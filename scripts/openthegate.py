@@ -1,4 +1,3 @@
-#curl ...
 import os
 from sys import argv
 import subprocess
@@ -13,11 +12,9 @@ def request_port(server_ip, key):
     """requests a port on the server using the openthegate protocol
         return a tuple with (error_code, server_ip, server_port)
     """
-
     import urllib, urllib2
 
     url = 'http://%s/post' % server_ip
-
     values = {'public_key' : key,}
 
     try:
@@ -45,7 +42,6 @@ def handleSigTERM(signum, frame):
 signal.signal(signal.SIGTERM, handleSigTERM)
 signal.signal(signal.SIGINT, handleSigTERM)
 
-
 key_file = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub') #todo
 key = ''
 f = open(key_file, 'r')
@@ -58,28 +54,22 @@ http_server_ip='46.137.72.214'
 
 (error_code, server_ip, server_port) = request_port(http_server_ip, key)
 
-if not error_code:
+if error_code:
     exit(5)
 
 local_port=argv[1]
-timeout=2
+timeout=5000
 
-s = subprocess.Popen(['ssh', '-R', '*:%s:localhost:%s' %(server_port, local_port), 'open@%s' % server_ip, 'sleep', '%s' % timeout],
-    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+command_list = ['ssh', '-R', '*:%s:localhost:%s' %(server_port, local_port), 'open@%s' % server_ip, '-o', 'StrictHostKeyChecking=no', '-o', 'ExitOnForwardFailure=yes', 'sleep', '%s' % timeout]
+#print ' '.join(command_list)
 
-time.sleep(3)
+s = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+time.sleep(2)
 
-if s.poll() != '':
-    print 'an error has occurred:\n%s ' % s.communicate()[0]
-    exit(2)
+if s.poll() is not None:
+    output = '%s - %s' % (s.stdout.read(), s.stderr.read())
+    print '%s ' % output
+    exit(7)
 
-print u'you are now connected, you port %S can now be accessed on on %s:%s' % (local_port, server_ip, server_port)
-
-while s.poll() is None:
-    output = s.communicate()[0]
-    if output != '':
-        print 'ssh: %s ' % output
-    time.sleep(1)
-
-
-
+print u'you are now connected, you port %s can now be accessed on on %s:%s' % (local_port, server_ip, server_port)
+s.wait()
