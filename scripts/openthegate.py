@@ -22,21 +22,25 @@ def request_port(server_ip, key):
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req)
         the_page = response.read()
-        print the_page
+#        print the_page
         parts = the_page.split()
         if len(parts) < 3 or parts[0] != 'ok':
-            return parts[0],0,0
+            print parts[0]
+            exit(8)
         else:
             return 0, parts[1], parts[2]
     except Exception, detail:
         print "Err ", detail
-        return 2,0,0
+        exit(9)
 
 
 def handleSigTERM(signum, frame):
     global s
     print 'killing process %s' % s.pid
-    os.kill(s.pid, signal.SIGKILL)
+    try:
+        os.kill(s.pid, signal.SIGKILL)
+    except OSError:
+        pass
     exit(3)
 
 signal.signal(signal.SIGTERM, handleSigTERM)
