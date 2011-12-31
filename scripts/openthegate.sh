@@ -10,7 +10,7 @@ serverport=2022
 localport=$1
 timeout=5000
 
-ssh -R *:$serverport:localhost:$localport test@$ip -n sleep $timeout &
+ssh -R *:$serverport:localhost:$localport open@$ip -n sleep $timeout &
 pid=$!
 
 echo "you are now connected, you can connect on $ip:$serverport"
