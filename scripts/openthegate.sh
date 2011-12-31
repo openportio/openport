@@ -1,3 +1,18 @@
 #curl ...
+if [ $# -lt 1 ] ; then
+	echo "please input the port"
+	exit 1
+fi
 
-ssh -R *:2022:localhost:80 test@46.137.72.214
+
+ip=46.137.72.214
+serverport=2022
+localport=$1
+timeout=5000
+
+ssh -R *:$serverport:localhost:$localport test@$ip -n sleep $timeout &
+pid=$!
+
+echo "you are now connected, you can connect on $ip:$serverport"
+
+wait $pid
