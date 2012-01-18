@@ -75,5 +75,5 @@ if s.poll() is not None:
     print '%s ' % output
     exit(7)
 
-print u'you are now connected, you port %s can now be accessed on on %s:%s' % (local_port, server_ip, server_port)
+print u'you are now connected, your port %s can now be accessed on on %s:%s' % (local_port, server_ip, server_port)
 s.wait()
