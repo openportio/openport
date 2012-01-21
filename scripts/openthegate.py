@@ -4,9 +4,13 @@ import subprocess
 import signal
 import time
 
-if len(argv) < 2:
-    print 'please input the port'
-    exit(1)
+local_port=argv[1]
+
+#if len(argv) < 2:
+#    print 'please input the port'
+#    exit(1)
+
+
 
 def request_port(server_ip, key):
     """requests a port on the server using the openthegate protocol
@@ -59,7 +63,7 @@ http_server_ip='46.137.72.214'
 if error_code:
     exit(5)
 
-local_port=argv[1]
+
 timeout=5000
 
 command_list = ['ssh', '-R', '*:%s:localhost:%s' %(server_port, local_port), 'open@%s' % server_ip, '-o', 'StrictHostKeyChecking=no', '-o', 'ExitOnForwardFailure=yes', 'sleep', '%s' % timeout]
