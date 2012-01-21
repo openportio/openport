@@ -22,7 +22,7 @@ def request_port(server_ip, key):
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req)
         the_page = response.read()
-        parts = the_page.split()
+        parts = the_page.splitlines()
         if len(parts) < 4 or parts[0] != 'ok':
             print parts[0]
             exit(8)
@@ -73,5 +73,5 @@ if s.poll() is not None:
     print '%s ' % output
     exit(7)
 
-print u'you are now connected, your port %s can now be accessed on on %s:%s\n%s' % (local_port, server_ip, server_port, message)
+print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (local_port, server_ip, server_port, message)
 s.wait()
