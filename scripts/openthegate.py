@@ -56,7 +56,7 @@ if key == '':
     print 'could not read key: %s' % key_file
     exit(4)
 
-http_server_ip='46.137.72.214'
+http_server_ip='www.openport.be'
 
 (error_code, server_ip, server_port, message) = request_port(http_server_ip, key)
 
