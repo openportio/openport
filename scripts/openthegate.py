@@ -6,9 +6,9 @@ import subprocess
 import signal
 import time
 
-if len(argv) < 2:
-    print 'please input the port'
-    exit(1)
+#if len(argv) < 2:
+#    print 'please input the port'
+#    exit(1)
 
 local_port=argv[1]
 
@@ -30,7 +30,8 @@ def request_port(server_ip, key):
         the_page = response.read()
         parts = the_page.splitlines()
         if len(parts) < 4 or parts[0] != 'ok':
-            print parts[0]
+            for line in parts:
+                print line
             exit(8)
         else:
             return 0, parts[1], parts[2], parts[3]
@@ -71,7 +72,7 @@ if error_code:
 timeout=5000
 
 # This starts the ssh session to the openPort servers.
-command_list = ['ssh', '-R', '*:%s:localhost:%s' %(server_port, local_port), 'open@%s' % server_ip, '-o', 'StrictHostKeyChecking=no', '-o', 'ExitOnForwardFailure=yes']
+command_list = ['ssh', '-R', '*:%s:localhost:%s' %(server_port, local_port), 'open@%s' % server_ip, '-o', 'StrictHostKeyChecking=no', '-o', 'ExitOnForwardFailure=yes', 'while true; do sleep 10; done']
 #print ' '.join(command_list)
 
 s = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
