@@ -6,35 +6,25 @@ import subprocess
 import signal
 import time
 
-#if len(argv) < 2:
-#    print 'please input the port'
-#    exit(1)
-
-local_port=argv[1]
-
-
-def request_port(server_ip, key):
+def request_port(key):
     """
-        Requests a port on the server using the openPort protocol
-        return a tuple with (error_code, server_ip, server_port)
+    Requests a port on the server using the openPort protocol
+    return a tuple with (error_code, server_ip, server_port)
     """
     import urllib, urllib2
 
-    url = 'http://%s/post' % server_ip
-    values = {'public_key' : key,}
-
+    url = 'http://www.openport.be/post'
     try:
-        data = urllib.urlencode(values)
+        data = urllib.urlencode({'public_key' : key,})
         req = urllib2.Request(url, data)
-        response = urllib2.urlopen(req)
-        the_page = response.read()
-        parts = the_page.splitlines()
+        response = urllib2.urlopen(req).read()
+        parts = response.splitlines()
         if len(parts) < 4 or parts[0] != 'ok':
             for line in parts:
                 print line
             exit(8)
         else:
-            return 0, parts[1], parts[2], parts[3]
+            return parts[1], parts[2], parts[3]
     except Exception, detail:
         print "Err ", detail
         exit(9)
@@ -51,37 +41,39 @@ def handleSigTERM(signum, frame):
         pass
     exit(3)
 
+def getPublicKey():
+    """
+    Gets content of the public key file.
+    """
+    key_file = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+    f = open(key_file, 'r')
+    key = f.readline()
+    if key == '':
+        print 'could not read key: %s' % key_file
+        exit(4)
+
+def startSession(server_ip, server_port, local_port):
+    """
+    This starts a remote ssh session to the given server server.
+    """
+
+    command_list = ['ssh', '-R', '*:%s:localhost:%s' %(server_port, local_port), 'open@%s' % server_ip, '-o',
+                    'StrictHostKeyChecking=no', '-o', 'ExitOnForwardFailure=yes', 'while true; do sleep 10; done']
+    s = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+
+    time.sleep(2)
+
+    if s.poll() is not None:
+        print '%s - %s' % (s.stdout.read(), s.stderr.read())
+        exit(7)
+
+    print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (local_port, server_ip, server_port, message)
+    s.wait()
+
+local_port=argv[1]
 signal.signal(signal.SIGTERM, handleSigTERM)
 signal.signal(signal.SIGINT, handleSigTERM)
 
-# Gets the public key file.
-key_file = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
-key = ''
-f = open(key_file, 'r')
-key = f.readline()
-if key == '':
-    print 'could not read key: %s' % key_file
-    exit(4)
-
-http_server_ip='www.openport.be'
-
-(error_code, server_ip, server_port, message) = request_port(http_server_ip, key)
-
-if error_code:
-    exit(5)
-timeout=5000
-
-# This starts the ssh session to the openPort servers.
-command_list = ['ssh', '-R', '*:%s:localhost:%s' %(server_port, local_port), 'open@%s' % server_ip, '-o', 'StrictHostKeyChecking=no', '-o', 'ExitOnForwardFailure=yes', 'while true; do sleep 10; done']
-#print ' '.join(command_list)
-
-s = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
-time.sleep(2)
-
-if s.poll() is not None:
-    output = '%s - %s' % (s.stdout.read(), s.stderr.read())
-    print '%s ' % output
-    exit(7)
-
-print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (local_port, server_ip, server_port, message)
-s.wait()
+key = getPublicKey()
+(server_ip, server_port, message) = request_port(key)
+startSession(server_ip, server_port, local_port)
