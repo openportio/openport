@@ -51,6 +51,7 @@ def getPublicKey():
     if key == '':
         print 'could not read key: %s' % key_file
         exit(4)
+    return key
 
 def startSession(server_ip, server_port, local_port):
     """
@@ -68,7 +69,7 @@ def startSession(server_ip, server_port, local_port):
         exit(7)
 
     print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (local_port, server_ip, server_port, message)
-    s.wait()
+    return s
 
 local_port=argv[1]
 signal.signal(signal.SIGTERM, handleSigTERM)
@@ -76,4 +77,5 @@ signal.signal(signal.SIGINT, handleSigTERM)
 
 key = getPublicKey()
 (server_ip, server_port, message) = request_port(key)
-startSession(server_ip, server_port, local_port)
+s = startSession(server_ip, server_port, local_port)
+s.wait()
