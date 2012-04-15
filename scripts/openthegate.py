@@ -9,7 +9,7 @@ import time
 def request_port(key):
     """
     Requests a port on the server using the openPort protocol
-    return a tuple with (error_code, server_ip, server_port)
+    return a tuple with ( server_ip, server_port, message )
     """
     import urllib, urllib2
 
@@ -24,7 +24,7 @@ def request_port(key):
                 print line
             exit(8)
         else:
-            return parts[1], parts[2], parts[3]
+            return parts[1], int(parts[2]), parts[3]
     except Exception, detail:
         print "Err ", detail
         exit(9)
@@ -71,11 +71,13 @@ def startSession(server_ip, server_port, local_port):
     print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (local_port, server_ip, server_port, message)
     return s
 
-local_port=argv[1]
-signal.signal(signal.SIGTERM, handleSigTERM)
-signal.signal(signal.SIGINT, handleSigTERM)
+	
+if __name__ == '__main__':
+	local_port=argv[1]
+	signal.signal(signal.SIGTERM, handleSigTERM)
+	signal.signal(signal.SIGINT, handleSigTERM)
 
-key = getPublicKey()
-(server_ip, server_port, message) = request_port(key)
-s = startSession(server_ip, server_port, local_port)
-s.wait()
+	key = getPublicKey()
+	(server_ip, server_port, message) = request_port(key)
+	s = startSession(server_ip, server_port, local_port)
+	s.wait()
