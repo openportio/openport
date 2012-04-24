@@ -32,6 +32,7 @@ import socket
 import select
 import sys
 import threading
+from sys import argv
 
 from openthegate import request_port
 
@@ -119,7 +120,7 @@ def start(options, server, remote):
 		
 class options():
 	def __init__(self):
-		self.port = 8000
+		self.port = None
 		self.user = 'open'
 		self.private_keyfile = 'id_rsa'
 		self.public_keyfile = 'id_rsa.pub'
@@ -134,7 +135,7 @@ def write_new_key(private_key_filename, public_key_filename):
 	
 	o = open(public_key_filename ,'w').write("ssh-rsa " +pk.get_base64()+ " \n")
 		
-def main():
+def open_port(port, callback=None):
 	optionss = options()
 	
 	if not os.path.exists(optionss.private_keyfile) or not not os.path.exists(optionss.public_keyfile):
@@ -145,9 +146,16 @@ def main():
 	
 	optionss.port = server_port
 
-	remote = ('localhost', 8000)
+	remote = ('localhost', port)
 	server = (server_ip, 22)
+	if callback != None:
+		import threading
+		thr = threading.Thread(target=callback, args=(server_ip, server_port))
+		thr.setDaemon(True)
+		thr.start()
 	start(optionss, server, remote)
 
 if __name__ == '__main__':
-    main()
+	port = int(argv[1])
+
+	open_port(port)
