@@ -5,7 +5,7 @@ if __name__ == '__main__':
 import os
 from sys import argv
 working_dir = os.getcwd()
-os.chdir(os.path.dirname(argv[0]))
+os.chdir(os.path.realpath(os.path.dirname(argv[0])))
 from servefile import serve_file_on_port
 from openthegate_win import open_port
 

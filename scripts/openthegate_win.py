@@ -1,31 +1,5 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2008  Robey Pointer <robeypointer@gmail.com>
-#
-# This file is part of paramiko.
-#
-# Paramiko is free software; you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation; either version 2.1 of the License, or (at your option)
-# any later version.
-#
-# Paramiko is distrubuted in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with Paramiko; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
-
-"""
-Sample script showing how to do remote port forwarding over paramiko.
-
-This script connects to the requested SSH server and sets up remote port
-forwarding (the openssh -R option) from a remote port through a tunneled
-connection to a destination reachable from the local machine.
-"""
-
 import getpass
 import os
 import socket
@@ -39,7 +13,6 @@ from openthegate import request_port
 from optparse import OptionParser
 
 import paramiko
-
 g_verbose = True
 
 
@@ -122,12 +95,14 @@ class options():
 	def __init__(self):
 		self.port = None
 		self.user = 'open'
-		self.private_keyfile = 'id_rsa'
-		self.public_keyfile = 'id_rsa.pub'
+		homedir = os.path.expanduser('~')
+		self.private_keyfile = os.path.join(homedir, '.ssh', 'id_rsa')
+		self.public_keyfile =  os.path.join(homedir, '.ssh', 'id_rsa.pub')
 		self.look_for_keys = False
 		
 		
-def write_new_key(private_key_filename, public_key_filename):		
+def write_new_key(private_key_filename, public_key_filename):	
+#	print 'writing keys: %s %s' %( private_key_filename, public_key_filename)
 	key = paramiko.RSAKey.generate(1024)
 	key.write_private_key_file(private_key_filename)
 	
@@ -138,7 +113,7 @@ def write_new_key(private_key_filename, public_key_filename):
 def open_port(port, callback=None):
 	optionss = options()
 	
-	if not os.path.exists(optionss.private_keyfile) or not not os.path.exists(optionss.public_keyfile):
+	if not os.path.exists(optionss.private_keyfile) or not os.path.exists(optionss.public_keyfile):
 		write_new_key(optionss.private_keyfile, optionss.public_keyfile)
 	public_key = open( optionss.public_keyfile, 'r').readline()
 	
