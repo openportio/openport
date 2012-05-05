@@ -21,6 +21,7 @@ Section # hidden section
 	file /r ..\dist\*.* 
 	#messageBox MB_OK "instdir: $INSTDIR"
 	WriteRegStr HKCR "*\shell\${APP_NAME}\command" "" "$INSTDIR\${APP_NAME}.exe $\"%1$\""
+	WriteRegStr HKCR "Directory\shell\${APP_NAME}\command" "" "$INSTDIR\${APP_NAME}.exe $\"%1$\""
 	writeUninstaller $INSTDIR\uninstaller.exe
 SectionEnd
 
@@ -28,4 +29,5 @@ Section "Uninstall"
 	Delete $INSTDIR\uninstaller.exe
 	RMDir /r /REBOOTOK $INSTDIR
 	DeleteRegKey HKCR "*\shell\${APP_NAME}"
+	DeleteRegKey HKCR "Directory\shell\${APP_NAME}"
 SectionEnd

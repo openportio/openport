@@ -43,7 +43,7 @@ if __name__ == '__main__':
 		print file_address
 		r.clipboard_append(file_address.strip())
 		r.destroy()
-		wx.MessageBox('You can now download your file from %s:%s' %(server_ip, server_port), 'Info', wx.OK | wx.ICON_INFORMATION)
+		wx.MessageBox('You can now download your file(s) from %s:%s\nThis link has been copied to your clipboard.' %(server_ip, server_port), 'Info', wx.OK | wx.ICON_INFORMATION)
 	app.MainLoop()
 
 	open_port_file(os.path.join(working_dir, argv[1]), showMessage)

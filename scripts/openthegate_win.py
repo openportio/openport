@@ -65,11 +65,17 @@ port on the SSH server (given with -p) is forwarded across an SSH session
 back to the local machine, and out to a remote site reachable from this
 network. This is similar to the openssh -R option.
 """
+
+class IgnoreUnknownHostKeyPolicy(paramiko.MissingHostKeyPolicy):
+    """A Paramiko policy that ignores UnknownHostKeyError for missing keys."""
+    def missing_host_key(self, client, hostname, key):
+        pass
+ 
 		
 def start(options, server, remote):
     client = paramiko.SSHClient()
     client.load_system_host_keys()
-    client.set_missing_host_key_policy(paramiko.WarningPolicy())
+    client.set_missing_host_key_policy( IgnoreUnknownHostKeyPolicy() )
 
     verbose('Connecting to ssh host %s:%d ...' % (server[0], server[1]))
 	
@@ -104,10 +110,13 @@ class options():
 def write_new_key(private_key_filename, public_key_filename):	
 #	print 'writing keys: %s %s' %( private_key_filename, public_key_filename)
 	key = paramiko.RSAKey.generate(1024)
+	if not os.path.exists( os.path.dirname(private_key_filename) ):
+		os.makedirs( os.path.dirname(private_key_filename), 0700)
 	key.write_private_key_file(private_key_filename)
 	
 	pk = paramiko.RSAKey(filename=private_key_filename)
-	
+	if not os.path.exists( os.path.dirname(public_key_filename) ):
+		os.makedirs( os.path.dirname(public_key_filename), 0700)
 	o = open(public_key_filename ,'w').write("ssh-rsa " +pk.get_base64()+ " \n")
 		
 def open_port(port, callback=None):
