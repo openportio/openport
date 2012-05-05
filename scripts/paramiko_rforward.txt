@@ -1,0 +1,4 @@
+
+#forwards local port 8000 to 192.168.5.130:2010
+
+python rforward.py -p 2010 -u jan -P -r localhost:8000 192.168.5.130
