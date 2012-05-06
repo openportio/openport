@@ -119,7 +119,7 @@ def write_new_key(private_key_filename, public_key_filename):
 		os.makedirs( os.path.dirname(public_key_filename), 0700)
 	o = open(public_key_filename ,'w').write("ssh-rsa " +pk.get_base64()+ " \n")
 		
-def open_port(port, callback=None):
+def open_port(port, callback=None, extra_args={}):
 	optionss = options()
 	
 	if not os.path.exists(optionss.private_keyfile) or not os.path.exists(optionss.public_keyfile):
@@ -134,7 +134,7 @@ def open_port(port, callback=None):
 	server = (server_ip, 22)
 	if callback != None:
 		import threading
-		thr = threading.Thread(target=callback, args=(server_ip, server_port))
+		thr = threading.Thread(target=callback, args=(server_ip, server_port, extra_args))
 		thr.setDaemon(True)
 		thr.start()
 	start(optionss, server, remote)

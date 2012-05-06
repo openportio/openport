@@ -19,14 +19,14 @@ def get_open_port():
 	s.close()
 	return port
 
-def open_port_file(path, callback=None):
+def open_port_file(path, callback=None, extra_args={}):
 	import threading
 	serving_port = get_open_port()
 	thr = threading.Thread(target=serve_file_on_port, args=(path, serving_port))
 	thr.setDaemon(True)
 	thr.start()
 	
-	thr2 = threading.Thread(target=open_port, args=(serving_port,callback))
+	thr2 = threading.Thread(target=open_port, args=(serving_port,callback, extra_args))
 	thr2.setDaemon(True)
 	thr2.start()
 

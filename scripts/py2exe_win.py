@@ -1,4 +1,5 @@
 from distutils.core import setup
 import py2exe
 
-setup(console=['openport-it.py'])
+setup(windows=['openportit.py'])
+setup(windows=['sharerequestsender.py'])

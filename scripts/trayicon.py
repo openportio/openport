@@ -1,27 +1,25 @@
-import sys, wx, webbrowser  
-
-VIEW_SHARES=wx.NewId()
-STOP_SHARING=wx.NewId()
-VIEW_LOG=wx.NewId()
-CHECK_UPDATES=wx.NewId()
-ABOUT=wx.NewId()
+import os
+import sys, wx, webbrowser
 
 class OpenPortItTaskBarIcon(wx.TaskBarIcon):
 
     def __init__(self, parent):  
         wx.TaskBarIcon.__init__(self)  
-        self.parentApp = parent  
-        self.icon = wx.Icon("logo-base.png",wx.BITMAP_TYPE_PNG)
+        self.parentApp = parent
+        dir = os.path.dirname( os.path.realpath( __file__ ) )
+        self.icon = wx.Icon(os.path.join(dir, "logo-base.png"),wx.BITMAP_TYPE_PNG)
         self.SetIcon(self.icon, "OpenPort-It")
         self.CreateMenu()
+        self.items = {}
 
     def CreateMenu(self):  
         self.Bind(wx.EVT_TASKBAR_RIGHT_UP, self.ShowMenu)  
-        self.Bind(wx.EVT_MENU, self.parentApp.viewShares, id=VIEW_SHARES)
-        self.menu=wx.Menu()  
-        self.menu.Append(VIEW_SHARES, "View Shares")
-        self.menu.AppendSeparator()
-        self.menu.Append(wx.ID_EXIT, "Close App")
+        self.menu=wx.Menu()
+
+    def addItem(self, label, callBackFunction):
+        newItem = wx.NewId()
+        self.menu.Append(newItem, label)
+        self.Bind(wx.EVT_MENU, callBackFunction, id=newItem)
 
     def ShowMenu(self,event):  
         self.PopupMenu(self.menu)  
