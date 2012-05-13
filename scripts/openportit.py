@@ -32,7 +32,7 @@ def open_port_file(path, callback=None, extra_args={}):
 
 if __name__ == '__main__':
 	
-	def showMessage(server_ip, server_port):
+	def showMessage(server_ip, server_port, extra_args):
 	
 		from Tkinter import Tk
 		r = Tk()

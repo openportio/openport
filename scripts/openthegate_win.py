@@ -7,6 +7,7 @@ import select
 import sys
 import threading
 from sys import argv
+import time
 
 from openthegate import request_port
 
@@ -88,6 +89,22 @@ def start(options, server, remote):
     except Exception, e:
         print '*** Failed to connect to %s:%d: %r' % (server[0], server[1], e)
         sys.exit(1)
+
+
+    def keep_alive(client):
+        errorCount = 0
+        while errorCount < 30:
+            try:
+                client.exec_command('ls')
+                time.sleep(30)
+            except e:
+                errorCount+=1
+                print e
+
+
+    thr = threading.Thread(target=keep_alive, args=(client,))
+    thr.setDaemon(True)
+    thr.start()
 
     verbose('Now forwarding remote port %d to %s:%d ...' % (options.port, remote[0], remote[1]))
 

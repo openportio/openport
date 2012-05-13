@@ -49,9 +49,9 @@ class OpenPortItFrame(wx.Frame):
 
     def restart_sharing(self):
         pass
-#        files = self.dbhandler.get_files()
-#        for file in files:
-#            open_port_file(file[1])
+        files = self.dbhandler.get_files()
+        for file in files:
+            open_port_file(file[1])
 
     def show_shares(self):
         panel = wx.Panel(self, id=-1, pos=DefaultPosition, size=DefaultSize, style=TAB_TRAVERSAL|NO_BORDER)
