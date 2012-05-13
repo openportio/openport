@@ -1,5 +1,6 @@
 !define APP_NAME "OpenPort-It"
 !define INSTDIR "$PROGRAMFILES\${APP_NAME}"
+!define MAIN_EXE "openportit.exe"
 
 Name "${APP_NAME}"
 OutFile "${APP_NAME}.exe"
@@ -20,8 +21,8 @@ Section # hidden section
 	setOutPath $INSTDIR
 	file /r ..\dist\*.* 
 	#messageBox MB_OK "instdir: $INSTDIR"
-	WriteRegStr HKCR "*\shell\${APP_NAME}\command" "" "$INSTDIR\${APP_NAME}.exe $\"%1$\""
-	WriteRegStr HKCR "Directory\shell\${APP_NAME}\command" "" "$INSTDIR\${APP_NAME}.exe $\"%1$\""
+	WriteRegStr HKCR "*\shell\${APP_NAME}\command" "" "$INSTDIR\${MAIN_EXE} $\"%1$\""
+	WriteRegStr HKCR "Directory\shell\${APP_NAME}\command" "" "$INSTDIR\${MAIN_EXE} $\"%1$\""
 	writeUninstaller $INSTDIR\uninstaller.exe
 SectionEnd
 
