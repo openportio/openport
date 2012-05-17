@@ -95,12 +95,11 @@ def start(options, server, remote):
         errorCount = 0
         while errorCount < 30:
             try:
-                client.exec_command('ls')
+                client.exec_command('echo ""')
                 time.sleep(30)
-            except e:
+            except Exception, ex:
                 errorCount+=1
-                print e
-
+                print ex
 
     thr = threading.Thread(target=keep_alive, args=(client,))
     thr.setDaemon(True)

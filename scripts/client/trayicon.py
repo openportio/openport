@@ -7,6 +7,8 @@ class OpenPortItTaskBarIcon(wx.TaskBarIcon):
         wx.TaskBarIcon.__init__(self)  
         self.parentApp = parent
         dir = os.path.dirname( os.path.realpath( __file__ ) )
+        if dir[-3:] == 'zip':
+            dir = os.path.dirname(dir)
         self.icon = wx.Icon(os.path.join(dir, "logo-base.png"),wx.BITMAP_TYPE_PNG)
         self.SetIcon(self.icon, "OpenPort-It")
         self.CreateMenu()

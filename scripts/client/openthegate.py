@@ -26,7 +26,7 @@ def request_port(key):
         else:
             return parts[1], int(parts[2]), parts[3]
     except Exception, detail:
-        print "Err ", detail
+        print "An error has occurred while commicating the the openport servers. ", detail
         exit(9)
 
 def handleSigTERM(signum, frame):
