@@ -1,4 +1,6 @@
 from optparse import OptionParser
+import subprocess
+import sys
 
 if __name__ == '__main__':
 	import wx
@@ -32,8 +34,16 @@ def open_port_file(path, callback=None, extra_args={}):
 	thr2.setDaemon(True)
 	thr2.start()
 
+def start_tray_application():
+    if sys.argv[0][-3:] == '.py':
+        command = ['python', 'application.py']
+    else:
+        command = [os.path.join(os.path.dirname(sys.argv[0]), 'application.exe')]
+    p = subprocess.Popen(command)
+
 if __name__ == '__main__':
 
+    print 'client pid:%s' % os.getpid()
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
@@ -55,7 +65,7 @@ if __name__ == '__main__':
     def show_message_box(server_ip, server_port, extra_args):
         wx.MessageBox('You can now download your file(s) from %s:%s\nThis link has been copied to your clipboard.' %(server_ip, server_port), 'Info', wx.OK | wx.ICON_INFORMATION)
 
-    def inform_tray_app(server_ip, server_port, extra_args, tray_port):
+    def inform_tray_app(server_ip, server_port, extra_args, tray_port, start_tray=False):
         import urllib, urllib2
         path = os.path.abspath( os.path.join(working_dir,args.filename))
         url = 'http://127.0.0.1:%s' % tray_port
@@ -68,12 +78,15 @@ if __name__ == '__main__':
                 print response
         except Exception, detail:
             print "An error has occured while informing the tray: ", detail
-            exit(9)
+            if start_tray:
+                start_tray_application() #todo: server will be killed when this script finishes...
+                sleep(3)
+                inform_tray_app(server_ip, server_port, extra_args, tray_port, start_tray=False)
 
 
     def callback(server_ip, server_port, extra_args):
         if args.tray_port > 0:
-            inform_tray_app(server_ip, server_port, extra_args, args.tray_port)
+            inform_tray_app(server_ip, server_port, extra_args, args.tray_port, start_tray=True)
         if not args.no_clipboard:
             copy_to_clipboard(server_ip, server_port)
         if not args.hide_message:

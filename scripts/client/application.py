@@ -20,14 +20,11 @@ class OpenPortItFrame(wx.Frame):
 
         self.addTrayIcon()
         self.startServer()
-        self.restart_sharing()
-
         self.shares_frame = SharesFrame(self, -1, "Shares")
 
 #        VIEW_LOG=wx.NewId()
 #        CHECK_UPDATES=wx.NewId()
 #        ABOUT=wx.NewId()
-
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)
@@ -113,9 +110,19 @@ class OpenPortItFrame(wx.Frame):
 
 
 def main():
+    print 'server pid:%s' % os.getpid()
+
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--restart-shares', action='store_true', help='Restart all active shares.')
+#    parser.add_argument('--tray-port', type=int, default=8001, help='Specify the port to run on.')
+    args = parser.parse_args()
+
     app = wx.App(False)
     frame = OpenPortItFrame(None, -1, ' ')
-#    frame.Show(True)
+
+    if args.restart_shares:
+        frame.restart_sharing()
 
     import signal
     def handleSigTERM():
