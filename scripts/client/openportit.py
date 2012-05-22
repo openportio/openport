@@ -35,11 +35,12 @@ def open_port_file(path, callback=None, extra_args={}):
 	thr2.start()
 
 def start_tray_application():
+    #todo: linux/mac
     if sys.argv[0][-3:] == '.py':
-        command = ['python', 'application.py']
+        command = ['start', 'python', 'application.py']
     else:
-        command = [os.path.join(os.path.dirname(sys.argv[0]), 'application.exe')]
-    p = subprocess.Popen(command)
+        command = ['start', os.path.join(os.path.dirname(sys.argv[0]), 'application.exe')]
+    subprocess.call(command, shell=True)
 
 if __name__ == '__main__':
 
@@ -79,7 +80,7 @@ if __name__ == '__main__':
         except Exception, detail:
             print "An error has occured while informing the tray: ", detail
             if start_tray:
-                start_tray_application() #todo: server will be killed when this script finishes...
+                start_tray_application()
                 sleep(3)
                 inform_tray_app(server_ip, server_port, extra_args, tray_port, start_tray=False)
 
