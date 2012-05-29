@@ -10,7 +10,7 @@ class SharesFrame(wx.Frame):
 
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, -1, title,
-            style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|wx.FRAME_TOOL_WINDOW)
+            style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
 
@@ -18,7 +18,7 @@ class SharesFrame(wx.Frame):
         self.share_panels = {}
         self.scrolling_window = wx.ScrolledWindow( self )
         if not noColor:self.scrolling_window.SetBackgroundColour('green')
-        self.SetSize((400, 600))
+        self.SetSize((400, 300))
 
         self.Bind(wx.EVT_SIZE, self.OnSize)
 
@@ -65,6 +65,13 @@ class SharesFrame(wx.Frame):
         button_panel.SetSizer(button_panel_sizer)
         if not noColor:button_panel.SetBackgroundColour('red')
         top_panel_sizer.Add(button_panel, 0, wx.ALIGN_LEFT, 5)
+
+        def copy_link(evt):
+            if 'copy_link' in callbacks:
+                callbacks['copy_link'](share)
+        copy_link_button = wx.Button(button_panel, -1, label="Copy link")
+        copy_link_button.Bind(wx.EVT_BUTTON, copy_link)
+        button_panel_sizer.Add(copy_link_button, 0, wx.EXPAND|wx.ALL, 5)
 
         def stop_sharing(evt):
             if 'stop' in callbacks:

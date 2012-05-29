@@ -24,6 +24,8 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
             server = postvars['server'][0]
             server_port = postvars['server_port'][0]
             pid = postvars['pid'][0]
+            account_id = postvars['account_id'][0]
+            key_id = postvars['key_id'][0]
 
             print 'path: <%s>' % path
 

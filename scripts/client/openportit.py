@@ -1,4 +1,5 @@
 from optparse import OptionParser
+import pprint
 import subprocess
 import sys
 
@@ -39,10 +40,21 @@ def start_tray_application():
     if sys.argv[0][-3:] == '.py':
         command = ['start', 'python', 'application.py']
     else:
-        command = ['start', os.path.join(os.path.dirname(sys.argv[0]), 'application.exe')]
-    subprocess.call(command, shell=True)
+        command = ['start', quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'application.exe'))]
+    print command
+    subprocess.call(' '.join(command), shell=True)
+
+def quote_path(path):
+    split = path.split(os.sep)
+    print split
+    quoted = ['"%s"' % dir if ' ' in dir else dir for dir in split]
+    return os.sep.join(quoted)
+
 
 if __name__ == '__main__':
+
+#    print quote_path('c:\\hallo\\jan\\hoe ist\\goed.txt')
+#    sys.exit(0)
 
     print 'client pid:%s' % os.getpid()
     import argparse
@@ -66,13 +78,20 @@ if __name__ == '__main__':
     def show_message_box(server_ip, server_port, extra_args):
         wx.MessageBox('You can now download your file(s) from %s:%s\nThis link has been copied to your clipboard.' %(server_ip, server_port), 'Info', wx.OK | wx.ICON_INFORMATION)
 
-    def inform_tray_app(server_ip, server_port, extra_args, tray_port, start_tray=False):
+    def inform_tray_app(server_ip, server_port, extra_args, tray_port, account_id, key_id, start_tray=False):
         import urllib, urllib2
         path = os.path.abspath( os.path.join(working_dir,args.filename))
         url = 'http://127.0.0.1:%s' % tray_port
 
         try:
-            data = urllib.urlencode({'path' : path, 'server': server_ip, 'server_port': server_port, 'pid': os.getpid()})
+            data = urllib.urlencode({
+                'path' : path,
+                'server': server_ip,
+                'server_port': server_port,
+                'pid': os.getpid(),
+                'account_id': account_id,
+                'key_id': key_id,
+            })
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req).read()
             if response.strip() != 'ok':
@@ -82,12 +101,12 @@ if __name__ == '__main__':
             if start_tray:
                 start_tray_application()
                 sleep(3)
-                inform_tray_app(server_ip, server_port, extra_args, tray_port, start_tray=False)
+                inform_tray_app(server_ip, server_port, extra_args, tray_port, account_id, key_id, start_tray=False)
 
 
-    def callback(server_ip, server_port, extra_args):
+    def callback(server_ip, server_port, account_id, key_id,  extra_args):
         if args.tray_port > 0:
-            inform_tray_app(server_ip, server_port, extra_args, args.tray_port, start_tray=True)
+            inform_tray_app(server_ip, server_port, extra_args, args.tray_port, account_id, key_id, start_tray=True)
         if not args.no_clipboard:
             copy_to_clipboard(server_ip, server_port)
         if not args.hide_message:

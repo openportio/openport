@@ -5,7 +5,7 @@ import py2exe
 import sys
 
 setup(
-    console=['openportit.py', 'application.py'],
+    windows=['openportit.py', 'application.py'],
     data_files=['logo-base.png']
 )
 #setup(windows=['application.py'])

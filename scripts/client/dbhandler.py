@@ -1,9 +1,10 @@
+import os
 from pysqlite2 import dbapi2 as sqlite
 
 class DBHandler():
 
     def __init__(self):
-        self.connection = sqlite.connect('openport.db')
+        self.connection = sqlite.connect(os.path.join(os.path.expanduser('~'), 'openport.db'))
         self.cursor = self.connection.cursor()
         self.init_db()
 

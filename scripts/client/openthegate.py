@@ -5,29 +5,37 @@ from sys import argv
 import subprocess
 import signal
 import time
+import sys
 
-def request_port(key):
+try:
+    import json
+except ImportError:
+    try:
+        import simplejson as json
+    except ImportError:
+        print 'You need python 2.6 or simplejson to run this application.'
+        sys.exit(1)
+
+def request_port(key, url = 'http://www.openport.be/post'):
     """
     Requests a port on the server using the openPort protocol
     return a tuple with ( server_ip, server_port, message )
     """
     import urllib, urllib2
 
-    url = 'http://www.openport.be/post'
     try:
         data = urllib.urlencode({'public_key' : key,})
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
-        parts = response.splitlines()
-        if len(parts) < 4 or parts[0] != 'ok':
-            for line in parts:
-                print line
-            exit(8)
+        dict = json.loads(response)
+        if 'error' in dict:
+            print dict['error']
+            sys.exit(8)
         else:
-            return parts[1], int(parts[2]), parts[3]
+            return dict
     except Exception, detail:
-        print "An error has occurred while commicating the the openport servers. ", detail
-        exit(9)
+        print "An error has occurred while communicating the the openport servers. ", detail
+        sys.exit(9)
 
 def handleSigTERM(signum, frame):
     """
@@ -78,6 +86,6 @@ if __name__ == '__main__':
 	signal.signal(signal.SIGINT, handleSigTERM)
 
 	key = getPublicKey()
-	(server_ip, server_port, message) = request_port(key)
-	s = startSession(server_ip, server_port, local_port)
+	dict = request_port(key)
+	s = startSession(dict['server_ip'], dict['server_port'], dict['local_port'])
 	s.wait()

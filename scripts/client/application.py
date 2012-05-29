@@ -100,12 +100,21 @@ class OpenPortItFrame(wx.Frame):
         self.dbhandler.stop_share(share)
         self.shares_frame.remove_share(share)
 
+    def copy_link(self, share):
+        from Tkinter import Tk
+        r = Tk()
+        r.withdraw()
+        r.clipboard_clear()
+        file_address = '%s:%s'%(share.server, share.server_port)
+        r.clipboard_append(file_address.strip())
+        r.destroy()
+
     def viewShares(self, event):
         self.shares_frame.Show(True)
 
     def onNewShare(self, share):
         print "adding share %s" % share.id
-        callbacks = {'stop': self.stop_sharing}
+        callbacks = {'stop': self.stop_sharing, 'copy_link': self.copy_link}
         self.shares_frame.add_share(share, callbacks=callbacks)
 
 
