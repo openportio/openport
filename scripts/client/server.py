@@ -37,7 +37,6 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
             traceback.print_stack()
             print e
 
-
     def write_response(self, text):
         try:
             self.send_response(200)

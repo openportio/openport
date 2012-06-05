@@ -74,3 +74,8 @@ class Share():
         self.server_port = ''
         self.pid = -1
         self.active = 0
+
+    def get_link(self):
+        return '%s:%s'%(self.server, self.server_port)
+
+

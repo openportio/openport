@@ -1,5 +1,6 @@
 import os
 import wx
+from osinteraction import OsInteraction
 
 noColor = True
 
@@ -13,6 +14,7 @@ class SharesFrame(wx.Frame):
             style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
+        self.os_interaction = OsInteraction()
 
     def rebuild(self):
         self.share_panels = {}
@@ -67,8 +69,7 @@ class SharesFrame(wx.Frame):
         top_panel_sizer.Add(button_panel, 0, wx.ALIGN_LEFT, 5)
 
         def copy_link(evt):
-            if 'copy_link' in callbacks:
-                callbacks['copy_link'](share)
+            self.os_interaction.copy_to_clipboard(share.get_link())
         copy_link_button = wx.Button(button_panel, -1, label="Copy link")
         copy_link_button.Bind(wx.EVT_BUTTON, copy_link)
         button_panel_sizer.Add(copy_link_button, 0, wx.EXPAND|wx.ALL, 5)

@@ -1,5 +1,5 @@
 import os
-import sys, wx, webbrowser
+import wx
 
 class OpenPortItTaskBarIcon(wx.TaskBarIcon):
 
@@ -26,26 +26,17 @@ class OpenPortItTaskBarIcon(wx.TaskBarIcon):
     def ShowMenu(self,event):  
         self.PopupMenu(self.menu)  
 
-class OpenPortItFrame(wx.Frame):
+def main(argv=None):
 
-    def __init__(self, parent, id, title):  
-        wx.Frame.__init__(self, parent, -1, title, size = (1, 1),  
-            style=wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE)  
+    class OpenPortItFrame(wx.Frame):
+        def __init__(self, parent, id, title):
+            wx.Frame.__init__(self, parent, -1, title, size = (1, 1),
+                style=wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE)
 
-        self.tbicon = OpenPortItTaskBarIcon(self)
-        self.tbicon.Bind(wx.EVT_MENU, self.exitApp, id=wx.ID_EXIT)   
-        self.Show(True)  
+            self.tbicon = OpenPortItTaskBarIcon(self)
+            self.tbicon.Bind(wx.EVT_MENU, self.exitApp, id=wx.ID_EXIT)
+            self.Show(True)
 
-    def exitApp(self,event):
-        self.tbicon.RemoveIcon()
-        self.tbicon.Destroy()
-        sys.exit()
-
-    def viewShares(self,event):
-        pass  
-
-#---------------- run the program -----------------------  
-def main(argv=None):  
     app = wx.App(False)  
     frame = OpenPortItFrame(None, -1, ' ')
     frame.Show(False)
