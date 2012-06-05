@@ -1,2 +1,4 @@
 
 /www/local_settings.py
+/scripts/client/dist/
+/scripts/client/build/
