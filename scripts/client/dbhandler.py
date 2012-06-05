@@ -67,15 +67,15 @@ class DBHandler():
 
 
 class Share():
-    def __init__(self):
-        self.id = -1
-        self.filePath = ''
-        self.server = ''
-        self.server_port = ''
-        self.pid = -1
-        self.active = 0
+    def __init__(self, id=-1, filePath='', server_ip='', server_port='', pid=-1, active=0):
+        self.id = id
+        self.filePath = filePath
+        self.server = server_ip
+        self.server_port = server_port
+        self.pid = pid
+        self.active = active
 
     def get_link(self):
-        return '%s:%s'%(self.server, self.server_port)
+        return 'http://%s:%s'%(self.server, self.server_port)
 
 
