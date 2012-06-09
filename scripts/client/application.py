@@ -72,7 +72,7 @@ class OpenPortItFrame(wx.Frame):
         def check_account_loop():
             while True:
                 self.check_account()
-                time.sleep(1)
+                time.sleep(60)
         t = threading.Thread(target=check_account_loop)
         t.setDaemon(True)
         t.start()
