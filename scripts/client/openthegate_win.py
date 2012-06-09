@@ -8,6 +8,7 @@ import sys
 import threading
 from sys import argv
 import time
+import wx
 
 from openthegate import request_port
 
@@ -143,6 +144,11 @@ def open_port(port, callback=None, extra_args={}):
         write_new_key(optionss.private_keyfile, optionss.public_keyfile)
     public_key = open( optionss.public_keyfile, 'r').readline()
     dict = request_port( public_key )
+
+    if 'error' in dict:
+        wx.MessageBox('An error has occured:\n%s' %(dict['error']), 'Error', wx.OK | wx.ICON_ERROR)
+        sys.exit(8)
+
     server_ip, server_port, message, account_id, key_id = \
         dict['server_ip'], dict['server_port'], dict['message'], dict['account_id'], dict['key_id']
     optionss.port = server_port

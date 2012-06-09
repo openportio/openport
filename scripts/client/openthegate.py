@@ -28,11 +28,7 @@ def request_port(key, url = 'http://www.openport.be/post'):
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
         dict = json.loads(response)
-        if 'error' in dict:
-            print dict['error']
-            sys.exit(8)
-        else:
-            return dict
+        return dict
     except Exception, detail:
         print "An error has occurred while communicating the the openport servers. ", detail
         sys.exit(9)
@@ -79,7 +75,7 @@ def startSession(server_ip, server_port, local_port):
     print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (local_port, server_ip, server_port, message)
     return s
 
-	
+
 if __name__ == '__main__':
 	local_port=argv[1]
 	signal.signal(signal.SIGTERM, handleSigTERM)
@@ -87,5 +83,8 @@ if __name__ == '__main__':
 
 	key = getPublicKey()
 	dict = request_port(key)
+    if 'error' in dict:
+        print dict['error']
+        sys.exit(9)
 	s = startSession(dict['server_ip'], dict['server_port'], dict['local_port'])
 	s.wait()
