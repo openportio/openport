@@ -11,7 +11,7 @@ from dbhandler import DBHandler
 from shares_frame import SharesFrame
 from osinteraction import OsInteraction
 from globals import Globals
-import urllib, urllib2
+import urllib2
 
 class OpenPortItFrame(wx.Frame):
 
@@ -24,7 +24,7 @@ class OpenPortItFrame(wx.Frame):
 
         self.addTrayIcon()
         start_server_thread(onNewShare=self.onNewShare)
-        self.shares_frame = SharesFrame(self, -1, "Shares")
+        self.shares_frame = SharesFrame(self, -1, "OpenPort-It - Shares")
         self.os_interaction = OsInteraction()
         self.globals = Globals()
         self.start_account_checking()
@@ -71,16 +71,16 @@ class OpenPortItFrame(wx.Frame):
 
         def check_account_loop():
             while True:
-                self.check_account()
-                time.sleep(60)
+                if self.globals.account_id == -1:
+                    time.sleep(1)
+                else:
+                    self.check_account()
+                    time.sleep(60)
         t = threading.Thread(target=check_account_loop)
         t.setDaemon(True)
         t.start()
 
     def check_account(self):
-        if self.globals.account_id == -1:
-            return
-
         url = 'http://www.openport.be/api/v1/account/%s/%s' %(self.globals.account_id, self.globals.key_id)
         try:
             req = urllib2.Request(url)

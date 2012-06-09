@@ -29,12 +29,12 @@ class SharesFrame(wx.Frame):
         self.frame_sizer.Add(self.account_panel, 0, wx.EXPAND|wx.ALL, 0)
         self.account_panel_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.account_amount_text = wx.StaticText(self.account_panel, -1, 'todo')
+        self.account_amount_text = wx.StaticText(self.account_panel, -1, 'Updating...')
         self.account_amount_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
         self.account_amount_text.SetSize(self.account_amount_text.GetBestSize())
         self.account_panel_sizer.Add(self.account_amount_text, 0, wx.EXPAND|wx.ALL,5)
 
-        self.account_reset_text = wx.StaticText(self.account_panel, -1, 'more todo')
+        self.account_reset_text = wx.StaticText(self.account_panel, -1, ' ')
         self.account_reset_text.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
         self.account_reset_text.SetSize(self.account_reset_text.GetBestSize())
         self.account_panel_sizer.Add(self.account_reset_text, 0, wx.EXPAND|wx.ALL,5)
