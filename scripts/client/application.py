@@ -1,11 +1,17 @@
+import json
 import os
 import sys
+import threading
+import time
+import datetime
 import wx
 from server import start_server_thread
 from trayicon import OpenPortItTaskBarIcon
 from dbhandler import DBHandler
 from shares_frame import SharesFrame
 from osinteraction import OsInteraction
+from globals import Globals
+import urllib, urllib2
 
 class OpenPortItFrame(wx.Frame):
 
@@ -20,6 +26,8 @@ class OpenPortItFrame(wx.Frame):
         start_server_thread(onNewShare=self.onNewShare)
         self.shares_frame = SharesFrame(self, -1, "Shares")
         self.os_interaction = OsInteraction()
+        self.globals = Globals()
+        self.start_account_checking()
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)
@@ -57,6 +65,39 @@ class OpenPortItFrame(wx.Frame):
         print "adding share %s" % share.id
         callbacks = {'stop': self.stop_sharing}
         self.shares_frame.add_share(share, callbacks=callbacks)
+        self.share_processes[share.pid]=None
+
+    def start_account_checking(self):
+
+        def check_account_loop():
+            while True:
+                self.check_account()
+                time.sleep(1)
+        t = threading.Thread(target=check_account_loop)
+        t.setDaemon(True)
+        t.start()
+
+    def check_account(self):
+        if self.globals.account_id == -1:
+            return
+
+        url = 'http://www.openport.be/api/v1/account/%s/%s' %(self.globals.account_id, self.globals.key_id)
+        try:
+            req = urllib2.Request(url)
+            response = urllib2.urlopen(req).read()
+            print response
+            dict = json.loads(response)
+            if 'error' in dict:
+                print dict['error']
+            else:
+                self.shares_frame.update_account(
+                    bytes_this_month = dict['bytes_this_month'],
+                    next_counter_reset_time = utc_epoch_to_local_datetime(dict['next_counter_reset_time']),
+                    max_bytes = dict['max_bytes'],
+                )
+        except Exception, detail:
+            print "An error has occurred while communicating the the openport servers. ", detail
+            sys.exit(9)
 
 def main():
     print 'server pid:%s' % os.getpid()
@@ -68,6 +109,8 @@ def main():
     args = parser.parse_args()
     start_app(args.restart_shares)
 
+def utc_epoch_to_local_datetime(utc_epoch):
+    return datetime.datetime(*time.localtime(utc_epoch)[0:6])
 
 def start_app(restart_shares):
     app = wx.App(False)

@@ -4,6 +4,7 @@ import threading
 import traceback
 import wx
 from dbhandler import DBHandler
+from globals import Globals
 
 onNewShare = None
 
@@ -27,6 +28,9 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
             account_id = postvars['account_id'][0]
             key_id = postvars['key_id'][0]
 
+            globals = Globals()
+            globals.account_id = account_id
+            globals.key_id = key_id
             print 'path: <%s>' % path
 
             share=save_request(path, server, server_port, pid)

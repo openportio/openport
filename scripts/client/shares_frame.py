@@ -1,8 +1,12 @@
 import os
+import datetime
 import wx
 from osinteraction import OsInteraction
+from globals import Globals
+
 
 noColor = True
+BYTES_PER_MB = 1024*1024
 
 class SharesFrame(wx.Frame):
 
@@ -15,9 +19,31 @@ class SharesFrame(wx.Frame):
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.os_interaction = OsInteraction()
+        self.globals = Globals()
 
     def rebuild(self):
         self.share_panels = {}
+        self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.account_panel = wx.Panel(self, style=wx.SIMPLE_BORDER)
+        self.frame_sizer.Add(self.account_panel, 0, wx.EXPAND|wx.ALL, 0)
+        self.account_panel_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.account_amount_text = wx.StaticText(self.account_panel, -1, 'todo')
+        self.account_amount_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
+        self.account_amount_text.SetSize(self.account_amount_text.GetBestSize())
+        self.account_panel_sizer.Add(self.account_amount_text, 0, wx.EXPAND|wx.ALL,5)
+
+        self.account_reset_text = wx.StaticText(self.account_panel, -1, 'more todo')
+        self.account_reset_text.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
+        self.account_reset_text.SetSize(self.account_reset_text.GetBestSize())
+        self.account_panel_sizer.Add(self.account_reset_text, 0, wx.EXPAND|wx.ALL,5)
+        self.account_panel.SetSizer(self.account_panel_sizer)
+
+        self.account_panel.Layout()
+        self.Layout()
+
+
         self.scrolling_window = wx.ScrolledWindow( self )
         if not noColor:self.scrolling_window.SetBackgroundColour('green')
         self.SetSize((400, 300))
@@ -31,7 +57,6 @@ class SharesFrame(wx.Frame):
         self.scrolling_window_sizer.Add(self.scroll_panel_sizer,0,wx.ALIGN_LEFT,wx.EXPAND)
         self.scrolling_window.SetSizer(self.scrolling_window_sizer)
 
-        self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
         self.frame_sizer.Add(self.scrolling_window, wx.EXPAND)
 
         self.scrolling_window.SetFocus()
@@ -41,8 +66,20 @@ class SharesFrame(wx.Frame):
         self.SetSizer(self.frame_sizer)
         self.Layout()
 
+    def update_account( self,
+        bytes_this_month = -1,
+        next_counter_reset_time = datetime.datetime.now(),
+        max_bytes = -1,
+        ):
+        self.account_amount_text.SetLabel( '%sMB / %sMB used' %(bytes_this_month/BYTES_PER_MB, max_bytes / BYTES_PER_MB ))
+        self.account_reset_text.SetLabel('Counters will be reset on %s' % next_counter_reset_time)
+
     def OnSize(self, event):
-        self.scrolling_window.SetSize(self.GetClientSize())
+        (frame_width, frame_height) = self.GetClientSize()
+        account_panel_height = self.account_panel.GetSize()[1]
+
+        self.account_panel.SetSize((frame_width, account_panel_height))
+        self.scrolling_window.SetSize((frame_width, frame_height - account_panel_height))
 
     def onFocus(self, event):
         self.scrolling_window.SetFocus()
