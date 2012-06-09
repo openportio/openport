@@ -57,7 +57,7 @@ def getPublicKey():
         exit(4)
     return key
 
-def startSession(server_ip, server_port, local_port):
+def startSession(server_ip, server_port, local_port, message):
     """
     This starts a remote ssh session to the given server server.
     """
@@ -86,5 +86,5 @@ if __name__ == '__main__':
     if 'error' in dict:
         print dict['error']
         sys.exit(9)
-	s = startSession(dict['server_ip'], dict['server_port'], dict['local_port'])
+	s = startSession(dict['server_ip'], dict['server_port'], local_port, dict['message'])
 	s.wait()
