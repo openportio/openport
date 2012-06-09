@@ -16,7 +16,7 @@ except ImportError:
         print 'You need python 2.6 or simplejson to run this application.'
         sys.exit(1)
 
-def request_port(key, url = 'http://www.openport.be/post'):
+def request_port(key, url='http://www.openport.be/post'):
     """
     Requests a port on the server using the openPort protocol
     return a tuple with ( server_ip, server_port, message )
@@ -24,7 +24,7 @@ def request_port(key, url = 'http://www.openport.be/post'):
     import urllib, urllib2
 
     try:
-        data = urllib.urlencode({'public_key' : key,})
+        data = urllib.urlencode({'public_key': key, })
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
         dict = json.loads(response)
@@ -32,6 +32,7 @@ def request_port(key, url = 'http://www.openport.be/post'):
     except Exception, detail:
         print "An error has occurred while communicating the the openport servers. ", detail
         sys.exit(9)
+
 
 def handleSigTERM(signum, frame):
     """
@@ -62,7 +63,7 @@ def startSession(server_ip, server_port, local_port, message):
     This starts a remote ssh session to the given server server.
     """
 
-    command_list = ['ssh', '-R', '*:%s:localhost:%s' %(server_port, local_port), 'open@%s' % server_ip, '-o',
+    command_list = ['ssh', '-R', '*:%s:localhost:%s' % (server_port, local_port), 'open@%s' % server_ip, '-o',
                     'StrictHostKeyChecking=no', '-o', 'ExitOnForwardFailure=yes', 'while true; do sleep 10; done']
     s = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
 
@@ -72,19 +73,20 @@ def startSession(server_ip, server_port, local_port, message):
         print '%s - %s' % (s.stdout.read(), s.stderr.read())
         exit(7)
 
-    print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (local_port, server_ip, server_port, message)
+    print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (
+        local_port, server_ip, server_port, message)
     return s
 
 
 if __name__ == '__main__':
-	local_port=argv[1]
-	signal.signal(signal.SIGTERM, handleSigTERM)
-	signal.signal(signal.SIGINT, handleSigTERM)
+    local_port=argv[1]
+    signal.signal(signal.SIGTERM, handleSigTERM)
+    signal.signal(signal.SIGINT, handleSigTERM)
 
-	key = getPublicKey()
-	dict = request_port(key)
+    key = getPublicKey()
+    dict = request_port(key)
     if 'error' in dict:
         print dict['error']
         sys.exit(9)
-	s = startSession(dict['server_ip'], dict['server_port'], local_port, dict['message'])
-	s.wait()
+    s = startSession(dict['server_ip'], dict['server_port'], local_port, dict['message'])
+    s.wait()
