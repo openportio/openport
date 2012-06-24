@@ -160,7 +160,9 @@ def open_port(port, callback=None, extra_args={}):
         thr = threading.Thread(target=callback, args=(server_ip, server_port, account_id, key_id, extra_args))
         thr.setDaemon(True)
         thr.start()
-    start(optionss, server, remote)
+    while True:
+        start(optionss, server, remote)
+        time.sleep(60)
 
 if __name__ == '__main__':
 	port = int(argv[1])
