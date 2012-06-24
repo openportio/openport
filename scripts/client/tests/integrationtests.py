@@ -21,7 +21,7 @@ class IntegrationTest(unittest.TestCase):
             print (server_ip, server_port, account_id, key_id,  extra_args)
             self.assertEquals('www.openport.be', server_ip)
             self.assertTrue(server_port>= 2000)
-            self.assertTrue(server_port<= 50000)
+            self.assertTrue(server_port<= 51000)
 
             self.assertTrue(account_id > 0)
             self.assertTrue(key_id > 0)
