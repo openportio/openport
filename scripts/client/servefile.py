@@ -1,13 +1,22 @@
+from BaseHTTPServer import HTTPServer
 import SimpleHTTPServer
 import SocketServer
 import os
 import posixpath
+import socket
 from sys import argv
 import urllib
+from OpenSSL import SSL
+
 
 file_serve_path = None
 
 class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    def setup(self):
+        self.connection = self.request
+        self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
+        self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
+
     def send_head(self):
         return self.send_file(file_serve_path)
 
@@ -31,6 +40,21 @@ class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 		self.send_header("Content-Disposition", "attachment; filename=%s" % os.path.basename(path))
 		self.end_headers()
 		return f
+
+
+class SecureHTTPServer(HTTPServer):
+    def __init__(self, server_address, HandlerClass):
+        SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
+        ctx = SSL.Context(SSL.SSLv23_METHOD)
+        #server.pem's location (containing the server private key and
+        #the server certificate).
+        fpem = os.path.join(os.path.dirname(__file__), 'server.pem')
+        ctx.use_privatekey_file (fpem)
+        ctx.use_certificate_file(fpem)
+        self.socket = SSL.Connection(ctx, socket.socket(self.address_family,
+            self.socket_type))
+        self.server_bind()
+        self.server_activate()
 
 class DirServeHandler(FileServeHandler):
     def send_head(self):
@@ -77,11 +101,12 @@ class DirServeHandler(FileServeHandler):
 
 
 def serve_file_on_port(path, port):
-    Handler = DirServeHandler if os.path.isdir(path) else FileServeHandler
+    HandlerClass = DirServeHandler if os.path.isdir(path) else FileServeHandler
     global file_serve_path
     file_serve_path = path
 
-    httpd = SocketServer.TCPServer(("", port), Handler)
+    ServerClass = SecureHTTPServer
+    httpd = ServerClass(('', port), HandlerClass)
 
     print "serving at port", port
     httpd.serve_forever()
@@ -91,4 +116,3 @@ if __name__ == '__main__':
     port = int(argv[2])
 
     serve_file_on_port(path, port)
-	

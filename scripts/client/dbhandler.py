@@ -76,6 +76,6 @@ class Share():
         self.active = active
 
     def get_link(self):
-        return 'http://%s:%s'%(self.server, self.server_port)
+        return 'https://%s:%s'%(self.server, self.server_port)
 
 

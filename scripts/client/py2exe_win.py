@@ -6,6 +6,6 @@ import sys
 
 setup(
     windows=['openportit.py', 'application.py'],
-    data_files=['logo-base.png']
+    data_files=['logo-base.png', 'server.pem']
 )
 #setup(windows=['application.py'])

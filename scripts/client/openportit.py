@@ -70,13 +70,13 @@ if __name__ == '__main__':
         r = Tk()
         r.withdraw()
         r.clipboard_clear()
-        file_address = '%s:%s'%(server_ip, server_port)
+        file_address = 'https://%s:%s'%(server_ip, server_port)
 
         r.clipboard_append(file_address.strip())
         r.destroy()
 
     def show_message_box(server_ip, server_port, extra_args):
-        wx.MessageBox('You can now download your file(s) from %s:%s\nThis link has been copied to your clipboard.' %(server_ip, server_port), 'Info', wx.OK | wx.ICON_INFORMATION)
+        wx.MessageBox('You can now download your file(s) from https://%s:%s\nThis link has been copied to your clipboard.' %(server_ip, server_port), 'Info', wx.OK | wx.ICON_INFORMATION)
 
     def inform_tray_app(server_ip, server_port, extra_args, tray_port, account_id, key_id, start_tray=False):
         import urllib, urllib2
