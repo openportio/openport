@@ -1,21 +1,21 @@
 import os
 import wx
+from osinteraction import OsInteraction
 
 class OpenPortItTaskBarIcon(wx.TaskBarIcon):
 
-    def __init__(self, parent):  
-        wx.TaskBarIcon.__init__(self)  
+    def __init__(self, parent):
+        wx.TaskBarIcon.__init__(self)
         self.parentApp = parent
-        dir = os.path.dirname( os.path.realpath( __file__ ) )
-        if dir[-3:] == 'zip':
-            dir = os.path.dirname(dir)
-        self.icon = wx.Icon(os.path.join(dir, "logo-base.png"),wx.BITMAP_TYPE_PNG)
+        osinteraction = OsInteraction()
+
+        self.icon = wx.Icon(osinteraction.get_resource_path('logo-base.png'), wx.BITMAP_TYPE_PNG)
         self.SetIcon(self.icon, "OpenPort-It")
         self.CreateMenu()
         self.items = {}
 
-    def CreateMenu(self):  
-        self.Bind(wx.EVT_TASKBAR_RIGHT_UP, self.ShowMenu)  
+    def CreateMenu(self):
+        self.Bind(wx.EVT_TASKBAR_RIGHT_UP, self.ShowMenu)
         self.menu=wx.Menu()
 
     def addItem(self, label, callBackFunction):
@@ -23,8 +23,8 @@ class OpenPortItTaskBarIcon(wx.TaskBarIcon):
         self.menu.Append(newItem, label)
         self.Bind(wx.EVT_MENU, callBackFunction, id=newItem)
 
-    def ShowMenu(self,event):  
-        self.PopupMenu(self.menu)  
+    def ShowMenu(self,event):
+        self.PopupMenu(self.menu)
 
 def main(argv=None):
 
@@ -37,10 +37,10 @@ def main(argv=None):
             self.tbicon.Bind(wx.EVT_MENU, self.exitApp, id=wx.ID_EXIT)
             self.Show(True)
 
-    app = wx.App(False)  
+    app = wx.App(False)
     frame = OpenPortItFrame(None, -1, ' ')
     frame.Show(False)
-    app.MainLoop()  
+    app.MainLoop()
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
     main()

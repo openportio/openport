@@ -7,9 +7,13 @@ import socket
 from sys import argv
 import urllib
 from OpenSSL import SSL
+from loggers import get_logger
+from osinteraction import OsInteraction
 
 
 file_serve_path = None
+logger = get_logger(__name__)
+osinteraction = OsInteraction()
 
 class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def setup(self):
@@ -48,7 +52,8 @@ class SecureHTTPServer(HTTPServer):
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         #server.pem's location (containing the server private key and
         #the server certificate).
-        fpem = os.path.join(os.path.dirname(__file__), 'server.pem')
+        fpem = osinteraction.get_resource_path('server.pem')
+        logger.debug('certificate file: %s' % fpem)
         ctx.use_privatekey_file (fpem)
         ctx.use_certificate_file(fpem)
         self.socket = SSL.Connection(ctx, socket.socket(self.address_family,

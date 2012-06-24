@@ -56,3 +56,8 @@ class OsInteraction():
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0)
         return p
 
+    def get_resource_path(self, path):
+        dir = os.path.dirname( os.path.realpath( __file__ ) )
+        if dir[-3:] == 'zip':
+            dir = os.path.dirname(dir)
+        return os.path.join(dir, path)

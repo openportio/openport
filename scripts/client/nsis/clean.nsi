@@ -21,6 +21,7 @@ Section # hidden section
 	setOutPath $INSTDIR
 	file /r ..\dist\*.* 
 	file ..\logo-base.png
+	file ..\server.pem
 	#messageBox MB_OK "instdir: $INSTDIR"
 	WriteRegStr HKCR "*\shell\${APP_NAME}\command" "" "$INSTDIR\${MAIN_EXE} $\"%1$\""
 	WriteRegStr HKCR "Directory\shell\${APP_NAME}\command" "" "$INSTDIR\${MAIN_EXE} $\"%1$\""
