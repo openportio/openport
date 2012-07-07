@@ -16,7 +16,7 @@ except ImportError:
         print 'You need python 2.6 or simplejson to run this application.'
         sys.exit(1)
 
-def request_port(key, url='http://www.openport.be/post'):
+def request_port(key, url='http://www.openport.be/post', restart_session_id = -1, request_server_port=-1):
     """
     Requests a port on the server using the openPort protocol
     return a tuple with ( server_ip, server_port, message )
@@ -24,7 +24,7 @@ def request_port(key, url='http://www.openport.be/post'):
     import urllib, urllib2
 
     try:
-        data = urllib.urlencode({'public_key': key, })
+        data = urllib.urlencode({'public_key': key, 'request_port': request_server_port, 'restart_session_id': restart_session_id})
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
         dict = json.loads(response)

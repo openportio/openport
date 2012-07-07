@@ -24,14 +24,14 @@ def get_open_port():
 	s.close()
 	return port
 
-def open_port_file(path, callback=None, extra_args={}):
+def open_port_file(path, callback=None):
 	import threading
 	serving_port = get_open_port()
 	thr = threading.Thread(target=serve_file_on_port, args=(path, serving_port))
 	thr.setDaemon(True)
 	thr.start()
 	
-	thr2 = threading.Thread(target=open_port, args=(serving_port,callback, extra_args))
+	thr2 = threading.Thread(target=open_port, args=(serving_port,callback))
 	thr2.setDaemon(True)
 	thr2.start()
 
@@ -65,33 +65,25 @@ if __name__ == '__main__':
     parser.add_argument('filename', help='The file you want to openport.')
     args = parser.parse_args()
 
-    def copy_to_clipboard(server_ip, server_port):
+    def copy_share_to_clipboard(share):
         from Tkinter import Tk
         r = Tk()
         r.withdraw()
         r.clipboard_clear()
-        file_address = 'https://%s:%s'%(server_ip, server_port)
+        file_address = share.get_link()
 
         r.clipboard_append(file_address.strip())
         r.destroy()
 
-    def show_message_box(server_ip, server_port, extra_args):
-        wx.MessageBox('You can now download your file(s) from https://%s:%s\nThis link has been copied to your clipboard.' %(server_ip, server_port), 'Info', wx.OK | wx.ICON_INFORMATION)
+    def show_message_box(share):
+        wx.MessageBox('You can now download your file(s) from %s\nThis link has been copied to your clipboard.' %(share.get_link()), 'Info', wx.OK | wx.ICON_INFORMATION)
 
-    def inform_tray_app(server_ip, server_port, extra_args, tray_port, account_id, key_id, start_tray=False):
+    def inform_tray_app(share, tray_port, start_tray=True):
         import urllib, urllib2
-        path = os.path.abspath( os.path.join(working_dir,args.filename))
         url = 'http://127.0.0.1:%s' % tray_port
 
         try:
-            data = urllib.urlencode({
-                'path' : path,
-                'server': server_ip,
-                'server_port': server_port,
-                'pid': os.getpid(),
-                'account_id': account_id,
-                'key_id': key_id,
-            })
+            data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req).read()
             if response.strip() != 'ok':
@@ -101,16 +93,22 @@ if __name__ == '__main__':
             if start_tray:
                 start_tray_application()
                 sleep(3)
-                inform_tray_app(server_ip, server_port, extra_args, tray_port, account_id, key_id, start_tray=False)
+                inform_tray_app(server_ip, server_port, tray_port, account_id, key_id, start_tray=False)
 
 
-    def callback(server_ip, server_port, account_id, key_id,  extra_args):
+    def callback(portForwardResponse):
+        share = Share()
+        share.filePath = os.path.join(working_dir, args.filename)
+        share.server = portForwardResponse.server
+        share.server_port = portForwardResponse.remote_port
+        share.pid = os.getpid()
+
         if args.tray_port > 0:
-            inform_tray_app(server_ip, server_port, extra_args, args.tray_port, account_id, key_id, start_tray=True)
+            inform_tray_app(share, args.tray_port)
         if not args.no_clipboard:
-            copy_to_clipboard(server_ip, server_port)
+            copy_share_to_clipboard(share)
         if not args.hide_message:
-            show_message_box(server_ip, server_port, extra_args)
+            show_message_box(share)
 
     app.MainLoop()
     open_port_file(os.path.join(working_dir, args.filename), callback)
@@ -118,4 +116,40 @@ if __name__ == '__main__':
     while True:
        sleep(1000)
 
-	
+
+class Share():
+    def __init__(self, id=-1, filePath='', server_ip='', server_port='', pid=-1, active=0, account_id=-1, key_id=-1):
+        self.id = id
+        self.filePath = filePath
+        self.server = server_ip
+        self.server_port = server_port
+        self.pid = pid
+        self.active = active
+        self.account_id = account_id
+        self.key_id = key_id
+
+    def get_link(self):
+        return 'https://%s:%s'%(self.server, self.server_port)
+
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'filePath' : self.filePath,
+            'server': self.server,
+            'server_port': self.server_port,
+            'pid': self.pid,
+            'active': self.active,
+            'account_id': self.account_id,
+            'key_id': self.key_id,
+        }
+
+    def from_dict(self, dict):
+        self.id = dict['id']
+        self.filePath = dict['filePath']
+        self.server = dict['server']
+        self.server_port = dict['server_port']
+        self.pid = dict['pid']
+        self.active = dict['active']
+        self.account_id = dict['account_id']
+        self.key_id = dict['key_id']
+

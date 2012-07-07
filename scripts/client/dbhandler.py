@@ -1,5 +1,6 @@
 import os
 from pysqlite2 import dbapi2 as sqlite
+from openportit import Share
 
 class DBHandler():
 
@@ -20,12 +21,14 @@ class DBHandler():
             )
             ''')
 
-    def add_share(self,filePath, server, port, pid):
-        self.cursor.execute('select * from shares where filePath = ?', (filePath,))
+    def add_share(self,share):
+        self.cursor.execute('select * from shares where filePath = ?', (share.filePath,))
         if self.cursor.fetchall():
-            self.cursor.execute('update shares set active = 0 where filePath = ?', (filePath,))
-        self.cursor.execute('insert into shares (filePath, server, port, pid, active) values (?, ?, ?, ?, 1)',  (filePath, server, port, pid))
+            self.cursor.execute('update shares set active = 0 where filePath = ?', (share.filePath,))
+        self.cursor.execute('insert into shares (filePath, server, port, pid, active) values (?, ?, ?, ?, 1)',
+            (share.filePath, share.server, share.server_port, share.pid))
         self.connection.commit()
+        share.id = self.cursor.lastrowid
         return self.get_share(self.cursor.lastrowid)
 
     def remove_file(self, id):
@@ -66,16 +69,6 @@ class DBHandler():
         self.connection.commit()
 
 
-class Share():
-    def __init__(self, id=-1, filePath='', server_ip='', server_port='', pid=-1, active=0):
-        self.id = id
-        self.filePath = filePath
-        self.server = server_ip
-        self.server_port = server_port
-        self.pid = pid
-        self.active = active
 
-    def get_link(self):
-        return 'https://%s:%s'%(self.server, self.server_port)
 
 

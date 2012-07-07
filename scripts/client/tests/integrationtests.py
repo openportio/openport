@@ -16,26 +16,25 @@ class IntegrationTest(unittest.TestCase):
         path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
         self.called_back = False
         self.share = None
-        def callback(server_ip, server_port, account_id, key_id,  extra_args):
+        def callback(portForwardResponse):
 
-            print (server_ip, server_port, account_id, key_id,  extra_args)
-            self.assertEquals('www.openport.be', server_ip)
-            self.assertTrue(server_port>= 2000)
-            self.assertTrue(server_port<= 51000)
+            print (portForwardResponse.server, portForwardResponse.remote_port, portForwardResponse.account_id, portForwardResponse.key_id)
+            self.assertEquals('www.openport.be', portForwardResponse.server)
+            self.assertTrue(portForwardResponse.remote_port>= 2000)
+            self.assertTrue(portForwardResponse.remote_port<= 51000)
 
-            self.assertTrue(account_id > 0)
-            self.assertTrue(key_id > 0)
+            self.assertTrue(portForwardResponse.account_id > 0)
+            self.assertTrue(portForwardResponse.key_id > 0)
 
             print 'called back, thanks :)'
             self.called_back = True
-            self.share = Share( filePath=path, server_ip=server_ip, server_port=server_port)
+            self.share = Share( filePath=path, server_ip=portForwardResponse.server, server_port=portForwardResponse.remote_port)
 
-        openportit.open_port_file(path, callback=callback, extra_args={})
+        openportit.open_port_file(path, callback=callback)
         i = 0
         while i < 10 and not self.called_back:
             i+=1
             sleep(1)
-
         self.assertTrue(self.called_back)
         temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(self.share.filePath))
 

@@ -5,6 +5,7 @@ import traceback
 import wx
 from dbhandler import DBHandler
 from globals import Globals
+from openportit import Share
 
 onNewShare = None
 
@@ -21,19 +22,20 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
                 postvars = urlparse.parse_qs(self.rfile.read(length), keep_blank_values=1)
             else:
                 postvars = {}
-            path = postvars['path'][0]
-            server = postvars['server'][0]
-            server_port = postvars['server_port'][0]
-            pid = postvars['pid'][0]
-            account_id = postvars['account_id'][0]
-            key_id = postvars['key_id'][0]
+
+            dict = {}
+            for key in postvars:
+                dict[key] = postvars[key][0]
+
+            share = Share()
+            share.from_dict(dict)
 
             globals = Globals()
-            globals.account_id = account_id
-            globals.key_id = key_id
+            globals.account_id = share.account_id
+            globals.key_id = share.key_id
             print 'path: <%s>' % path
 
-            share=save_request(path, server, server_port, pid)
+            share=save_request(share)
             if onNewShare:
                 wx.CallAfter(onNewShare, share)
             self.write_response('ok')
@@ -63,9 +65,9 @@ def start_server(onNewShareFunc=None):
     except KeyboardInterrupt:
         server.socket.close()
 
-def save_request(path, server, server_port, pid):
+def save_request(share):
     db_handler = DBHandler()
-    return db_handler.add_share(path, server, server_port, pid)
+    return db_handler.add_share(share)
 
 def start_server_thread(onNewShare=None):
     t = threading.Thread(target=start_server, args=[onNewShare])
