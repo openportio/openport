@@ -31,7 +31,7 @@ def request_port(key, url='http://www.openport.be/post', restart_session_id = -1
         return dict
     except Exception, detail:
         print "An error has occurred while communicating the the openport servers. ", detail
-        sys.exit(9)
+        raise detail
 
 
 def handleSigTERM(signum, frame):

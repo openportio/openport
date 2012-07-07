@@ -110,7 +110,8 @@ class OpenPortItFrame(wx.Frame):
                 )
         except Exception, detail:
             print "An error has occurred while communicating the the openport servers. ", detail
-            sys.exit(9)
+            raise detail
+            #sys.exit(9)
 
 def main():
     print 'server pid:%s' % os.getpid()

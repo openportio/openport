@@ -8,6 +8,9 @@ from loggers import get_logger
 
 logger = get_logger(__name__)
 
+class PortForwardException(Exception):
+    pass
+
 class IgnoreUnknownHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     """A Paramiko policy that ignores UnknownHostKeyError for missing keys."""
     def missing_host_key(self, client, hostname, key):
@@ -32,7 +35,7 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
 
     def keep_alive(client):
         errorCount = 0
-        while errorCount < 30:
+        while errorCount < 2:
             try:
                 time.sleep(3)
                 client.exec_command('echo ""')
@@ -43,14 +46,16 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
                 if error_callback:
                     error_callback()
                 print ex
+        raise PortForwardException('keep_alive stopped')
 
-    thr = threading.Thread(target=keep_alive, args=(client,))
-    thr.setDaemon(True)
-    thr.start()
 
     try:
-        reverse_forward_tunnel(local_port, remote_port, client.get_transport())
+        thr = threading.Thread(target=reverse_forward_tunnel, args=(local_port, remote_port, client.get_transport()))
+        thr.setDaemon(True)
+        thr.start()
         logger.info('Now forwarding remote port %s:%d to localhost:%d...' % (server, remote_port, local_port))
+
+        keep_alive(client)
     except KeyboardInterrupt:
         print 'C-c: Port forwarding stopped.'
         sys.exit(0)

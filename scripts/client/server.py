@@ -32,41 +32,47 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
             for key in postvars:
                 dict[key] = postvars[key][0]
 
-            logger.debug(dict)
+            logger.debug('got dict %s on path %s' % (dict, self.path))
+            logger.debug('known shares: %s' %shares)
 
             if self.path.endswith('newShare'):
+                if dict['local_port'] in shares:
+                    #update existing share
+                    share = shares[dict['local_port']]
+                    share.from_dict(dict)
+                else:
+                    share = Share()
+                    share.from_dict(dict)
 
-                share = Share()
-                share.from_dict(dict)
+                    globals = Globals()
+                    globals.account_id = share.account_id
+                    globals.key_id = share.key_id
+                    print 'path: <%s>' % share.filePath
 
-                globals = Globals()
-                globals.account_id = share.account_id
-                globals.key_id = share.key_id
-                print 'path: <%s>' % share.filePath
-
-                save_request(share)
-                if onNewShare:
-                    wx.CallAfter(onNewShare, share)
-                global shares
-                shares[share.local_port] = share
-                logger.debug(shares)
+                    save_request(share)
+                    if onNewShare:
+                        wx.CallAfter(onNewShare, share)
+                    global shares
+                    shares[share.local_port] = share
+                    logger.debug(shares)
                 self.write_response('ok')
             elif self.path.endswith('successShare'):
-                logger.debug(shares)
                 logger.debug('success')
-                try:
+                if not dict['local_port'] in shares:
+                    logger.error('unknown key: %s in shares %s' % (dict['local_port'], shares))
+                    self.write_response('unknown')
+                else:
                     shares[dict['local_port']].notify_success()
                     self.write_response('ok')
-                except KeyError:
-                    self.write_response('unknown')
 
             elif self.path.endswith('errorShare'):
                 logger.debug('error')
-                try:
+                if not dict['local_port'] in shares:
+                    logger.error('unknown key: %s in shares %s' % (dict['local_port'], shares))
+                    self.write_response('unknown')
+                else:
                     shares[dict['local_port']].notify_error()
                     self.write_response('ok')
-                except KeyError:
-                    self.write_response('unknown')
 
         except Exception, e:
             logger.exception(e)

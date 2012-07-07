@@ -130,32 +130,28 @@ class SharesFrame(wx.Frame):
 
         share_panel.SetSizer(share_panel_sizer)
         share_panel.Layout()
-        self.share_panels[share.id] = share_panel
+        self.share_panels[share.local_port] = share_panel
         self.scrolling_window.Layout()
         #self.frame_sizer.Fit(self)
         #self.Layout()
 
     def notify_error(self, share):
-        share_panel = self.share_panels[share.id]
+        share_panel = self.share_panels[share.local_port]
         share_panel.SetBackgroundColour((240,0,0))
         share_panel.Refresh()
         logger.error('error in share')
 
     def notify_success(self, share):
-        share_panel = self.share_panels[share.id]
-        share_panel.SetBackgroundColour((0,240,0))
-        share_panel.Refresh()
-        from time import sleep
-        sleep(1)
+        share_panel = self.share_panels[share.local_port]
         share_panel.SetBackgroundColour(wx.NullColour)
         share_panel.Refresh()
 
     def remove_share(self, share):
-        share_panel = self.share_panels[share.id]
+        share_panel = self.share_panels[share.local_port]
         self.scrolling_window.RemoveChild(share_panel)
         self.scrolling_window_sizer.Remove(share_panel)
         share_panel.Destroy()
-        self.share_panels.pop(share.id)
+        self.share_panels.pop(share.local_port)
         self.scrolling_window.Layout()
       #  self.Layout()
 

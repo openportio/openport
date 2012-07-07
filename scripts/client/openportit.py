@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from portforwarding import PortForwardException
 from share import Share
 from time import sleep
 from loggers import get_logger
@@ -39,14 +40,22 @@ def open_port_file(share, callback=None):
     thr.setDaemon(True)
     thr.start()
 
-    open_port(
-        serving_port,
-#        request_server_port=share.server_port,
-#        restart_session_id=share.session_id,
-        port_request_callback = callback,
-        port_forward_error = share.notify_error,
-        port_forward_success = share.notify_success
-    )
+    from time import sleep
+    while True:
+        try:
+            open_port(
+                serving_port,
+                request_server_port=share.server_port,
+                restart_session_id=share.session_id,
+                port_request_callback = callback,
+                port_forward_error = share.notify_error,
+                port_forward_success = share.notify_success
+            )
+            sleep(10)
+        except Exception:
+            sleep(10)
+            pass #try again
+
 
 def start_tray_application():
     #todo: linux/mac
@@ -172,10 +181,7 @@ if __name__ == '__main__':
     share.success_observers.append(success_callback)
 
     app.MainLoop()
-    from time import sleep
-    while True:
-        open_port_file(share, callback)
-        sleep(10)
+    open_port_file(share, callback)
 
 
 
