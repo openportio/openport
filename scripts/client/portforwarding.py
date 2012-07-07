@@ -1,4 +1,3 @@
-import logging
 import socket
 import threading
 import paramiko
@@ -14,7 +13,7 @@ class IgnoreUnknownHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     def missing_host_key(self, client, hostname, key):
         pass
 
-def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, public_key_file, private_key_file):
+def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, public_key_file, private_key_file, error_callback=None, success_callback=None):
     """This will connect to the server and start port forwarding to the given port of the localhost"""
     client = paramiko.SSHClient()
     client.load_system_host_keys()
@@ -35,10 +34,14 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
         errorCount = 0
         while errorCount < 30:
             try:
+                time.sleep(3)
                 client.exec_command('echo ""')
-                time.sleep(30)
+                if success_callback:
+                    success_callback()
             except Exception, ex:
                 errorCount+=1
+                if error_callback:
+                    error_callback()
                 print ex
 
     thr = threading.Thread(target=keep_alive, args=(client,))

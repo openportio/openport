@@ -3,7 +3,9 @@ import datetime
 import wx
 from osinteraction import OsInteraction
 from globals import Globals
+from loggers import get_logger
 
+logger = get_logger(__name__)
 
 noColor = True
 BYTES_PER_MB = 1024*1024
@@ -132,6 +134,21 @@ class SharesFrame(wx.Frame):
         self.scrolling_window.Layout()
         #self.frame_sizer.Fit(self)
         #self.Layout()
+
+    def notify_error(self, share):
+        share_panel = self.share_panels[share.id]
+        share_panel.SetBackgroundColour((240,0,0))
+        share_panel.Refresh()
+        logger.error('error in share')
+
+    def notify_success(self, share):
+        share_panel = self.share_panels[share.id]
+        share_panel.SetBackgroundColour((0,240,0))
+        share_panel.Refresh()
+        from time import sleep
+        sleep(1)
+        share_panel.SetBackgroundColour(wx.NullColour)
+        share_panel.Refresh()
 
     def remove_share(self, share):
         share_panel = self.share_panels[share.id]

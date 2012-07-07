@@ -1,11 +1,14 @@
-from optparse import OptionParser
-import pprint
 import subprocess
 import sys
+from share import Share
+from time import sleep
+from loggers import get_logger
+import urllib, urllib2
 
 if __name__ == '__main__':
-	import wx
-	app = wx.App(redirect=False)
+    import wx
+
+    app = wx.App(redirect=False)
 
 import os
 from sys import argv
@@ -15,25 +18,35 @@ os.chdir(os.path.realpath(os.path.dirname(argv[0])))
 from servefile import serve_file_on_port
 from openport_win import open_port
 
-def get_open_port():
-	import socket
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.bind(("",0))
-	s.listen(1)
-	port = s.getsockname()[1]
-	s.close()
-	return port
+logger = get_logger('openportit')
 
-def open_port_file(path, callback=None):
-	import threading
-	serving_port = get_open_port()
-	thr = threading.Thread(target=serve_file_on_port, args=(path, serving_port))
-	thr.setDaemon(True)
-	thr.start()
-	
-	thr2 = threading.Thread(target=open_port, args=(serving_port,callback))
-	thr2.setDaemon(True)
-	thr2.start()
+def get_open_port():
+    import socket
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("", 0))
+    s.listen(1)
+    port = s.getsockname()[1]
+    s.close()
+    return port
+
+
+def open_port_file(share, callback=None):
+    import threading
+
+    serving_port = get_open_port()
+    thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, serving_port))
+    thr.setDaemon(True)
+    thr.start()
+
+    open_port(
+        serving_port,
+#        request_server_port=share.server_port,
+#        restart_session_id=share.session_id,
+        port_request_callback = callback,
+        port_forward_error = share.notify_error,
+        port_forward_success = share.notify_success
+    )
 
 def start_tray_application():
     #todo: linux/mac
@@ -58,6 +71,7 @@ if __name__ == '__main__':
 
     print 'client pid:%s' % os.getpid()
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
     parser.add_argument('--no-clipboard', action='store_true', help='Do not copy the link to the clipboard.')
@@ -67,6 +81,7 @@ if __name__ == '__main__':
 
     def copy_share_to_clipboard(share):
         from Tkinter import Tk
+
         r = Tk()
         r.withdraw()
         r.clipboard_clear()
@@ -76,12 +91,11 @@ if __name__ == '__main__':
         r.destroy()
 
     def show_message_box(share):
-        wx.MessageBox('You can now download your file(s) from %s\nThis link has been copied to your clipboard.' %(share.get_link()), 'Info', wx.OK | wx.ICON_INFORMATION)
+        wx.MessageBox('You can now download your file(s) from %s\nThis link has been copied to your clipboard.' % (
+        share.get_link()), 'Info', wx.OK | wx.ICON_INFORMATION)
 
     def inform_tray_app(share, tray_port, start_tray=True):
-        import urllib, urllib2
-        url = 'http://127.0.0.1:%s' % tray_port
-
+        url = 'http://127.0.0.1:%s/newShare' % tray_port
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
@@ -89,19 +103,50 @@ if __name__ == '__main__':
             if response.strip() != 'ok':
                 print response
         except Exception, detail:
-            print "An error has occured while informing the tray: ", detail
-            if start_tray:
+            if not start_tray:
+                print "An error has occured while informing the tray: ", detail
+            else:
                 start_tray_application()
                 sleep(3)
-                inform_tray_app(server_ip, server_port, tray_port, account_id, key_id, start_tray=False)
+                inform_tray_app(share, tray_port, start_tray=False)
 
+
+    def inform_tray_app_error(share, tray_port):
+        url = 'http://127.0.0.1:%s/errorShare' % tray_port
+        try:
+            data = urllib.urlencode(share.as_dict())
+            req = urllib2.Request(url, data)
+            response = urllib2.urlopen(req).read()
+            if response.strip() != 'ok':
+                print response
+            if response.strip() == 'unknown':
+                logger.critical('this share is no longer known by the tray, exiting')
+                sys.exit(1)
+        except Exception, detail:
+            logger.exception(detail)
+
+    def inform_tray_app_success(share, tray_port):
+        url = 'http://127.0.0.1:%s/successShare' % tray_port
+        try:
+            data = urllib.urlencode(share.as_dict())
+            req = urllib2.Request(url, data)
+            response = urllib2.urlopen(req).read()
+            if response.strip() != 'ok':
+                print response
+            if response.strip() == 'unknown':
+                logger.critical('this share is no longer known by the tray, exiting')
+                sys.exit(1)
+        except Exception, detail:
+            logger.exception(detail)
 
     def callback(portForwardResponse):
-        share = Share()
-        share.filePath = os.path.join(working_dir, args.filename)
         share.server = portForwardResponse.server
         share.server_port = portForwardResponse.remote_port
         share.pid = os.getpid()
+        share.local_port = portForwardResponse.local_port
+        share.account_id = portForwardResponse.account_id
+        share.key_id = portForwardResponse.key_id
+        share.session_id = portForwardResponse.session_id
 
         if args.tray_port > 0:
             inform_tray_app(share, args.tray_port)
@@ -110,46 +155,27 @@ if __name__ == '__main__':
         if not args.hide_message:
             show_message_box(share)
 
+    def error_callback(share):
+        logger.info('error')
+        if args.tray_port > 0:
+            inform_tray_app_error(share, args.tray_port)
+
+    def success_callback(share):
+        logger.info('success')
+        if args.tray_port > 0:
+            inform_tray_app_success(share, args.tray_port)
+
+    share = Share()
+    share.filePath = os.path.join(working_dir, args.filename)
+
+    share.error_observers.append(error_callback)
+    share.success_observers.append(success_callback)
+
     app.MainLoop()
-    open_port_file(os.path.join(working_dir, args.filename), callback)
     from time import sleep
     while True:
-       sleep(1000)
+        open_port_file(share, callback)
+        sleep(10)
 
 
-class Share():
-    def __init__(self, id=-1, filePath='', server_ip='', server_port='', pid=-1, active=0, account_id=-1, key_id=-1):
-        self.id = id
-        self.filePath = filePath
-        self.server = server_ip
-        self.server_port = server_port
-        self.pid = pid
-        self.active = active
-        self.account_id = account_id
-        self.key_id = key_id
-
-    def get_link(self):
-        return 'https://%s:%s'%(self.server, self.server_port)
-
-    def as_dict(self):
-        return {
-            'id': self.id,
-            'filePath' : self.filePath,
-            'server': self.server,
-            'server_port': self.server_port,
-            'pid': self.pid,
-            'active': self.active,
-            'account_id': self.account_id,
-            'key_id': self.key_id,
-        }
-
-    def from_dict(self, dict):
-        self.id = dict['id']
-        self.filePath = dict['filePath']
-        self.server = dict['server']
-        self.server_port = dict['server_port']
-        self.pid = dict['pid']
-        self.active = dict['active']
-        self.account_id = dict['account_id']
-        self.key_id = dict['key_id']
 

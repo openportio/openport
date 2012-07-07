@@ -6,8 +6,13 @@ import wx
 from dbhandler import DBHandler
 from globals import Globals
 from openportit import Share
+from loggers import get_logger
+
+logger = get_logger('server')
 
 onNewShare = None
+
+shares = {}
 
 class ShareRequestHandler(BaseHTTPRequestHandler):
 
@@ -27,21 +32,45 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
             for key in postvars:
                 dict[key] = postvars[key][0]
 
-            share = Share()
-            share.from_dict(dict)
+            logger.debug(dict)
 
-            globals = Globals()
-            globals.account_id = share.account_id
-            globals.key_id = share.key_id
-            print 'path: <%s>' % path
+            if self.path.endswith('newShare'):
 
-            share=save_request(share)
-            if onNewShare:
-                wx.CallAfter(onNewShare, share)
-            self.write_response('ok')
+                share = Share()
+                share.from_dict(dict)
+
+                globals = Globals()
+                globals.account_id = share.account_id
+                globals.key_id = share.key_id
+                print 'path: <%s>' % share.filePath
+
+                save_request(share)
+                if onNewShare:
+                    wx.CallAfter(onNewShare, share)
+                global shares
+                shares[share.local_port] = share
+                logger.debug(shares)
+                self.write_response('ok')
+            elif self.path.endswith('successShare'):
+                logger.debug(shares)
+                logger.debug('success')
+                try:
+                    shares[dict['local_port']].notify_success()
+                    self.write_response('ok')
+                except KeyError:
+                    self.write_response('unknown')
+
+            elif self.path.endswith('errorShare'):
+                logger.debug('error')
+                try:
+                    shares[dict['local_port']].notify_error()
+                    self.write_response('ok')
+                except KeyError:
+                    self.write_response('unknown')
+
         except Exception, e:
-            traceback.print_stack()
-            print e
+            logger.exception(e)
+            self.write_response('an error has occurred')
 
     def write_response(self, text):
         try:

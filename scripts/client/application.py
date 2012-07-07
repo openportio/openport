@@ -12,6 +12,9 @@ from shares_frame import SharesFrame
 from osinteraction import OsInteraction
 from globals import Globals
 import urllib2
+from loggers import get_logger
+
+logger = get_logger('application')
 
 class OpenPortItFrame(wx.Frame):
 
@@ -65,7 +68,16 @@ class OpenPortItFrame(wx.Frame):
         print "adding share %s" % share.id
         callbacks = {'stop': self.stop_sharing}
         self.shares_frame.add_share(share, callbacks=callbacks)
+        share.success_observers.append(self.onShareSuccess)
+        share.error_observers.append(self.onShareError)
+
         self.share_processes[share.pid]=None
+
+    def onShareError(self, share):
+        self.shares_frame.notify_error(share)
+
+    def onShareSuccess(self, share):
+        self.shares_frame.notify_success(share)
 
     def start_account_checking(self):
 
@@ -82,6 +94,7 @@ class OpenPortItFrame(wx.Frame):
 
     def check_account(self):
         url = 'http://www.openport.be/api/v1/account/%s/%s' %(self.globals.account_id, self.globals.key_id)
+        logger.info('checking account: %s' % url)
         try:
             req = urllib2.Request(url)
             response = urllib2.urlopen(req).read()
