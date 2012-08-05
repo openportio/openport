@@ -4,6 +4,9 @@ import platform
 import subprocess
 import sys
 
+
+APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
+
 class OsInteraction():
 
     def copy_to_clipboard(self, text):
@@ -43,9 +46,15 @@ class OsInteraction():
         else:
             os.kill(pid)
 
+    def is_compiled(self):
+        return sys.argv[0][-3:] == 'exe'
+
+    def get_app_name(self):
+        return os.path.basename(sys.argv[0])
+
     def start_openport_process(self, filePath):
         app_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
-        if sys.argv[0][-3:] == 'exe':
+        if self.is_compiled():
             command = [os.path.join(app_dir, 'openportit.exe'),]
         else:
             command = ['python', os.path.join(app_dir, 'openportit.py')]
@@ -61,3 +70,10 @@ class OsInteraction():
         if dir[-3:] == 'zip':
             dir = os.path.dirname(dir)
         return os.path.join(dir, path)
+
+    def get_app_data_path(self, filename=''):
+        try:
+            os.makedirs(APP_DATA_PATH)
+        except WindowsError:
+            pass
+        return os.path.join(APP_DATA_PATH, filename)

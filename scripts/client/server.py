@@ -17,7 +17,7 @@ shares = {}
 class ShareRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
-        print "got post?"
+        logger.debug('got post on path:%s'%self.path)
         try:
             ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
             if ctype == 'multipart/form-data':
@@ -54,6 +54,7 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
                         wx.CallAfter(onNewShare, share)
                     global shares
                     shares[share.local_port] = share
+                    logger.debug('added new share')
                     logger.debug(shares)
                 self.write_response('ok')
             elif self.path.endswith('successShare'):

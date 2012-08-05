@@ -1,11 +1,13 @@
 import os
 from pysqlite2 import dbapi2 as sqlite
 from openportit import Share
+from osinteraction import OsInteraction
 
 class DBHandler():
 
     def __init__(self):
-        self.connection = sqlite.connect(os.path.join(os.path.expanduser('~'), 'openport.db'))
+        self.os_interaction = OsInteraction()
+        self.connection = sqlite.connect(self.os_interaction.get_app_data_path('openport.db'))
         self.cursor = self.connection.cursor()
         self.init_db()
 

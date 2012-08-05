@@ -1,5 +1,6 @@
 import logging
 from sys import stdout
+from osinteraction import OsInteraction
 
 def get_logger(name):
     logger = logging.getLogger(name)
@@ -7,6 +8,14 @@ def get_logger(name):
     ch = logging.StreamHandler(strm=stdout)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
+
+    os_interaction = OsInteraction()
+    if os_interaction.is_compiled():
+        fh = logging.FileHandler(os_interaction.get_app_data_path('%s.log' % os_interaction.get_app_name()))
+        fh.setFormatter(formatter)
+        fh.setLevel(logging.WARNING)
+        logger.addHandler(fh)
+
     logger.setLevel(logging.DEBUG)
     return logger
 

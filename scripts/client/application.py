@@ -31,6 +31,9 @@ class OpenPortItFrame(wx.Frame):
         self.os_interaction = OsInteraction()
         self.globals = Globals()
         self.start_account_checking()
+        if self.os_interaction.is_compiled():
+            sys.stdout = open(self.os_interaction.get_app_data_path('application.out.log'), 'a')
+            sys.stderr = open(self.os_interaction.get_app_data_path('application.error.log'), 'a')
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)

@@ -1,6 +1,6 @@
 import subprocess
 import sys
-from portforwarding import PortForwardException
+from osinteraction import OsInteraction
 from share import Share
 from time import sleep
 from loggers import get_logger
@@ -75,10 +75,12 @@ def quote_path(path):
 
 if __name__ == '__main__':
 
-#    print quote_path('c:\\hallo\\jan\\hoe ist\\goed.txt')
-#    sys.exit(0)
+    os_interaction = OsInteraction()
+    if os_interaction.is_compiled():
+        sys.stdout = open(os_interaction.get_app_data_path('openportit.out.log'), 'a')
+        sys.stderr = open(os_interaction.get_app_data_path('openportit.error.log'), 'a')
 
-    print 'client pid:%s' % os.getpid()
+    logger.debug('client pid:%s' % os.getpid())
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -97,6 +99,10 @@ if __name__ == '__main__':
         file_address = share.get_link()
 
         r.clipboard_append(file_address.strip())
+
+#        result = r.selection_get(selection = "CLIPBOARD")
+#        logger.debug('tried to copy %s to clipboard, got %s' % (file_address, result))
+
         r.destroy()
 
     def show_message_box(share):
@@ -131,6 +137,9 @@ if __name__ == '__main__':
             if response.strip() == 'unknown':
                 logger.critical('this share is no longer known by the tray, exiting')
                 sys.exit(1)
+        except urllib2.URLError, error:
+            logger.exception(error)
+            sys.exit(1)
         except Exception, detail:
             logger.exception(detail)
 
@@ -145,6 +154,9 @@ if __name__ == '__main__':
             if response.strip() == 'unknown':
                 logger.critical('this share is no longer known by the tray, exiting')
                 sys.exit(1)
+        except urllib2.URLError, error:
+            logger.exception(error)
+            sys.exit(1)
         except Exception, detail:
             logger.exception(detail)
 
@@ -159,26 +171,27 @@ if __name__ == '__main__':
 
         if args.tray_port > 0:
             inform_tray_app(share, args.tray_port)
+
+        share.error_observers.append(error_callback)
+        share.success_observers.append(success_callback)
+
         if not args.no_clipboard:
             copy_share_to_clipboard(share)
         if not args.hide_message:
             show_message_box(share)
 
     def error_callback(share):
-        logger.info('error')
+        logger.debug('error')
         if args.tray_port > 0:
             inform_tray_app_error(share, args.tray_port)
 
     def success_callback(share):
-        logger.info('success')
+        logger.debug('success')
         if args.tray_port > 0:
             inform_tray_app_success(share, args.tray_port)
 
     share = Share()
     share.filePath = os.path.join(working_dir, args.filename)
-
-    share.error_observers.append(error_callback)
-    share.success_observers.append(success_callback)
 
     app.MainLoop()
     open_port_file(share, callback)
