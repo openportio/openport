@@ -1,4 +1,5 @@
 from BaseHTTPServer import HTTPServer
+from SocketServer import ThreadingMixIn
 import SimpleHTTPServer
 import SocketServer
 import os
@@ -46,10 +47,12 @@ class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 		return f
 
 
-class SecureHTTPServer(HTTPServer):
+class SecureHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTPServer):
     def __init__(self, server_address, HandlerClass):
         SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
+        #danger of decryption because every user has the same private key... Make sure to use diffie hellman for key exchange.
+        ctx.set_options(SSL.OP_SINGLE_DH_USE)
         #server.pem's location (containing the server private key and
         #the server certificate).
         fpem = osinteraction.get_resource_path('server.pem')
@@ -60,6 +63,10 @@ class SecureHTTPServer(HTTPServer):
             self.socket_type))
         self.server_bind()
         self.server_activate()
+
+class ThreadingHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTPServer):
+    pass
+
 
 class DirServeHandler(FileServeHandler):
     def send_head(self):
@@ -111,6 +118,7 @@ def serve_file_on_port(path, port):
     file_serve_path = path
 
     ServerClass = SecureHTTPServer
+ #   ServerClass = ThreadingHTTPServer
     httpd = ServerClass(('', port), HandlerClass)
 
     print "serving at port", port

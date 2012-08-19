@@ -37,7 +37,7 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
         errorCount = 0
         while errorCount < 2:
             try:
-                time.sleep(3)
+                time.sleep(30)
                 client.exec_command('echo ""')
                 if success_callback:
                     success_callback()
