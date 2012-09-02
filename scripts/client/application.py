@@ -59,7 +59,7 @@ class OpenPortItFrame(wx.Frame):
                 self.share_processes[p.pid]=p
 
     def stop_sharing(self,share):
-        print "stopping %s" % share.id
+        logger.info("stopping %s" % share.id)
         self.os_interaction.kill_pid(share.pid)
         self.dbhandler.stop_share(share)
         self.shares_frame.remove_share(share)
@@ -68,7 +68,7 @@ class OpenPortItFrame(wx.Frame):
         self.shares_frame.Show(True)
 
     def onNewShare(self, share):
-        print "adding share %s" % share.id
+        logger.info( "adding share %s" % share.id )
         callbacks = {'stop': self.stop_sharing}
         self.shares_frame.add_share(share, callbacks=callbacks)
         share.success_observers.append(self.onShareSuccess)
@@ -101,10 +101,10 @@ class OpenPortItFrame(wx.Frame):
         try:
             req = urllib2.Request(url)
             response = urllib2.urlopen(req).read()
-            print response
+            logger.debug( response )
             dict = json.loads(response)
             if 'error' in dict:
-                print dict['error']
+                logger.error( dict['error'] )
             else:
                 self.shares_frame.update_account(
                     bytes_this_month = dict['bytes_this_month'],
@@ -112,12 +112,12 @@ class OpenPortItFrame(wx.Frame):
                     max_bytes = dict['max_bytes'],
                 )
         except Exception, detail:
-            print "An error has occurred while communicating the the openport servers. ", detail
+            logger.error( "An error has occurred while communicating the the openport servers. %s" % detail )
             raise detail
             #sys.exit(9)
 
 def main():
-    print 'server pid:%s' % os.getpid()
+    logger.debug('server pid:%s' % os.getpid() )
 
     import argparse
     parser = argparse.ArgumentParser()

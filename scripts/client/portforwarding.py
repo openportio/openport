@@ -30,7 +30,7 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
         client.connect(server, server_ssh_port, username=ssh_user, pkey=pk,
             look_for_keys=False)
     except Exception, e:
-        print '*** Failed to connect to %s:%d: %r' % (server, server_ssh_port, e)
+        logger.error( '*** Failed to connect to %s:%d: %r' % (server, server_ssh_port, e) )
         sys.exit(1)
 
     def keep_alive(client):
@@ -45,7 +45,7 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
                 errorCount+=1
                 if error_callback:
                     error_callback()
-                print ex
+                logger.exception( ex )
         raise PortForwardException('keep_alive stopped')
 
 
@@ -57,7 +57,7 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
 
         keep_alive(client)
     except KeyboardInterrupt:
-        print 'C-c: Port forwarding stopped.'
+        logger.info( 'C-c: Port forwarding stopped.' )
         sys.exit(0)
 
 

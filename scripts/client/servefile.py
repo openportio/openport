@@ -27,7 +27,7 @@ class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     def send_file(self, path):
 		f = None
-		print 'path = ', path
+		logger.debug( 'path = %s' % path )
 		ctype = self.guess_type(path)
 		try:
 			# Always read in binary mode. Opening files in text mode may cause
@@ -121,7 +121,7 @@ def serve_file_on_port(path, port):
  #   ServerClass = ThreadingHTTPServer
     httpd = ServerClass(('', port), HandlerClass)
 
-    print "serving at port", port
+    logger.info( "serving at port %s" % port )
     httpd.serve_forever()
 
 if __name__ == '__main__':

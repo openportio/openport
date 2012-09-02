@@ -159,7 +159,7 @@ def main():
     from dbhandler import DBHandler
 
     def stop_sharing(share):
-        print "stopping %s" % share.id
+        logger.info( "stopping %s" % share.id )
         frame.remove_share(share)
 
     def add_share1(ignore):

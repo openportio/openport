@@ -47,7 +47,7 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
                     globals = Globals()
                     globals.account_id = share.account_id
                     globals.key_id = share.key_id
-                    print 'path: <%s>' % share.filePath
+                    logger.debug( 'path: <%s>' % share.filePath )
 
                     save_request(share)
                     if onNewShare:
@@ -89,14 +89,14 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
             self.wfile.close()
         except Exception, e:
             traceback.print_stack()
-            print e
+            logger.error( e )
 
 def start_server(onNewShareFunc=None):
     try:
         server = HTTPServer(('', 8001), ShareRequestHandler)
         global onNewShare
         onNewShare=onNewShareFunc
-        print 'Starting server'
+        logger.info( 'Starting server' )
         server.serve_forever()
     except KeyboardInterrupt:
         server.socket.close()

@@ -3,9 +3,12 @@ import os
 import platform
 import subprocess
 import sys
+#from loggers import get_logger
 
 
 APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
+
+#logger = get_logger('OsInteraction')
 
 class OsInteraction():
 
@@ -59,7 +62,7 @@ class OsInteraction():
         else:
             command = ['python', os.path.join(app_dir, 'openportit.py')]
         command.extend(['--hide-message', '--no-clipboard', '--tray-port', '8001', filePath])
-        print command
+        #logger.debug( command )
         p = subprocess.Popen( command,
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0)

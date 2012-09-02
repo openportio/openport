@@ -63,12 +63,12 @@ def start_tray_application():
         command = ['start', 'python', 'application.py']
     else:
         command = ['start', quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'application.exe'))]
-    print command
+    logger.debug( command )
     subprocess.call(' '.join(command), shell=True)
 
 def quote_path(path):
     split = path.split(os.sep)
-    print split
+    logger.debug( split )
     quoted = ['"%s"' % dir if ' ' in dir else dir for dir in split]
     return os.sep.join(quoted)
 
@@ -116,10 +116,10 @@ if __name__ == '__main__':
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req).read()
             if response.strip() != 'ok':
-                print response
+                logger.error( response )
         except Exception, detail:
             if not start_tray:
-                print "An error has occured while informing the tray: ", detail
+                logger.error( "An error has occured while informing the tray: %s" % detail )
             else:
                 start_tray_application()
                 sleep(3)
@@ -133,7 +133,7 @@ if __name__ == '__main__':
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req).read()
             if response.strip() != 'ok':
-                print response
+                logger.error( response )
             if response.strip() == 'unknown':
                 logger.critical('this share is no longer known by the tray, exiting')
                 sys.exit(1)
@@ -150,7 +150,7 @@ if __name__ == '__main__':
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req).read()
             if response.strip() != 'ok':
-                print response
+                logger.error( response )
             if response.strip() == 'unknown':
                 logger.critical('this share is no longer known by the tray, exiting')
                 sys.exit(1)
