@@ -39,6 +39,8 @@ class PortForwardResponse():
 def open_port(local_port, restart_session_id = -1, request_server_port=-1, port_request_callback=None, port_forward_success=None, port_forward_error=None):
 
     public_key = get_or_create_public_key()
+
+    logger.debug("requesting port forward - remote port: %s, restart session id: %s" % (request_server_port, restart_session_id))
     dict = request_port( public_key, restart_session_id=restart_session_id, request_server_port=request_server_port )
 
     if 'error' in dict:
@@ -47,6 +49,9 @@ def open_port(local_port, restart_session_id = -1, request_server_port=-1, port_
     logger.debug(dict)
 
     response = PortForwardResponse(dict)
+
+    if request_server_port != '' and request_server_port != response.remote_port:
+        logger.error( 'Did not get requested server port (%s), but got %s' % (request_server_port, response.remote_port))
     response.local_port = local_port
 
     if port_request_callback is not None:

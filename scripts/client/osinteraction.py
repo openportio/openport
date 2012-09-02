@@ -13,12 +13,22 @@ APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
 class OsInteraction():
 
     def copy_to_clipboard(self, text):
-        from Tkinter import Tk
-        r = Tk()
-        r.withdraw()
-        r.clipboard_clear()
-        r.clipboard_append(text.strip())
-        r.destroy()
+        print 'copying to clipboard: %s' % text
+        command = 'echo ' + text.strip() + '| clip'
+        os.system(command)
+
+#        from Tkinter import Tk
+#        r = Tk()
+#        r.withdraw()
+#        r.clipboard_clear()
+#        r.clipboard_append(text.strip())
+#        r.destroy()
+
+#        from Tkinter import Tk
+#        r = Tk()
+#        result = r.selection_get(selection = "CLIPBOARD")
+#        logger.debug('tried to copy %s to clipboard, got %s' % (share.get_link(), result))
+#        r.destroy()
 
     def pid_is_running(self, pid):
         """Check whether pid exists in the current process table."""
