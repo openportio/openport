@@ -91,19 +91,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     def copy_share_to_clipboard(share):
-        from Tkinter import Tk
-
-        r = Tk()
-        r.withdraw()
-        r.clipboard_clear()
-        file_address = share.get_link()
-
-        r.clipboard_append(file_address.strip())
-
-#        result = r.selection_get(selection = "CLIPBOARD")
-#        logger.debug('tried to copy %s to clipboard, got %s' % (file_address, result))
-
-        r.destroy()
+        os_interaction.copy_to_clipboard(share.get_link().strip())
 
     def show_message_box(share):
         wx.MessageBox('You can now download your file(s) from %s\nThis link has been copied to your clipboard.' % (
