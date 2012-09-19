@@ -1,7 +1,7 @@
 import subprocess
 import sys
 from osinteraction import OsInteraction
-from scripts.client.services import crypt_service
+from services import crypt_service
 from share import Share
 from time import sleep
 from loggers import get_logger

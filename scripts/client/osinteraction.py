@@ -13,7 +13,7 @@ APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
 class OsInteraction():
 
     def copy_to_clipboard(self, text):
-        print 'copying to clipboard: %s' % text
+        #print 'copying to clipboard: %s' % text
         command = 'echo ' + text.strip() + '| clip'
         os.system(command)
 

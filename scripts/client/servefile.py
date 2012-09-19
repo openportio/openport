@@ -51,7 +51,7 @@ class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     def check_token(self):
         dict = parse_qs(urlparse(self.path).query)
-        print dict, self.path
+        #print dict, self.path
         if not 't' in dict or len(dict['t']) < 1 or dict['t'][0].strip('/') != _token:
             self.send_error(401, "invalid token")
             return False

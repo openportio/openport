@@ -6,7 +6,7 @@ from wx._gdi import PaintDC
 from osinteraction import OsInteraction
 from globals import Globals
 from loggers import get_logger
-from scripts.client.services import qr_service, image_service
+from services import qr_service, image_service
 
 logger = get_logger(__name__)
 

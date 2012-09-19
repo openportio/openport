@@ -1,4 +1,4 @@
-from scripts.client.pyqrnative.PyQRNative import *
+from ..pyqrnative.PyQRNative import *
 
 
 data = "http://www.baconsalt.com"
