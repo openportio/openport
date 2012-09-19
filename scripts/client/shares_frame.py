@@ -1,7 +1,7 @@
 import os
 import datetime
 import wx
-from wx._core import EVT_PAINT
+from wx._core import EVT_PAINT, EVT_SIZING, EVT_SIZE
 from wx._gdi import PaintDC
 from osinteraction import OsInteraction
 from globals import Globals
@@ -183,6 +183,7 @@ class QrFrame(wx.Frame):
         self.img_panel.display(wx_img)
         self.frame_sizer.Add(self.img_panel, 0, wx.EXPAND|wx.ALL, 0)
         self.img_panel.Layout()
+        self.SetSize((470,480))
         self.Layout()
 
 class ImagePanel(wx.Panel):

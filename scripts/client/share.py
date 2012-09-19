@@ -17,7 +17,7 @@ class Share():
         self.error_observers = []
 
     def get_link(self):
-        return 'https://%s:%s?t=%s' % (self.server, self.server_port, self.token)
+        return 'http://%s:%s?t=%s' % (self.server, self.server_port, self.token)
 
     def as_dict(self):
         return {

@@ -57,6 +57,8 @@ class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             return False
         return True
 
+class ThreadingHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTPServer):
+    pass
 
 class SecureHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTPServer):
     def __init__(self, server_address, HandlerClass):
@@ -170,8 +172,8 @@ def serve_file_on_port(path, port, token):
     global _token
     _token = token
 
-    ServerClass = SecureHTTPServer
- #   ServerClass = ThreadingHTTPServer
+ #   ServerClass = SecureHTTPServer
+    ServerClass = ThreadingHTTPServer
     httpd = ServerClass(('', port), HandlerClass)
 
     logger.info( "serving at port %s" % port )
