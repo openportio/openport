@@ -1,18 +1,20 @@
 from BaseHTTPServer import HTTPServer
-from SocketServer import ThreadingMixIn
+from StringIO import StringIO
+import cgi
+from urlparse import urlparse, parse_qs
 import SimpleHTTPServer
 import SocketServer
 import os
 import posixpath
 import socket
-from sys import argv
 import urllib
 from OpenSSL import SSL
 from loggers import get_logger
 from osinteraction import OsInteraction
 
 
-file_serve_path = None
+_file_serve_path = None
+_token = None
 logger = get_logger(__name__)
 osinteraction = OsInteraction()
 
@@ -23,7 +25,8 @@ class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
 
     def send_head(self):
-        return self.send_file(file_serve_path)
+        if not self.check_token(): return None
+        return self.send_file(_file_serve_path)
 
     def send_file(self, path):
 		f = None
@@ -46,6 +49,14 @@ class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 		self.end_headers()
 		return f
 
+    def check_token(self):
+        dict = parse_qs(urlparse(self.path).query)
+        print dict, self.path
+        if not 't' in dict or len(dict['t']) < 1 or dict['t'][0].strip('/') != _token:
+            self.send_error(401, "invalid token")
+            return False
+        return True
+
 
 class SecureHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTPServer):
     def __init__(self, server_address, HandlerClass):
@@ -64,10 +75,6 @@ class SecureHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTP
         self.server_bind()
         self.server_activate()
 
-class ThreadingHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTPServer):
-    pass
-
-
 class DirServeHandler(FileServeHandler):
     def send_head(self):
         """Common code for GET and HEAD commands.
@@ -78,6 +85,7 @@ class DirServeHandler(FileServeHandler):
         and must be closed by the caller under all circumstances), or
         None, in which case the caller has nothing further to do.
         """
+        if not self.check_token(): return None
         path = self.translate_path(self.path)
         if os.path.isdir(path):
             if not self.path.endswith('/'):
@@ -89,6 +97,48 @@ class DirServeHandler(FileServeHandler):
             return self.list_directory(path)
         else:
             return self.send_file(path)
+
+    def list_directory(self, path):
+        """Helper to produce a directory listing (absent index.html).
+
+        Return value is either a file object, or None (indicating an
+        error).  In either case, the headers are sent, making the
+        interface the same as for send_head().
+
+        """
+        try:
+            list = os.listdir(path)
+        except os.error:
+            self.send_error(404, "No permission to list directory")
+            return None
+        list.sort(key=lambda a: a.lower())
+        f = StringIO()
+        displaypath = cgi.escape(urllib.unquote(self.path))
+        f.write('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">')
+        f.write("<html>\n<title>Directory listing for %s</title>\n" % displaypath)
+        f.write("<body>\n<h2>Directory listing for %s</h2>\n" % displaypath)
+        f.write("<hr>\n<ul>\n")
+        for name in list:
+            fullname = os.path.join(path, name)
+            displayname = linkname = name
+            # Append / for directories or @ for symbolic links
+            if os.path.isdir(fullname):
+                displayname = name + "/"
+                linkname = name + "/"
+            if os.path.islink(fullname):
+                displayname = name + "@"
+                # Note: a link to a directory displays with @ and links with /
+            f.write('<li><a href="%s?t=%s">%s</a>\n'
+            % (urllib.quote(linkname), _token, cgi.escape(displayname)))
+        f.write("</ul>\n<hr>\n</body>\n</html>\n")
+        length = f.tell()
+        f.seek(0)
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.send_header("Content-Length", str(length))
+        self.end_headers()
+        return f
+
 
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.
@@ -103,7 +153,7 @@ class DirServeHandler(FileServeHandler):
         path = posixpath.normpath(urllib.unquote(path))
         words = path.split('/')
         words = filter(None, words)
-        path = file_serve_path
+        path = _file_serve_path
         for word in words:
             drive, word = os.path.splitdrive(word)
             head, word = os.path.split(word)
@@ -112,10 +162,13 @@ class DirServeHandler(FileServeHandler):
         return path
 
 
-def serve_file_on_port(path, port):
+def serve_file_on_port(path, port, token):
     HandlerClass = DirServeHandler if os.path.isdir(path) else FileServeHandler
-    global file_serve_path
-    file_serve_path = path
+    global _file_serve_path
+    _file_serve_path = path
+
+    global _token
+    _token = token
 
     ServerClass = SecureHTTPServer
  #   ServerClass = ThreadingHTTPServer
@@ -125,7 +178,7 @@ def serve_file_on_port(path, port):
     httpd.serve_forever()
 
 if __name__ == '__main__':
-    path = argv[1]
-    port = int(argv[2])
+    path = os.path.dirname(os.path.abspath(__file__))
+    port = 2001
 
-    serve_file_on_port(path, port)
+    serve_file_on_port(path, port, 'token')

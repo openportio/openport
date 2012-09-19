@@ -1,6 +1,6 @@
 class Share():
     def __init__(self, id=-1, filePath='', server_ip='', server_port='', pid=-1, active=0, account_id=-1,
-                 key_id=-1, local_port=-1, session_id=-1):
+                 key_id=-1, local_port=-1, session_id=-1, token=''):
         self.id = id
         self.filePath = filePath
         self.server = server_ip
@@ -11,12 +11,13 @@ class Share():
         self.key_id = key_id
         self.local_port = local_port
         self.session_id = session_id
+        self.token = token
 
         self.success_observers = []
         self.error_observers = []
 
     def get_link(self):
-        return 'https://%s:%s' % (self.server, self.server_port)
+        return 'https://%s:%s?t=%s' % (self.server, self.server_port, self.token)
 
     def as_dict(self):
         return {
@@ -29,7 +30,8 @@ class Share():
             'account_id': self.account_id,
             'key_id': self.key_id,
             'local_port': self.local_port,
-            'session_id': self.session_id
+            'session_id': self.session_id,
+            'token': self.token
         }
 
     def from_dict(self, dict):
@@ -43,6 +45,7 @@ class Share():
         self.key_id = dict['key_id']
         self.local_port = dict['local_port']
         self.session_id = dict['session_id']
+        self.token = dict['token']
 
 
     def notify_success(self):

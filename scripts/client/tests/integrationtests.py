@@ -12,6 +12,8 @@ print sys.path
 import openportit
 from dbhandler import Share
 
+TOKEN = 'tokentest'
+
 class IntegrationTest(unittest.TestCase):
 
     def testStartShare(self):
@@ -35,10 +37,11 @@ class IntegrationTest(unittest.TestCase):
 
             print 'called back, thanks :)'
             self.called_back = True
-            self.share = Share( filePath=path, server_ip=portForwardResponse.server, server_port=portForwardResponse.remote_port)
+            self.share = Share( filePath=path, server_ip=portForwardResponse.server, server_port=portForwardResponse.remote_port, token=TOKEN)
 
         share = Share()
         share.filePath = path
+        share.token = TOKEN
 
         def start_openport_it():
             openportit.open_port_file(share, callback=callback)

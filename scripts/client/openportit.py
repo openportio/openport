@@ -1,6 +1,7 @@
 import subprocess
 import sys
 from osinteraction import OsInteraction
+from scripts.client.services import crypt_service
 from share import Share
 from time import sleep
 from loggers import get_logger
@@ -36,7 +37,7 @@ def open_port_file(share, callback=None):
     import threading
 
     serving_port = get_open_port()
-    thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, serving_port))
+    thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, serving_port, share.token))
     thr.setDaemon(True)
     thr.start()
 
@@ -179,6 +180,7 @@ if __name__ == '__main__':
             inform_tray_app_success(share, args.tray_port)
 
     share = Share()
+    share.token = crypt_service.get_token()
     share.filePath = os.path.join(working_dir, args.filename)
 
     app.MainLoop()
