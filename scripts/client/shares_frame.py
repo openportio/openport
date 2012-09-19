@@ -1,9 +1,12 @@
 import os
 import datetime
 import wx
+from wx._core import EVT_PAINT
+from wx._gdi import PaintDC
 from osinteraction import OsInteraction
 from globals import Globals
 from loggers import get_logger
+from scripts.client.services import qr_service, image_service
 
 logger = get_logger(__name__)
 
@@ -120,6 +123,11 @@ class SharesFrame(wx.Frame):
         stop_sharing_button.Bind(wx.EVT_BUTTON, stop_sharing)
         button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND|wx.ALL, 5)
 
+        def show_qr_evt(evt):
+            self.show_qr(share.filePath, share.get_link())
+        qr_button = wx.Button(button_panel, -1, label="Show QR")
+        qr_button.Bind(wx.EVT_BUTTON, show_qr_evt)
+        button_panel_sizer.Add(qr_button, 0, wx.EXPAND|wx.ALL, 5)
 
         top_panel.SetSizer(top_panel_sizer)
         share_panel_sizer.Add(top_panel, 0, wx.EXPAND, 5)
@@ -134,6 +142,13 @@ class SharesFrame(wx.Frame):
         self.scrolling_window.Layout()
         #self.frame_sizer.Fit(self)
         #self.Layout()
+
+    def show_qr(self, title, data):
+        pil_img = qr_service.get_qr_image(data)
+        wx_img = image_service.PilImageToWxImage(pil_img)
+        qr_frame = QrFrame(None, -1, title)
+        qr_frame.add_img(wx_img)
+        qr_frame.Show(True)
 
     def notify_error(self, share):
         share_panel = self.share_panels[share.local_port]
@@ -154,6 +169,36 @@ class SharesFrame(wx.Frame):
         self.share_panels.pop(share.local_port)
         self.scrolling_window.Layout()
       #  self.Layout()
+
+class QrFrame(wx.Frame):
+    def __init__(self, parent, id, title):
+        wx.Frame.__init__(self, parent, -1, title,
+            style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
+
+    def add_img(self, wx_img):
+        self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
+
+
+        self.img_panel = ImagePanel(self, -1)
+        self.img_panel.display(wx_img)
+        self.frame_sizer.Add(self.img_panel, 0, wx.EXPAND|wx.ALL, 0)
+        self.img_panel.Layout()
+        self.Layout()
+
+class ImagePanel(wx.Panel):
+    def __init__(self, parent, id):
+        wx.Panel.__init__(self, parent, id)
+        self.image = None
+        EVT_PAINT(self, self.OnPaint)
+
+    def display(self, image):
+        self.image = image
+        self.Refresh(True)
+
+    def OnPaint(self, evt):
+        dc = PaintDC(self)
+        if self.image:
+            dc.DrawBitmap(self.image.ConvertToBitmap(), 0,0)
 
 def main():
     from dbhandler import DBHandler
