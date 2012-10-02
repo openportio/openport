@@ -7,6 +7,7 @@ import select
 from loggers import get_logger
 
 logger = get_logger(__name__)
+clients = {}
 
 class PortForwardException(Exception):
     pass
@@ -16,6 +17,10 @@ class IgnoreUnknownHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     def missing_host_key(self, client, hostname, key):
         pass
 
+def kill_client(server_port):
+    print clients
+    clients[server_port].close()
+
 def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, public_key_file, private_key_file, error_callback=None, success_callback=None):
     """This will connect to the server and start port forwarding to the given port of the localhost"""
     client = paramiko.SSHClient()
@@ -23,6 +28,8 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
     client.set_missing_host_key_policy( IgnoreUnknownHostKeyPolicy() )
 
     logger.debug('Connecting to ssh host %s:%d ...' % (server, server_ssh_port))
+    global clients
+    clients[remote_port] = client
 
     pk = paramiko.RSAKey(filename=private_key_file)
 
@@ -37,10 +44,10 @@ def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, pub
         errorCount = 0
         while errorCount < 2:
             try:
-                time.sleep(30)
                 client.exec_command('echo ""')
                 if success_callback:
                     success_callback()
+                time.sleep(30)
             except Exception, ex:
                 errorCount+=1
                 if error_callback:

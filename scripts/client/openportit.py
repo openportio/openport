@@ -1,11 +1,16 @@
 import subprocess
 import sys
 from osinteraction import OsInteraction
+from scripts.client.portforwarding import forward_port
 from services import crypt_service
 from share import Share
 from time import sleep
 from loggers import get_logger
 import urllib, urllib2
+from keyhandling import get_or_create_public_key, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
+
+SERVER_SSH_PORT = 22
+SERVER_SSH_USER = 'open'
 
 if __name__ == '__main__':
     import wx
@@ -36,21 +41,44 @@ def get_open_port():
 def open_port_file(share, callback=None):
     import threading
 
-    serving_port = get_open_port()
-    thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, serving_port, share.token))
+    local_port = get_open_port()
+    thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, local_port, share.token))
     thr.setDaemon(True)
     thr.start()
 
     from time import sleep
     while True:
         try:
-            open_port(
-                serving_port,
+            response = open_port(
+                local_port,
                 request_server_port=share.server_port,
-                restart_session_id=share.session_id,
-                port_request_callback = callback,
-                port_forward_error = share.notify_error,
-                port_forward_success = share.notify_success
+                restart_session_id=share.session_id
+            )
+
+            share.server = response.server
+            share.server_port = response.remote_port
+            share.pid = os.getpid()
+            share.local_port = response.local_port
+            share.account_id = response.account_id
+            share.key_id = response.key_id
+            share.session_id = response.session_id
+
+            if callback is not None:
+                import threading
+                thr = threading.Thread(target=callback, args=(share,))
+                thr.setDaemon(True)
+                thr.start()
+
+            forward_port(
+                local_port,
+                response.remote_port,
+                response.server,
+                SERVER_SSH_PORT,
+                SERVER_SSH_USER,
+                PUBLIC_KEY_FILE,
+                PRIVATE_KEY_FILE,
+                success_callback=share.notify_success,
+                error_callback=share.notify_error
             )
             sleep(10)
         except Exception:
@@ -149,15 +177,11 @@ if __name__ == '__main__':
         except Exception, detail:
             logger.exception(detail)
 
-    def callback(portForwardResponse):
-        share.server = portForwardResponse.server
-        share.server_port = portForwardResponse.remote_port
-        share.pid = os.getpid()
-        share.local_port = portForwardResponse.local_port
-        share.account_id = portForwardResponse.account_id
-        share.key_id = portForwardResponse.key_id
-        share.session_id = portForwardResponse.session_id
-
+    first_time = True
+    def callback(ignore):
+        if not first_time:
+            return
+        first_time = False
         if args.tray_port > 0:
             inform_tray_app(share, args.tray_port)
 

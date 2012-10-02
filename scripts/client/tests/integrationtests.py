@@ -5,6 +5,9 @@ import os
 import sys
 import threading
 import urllib
+from scripts.client import portforwarding, openport
+from scripts.client.keyhandling import get_or_create_public_key
+from scripts.client.openport_win import PortForwardResponse
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 print sys.path
@@ -18,30 +21,31 @@ class IntegrationTest(unittest.TestCase):
 
     def testStartShare(self):
         path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
-        self.start_sharing(path)
-        temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(self.share.filePath))
-        self.downloadAndCheckFile(self.share.get_link(), self.share.filePath, temp_file)
+        share = self.get_share(path)
+        self.start_sharing(share)
+        temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
+        self.downloadAndCheckFile(share, temp_file)
 
-    def start_sharing(self, path):
-        self.called_back = False
-        self.share = None
-        def callback(portForwardResponse):
-
-            print (portForwardResponse.server, portForwardResponse.remote_port, portForwardResponse.account_id, portForwardResponse.key_id)
-            self.assertEquals('www.openport.be', portForwardResponse.server)
-            self.assertTrue(portForwardResponse.remote_port>= 2000)
-            self.assertTrue(portForwardResponse.remote_port<= 51000)
-
-            self.assertTrue(portForwardResponse.account_id > 0)
-            self.assertTrue(portForwardResponse.key_id > 0)
-
-            print 'called back, thanks :)'
-            self.called_back = True
-            self.share = Share( filePath=path, server_ip=portForwardResponse.server, server_port=portForwardResponse.remote_port, token=TOKEN)
-
+    def get_share(self, path):
         share = Share()
         share.filePath = path
         share.token = TOKEN
+        return share
+
+    def start_sharing(self, share):
+        self.called_back = False
+        def callback(share):
+
+            print share.as_dict()
+            self.assertEquals('www.openport.be', share.server)
+            self.assertTrue(share.server_port>= 2000)
+            self.assertTrue(share.server_port<= 51000)
+
+            self.assertTrue(share.account_id > 0)
+            self.assertTrue(share.key_id > 0)
+
+            print 'called back, thanks :)'
+            self.called_back = True
 
         def start_openport_it():
             openportit.open_port_file(share, callback=callback)
@@ -54,25 +58,28 @@ class IntegrationTest(unittest.TestCase):
             i+=1
             sleep(1)
         self.assertTrue(self.called_back)
+        return share
 
 
-    def downloadAndCheckFile(self, url, ref_file_path, temp_file):
+    def downloadAndCheckFile(self, share, temp_file):
         try:
             os.remove(temp_file)
         except Exception:
             pass
         self.assertFalse(os.path.exists(temp_file))
-        print self.share.get_link()
+        url = share.get_link()
+        print 'downloading %s' % url
         urllib.urlretrieve (url, temp_file)
         self.assertTrue(os.path.exists(temp_file))
-        self.assertTrue(filecmp.cmp(ref_file_path, temp_file))
+        self.assertTrue(filecmp.cmp(share.filePath, temp_file))
         os.remove(temp_file)
 
 
     def testMultiThread(self):
         path = os.path.join(os.path.dirname(__file__), 'testfiles/WALL_DANGER_SOFTWARE.jpg')
-        self.start_sharing(path)
-        temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(self.share.filePath))
+        share = self.get_share(path)
+        self.start_sharing(share)
+        temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
         temp_file_path_1 = temp_file  + '1'
         temp_file_path_2 = temp_file  + '2'
 
@@ -80,7 +87,7 @@ class IntegrationTest(unittest.TestCase):
 
         def download(temp_file_path):
             try:
-                self.downloadAndCheckFile(self.share.get_link(), self.share.filePath, temp_file_path)
+                self.downloadAndCheckFile(share, temp_file_path)
             except Exception, e:
                 self.errors.append(e)
 
@@ -108,4 +115,27 @@ class IntegrationTest(unittest.TestCase):
 
 
         self.assertEqual(0, len(self.errors))
+
+    def testSamePort(self):
+        path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
+        share = self.get_share(path)
+        self.success_called_back = False
+        def success_callback(share):
+            self.success_called_back = True
+            print 'port forwarding success is called'
+        share.success_observers.append(success_callback)
+
+        self.start_sharing(share)
+
+        i = 0
+        while i < 1000 and not self.success_called_back:
+            i += 1
+            sleep(0.01)
+        self.assertTrue(self.success_called_back)
+        port = share.server_port
+        portforwarding.kill_client(port)
+        sleep(3)
+        dict = openport.request_port(key=get_or_create_public_key(), restart_session_id=share.session_id, request_server_port=port)
+        response = PortForwardResponse(dict)
+        self.assertEqual(port, response.remote_port)
 

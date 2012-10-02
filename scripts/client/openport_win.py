@@ -4,15 +4,13 @@ import sys
 import time
 import wx
 from sys import argv
-from keyhandling import get_or_create_public_key, PRIVATE_KEYFILE, PUBLIC_KEYFILE
+from keyhandling import get_or_create_public_key, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
 from portforwarding import forward_port
 from loggers import get_logger
 
 from openport import request_port
 
 logger = get_logger('openport_win')
-SERVER_SSH_PORT = 22
-SERVER_SSH_USER = 'open'
 
 class PortForwardResponse():
     def __init__(self, server='', remote_port=-1, message='', account_id=-1, key_id=-1, session_id=-1, local_port=-1):
@@ -36,7 +34,7 @@ class PortForwardResponse():
         self.session_id = dict['session_id']
 
 
-def open_port(local_port, restart_session_id = -1, request_server_port=-1, port_request_callback=None, port_forward_success=None, port_forward_error=None):
+def open_port(local_port, restart_session_id = -1, request_server_port=-1):
 
     public_key = get_or_create_public_key()
 
@@ -54,24 +52,7 @@ def open_port(local_port, restart_session_id = -1, request_server_port=-1, port_
         logger.error( 'Did not get requested server port (%s), but got %s' % (request_server_port, response.remote_port))
     response.local_port = local_port
 
-    if port_request_callback is not None:
-        import threading
-        thr = threading.Thread(target=port_request_callback, args=(response,))
-        thr.setDaemon(True)
-        thr.start()
-    forward_port(
-        local_port,
-        response.remote_port,
-        response.server,
-        SERVER_SSH_PORT,
-        SERVER_SSH_USER,
-        PUBLIC_KEYFILE,
-        PRIVATE_KEYFILE,
-        success_callback=port_forward_success,
-        error_callback=port_forward_error
-
-    )
-    time.sleep(60)
+    return response
 
 if __name__ == '__main__':
 	port = int(argv[1])

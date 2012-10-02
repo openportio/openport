@@ -2,14 +2,14 @@ import os
 import paramiko
 
 HOME_DIR = os.path.expanduser('~')
-PRIVATE_KEYFILE = os.path.join(HOME_DIR, '.ssh', 'id_rsa')
-PUBLIC_KEYFILE =  os.path.join(HOME_DIR, '.ssh', 'id_rsa.pub')
+PRIVATE_KEY_FILE = os.path.join(HOME_DIR, '.ssh', 'id_rsa')
+PUBLIC_KEY_FILE =  os.path.join(HOME_DIR, '.ssh', 'id_rsa.pub')
 
 def get_or_create_public_key():
-    if not os.path.exists(PRIVATE_KEYFILE) or not os.path.exists(PUBLIC_KEYFILE):
-        write_new_key(PRIVATE_KEYFILE, PUBLIC_KEYFILE)
+    if not os.path.exists(PRIVATE_KEY_FILE) or not os.path.exists(PUBLIC_KEY_FILE):
+        write_new_key(PRIVATE_KEY_FILE, PUBLIC_KEY_FILE)
 
-    return open(PUBLIC_KEYFILE, 'r').readline()
+    return open(PUBLIC_KEY_FILE, 'r').readline()
 
 def write_new_key(private_key_filename, public_key_filename):
 #	print 'writing keys: %s %s' %( private_key_filename, public_key_filename)
