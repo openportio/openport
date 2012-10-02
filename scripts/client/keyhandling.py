@@ -21,5 +21,7 @@ def write_new_key(private_key_filename, public_key_filename):
     pk = paramiko.RSAKey(filename=private_key_filename)
     if not os.path.exists( os.path.dirname(public_key_filename) ):
         os.makedirs( os.path.dirname(public_key_filename), 0700)
-    o = open(public_key_filename ,'w').write("ssh-rsa " +pk.get_base64()+ " \n")
+    import getpass
+    username = getpass.getuser()
+    o = open(public_key_filename ,'w').write("ssh-rsa %s %s \n" % (pk.get_base64(), username))
 
