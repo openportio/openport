@@ -1,13 +1,13 @@
 import subprocess
 import sys
 from osinteraction import OsInteraction
-from scripts.client.portforwarding import forward_port
+from portforwarding import forward_port
 from services import crypt_service
 from share import Share
 from time import sleep
 from loggers import get_logger
 import urllib, urllib2
-from keyhandling import get_or_create_public_key, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
+from keyhandling import PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
 
 SERVER_SSH_PORT = 22
 SERVER_SSH_USER = 'open'
@@ -179,6 +179,7 @@ if __name__ == '__main__':
 
     first_time = True
     def callback(ignore):
+        global first_time
         if not first_time:
             return
         first_time = False
