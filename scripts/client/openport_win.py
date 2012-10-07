@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
 import sys
-import time
 import wx
 from sys import argv
-from keyhandling import get_or_create_public_key, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
-from portforwarding import forward_port
+from keyhandling import get_or_create_public_key
 from loggers import get_logger
 
 from openport import request_port
@@ -20,7 +18,6 @@ class PortForwardResponse():
         self.account_id = account_id
         self.key_id = key_id
         self.session_id = session_id
-        self.local_port = local_port
 
     def __init__(self,dict):
         self.from_dict(dict)
@@ -50,7 +47,6 @@ def open_port(local_port, restart_session_id = -1, request_server_port=-1):
 
     if request_server_port != '' and request_server_port != response.remote_port:
         logger.error( 'Did not get requested server port (%s), but got %s' % (request_server_port, response.remote_port))
-    response.local_port = local_port
 
     return response
 

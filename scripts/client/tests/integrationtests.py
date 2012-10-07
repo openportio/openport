@@ -5,7 +5,7 @@ import os
 import sys
 import threading
 import urllib
-from scripts.client import portforwarding, openport
+from scripts.client import openport, tryouts
 from scripts.client.keyhandling import get_or_create_public_key
 from scripts.client.openport_win import PortForwardResponse
 
@@ -128,13 +128,16 @@ class IntegrationTest(unittest.TestCase):
         self.start_sharing(share)
 
         i = 0
-        while i < 1000 and not self.success_called_back:
+        while i < 10000 and not self.success_called_back:
             i += 1
             sleep(0.01)
+        print "escaped at ",i
         self.assertTrue(self.success_called_back)
-        port = share.server_port
-        portforwarding.kill_client(port)
-        sleep(3)
+        port = share.local_port
+
+        print openportit.clients
+        openportit.clients[port].stop()
+        sleep(30)
         dict = openport.request_port(key=get_or_create_public_key(), restart_session_id=share.session_id, request_server_port=port)
         response = PortForwardResponse(dict)
         self.assertEqual(port, response.remote_port)

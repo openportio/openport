@@ -1,7 +1,7 @@
 import subprocess
 import sys
 from osinteraction import OsInteraction
-from portforwarding import forward_port
+from portforwarding import PortForwardingService
 from services import crypt_service
 from share import Share
 from time import sleep
@@ -11,6 +11,7 @@ from keyhandling import PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
 
 SERVER_SSH_PORT = 22
 SERVER_SSH_USER = 'open'
+clients = {}
 
 if __name__ == '__main__':
     import wx
@@ -58,7 +59,7 @@ def open_port_file(share, callback=None):
             share.server = response.server
             share.server_port = response.remote_port
             share.pid = os.getpid()
-            share.local_port = response.local_port
+            share.local_port = local_port
             share.account_id = response.account_id
             share.key_id = response.key_id
             share.session_id = response.session_id
@@ -69,7 +70,7 @@ def open_port_file(share, callback=None):
                 thr.setDaemon(True)
                 thr.start()
 
-            forward_port(
+            portForwardingService = PortForwardingService(
                 local_port,
                 response.remote_port,
                 response.server,
@@ -78,13 +79,14 @@ def open_port_file(share, callback=None):
                 PUBLIC_KEY_FILE,
                 PRIVATE_KEY_FILE,
                 success_callback=share.notify_success,
-                error_callback=share.notify_error
-            )
-            sleep(10)
-        except Exception:
-            sleep(10)
-            pass #try again
+                error_callback=share.notify_error)
 
+            clients[local_port] = portForwardingService
+            portForwardingService.start() #hangs
+        except Exception as e:
+            logger.error(e)
+        finally:
+            sleep(10)
 
 def start_tray_application():
     #todo: linux/mac

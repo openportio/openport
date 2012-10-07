@@ -7,7 +7,6 @@ import select
 from loggers import get_logger
 
 logger = get_logger(__name__)
-clients = {}
 
 class PortForwardException(Exception):
     pass
@@ -17,97 +16,115 @@ class IgnoreUnknownHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     def missing_host_key(self, client, hostname, key):
         pass
 
-def kill_client(server_port):
-    print clients
-    clients[server_port].close()
+class PortForwardingService:
 
-def forward_port(local_port, remote_port, server, server_ssh_port, ssh_user, public_key_file, private_key_file, error_callback=None, success_callback=None):
-    """This will connect to the server and start port forwarding to the given port of the localhost"""
-    client = paramiko.SSHClient()
-    client.load_system_host_keys()
-    client.set_missing_host_key_policy( IgnoreUnknownHostKeyPolicy() )
+    def __init__(self, local_port, remote_port, server, server_ssh_port, ssh_user, public_key_file, private_key_file, error_callback=None, success_callback=None):
+        self.local_port       = local_port
+        self.remote_port      = remote_port
+        self.server           = server
+        self.server_ssh_port  = server_ssh_port
+        self.ssh_user         = ssh_user
+        self.public_key_file  = public_key_file
+        self.private_key_file = private_key_file
+        self.error_callback   = error_callback
+        self.success_callback = success_callback
+        self.client = paramiko.SSHClient()
+        self.client.set_missing_host_key_policy( IgnoreUnknownHostKeyPolicy() )
 
-    logger.debug('Connecting to ssh host %s:%d ...' % (server, server_ssh_port))
-    global clients
-    clients[remote_port] = client
+    def stop(self):
+        self.client.close()
 
-    pk = paramiko.RSAKey(filename=private_key_file)
+    def start(self):
+        """This will connect to the server and start port forwarding to the given port of the localhost"""
+        self.client.load_system_host_keys()
 
-    try:
-        client.connect(server, server_ssh_port, username=ssh_user, pkey=pk,
-            look_for_keys=False)
-    except Exception, e:
-        logger.error( '*** Failed to connect to %s:%d: %r' % (server, server_ssh_port, e) )
-        sys.exit(1)
+        logger.debug('Connecting to ssh host %s:%d ...' % (self.server, self.server_ssh_port))
 
-    def keep_alive(client):
+        pk = paramiko.RSAKey(filename=self.private_key_file)
+
+        try:
+            self.client.connect(self.server, self.server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
+        except Exception, e:
+            logger.error( '*** Failed to connect to %s:%d: %r' % (self.server, self.server_ssh_port, e) )
+            return
+
+        try:
+            self.portForwardingRequestException = None
+            thr = threading.Thread(target=self._forward_local_port)
+            thr.setDaemon(True)
+            thr.start()
+            logger.info('Now forwarding remote port %s:%d to localhost:%d...' % (self.server, self.remote_port, self.local_port))
+
+            self.keep_alive()
+        except KeyboardInterrupt:
+            logger.info( 'C-c: Port forwarding stopped.' )
+            sys.exit(0)
+
+    def keep_alive(self):
         errorCount = 0
         while errorCount < 2:
+            if self.portForwardingRequestException is not None:
+                if self.error_callback:
+                    self.error_callback()
+                raise PortForwardException('port forwarding thread gave an exception...', self.portForwardingRequestException)
             try:
-                client.exec_command('echo ""')
-                if success_callback:
-                    success_callback()
+                self.client.exec_command('echo ""')
+                if self.success_callback:
+                    self.success_callback()
                 time.sleep(30)
             except Exception, ex:
                 errorCount+=1
-                if error_callback:
-                    error_callback()
+                if self.error_callback:
+                    self.error_callback()
                 logger.exception( ex )
         raise PortForwardException('keep_alive stopped')
 
+    def _forward_local_port(self):
+        try:
+            transport = self.client.get_transport()
+            transport.set_keepalive(30)
+            logger.info('requesting forward from remote port %s' % (self.remote_port,))
+            transport.request_port_forward('', self.remote_port)
+            while True:
+                chan = transport.accept(1000)
+                if chan is None:
+                    continue
+                thr = threading.Thread(target=self._port_forward_handler, args=(chan,))
+                thr.setDaemon(True)
+                thr.start()
+        except Exception as e:
+            self.portForwardingRequestException = e
 
-    try:
-        thr = threading.Thread(target=reverse_forward_tunnel, args=(local_port, remote_port, client.get_transport()))
-        thr.setDaemon(True)
-        thr.start()
-        logger.info('Now forwarding remote port %s:%d to localhost:%d...' % (server, remote_port, local_port))
+    def _port_forward_handler(self, chan):
+        """
+        A handler to handle the incomming traffic.
+        This will connect the channel to the localhost at the given port.
+        """
+        local_server = 'localhost'
+        logger.info('Opening socket %s:%d'% (local_server, self.local_port))
+        sock = socket.socket()
+        try:
+            sock.connect((local_server, self.local_port))
+        except Exception, e:
+            logger.error('Forwarding request to %s:%d failed: %r' % (local_server, self.local_port, e))
+            return
 
-        keep_alive(client)
-    except KeyboardInterrupt:
-        logger.info( 'C-c: Port forwarding stopped.' )
-        sys.exit(0)
-
-
-def port_forward_handler(chan, localhost, local_port):
-    """
-    A handler to handle the incomming traffic.
-    This will connect the channel to the localhost at the given port.
-    """
-
-    logger.info('Opening socket %s:%d'% (localhost, local_port))
-    sock = socket.socket()
-    try:
-        sock.connect((localhost, local_port))
-    except Exception, e:
-        logger.error('Forwarding request to %s:%d failed: %r' % (localhost, local_port, e))
-        return
-
-    logger.info('Connected!  Tunnel open %r -> %r -> %r' % (chan.origin_addr,
-                                                        chan.getpeername(), (localhost, local_port)))
-    while True:
-        r, w, x = select.select([sock, chan], [], [])
-        if sock in r:
-            data = sock.recv(1024)
-            if not len(data):
-                break
-            chan.send(data)
-        if chan in r:
-            data = chan.recv(1024)
-            if not len(data):
-                break
-            sock.send(data)
-    chan.close()
-    sock.close()
-    logger.info('Tunnel closed from %r' % (chan.origin_addr,))
+        logger.info('Connected!  Tunnel open %r -> %r -> %r' % (chan.origin_addr,
+                                                            chan.getpeername(), (local_server, self.local_port)))
+        while True:
+            r, w, x = select.select([sock, chan], [], [])
+            if sock in r:
+                data = sock.recv(1024)
+                if not len(data):
+                    break
+                chan.send(data)
+            if chan in r:
+                data = chan.recv(1024)
+                if not len(data):
+                    break
+                sock.send(data)
+        chan.close()
+        sock.close()
+        logger.info('Tunnel closed from %r' % (chan.origin_addr,))
 
 
-def reverse_forward_tunnel(local_port, remote_port, transport):
-    transport.set_keepalive(30)
-    transport.request_port_forward('', remote_port)
-    while True:
-        chan = transport.accept(1000)
-        if chan is None:
-            continue
-        thr = threading.Thread(target=port_forward_handler, args=(chan, 'localhost', local_port))
-        thr.setDaemon(True)
-        thr.start()
