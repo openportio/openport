@@ -80,11 +80,13 @@ def startSession(server_ip, server_port, local_port, message):
 
 if __name__ == '__main__':
     local_port=argv[1]
+    request_server_port = argv[2] if len(argv) >= 4 else -1
+    restart_session_id = argv[3] if len(argv) >= 4 else -1
     signal.signal(signal.SIGTERM, handleSigTERM)
     signal.signal(signal.SIGINT, handleSigTERM)
 
     key = getPublicKey()
-    dict = request_port(key)
+    dict = request_port(key, restart_session_id=restart_session_id, request_server_port=request_server_port)
     if 'error' in dict:
         print dict['error']
         sys.exit(9)
