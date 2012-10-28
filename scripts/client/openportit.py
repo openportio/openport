@@ -53,7 +53,7 @@ def open_port_file(share, callback=None):
             response = open_port(
                 local_port,
                 request_server_port=share.server_port,
-                restart_session_id=share.session_id
+                restart_session_token=share.server_session_token
             )
 
             share.server = response.server
@@ -62,7 +62,7 @@ def open_port_file(share, callback=None):
             share.local_port = local_port
             share.account_id = response.account_id
             share.key_id = response.key_id
-            share.session_id = response.session_id
+            share.server_session_token = response.session_token
 
             if callback is not None:
                 import threading
@@ -87,6 +87,11 @@ def open_port_file(share, callback=None):
             logger.error(e)
         finally:
             sleep(10)
+
+def forward_port(port):
+    open_port(port)
+    forward_port(port)
+
 
 def start_tray_application():
     #todo: linux/mac

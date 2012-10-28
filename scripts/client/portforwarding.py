@@ -40,6 +40,7 @@ class PortForwardingService:
 
         logger.debug('Connecting to ssh host %s:%d ...' % (self.server, self.server_ssh_port))
 
+ //       paramiko.util.log_to_file('c:/users/jan/paramikofilename.log')
         pk = paramiko.RSAKey(filename=self.private_key_file)
 
         try:
@@ -71,7 +72,7 @@ class PortForwardingService:
                 self.client.exec_command('echo ""')
                 if self.success_callback:
                     self.success_callback()
-                time.sleep(30)
+                time.sleep(10)
             except Exception, ex:
                 errorCount+=1
                 if self.error_callback:

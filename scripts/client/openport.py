@@ -16,7 +16,7 @@ except ImportError:
         print 'You need python 2.6 or simplejson to run this application.'
         sys.exit(1)
 
-def request_port(key, url='http://www.openport.be/post', restart_session_id = -1, request_server_port=-1):
+def request_port(key, url='http://www.openport.be/post', restart_session_token = '', request_server_port=-1):
     """
     Requests a port on the server using the openPort protocol
     return a tuple with ( server_ip, server_port, message )
@@ -24,7 +24,7 @@ def request_port(key, url='http://www.openport.be/post', restart_session_id = -1
     import urllib, urllib2
 
     try:
-        data = urllib.urlencode({'public_key': key, 'request_port': request_server_port, 'restart_session_id': restart_session_id})
+        data = urllib.urlencode({'public_key': key, 'request_port': request_server_port, 'restart_session_token': restart_session_token})
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
         dict = json.loads(response)
@@ -81,12 +81,12 @@ def startSession(server_ip, server_port, local_port, message):
 if __name__ == '__main__':
     local_port=argv[1]
     request_server_port = argv[2] if len(argv) >= 4 else -1
-    restart_session_id = argv[3] if len(argv) >= 4 else -1
+    restart_session_token = argv[3] if len(argv) >= 4 else -1
     signal.signal(signal.SIGTERM, handleSigTERM)
     signal.signal(signal.SIGINT, handleSigTERM)
 
     key = getPublicKey()
-    dict = request_port(key, restart_session_id=restart_session_id, request_server_port=request_server_port)
+    dict = request_port(key, restart_session_token=restart_session_token, request_server_port=request_server_port)
     if 'error' in dict:
         print dict['error']
         sys.exit(9)
