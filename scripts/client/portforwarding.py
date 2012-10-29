@@ -40,7 +40,7 @@ class PortForwardingService:
 
         logger.debug('Connecting to ssh host %s:%d ...' % (self.server, self.server_ssh_port))
 
- //       paramiko.util.log_to_file('c:/users/jan/paramikofilename.log')
+ #          paramiko.util.log_to_file('c:/users/jan/paramikofilename.log')
         pk = paramiko.RSAKey(filename=self.private_key_file)
 
         try:

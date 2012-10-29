@@ -138,7 +138,11 @@ class IntegrationTest(unittest.TestCase):
         print openportit.clients
         openportit.clients[port].stop()
         sleep(30)
-        dict = openport.request_port(key=get_or_create_public_key(), restart_session_token =share.server_session_token, request_server_port=port)
+        dict = openport.request_port(
+            key=get_or_create_public_key(),
+            restart_session_token=share.server_session_token,
+            request_server_port=port
+        )
         response = PortForwardResponse(dict)
         self.assertEqual(port, response.remote_port)
 
