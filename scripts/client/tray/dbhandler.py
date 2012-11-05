@@ -1,7 +1,7 @@
 import os
 from pysqlite2 import dbapi2 as sqlite
-from openportit import Share
-from osinteraction import OsInteraction
+from common.share import Share
+from services.osinteraction import OsInteraction
 
 class DBHandler():
 

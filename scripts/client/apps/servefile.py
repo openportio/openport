@@ -9,8 +9,8 @@ import posixpath
 import socket
 import urllib
 from OpenSSL import SSL
-from loggers import get_logger
-from osinteraction import OsInteraction
+from services.logger_service import get_logger
+from services.osinteraction import OsInteraction
 
 
 _file_serve_path = None

@@ -5,22 +5,22 @@ import os
 import sys
 import threading
 import urllib
-from scripts.client import openport, tryouts
-from scripts.client.keyhandling import get_or_create_public_key
-from scripts.client.openport_win import PortForwardResponse
+from apps import openport
+from apps.keyhandling import get_or_create_public_key
+from apps.openport_win import PortForwardResponse
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 print sys.path
 
-import openportit
-from dbhandler import Share
+import apps.openportit
+from tray.dbhandler import Share
 
 TOKEN = 'tokentest'
 
 class IntegrationTest(unittest.TestCase):
 
     def testStartShare(self):
-        path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
+        path = os.path.join(os.path.dirname(__file__), '../tray/logo-base.png')
         share = self.get_share(path)
         self.start_sharing(share)
         temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
@@ -48,13 +48,13 @@ class IntegrationTest(unittest.TestCase):
             self.called_back = True
 
         def start_openport_it():
-            openportit.open_port_file(share, callback=callback)
+            apps.openportit.open_port_file(share, callback=callback)
         thr = threading.Thread(target=start_openport_it)
         thr.setDaemon(True)
         thr.start()
 
         i = 0
-        while i < 10 and not self.called_back:
+        while i < 1000 and not self.called_back:
             i+=1
             sleep(1)
         self.assertTrue(self.called_back)
@@ -129,15 +129,15 @@ class IntegrationTest(unittest.TestCase):
         self.start_sharing(share)
 
         i = 0
-        while i < 10000 and not self.success_called_back:
+        while i < 10 and not self.success_called_back:
             i += 1
             sleep(0.01)
         print "escaped at ",i
         self.assertTrue(self.success_called_back)
         port = share.local_port
 
-        print openportit.clients
-        openportit.clients[port].stop()
+        print apps.openportit.clients
+        apps.openportit.clients[port].stop()
         sleep(30)
         dict = openport.request_port(
             key=get_or_create_public_key(),

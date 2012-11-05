@@ -1,11 +1,11 @@
 import os
 import datetime
 import wx
-from wx._core import EVT_PAINT, EVT_SIZING, EVT_SIZE
+from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
-from osinteraction import OsInteraction
-from globals import Globals
-from loggers import get_logger
+from services.osinteraction import OsInteraction
+from tray.globals import Globals
+from services.logger_service import get_logger
 from services import qr_service, image_service
 
 logger = get_logger(__name__)
@@ -202,7 +202,7 @@ class ImagePanel(wx.Panel):
             dc.DrawBitmap(self.image.ConvertToBitmap(), 0,0)
 
 def main():
-    from dbhandler import DBHandler
+    from openporttray.dbhandler import DBHandler
 
     def stop_sharing(share):
         logger.info( "stopping %s" % share.id )

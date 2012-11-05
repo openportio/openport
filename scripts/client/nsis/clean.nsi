@@ -49,8 +49,8 @@ BrandingText "http://www.openport.net/"
 Section # hidden section
 	setOutPath $INSTDIR
 	file /r ..\dist\*.* 
-	file ..\logo-base.png
-	file ..\server.pem
+	file ..\tray\logo-base.png
+	file ..\apps\server.pem
 	#messageBox MB_OK "instdir: $INSTDIR"
 	WriteRegStr HKCR "*\shell\${APPNAME}\command" "" "$INSTDIR\${MAIN_EXE} $\"%1$\""
 	WriteRegStr HKCR "Directory\shell\${APPNAME}\command" "" "$INSTDIR\${MAIN_EXE} $\"%1$\""

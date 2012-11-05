@@ -5,8 +5,8 @@ import traceback
 import wx
 from dbhandler import DBHandler
 from globals import Globals
-from openportit import Share
-from loggers import get_logger
+from common.share import Share
+from services.logger_service import get_logger
 
 logger = get_logger('server')
 

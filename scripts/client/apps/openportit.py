@@ -1,13 +1,16 @@
 import subprocess
 import sys
-from osinteraction import OsInteraction
-from portforwarding import PortForwardingService
-from services import crypt_service
-from share import Share
-from time import sleep
-from loggers import get_logger
+import os
 import urllib, urllib2
-from keyhandling import PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
+from time import sleep
+
+print os.getcwd()
+from services.osinteraction import OsInteraction
+from apps.portforwarding import PortForwardingService
+from services import crypt_service
+from common.share import Share
+from services.logger_service import get_logger
+from apps.keyhandling import PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
 
 SERVER_SSH_PORT = 22
 SERVER_SSH_USER = 'open'
@@ -22,11 +25,13 @@ import os
 from sys import argv
 
 working_dir = os.getcwd()
-os.chdir(os.path.realpath(os.path.dirname(argv[0])))
-from servefile import serve_file_on_port
-from openport_win import open_port
+print working_dir
+#os.chdir(os.path.realpath(os.path.dirname(argv[0])))
+print os.getcwd()
+from apps.servefile import serve_file_on_port
+from apps.openport_win import open_port
 
-logger = get_logger('openportit')
+logger = get_logger('apps')
 
 def get_open_port():
     import socket
@@ -96,9 +101,9 @@ def forward_port(port):
 def start_tray_application():
     #todo: linux/mac
     if sys.argv[0][-3:] == '.py':
-        command = ['start', 'python', 'openporttray.py']
+        command = ['start', 'python', '-m', 'tray.openporttray']
     else:
-        command = ['start', quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'application.exe'))]
+        command = ['start', quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openporttray.exe'))]
     logger.debug( command )
     subprocess.call(' '.join(command), shell=True)
 
@@ -113,8 +118,8 @@ if __name__ == '__main__':
 
     os_interaction = OsInteraction()
     if os_interaction.is_compiled():
-        sys.stdout = open(os_interaction.get_app_data_path('openportit.out.log'), 'a')
-        sys.stderr = open(os_interaction.get_app_data_path('openportit.error.log'), 'a')
+        sys.stdout = open(os_interaction.get_app_data_path('apps.out.log'), 'a')
+        sys.stderr = open(os_interaction.get_app_data_path('apps.error.log'), 'a')
 
     logger.debug('client pid:%s' % os.getpid())
     import argparse

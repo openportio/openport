@@ -68,9 +68,9 @@ class OsInteraction():
     def start_openport_process(self, filePath):
         app_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
         if self.is_compiled():
-            command = [os.path.join(app_dir, 'openportit.exe'),]
+            command = [os.path.join(app_dir, 'apps.exe'),]
         else:
-            command = ['python', os.path.join(app_dir, 'openportit.py')]
+            command = ['python', os.path.join(app_dir, 'apps.py')]
         command.extend(['--hide-message', '--no-clipboard', '--tray-port', '8001', filePath])
         #logger.debug( command )
         p = subprocess.Popen( command,
@@ -79,9 +79,9 @@ class OsInteraction():
         return p
 
     def get_resource_path(self, path):
-        dir = os.path.dirname( os.path.realpath( __file__ ) )
-        if dir[-3:] == 'zip':
-            dir = os.path.dirname(dir)
+        dir = os.path.dirname( os.path.dirname( os.path.realpath( __file__ ) ) )
+#        if dir[-3:] == 'zip':
+#            dir = os.path.dirname(dir)
         return os.path.join(dir, path)
 
     def get_app_data_path(self, filename=''):

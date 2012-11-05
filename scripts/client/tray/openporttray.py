@@ -5,14 +5,15 @@ import threading
 import time
 import datetime
 import wx
+import urllib2
+
 from server import start_server_thread
 from trayicon import OpenPortItTaskBarIcon
 from dbhandler import DBHandler
 from shares_frame import SharesFrame
-from osinteraction import OsInteraction
+from services.osinteraction import OsInteraction
 from globals import Globals
-import urllib2
-from loggers import get_logger
+from services.logger_service import get_logger
 
 logger = get_logger('application')
 

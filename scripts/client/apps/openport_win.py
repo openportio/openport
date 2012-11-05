@@ -3,10 +3,10 @@
 import sys
 import wx
 from sys import argv
-from keyhandling import get_or_create_public_key
-from loggers import get_logger
+from apps.keyhandling import get_or_create_public_key
+from services.logger_service import get_logger
 
-from openport import request_port
+from apps.openport import request_port
 
 logger = get_logger('openport_win')
 
