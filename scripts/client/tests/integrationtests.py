@@ -117,6 +117,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(0, len(self.errors))
 
     def testSamePort(self):
+        #todo: add webservice to keyhandler to fill in the pids for the sessions.
         path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
         share = self.get_share(path)
         self.success_called_back = False

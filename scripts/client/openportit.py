@@ -96,7 +96,7 @@ def forward_port(port):
 def start_tray_application():
     #todo: linux/mac
     if sys.argv[0][-3:] == '.py':
-        command = ['start', 'python', 'application.py']
+        command = ['start', 'python', 'openporttray.py']
     else:
         command = ['start', quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'application.exe'))]
     logger.debug( command )
