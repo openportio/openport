@@ -3,6 +3,7 @@ import datetime
 import wx
 from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
+from common.share import Share
 from services.osinteraction import OsInteraction
 from tray.globals import Globals
 from services.logger_service import get_logger
@@ -90,7 +91,10 @@ class SharesFrame(wx.Frame):
         self.scrolling_window.SetFocus()
 
     def add_share(self, share, callbacks={}):
-        filename = share.filePath
+        if isinstance(share, Share):
+            filename = share.filePath
+        else:
+            filename = share.local_port
 
         share_panel = wx.Panel(self.scrolling_window, id=share.id, style=wx.SIMPLE_BORDER)
         self.scrolling_window_sizer.Add(share_panel, 0, wx.EXPAND, 0)
@@ -124,7 +128,11 @@ class SharesFrame(wx.Frame):
         button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND|wx.ALL, 5)
 
         def show_qr_evt(evt):
-            self.show_qr(share.filePath, share.get_link())
+            if isinstance(share, Share):
+                title = share.filePath
+            else:
+                title = share.local_port
+            self.show_qr(title, share.get_link())
         qr_button = wx.Button(button_panel, -1, label="Show QR")
         qr_button.Bind(wx.EVT_BUTTON, show_qr_evt)
         button_panel_sizer.Add(qr_button, 0, wx.EXPAND|wx.ALL, 5)

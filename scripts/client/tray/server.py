@@ -3,6 +3,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import threading
 import traceback
 import wx
+from common.session import Session
 from dbhandler import DBHandler
 from globals import Globals
 from common.share import Share
@@ -41,15 +42,18 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
                     share = shares[dict['local_port']]
                     share.from_dict(dict)
                 else:
-                    share = Share()
+                    if dict['type'] == 'Share':
+                        share = Share()
+                    else:
+                        share = Session()
                     share.from_dict(dict)
 
                     globals = Globals()
                     globals.account_id = share.account_id
                     globals.key_id = share.key_id
-                    logger.debug( 'path: <%s>' % share.filePath )
+#                    logger.debug( 'path: <%s>' % share.filePath )
 
-                    save_request(share)
+                    #save_request(share) # todo: problem with sessions and share.
                     if onNewShare:
                         wx.CallAfter(onNewShare, share)
                     global shares

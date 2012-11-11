@@ -102,7 +102,7 @@ class PortForwardingService:
         This will connect the channel to the localhost at the given port.
         """
         local_server = 'localhost'
-        logger.info('Opening socket %s:%d'% (local_server, self.local_port))
+        logger.info('Opening socket %s:%s'% (local_server, self.local_port))
         sock = socket.socket()
         try:
             sock.connect((local_server, self.local_port))
