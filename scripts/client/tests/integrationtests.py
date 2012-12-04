@@ -147,3 +147,11 @@ class IntegrationTest(unittest.TestCase):
         response = PortForwardResponse(dict)
         self.assertEqual(port, response.remote_port)
 
+
+
+    def exceptionTest(self):
+        try:
+            raise ValueError
+        except ValueError, TypeError:
+            print "huray!"
+
