@@ -30,7 +30,7 @@ def request_port(key, url='http://www.openport.be/post', restart_session_token =
         dict = json.loads(response)
         return dict
     except Exception, detail:
-        print "An error has occurred while communicating the the openport servers. ", detail
+        print "An error has occurred while communicating the the openport servers. ", detail, detail.read()
         raise detail
 
 
