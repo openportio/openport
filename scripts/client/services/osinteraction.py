@@ -3,12 +3,12 @@ import os
 import platform
 import subprocess
 import sys
-#from loggers import get_logger
+from loggers import get_logger
 
 
 APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
 
-#logger = get_logger('OsInteraction')
+logger = get_logger('OsInteraction')
 
 class OsInteraction():
 
@@ -65,14 +65,14 @@ class OsInteraction():
     def get_app_name(self):
         return os.path.basename(sys.argv[0])
 
-    def start_openport_process(self, filePath):
-        app_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
-        if self.is_compiled():
-            command = [os.path.join(app_dir, 'apps.exe'),]
-        else:
-            command = ['python', os.path.join(app_dir, 'apps.py')]
-        command.extend(['--hide-message', '--no-clipboard', '--tray-port', '8001', filePath])
-        #logger.debug( command )
+    def start_openport_process(self, share):
+        command = []
+        if share.restart_command.split()[0][-3:] == '.py':
+            command.extend(['python.exe'])
+        command.extend( share.restart_command.split(' ') )
+        command.extend(['--hide-message', '--no-clipboard', '--tray-port', '8001', '--request-port', '%s' % share.server_port,
+                        '--request-token', share.server_session_token, '--local-port', '%s' % share.local_port])
+        logger.debug( command )
         p = subprocess.Popen( command,
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0)

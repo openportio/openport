@@ -1,4 +1,5 @@
 import os
+import sys
 import wx
 from apps.openport_app import inform_tray_app_new, inform_tray_app_error, inform_tray_app_success, app, copy_share_to_clipboard, init
 
@@ -28,9 +29,9 @@ def get_open_port():
 def open_port_file(share, callback=None):
     import threading
 
-    local_port = get_open_port()
-    share.local_port = local_port
-    thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, local_port, share.token))
+    if share.local_port == -1:
+        share.local_port = get_open_port()
+    thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, share.local_port, share.token))
     thr.setDaemon(True)
     thr.start()
     open_port(share, callback=callback)
@@ -45,6 +46,9 @@ if __name__ == '__main__':
     parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
     parser.add_argument('--no-clipboard', action='store_true', help='Do not copy the link to the clipboard.')
     parser.add_argument('--tray-port', type=int, default=8001, help='Inform the tray app of the new share.')
+    parser.add_argument('--local-port', type=int, default=-1, help='The local port to start the share on.')
+    parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
+    parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
     parser.add_argument('filename', help='The file you want to openport.')
     args = parser.parse_args()
 
@@ -83,6 +87,10 @@ if __name__ == '__main__':
     share = Share()
     share.token = crypt_service.get_token()
     share.filePath = os.path.join(os.getcwd(), args.filename)
+    share.server_port = args.request_port
+    share.local_port = args.local_port
+    share.server_session_token = args.request_token
+    share.restart_command = ' '.join(sys.argv)
 
     app.MainLoop()
     open_port_file(share, callback)

@@ -108,7 +108,9 @@ if __name__ == '__main__':
     parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
     parser.add_argument('--no-clipboard', action='store_true', help='Do not copy the link to the clipboard.')
     parser.add_argument('--tray-port', type=int, default=8001, help='Inform the tray app of the new session.')
-    parser.add_argument('local_port', help='The port you want to openport.')
+    parser.add_argument('--local-port', type=int, help='The port you want to openport.', required=True)
+    parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
+    parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
     args = parser.parse_args()
 
     def show_message_box(session):
@@ -144,6 +146,9 @@ if __name__ == '__main__':
 
     session = Session()
     session.local_port = int(args.local_port)
+    session.restart_command = ' '.join(sys.argv)
+    session.server_port = args.request_port
+    session.server_session_token = args.request_token
 
     app.MainLoop()
     open_port(session, callback)

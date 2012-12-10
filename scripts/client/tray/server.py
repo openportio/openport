@@ -53,7 +53,7 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
                     globals.key_id = share.key_id
 #                    logger.debug( 'path: <%s>' % share.filePath )
 
-                    #save_request(share) # todo: problem with sessions and share.
+                    save_request(share)
                     if onNewShare:
                         wx.CallAfter(onNewShare, share)
                     global shares

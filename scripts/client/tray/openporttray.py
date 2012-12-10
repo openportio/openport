@@ -56,7 +56,7 @@ class OpenPortItFrame(wx.Frame):
             if self.os_interaction.pid_is_running(share.pid):
                 self.onNewShare(share)
             else:
-                p = self.os_interaction.start_openport_process(share.filePath)
+                p = self.os_interaction.start_openport_process(share)
                 self.share_processes[p.pid]=p
 
     def stop_sharing(self,share):
@@ -125,7 +125,8 @@ def main():
     parser.add_argument('--restart-shares', action='store_true', help='Restart all active shares.')
 #    parser.add_argument('--tray-port', type=int, default=8001, help='Specify the port to run on.')
     args = parser.parse_args()
-    start_app(args.restart_shares)
+    #start_app(args.restart_shares)
+    start_app(True)
 
 def utc_epoch_to_local_datetime(utc_epoch):
     return datetime.datetime(*time.localtime(utc_epoch)[0:6])

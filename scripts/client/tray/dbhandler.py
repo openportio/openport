@@ -13,61 +13,54 @@ class DBHandler():
 
     def init_db(self):
         self.cursor.execute(
-            '''CREATE TABLE IF NOT EXISTS shares (
+            '''CREATE TABLE IF NOT EXISTS sessions (
             id INTEGER PRIMARY KEY,
-            filePath VARCHAR(200),
             server VARCHAR(50),
-            port INTEGER,
+            server_port INTEGER,
+            session_token VARCHAR(50),
+            local_port INTEGER,
             pid INTEGER,
-            active BOOLEAN
+            active BOOLEAN,
+            restart_command VARCHAR(200)
             )
             ''')
 
     def add_share(self,share):
-        self.cursor.execute('select * from shares where filePath = ?', (share.filePath,))
-        if self.cursor.fetchall():
-            self.cursor.execute('update shares set active = 0 where filePath = ?', (share.filePath,))
-        self.cursor.execute('insert into shares (filePath, server, port, pid, active) values (?, ?, ?, ?, 1)',
-            (share.filePath, share.server, share.server_port, share.pid))
+        self.cursor.execute('update sessions set active = 0 where local_port = ?', (share.local_port,))
+        self.cursor.execute('insert into sessions (server, server_port, session_token, local_port, pid, active, restart_command) '
+                            'values (?, ?, ?, ?, ?, ?, ?)',
+            (share.server, share.server_port, share.server_session_token, share.local_port, share.pid, 1, share.restart_command))
         self.connection.commit()
         share.id = self.cursor.lastrowid
         return self.get_share(self.cursor.lastrowid)
 
-    def remove_file(self, id):
-        self.cursor.execute('delete from shares where id = ?',  (id,))
-        self.connection.commit()
-
     def get_share(self, id):
-        self.cursor.execute('select id, filePath, server, port, pid, active from shares where id = ?', (id,))
+        self.cursor.execute('select server, server_port, session_token, local_port, pid, active, restart_command, id from sessions'
+                            ' where id = ?', (id,))
         row = self.cursor.fetchone()
+        return self.get_share_from_row(row)
+
+    def get_share_from_row(self, row):
+
         share = Share()
-        share.id = row[0]
-        share.filePath = row[1]
-        share.server = row[2]
-        share.server_port = row[3]
+        share.server = row[0]
+        share.server_port = row[1]
+        share.server_session_token = row[2]
+        share.local_port = row[3]
         share.pid = row[4]
         share.active = row[5]
+        share.restart_command = row[6]
+        share.id = row[7]
         return share
 
 
     def get_shares(self):
-        self.cursor.execute('select id, filePath, server, port, pid, active from shares where active = 1')
-
-        result = []
-        for row in self.cursor:
-            share = Share()
-            share.id = row[0]
-            share.filePath = row[1]
-            share.server = row[2]
-            share.server_port = row[3]
-            share.pid = row[4]
-            share.active = row[5]
-            result.append(share)
-
-        return result
+        self.cursor.execute('select server, server_port, session_token, local_port, pid, active, restart_command, id from sessions'
+                            ' where active = 1')
+        return (self.get_share_from_row(row) for row in self.cursor)
 
     def stop_share(self, share):
-        self.cursor.execute('update shares set active = 0 where id = ?', (share.id,))
+        self.cursor.execute('update sessions set active = 0 where id = ?', (share.id,))
         self.connection.commit()
 
 
