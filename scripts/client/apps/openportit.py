@@ -11,7 +11,7 @@ from services.logger_service import get_logger
 clients = {}
 
 from apps.servefile import serve_file_on_port
-from apps.openport_win import open_port
+from apps.openport_api import open_port
 
 logger = get_logger('openportit')
 

@@ -7,7 +7,7 @@ import threading
 import urllib
 from apps import openport
 from apps.keyhandling import get_or_create_public_key
-from apps.openport_win import PortForwardResponse
+from apps.openport_api import PortForwardResponse
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 print sys.path
