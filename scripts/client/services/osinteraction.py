@@ -4,6 +4,7 @@ import platform
 import subprocess
 import sys
 from loggers import get_logger
+from common.share import Share
 
 
 APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
@@ -65,13 +66,20 @@ class OsInteraction():
     def get_app_name(self):
         return os.path.basename(sys.argv[0])
 
-    def start_openport_process(self, share):
+    def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
         command = []
         if share.restart_command.split()[0][-3:] == '.py':
             command.extend(['python.exe'])
         command.extend( share.restart_command.split(' ') )
-        command.extend(['--hide-message', '--no-clipboard', '--tray-port', '8001', '--request-port', '%s' % share.server_port,
+        command.extend(['--tray-port', '%s' % tray_port, '--request-port', '%s' % share.server_port,
                         '--request-token', share.server_session_token, '--local-port', '%s' % share.local_port])
+        if hide_message:
+            command.extend(['--hide-message'])
+        if no_clipboard:
+            command.extend(['--no-clipboard'])
+        if isinstance(share, Share):
+            command.extend([share.filePath])
+
         logger.debug( command )
         p = subprocess.Popen( command,
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,

@@ -21,11 +21,30 @@ class SharesFrame(wx.Frame):
 
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, -1, title,
-            style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
+            style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+        self.application = parent
+        self.addMenuBar()
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.os_interaction = OsInteraction()
         self.globals = Globals()
+
+    def addMenuBar(self):
+        menubar = wx.MenuBar()
+        file = wx.Menu()
+#        help = wx.Menu()
+        file.Append(101, '&New share', 'Share a new document')
+        self.Bind(wx.EVT_MENU, self.application.showOpenportItDialog, id=101)
+
+        file.Append(102, '&Open Port', 'Open a new port')
+        self.Bind(wx.EVT_MENU, self.application.showOpenportDialog, id=102)
+        file.AppendSeparator()
+        quit = wx.MenuItem(file, 105, '&Quit\tCtrl+Q', 'Quit the Application')
+        self.Bind(wx.EVT_MENU, self.application.exitApp, id=105)
+        file.AppendItem(quit)
+        menubar.Append(file, '&File')
+#        menubar.Append(help, '&Help')
+        self.SetMenuBar(menubar)
 
     def rebuild(self):
         self.share_panels = {}

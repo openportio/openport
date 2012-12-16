@@ -14,6 +14,7 @@ from shares_frame import SharesFrame
 from services.osinteraction import OsInteraction
 from globals import Globals
 from services.logger_service import get_logger
+from common.share import Share
 
 logger = get_logger('application')
 
@@ -28,13 +29,14 @@ class OpenPortItFrame(wx.Frame):
 
         self.addTrayIcon()
         start_server_thread(onNewShare=self.onNewShare)
-        self.shares_frame = SharesFrame(self, -1, "OpenPort-It - Shares")
+        self.shares_frame = SharesFrame(self, -1, "OpenPort")
         self.os_interaction = OsInteraction()
         self.globals = Globals()
         self.start_account_checking()
         if self.os_interaction.is_compiled():
             sys.stdout = open(self.os_interaction.get_app_data_path('application.out.log'), 'a')
             sys.stderr = open(self.os_interaction.get_app_data_path('application.error.log'), 'a')
+        self.viewShares(None)
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)
@@ -116,6 +118,34 @@ class OpenPortItFrame(wx.Frame):
             logger.error( "An error has occurred while communicating the the openport servers. %s" % detail )
             raise detail
             #sys.exit(9)
+
+    def showOpenportItDialog(self, event):
+        dlg = wx.FileDialog(
+            self, message="Choose a file to share",
+            defaultFile="",
+            wildcard="*",
+            style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR
+        )
+        if dlg.ShowModal() == wx.ID_OK:
+            paths = dlg.GetPaths()
+            for path in paths:
+                self.startOpenportItProcess(path)
+        dlg.Destroy()
+
+    def startOpenportItProcess (self, path):
+        share = Share()
+        share.filePath = path
+        if self.os_interaction.is_compiled():
+            share.restart_command = 'openportit.exe'
+        else:
+            share.restart_command = 'apps/openportit.py'
+
+        self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False)
+
+    def showOpenportDialog(self, event):
+        pass
+
+
 
 def main():
     logger.debug('server pid:%s' % os.getpid() )
