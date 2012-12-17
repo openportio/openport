@@ -3,13 +3,13 @@ import os
 import platform
 import subprocess
 import sys
-from loggers import get_logger
+#from services.logger_service import get_logger  #creates a circular reference
 from common.share import Share
 
 
 APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
 
-logger = get_logger('OsInteraction')
+#logger = get_logger('OsInteraction')
 
 class OsInteraction():
 
@@ -70,9 +70,11 @@ class OsInteraction():
         command = []
         if share.restart_command.split()[0][-3:] == '.py':
             command.extend(['python.exe'])
-        command.extend( share.restart_command.split(' ') )
+        command.extend( share.restart_command.strip().split(' ') )
         command.extend(['--tray-port', '%s' % tray_port, '--request-port', '%s' % share.server_port,
-                        '--request-token', share.server_session_token, '--local-port', '%s' % share.local_port])
+                        '--local-port', '%s' % share.local_port])
+        if share.server_session_token != '':
+            command.extend(['--request-token', share.server_session_token ])
         if hide_message:
             command.extend(['--hide-message'])
         if no_clipboard:
@@ -80,7 +82,8 @@ class OsInteraction():
         if isinstance(share, Share):
             command.extend([share.filePath])
 
-        logger.debug( command )
+#        logger.debug( command )
+#        print command, ' '.join(command )
         p = subprocess.Popen( command,
             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0)

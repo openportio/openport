@@ -1,6 +1,6 @@
 import logging
 from sys import stdout
-from osinteraction import OsInteraction
+from services.osinteraction import OsInteraction
 
 def get_logger(name):
     logger = logging.getLogger(name)
