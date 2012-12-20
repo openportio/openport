@@ -6,7 +6,7 @@ from time import sleep
 import wx
 
 print os.getcwd()
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from services.osinteraction import OsInteraction
 from services.logger_service import get_logger
 

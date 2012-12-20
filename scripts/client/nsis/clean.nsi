@@ -4,7 +4,8 @@
 
 !define APPNAME "OpenPort-It"
 !define INSTDIR "$PROGRAMFILES\${APPNAME}"
-!define MAIN_EXE "openportit.exe"
+!define OPENPORTIT_EXE "openportit.exe"
+!define OPENPORT_EXE "openport_app.exe"
 
 Name "${APPNAME}"
 OutFile "${APPNAME}.exe"
@@ -44,16 +45,16 @@ InstallDir ${INSTDIR}
 ;--------------------------------
 ; Language and Branding
 !insertmacro MUI_LANGUAGE "English"
-BrandingText "http://www.openport.net/"
+BrandingText "http://www.openport.be/"
 
 Section # hidden section
 	setOutPath $INSTDIR
 	file /r ..\dist\*.* 
-	file ..\tray\logo-base.png
-	file ..\apps\server.pem
+	file ..\resources\logo-base.png
+	file ..\resources\server.pem
 	#messageBox MB_OK "instdir: $INSTDIR"
-	WriteRegStr HKCR "*\shell\${APPNAME}\command" "" "$INSTDIR\${MAIN_EXE} $\"%1$\""
-	WriteRegStr HKCR "Directory\shell\${APPNAME}\command" "" "$INSTDIR\${MAIN_EXE} $\"%1$\""
+	WriteRegStr HKCR "*\shell\${APPNAME}\command" "" "$INSTDIR\${OPENPORTIT_EXE} $\"%1$\""
+	WriteRegStr HKCR "Directory\shell\${APPNAME}\command" "" "$INSTDIR\${OPENPORTIT_EXE} $\"%1$\""
 	writeUninstaller "$INSTDIR\Uninstall.exe"
 	; Write uninstaller to add/remove programs.
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"

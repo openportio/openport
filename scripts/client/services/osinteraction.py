@@ -91,8 +91,10 @@ class OsInteraction():
 
     def get_resource_path(self, path):
         dir = os.path.dirname( os.path.dirname( os.path.realpath( __file__ ) ) )
-#        if dir[-3:] == 'zip':
-#            dir = os.path.dirname(dir)
+        if dir[-3:] == 'zip':
+            dir = os.path.dirname(dir)
+        else:
+            dir = os.path.join(dir, 'resources')
         return os.path.join(dir, path)
 
     def get_app_data_path(self, filename=''):
