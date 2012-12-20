@@ -1,6 +1,7 @@
 import os
 from pysqlite2 import dbapi2 as sqlite
 from common.share import Share
+from common.session import Session
 from services.osinteraction import OsInteraction
 
 class DBHandler():
@@ -41,8 +42,7 @@ class DBHandler():
         return self.get_share_from_row(row)
 
     def get_share_from_row(self, row):
-
-        share = Share()
+        share = Session()
         share.server = row[0]
         share.server_port = row[1]
         share.server_session_token = row[2]

@@ -6,6 +6,7 @@ from time import sleep
 import wx
 
 print os.getcwd()
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from services.osinteraction import OsInteraction
 from services.logger_service import get_logger
 
@@ -95,3 +96,62 @@ def inform_tray_app_success(share, tray_port):
 
 def copy_share_to_clipboard(share):
     os_interaction.copy_to_clipboard(share.get_link().strip())
+
+
+
+
+if __name__ == '__main__':
+    init()
+    logger.debug('client pid:%s' % os.getpid())
+    import argparse
+    from apps.openport_api import open_port
+    from common.session import Session
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
+    parser.add_argument('--no-clipboard', action='store_true', help='Do not copy the link to the clipboard.')
+    parser.add_argument('--tray-port', type=int, default=8001, help='Inform the tray app of the new session.')
+    parser.add_argument('--local-port', type=int, help='The port you want to openport.', required=True)
+    parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
+    parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
+    args = parser.parse_args()
+
+    def show_message_box(session):
+        wx.MessageBox('Your local port %s is now reachable on %s' % ( session.local_port, session.get_link()), 'Info',
+            wx.OK | wx.ICON_INFORMATION)
+
+    first_time = True
+    def callback(ignore):
+        global first_time
+        if not first_time:
+            return
+        first_time = False
+        if args.tray_port > 0:
+            inform_tray_app_new(session, args.tray_port)
+
+        session.error_observers.append(error_callback)
+        session.success_observers.append(success_callback)
+
+        if not args.no_clipboard:
+            copy_share_to_clipboard(session)
+        if not args.hide_message:
+            show_message_box(session)
+
+    def error_callback(session):
+        logger.debug('error')
+        if args.tray_port > 0:
+            inform_tray_app_error(session, args.tray_port)
+
+    def success_callback(session):
+        logger.debug('success')
+        if args.tray_port > 0:
+            inform_tray_app_success(session, args.tray_port)
+
+    session = Session()
+    session.local_port = int(args.local_port)
+    session.restart_command = ' '.join(sys.argv)
+    session.server_port = args.request_port
+    session.server_session_token = args.request_token
+
+    app.MainLoop()
+    open_port(session, callback)

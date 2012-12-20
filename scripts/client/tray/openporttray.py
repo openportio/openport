@@ -7,14 +7,15 @@ import datetime
 import wx
 import urllib2
 
-from server import start_server_thread
-from trayicon import OpenPortItTaskBarIcon
-from dbhandler import DBHandler
-from shares_frame import SharesFrame
+from tray.server import start_server_thread
+from tray.trayicon import OpenPortItTaskBarIcon
+from tray.dbhandler import DBHandler
+from tray.shares_frame import SharesFrame
 from services.osinteraction import OsInteraction
-from globals import Globals
+from tray.globals import Globals
 from services.logger_service import get_logger
 from common.share import Share
+from common.session import Session
 
 logger = get_logger('application')
 
@@ -143,9 +144,24 @@ class OpenPortItFrame(wx.Frame):
         self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False)
 
     def showOpenportDialog(self, event):
-        pass
+        dialog = wx.NumberEntryDialog(self,
+            'Choose a port you want to open',
+            '( 1 - 65535 )',
+            'Openport - Choose a port you want to open', 80, 1, 65535)
+        dialog.ShowModal()
 
+        if dialog.GetReturnCode() == wx.ID_OK:
+            self.startOpenportProcess(dialog.GetValue())
 
+    def startOpenportProcess (self, port):
+        session = Session()
+        session.local_port = port
+        if self.os_interaction.is_compiled():
+            session.restart_command = 'openport_app.exe'
+        else:
+            session.restart_command = 'apps/openport_app.py'
+
+        self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False)
 
 def main():
     logger.debug('server pid:%s' % os.getpid() )
