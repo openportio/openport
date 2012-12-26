@@ -29,6 +29,10 @@ class SharesFrame(wx.Frame):
         self.os_interaction = OsInteraction()
         self.globals = Globals()
 
+        iconFile = self.os_interaction.get_resource_path('logo-base.ico')
+        icon = wx.Icon(iconFile, wx.BITMAP_TYPE_ICO)
+        self.SetIcon(icon)
+
     def addMenuBar(self):
         menubar = wx.MenuBar()
         file = wx.Menu()

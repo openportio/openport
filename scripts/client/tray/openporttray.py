@@ -23,7 +23,7 @@ class OpenPortItFrame(wx.Frame):
 
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, -1, title, size = (200, 150),
-            style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE)
+            style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
 
         self.share_processes = {}
         self.dbhandler = DBHandler()
@@ -37,6 +37,11 @@ class OpenPortItFrame(wx.Frame):
         if self.os_interaction.is_compiled():
             sys.stdout = open(self.os_interaction.get_app_data_path('application.out.log'), 'a')
             sys.stderr = open(self.os_interaction.get_app_data_path('application.error.log'), 'a')
+
+        iconFile = self.os_interaction.get_resource_path('logo-base.ico')
+        icon = wx.Icon(iconFile, wx.BITMAP_TYPE_ICO)
+        self.SetIcon(icon)
+
         self.viewShares(None)
 
     def addTrayIcon(self):

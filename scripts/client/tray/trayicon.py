@@ -9,7 +9,7 @@ class OpenPortItTaskBarIcon(wx.TaskBarIcon):
         self.parentApp = parent
         osinteraction = OsInteraction()
 
-        self.icon = wx.Icon(osinteraction.get_resource_path('logo-base.png'), wx.BITMAP_TYPE_PNG)
+        self.icon = wx.Icon(osinteraction.get_resource_path('logo-base.ico'), wx.BITMAP_TYPE_ICO)
         self.SetIcon(self.icon, "OpenPort-It")
         self.CreateMenu()
         self.items = {}
@@ -31,7 +31,7 @@ def main(argv=None):
     class OpenPortItFrame(wx.Frame):
         def __init__(self, parent, id, title):
             wx.Frame.__init__(self, parent, -1, title, size = (1, 1),
-                style=wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE)
+                style=wx.NO_FULL_REPAINT_ON_RESIZE)
 
             self.tbicon = OpenPortItTaskBarIcon(self)
             self.tbicon.Bind(wx.EVT_MENU, self.exitApp, id=wx.ID_EXIT)

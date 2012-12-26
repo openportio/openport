@@ -50,7 +50,7 @@ BrandingText "http://www.openport.be/"
 Section # hidden section
 	setOutPath $INSTDIR
 	file /r ..\dist\*.* 
-	file ..\resources\logo-base.png
+	file ..\resources\logo-base.ico
 	file ..\resources\server.pem
 	#messageBox MB_OK "instdir: $INSTDIR"
 	WriteRegStr HKCR "*\shell\${APPNAME}\command" "" "$INSTDIR\${OPENPORTIT_EXE} $\"%1$\""
@@ -58,7 +58,7 @@ Section # hidden section
 	writeUninstaller "$INSTDIR\Uninstall.exe"
 	; Write uninstaller to add/remove programs.
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"
-	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayIcon" "$INSTDIR\logo-base.png"
+	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayIcon" "$INSTDIR\logo-base.ico"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "Publisher" "Danger Software"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" "$INSTDIR\Uninstall.exe"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "InstallLocation" "$INSTDIR"
