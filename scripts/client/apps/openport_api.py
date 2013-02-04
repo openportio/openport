@@ -13,6 +13,7 @@ from apps.openport import request_port
 logger = get_logger('openport_api')
 
 SERVER_SSH_PORT = 22
+FALLBACK_SERVER_SSH_PORT = 443
 SERVER_SSH_USER = 'open'
 
 class PortForwardResponse():
@@ -89,7 +90,9 @@ def open_port(session, callback=None):
                 PUBLIC_KEY_FILE,
                 PRIVATE_KEY_FILE,
                 success_callback=session.notify_success,
-                error_callback=session.notify_error)
+                error_callback=session.notify_error,
+                fallback_server_ssh_port = FALLBACK_SERVER_SSH_PORT
+            )
             portForwardingService.start() #hangs
         except Exception as e:
             logger.error(e)

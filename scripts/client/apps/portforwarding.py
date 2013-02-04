@@ -18,7 +18,17 @@ class IgnoreUnknownHostKeyPolicy(paramiko.MissingHostKeyPolicy):
 
 class PortForwardingService:
 
-    def __init__(self, local_port, remote_port, server, server_ssh_port, ssh_user, public_key_file, private_key_file, error_callback=None, success_callback=None):
+    def __init__(self,
+                 local_port,
+                 remote_port,
+                 server,
+                 server_ssh_port,
+                 ssh_user,
+                 public_key_file,
+                 private_key_file,
+                 error_callback=None,
+                 success_callback=None,
+                 fallback_server_ssh_port=None):
         self.local_port       = local_port
         self.remote_port      = remote_port
         self.server           = server
@@ -28,6 +38,7 @@ class PortForwardingService:
         self.private_key_file = private_key_file
         self.error_callback   = error_callback
         self.success_callback = success_callback
+        self.fallback_server_ssh_port = fallback_server_ssh_port
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy( IgnoreUnknownHostKeyPolicy() )
 
@@ -47,7 +58,19 @@ class PortForwardingService:
             self.client.connect(self.server, self.server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
         except Exception, e:
             logger.error( '*** Failed to connect to %s:%d: %r' % (self.server, self.server_ssh_port, e) )
-            return
+            if self.fallback_server_ssh_port is not None:
+                try:
+                    self.client.connect(
+                        self.server, self.fallback_server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
+                except Exception, e:
+                    logger.error( '*** Failed to fallback connect to %s:%d: %r' % (self.server, self.fallback_server_ssh_port, e) )
+                    if self.error_callback:
+                        self.error_callback()
+                    return
+            else:
+                if self.error_callback:
+                    self.error_callback()
+                return
 
         try:
             self.portForwardingRequestException = None
