@@ -6,6 +6,7 @@
 !define INSTDIR "$PROGRAMFILES\${APPNAME}"
 !define OPENPORTIT_EXE "openportit.exe"
 !define OPENPORT_EXE "openport_app.exe"
+!define OPENPORT_TRAY_EXE "openporttray.exe"
 
 Name "${APPNAME}"
 OutFile "${APPNAME}.exe"
@@ -63,6 +64,9 @@ Section # hidden section
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" "$INSTDIR\Uninstall.exe"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "InstallLocation" "$INSTDIR"
 	
+	# Start Menu
+	createShortCut "$SMPROGRAMS\${APPNAME}.lnk" "$INSTDIR\${OPENPORT_TRAY_EXE}" "" "$INSTDIR\logo-base.ico"
+	
 SectionEnd
 
 Section "Uninstall"
@@ -70,4 +74,5 @@ Section "Uninstall"
 	RMDir /r /REBOOTOK $INSTDIR
 	DeleteRegKey HKCR "*\shell\${APPNAME}"
 	DeleteRegKey HKCR "Directory\shell\${APPNAME}"
+	Delete "$SMPROGRAMS\${APPNAME}.lnk"
 SectionEnd
