@@ -24,9 +24,14 @@ def init():
         sys.stdout = open(os_interaction.get_app_data_path('apps.out.log'), 'a')
         sys.stderr = open(os_interaction.get_app_data_path('apps.error.log'), 'a')
 
+tray_app_started = False
 
 def start_tray_application():
-    #todo: linux/mac
+    global tray_app_started
+    if tray_app_started:
+        return
+    tray_app_started = True
+
     if sys.argv[0][-3:] == '.py':
         command = ['start', 'python', '-m', 'tray.openporttray']
     else:
