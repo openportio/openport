@@ -20,7 +20,7 @@ TOKEN = 'tokentest'
 class IntegrationTest(unittest.TestCase):
 
     def testStartShare(self):
-        path = os.path.join(os.path.dirname(__file__), '../tray/logo-base.png')
+        path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.png')
         share = self.get_share(path)
         self.start_sharing(share)
         temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
@@ -129,7 +129,7 @@ class IntegrationTest(unittest.TestCase):
         self.start_sharing(share)
 
         i = 0
-        while i < 10 and not self.success_called_back:
+        while i < 100 and not self.success_called_back:
             i += 1
             sleep(0.01)
         print "escaped at ",i

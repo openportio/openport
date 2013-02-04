@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="de2a7066-2499-439c-88ba-fa6dcac844ae" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apps/openport_app.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/session.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../docs/todo.txt" afterPath="$PROJECT_DIR$/../../docs/todo.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/client.iml" afterPath="$PROJECT_DIR$/.idea/client.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+    <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_win.py" afterPath="$PROJECT_DIR$/apps/openport_win.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openportit.py" afterPath="$PROJECT_DIR$/apps/openportit.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/portforwarding.py" afterPath="$PROJECT_DIR$/apps/portforwarding.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/share.py" afterPath="$PROJECT_DIR$/common/share.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tray/server.py" afterPath="$PROJECT_DIR$/tray/server.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tray/shares_frame.py" afterPath="$PROJECT_DIR$/tray/shares_frame.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../www/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../../www/.idea/workspace.xml" />
+    </list>
+    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="fallback ssh port 443 (for firewalls)">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../../external/ext_http_server.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../docs/client python configuration.txt" afterPath="$PROJECT_DIR$/../../docs/client python configuration.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../docs/todo.txt" afterPath="$PROJECT_DIR$/../../docs/todo.txt" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/servefile.py" afterPath="$PROJECT_DIR$/apps/servefile.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nsis/clean.nsi" afterPath="$PROJECT_DIR$/nsis/clean.nsi" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/integrationtests.py" afterPath="$PROJECT_DIR$/tests/integrationtests.py" />
     </list>
     <ignored path="client.iws" />
     <ignored path=".idea/workspace.xml" />
+    <file path="$PROJECT_DIR$/.idea/workspace.xml" changelist="65871582-01d9-427a-a1b2-48f1bf0b25f7" time="1359995854448" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,13 +30,18 @@
     <disable_hints />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="client" />
+  </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="py2exe_win.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/py2exe_win.py">
+      <file leaf-file-name="openport_api.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/apps/openport_api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="59" selection-start="161" selection-end="161" vertical-scroll-proportion="0.0">
-              <folding />
+            <state line="14" column="20" selection-start="377" selection-end="377" vertical-scroll-proportion="-9.52">
+              <folding>
+                <element signature="e#22#31#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -46,88 +49,48 @@
       <file leaf-file-name="openportit.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/apps/openportit.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="35" column="14" selection-start="906" selection-end="906" vertical-scroll-proportion="0.0">
+            <state line="8" column="46" selection-start="296" selection-end="296" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="servefile.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/apps/servefile.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="21" column="35" selection-start="517" selection-end="517" vertical-scroll-proportion="0.0">
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#0#37#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="openport_app.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
+      <file leaf-file-name="integrationtests.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/tests/integrationtests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="0" selection-start="163" selection-end="163" vertical-scroll-proportion="0.0">
+            <state line="71" column="0" selection-start="2025" selection-end="2025" vertical-scroll-proportion="0.33239436">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ext_http_server.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://C:/Python26/Lib/site-packages/ext_http_server.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="portforwarding.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/apps/portforwarding.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="72" column="0" selection-start="2768" selection-end="2768" vertical-scroll-proportion="0.0">
               <folding>
-                <element signature="e#0#17#0" expanded="true" />
+                <element signature="e#0#13#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="session.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/common/session.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="33" selection-start="1149" selection-end="1149" vertical-scroll-proportion="0.53900707">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="share.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/share.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="36" selection-start="275" selection-end="275" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="__builtin__.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.PyCharm10/system/python_stubs/-891257481/__builtin__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="3981" column="8" selection-start="135156" selection-end="135156" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="server.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tray/server.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="55" column="71" selection-start="1947" selection-end="1947" vertical-scroll-proportion="-4.0">
-              <folding>
-                <element signature="e#0#20#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="shares_frame.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tray/shares_frame.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="98" column="59" selection-start="3796" selection-end="3796" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="dbhandler.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tray/dbhandler.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="25" column="13" selection-start="715" selection-end="715" vertical-scroll-proportion="-0.36">
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="openporttray.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tray/openporttray.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="58" column="69" selection-start="2037" selection-end="2037" vertical-scroll-proportion="0.0">
-              <folding />
             </state>
           </provider>
         </entry>
@@ -145,30 +108,30 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/openportit/openportit.py" />
-        <option value="$PROJECT_DIR$/tray/openporttray.py" />
-        <option value="$PROJECT_DIR$/services/qr_service.py" />
-        <option value="$PROJECT_DIR$/nsis/clean.nsi" />
-        <option value="$PROJECT_DIR$/tray/trayicon.py" />
-        <option value="$PROJECT_DIR$/services/osinteraction.py" />
-        <option value="$PROJECT_DIR$/py2exe_win.py" />
-        <option value="$PROJECT_DIR$/tests/integrationtests.py" />
-        <option value="$PROJECT_DIR$/apps/openport_app.py" />
-        <option value="$PROJECT_DIR$/apps/openportit.py" />
-        <option value="$PROJECT_DIR$/apps/portforwarding.py" />
         <option value="$PROJECT_DIR$/apps/openport_win.py" />
-        <option value="$PROJECT_DIR$/common/share.py" />
-        <option value="$PROJECT_DIR$/tray/shares_frame.py" />
-        <option value="$PROJECT_DIR$/tray/server.py" />
         <option value="$PROJECT_DIR$/common/session.py" />
+        <option value="$PROJECT_DIR$/services/logger_service.py" />
+        <option value="$PROJECT_DIR$/common/share.py" />
+        <option value="$PROJECT_DIR$/tray/dbhandler.py" />
+        <option value="$PROJECT_DIR$/services/osinteraction.py" />
+        <option value="$PROJECT_DIR$/apps/openport_app.py" />
+        <option value="$PROJECT_DIR$/tray/shares_frame.py" />
+        <option value="$PROJECT_DIR$/tray/trayicon.py" />
+        <option value="$PROJECT_DIR$/tray/openporttray.py" />
+        <option value="$PROJECT_DIR$/tryouts/icon_test.py" />
+        <option value="$PROJECT_DIR$/py2exe_win.py" />
+        <option value="$PROJECT_DIR$/apps/portforwarding.py" />
+        <option value="$PROJECT_DIR$/apps/openport_api.py" />
+        <option value="$PROJECT_DIR$/apps/servefile.py" />
+        <option value="$PROJECT_DIR$/tests/integrationtests.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1378" />
-    <option name="height" value="744" />
+    <option name="width" value="1386" />
+    <option name="height" value="788" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -192,7 +155,7 @@
       <hideEmptyPackages />
       <abbreviatePackageNames />
       <autoscrollToSource />
-      <autoscrollFromSource />
+      <autoscrollFromSource ProjectPane="true" />
       <sortByType />
     </navigator>
     <panes>
@@ -203,6 +166,68 @@
               <option name="myItemId" value="client" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6 (C:/Python26/python.exe) &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6 (C:/Python26/python.exe) &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="site-packages" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6 (C:/Python26/python.exe) &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Lib" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6 (C:/Python26/python.exe) &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Python26" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -232,7 +257,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="tray" />
+              <option name="myItemId" value="tests" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -250,7 +275,15 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="common" />
+              <option name="myItemId" value="build" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bdist.win32" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="winexe" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -283,7 +316,7 @@
     <property name="options.lastSelected" value="project.propVCSSupport.Mappings" />
     <property name="recentsLimit" value="5" />
     <property name="restartRequiresConfirmation" value="true" />
-    <property name="last_opened_file_path" value="C:/Python26/Lib/site-packages/aufmachen-0.1_dev-py2.6.egg/tmp" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/tryouts/icon_test.py" />
     <property name="GoToClass.includeJavaFiles" value="false" />
     <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
@@ -302,7 +335,7 @@
       <recent name="C:\Users\Jan\Projects\openthegate\scripts\client\apps" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.openport_win">
+  <component name="RunManager" selected="Python.openportit big file">
     <configuration default="false" name="Unittests in IntegrationTest.testStartShare" type="tests" factoryName="Unittests" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -410,7 +443,9 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="apps/openportit.py" />
       <option name="PARAMETERS" value="C:\Users\Jan\Projects\openthegate\scripts\client\py2exe.bat" />
+      <RunnerSettings RunnerId="PyDebugRunner" />
       <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PyDebugRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
@@ -427,6 +462,61 @@
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="tray/openporttray.py" />
       <option name="PARAMETERS" value="" />
+      <RunnerSettings RunnerId="PyDebugRunner" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PyDebugRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="openport_app" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <module name="client" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/apps/openport_app.py" />
+      <option name="PARAMETERS" value="--local-port 52525" />
+      <RunnerSettings RunnerId="PyDebugRunner" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PyDebugRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Unnamed" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:/Python26/python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tryouts" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <module name="client" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tryouts/icon_test.py" />
+      <option name="PARAMETERS" value="" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="openportit big file" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <module name="client" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="apps/openportit.py" />
+      <option name="PARAMETERS" value="&quot;C:\Users\Jan\Music\Full Cds\2009 - Rules (Vinyl V0)\B6 - 1517.mp3&quot;" />
       <RunnerSettings RunnerId="PyDebugRunner" />
       <RunnerSettings RunnerId="PythonRunner" />
       <ConfigurationWrapper RunnerId="PyDebugRunner" />
@@ -450,42 +540,22 @@
       <option name="PATTERN" value="" />
       <option name="USE_PATTERN" value="false" />
       <option name="PUREUNITTEST" value="true" />
+      <RunnerSettings RunnerId="PyDebugRunner" />
       <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PyDebugRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
-    <configuration default="false" name="openport_win" type="PythonConfigurationType" factoryName="Python">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <module name="client" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/apps/openport_win.py" />
-      <option name="PARAMETERS" value="52525" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <list size="6">
+    <list size="8">
       <item index="0" class="java.lang.String" itemvalue="Python.openportit" />
       <item index="1" class="java.lang.String" itemvalue="Python.tray" />
-      <item index="2" class="java.lang.String" itemvalue="Python's test.Unittests in integrationtests" />
-      <item index="3" class="java.lang.String" itemvalue="Python's test.Unittests in IntegrationTest.testStartShare" />
-      <item index="4" class="java.lang.String" itemvalue="Python's test.Unittests in IntegrationTest.testSamePort" />
-      <item index="5" class="java.lang.String" itemvalue="Python.openport_win" />
+      <item index="2" class="java.lang.String" itemvalue="Python.openport_app" />
+      <item index="3" class="java.lang.String" itemvalue="Python.Unnamed" />
+      <item index="4" class="java.lang.String" itemvalue="Python.openportit big file" />
+      <item index="5" class="java.lang.String" itemvalue="Python's test.Unittests in integrationtests" />
+      <item index="6" class="java.lang.String" itemvalue="Python's test.Unittests in IntegrationTest.testStartShare" />
+      <item index="7" class="java.lang.String" itemvalue="Python's test.Unittests in IntegrationTest.testSamePort" />
     </list>
-    <recent_temporary>
-      <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Python's test.Unittests in IntegrationTest.testSamePort" />
-        <item index="1" class="java.lang.String" itemvalue="Python's test.Unittests in IntegrationTest.testStartShare" />
-        <item index="2" class="java.lang.String" itemvalue="Python's test.Unittests in IntegrationTest.testStartShare" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
   <component name="SvnConfiguration" maxAnnotateRevisions="500" myUseAcceleration="nothing" myAutoUpdateAfterCommit="false" cleanupOnStartRun="false">
@@ -508,10 +578,28 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="de2a7066-2499-439c-88ba-fa6dcac844ae" name="Default" comment="" />
+      <changelist id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
+      <changelist id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="" />
       <created>1352155335182</created>
-      <updated>1352155335182</updated>
+      <updated>1355698976803</updated>
     </task>
+    <task id="LOCAL-00002" summary="renamed file">
+      <created>1355696320181</created>
+      <updated>1355696320181</updated>
+    </task>
+    <task id="LOCAL-00004" summary="You can now share a file from the menu bar">
+      <created>1355699051386</created>
+      <updated>1355699051386</updated>
+    </task>
+    <task id="LOCAL-00005" summary="You can now share ports from the menu bar">
+      <created>1355705694692</created>
+      <updated>1355705694692</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fallback ssh port 443 (for firewalls)">
+      <created>1359990440054</created>
+      <updated>1359990440054</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -535,24 +623,25 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1378" height="744" extended-state="0" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1386" height="788" extended-state="0" />
+    <editor active="false" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.12328767" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.34931508" sideWeight="0.49786553" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.20454545" sideWeight="0.32534248" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23708206" sideWeight="0.5599315" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.48972604" sideWeight="0.49786553" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24622357" sideWeight="0.60509557" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.57802546" sideWeight="0.49468085" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.6232877" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.44006848" sideWeight="0.99496853" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5565069" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39490446" sideWeight="0.9080547" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3458904" sideWeight="0.49786553" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -562,7 +651,7 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <option name="OFFER_MOVE_TO_ANOTHER_CHANGELIST_ON_PARTIAL_COMMIT" value="true" />
+    <option name="OFFER_MOVE_TO_ANOTHER_CHANGELIST_ON_PARTIAL_COMMIT" value="false" />
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="CHECK_NEW_TODO" value="true" />
     <option name="myTodoPanelSettings">
@@ -593,7 +682,7 @@
     <option name="SHOW_VCS_ERROR_NOTIFICATIONS" value="true" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" />
+    <option name="LAST_COMMIT_MESSAGE" value="fallback ssh port 443 (for firewalls)" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -606,147 +695,129 @@
     <option name="UPDATE_GROUP_BY_CHANGELIST" value="false" />
     <option name="SHOW_FILE_HISTORY_AS_TREE" value="false" />
     <option name="FILE_HISTORY_SPLITTER_PROPORTION" value="0.6" />
+    <MESSAGE value="renamed file" />
+    <MESSAGE value="You can now share a file from the menu bar" />
+    <MESSAGE value="You can now share ports from the menu bar" />
+    <MESSAGE value="fallback ssh port 443 (for firewalls)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/tray/trayicon.py</url>
-          <line>11</line>
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/services/osinteraction.py</url>
-          <line>81</line>
-          <option name="timeStamp" value="1" />
+          <line>92</line>
+          <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/integrationtests.py</url>
-          <line>73</line>
-          <option name="timeStamp" value="12" />
+          <url>file://$PROJECT_DIR$/tray/shares_frame.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="23" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="13" />
+      <option name="time" value="24" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://C:/Python26/Lib/urllib.py">
+    <entry file="file://$PROJECT_DIR$/tray/dbhandler.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1260" column="0" selection-start="45367" selection-end="45367" vertical-scroll-proportion="84.26087" />
+        <state line="5" column="0" selection-start="164" selection-end="164" vertical-scroll-proportion="0.0" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tray/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="76" column="50" selection-start="2943" selection-end="2943" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/apps/openport.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="0" selection-start="907" selection-end="907" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="40" column="12" selection-start="1167" selection-end="1167" vertical-scroll-proportion="-0.8365019" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/integrationtests.py">
+    <entry file="file://$PROJECT_DIR$/py2exe_win.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="132" column="18" selection-start="4137" selection-end="4137" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
+        <state line="9" column="45" selection-start="171" selection-end="171" vertical-scroll-proportion="0.15769945" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="102" column="5" selection-start="3157" selection-end="3159" vertical-scroll-proportion="0.031135531" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/services/osinteraction.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="83" column="1" selection-start="2620" selection-end="2620" vertical-scroll-proportion="0.0">
+        <state line="91" column="25" selection-start="3024" selection-end="3041" vertical-scroll-proportion="0.39177102">
           <folding />
         </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tray/trayicon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="42" selection-start="101" selection-end="112" vertical-scroll-proportion="0.030411448" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tray/shares_frame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="33" column="26" selection-start="981" selection-end="981" vertical-scroll-proportion="0.031135531">
+          <folding>
+            <marker date="1356551936125" expanded="true" signature="496:981" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tryouts/icon_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="26" selection-start="444" selection-end="444" vertical-scroll-proportion="0.3041145" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tray/openporttray.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="180" column="0" selection-start="6016" selection-end="6424" vertical-scroll-proportion="0.23971377" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/apps/portforwarding.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="104" column="41" selection-start="4075" selection-end="4075" vertical-scroll-proportion="0.0">
-          <folding />
+        <state line="72" column="0" selection-start="2768" selection-end="2768" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/apps/openport_win.py">
+    <entry file="file://$PROJECT_DIR$/apps/openport_api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="145" column="45" selection-start="5141" selection-end="5141" vertical-scroll-proportion="-5.6">
+        <state line="14" column="20" selection-start="377" selection-end="377" vertical-scroll-proportion="-9.52">
           <folding>
             <element signature="e#22#31#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="0" selection-start="163" selection-end="163" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#0#17#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/apps/openportit.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="14" selection-start="906" selection-end="906" vertical-scroll-proportion="0.0">
+        <state line="8" column="46" selection-start="296" selection-end="296" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python26/Lib/site-packages/ext_http_server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/servefile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="21" column="35" selection-start="517" selection-end="517" vertical-scroll-proportion="0.0">
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#0#37#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/py2exe_win.py">
+    <entry file="file://$PROJECT_DIR$/tests/integrationtests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="59" selection-start="161" selection-end="161" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tray/openporttray.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="58" column="69" selection-start="2037" selection-end="2037" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tray/dbhandler.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="13" selection-start="715" selection-end="715" vertical-scroll-proportion="-0.36">
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tray/shares_frame.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="98" column="59" selection-start="3796" selection-end="3796" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tray/server.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="55" column="71" selection-start="1947" selection-end="1947" vertical-scroll-proportion="-4.0">
-          <folding>
-            <element signature="e#0#20#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm10/system/python_stubs/-891257481/__builtin__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3981" column="8" selection-start="135156" selection-end="135156" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/share.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="36" selection-start="275" selection-end="275" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/session.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="33" selection-start="1149" selection-end="1149" vertical-scroll-proportion="0.53900707">
+        <state line="71" column="0" selection-start="2025" selection-end="2025" vertical-scroll-proportion="0.33239436">
           <folding />
         </state>
       </provider>

@@ -11,6 +11,7 @@ import urllib
 from OpenSSL import SSL
 from services.logger_service import get_logger
 from services.osinteraction import OsInteraction
+from ext_http_server import RangeHandler
 
 
 _file_serve_path = None
@@ -18,7 +19,7 @@ _token = None
 logger = get_logger(__name__)
 osinteraction = OsInteraction()
 
-class FileServeHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class FileServeHandler(RangeHandler):
     def setup(self):
         self.connection = self.request
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
