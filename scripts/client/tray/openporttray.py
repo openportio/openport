@@ -55,7 +55,8 @@ class OpenPortItFrame(wx.Frame):
         self.tbicon.RemoveIcon()
         self.tbicon.Destroy()
         for pid in self.share_processes:
-            self.os_interaction.kill_pid(pid)
+            p = self.os_interaction.kill_pid(pid)
+            logger.info("kill pid %s successful: %s" % (pid, p))
         sys.exit()
 
     def restart_sharing(self):
@@ -64,8 +65,11 @@ class OpenPortItFrame(wx.Frame):
             if self.os_interaction.pid_is_running(share.pid):
                 self.onNewShare(share)
             else:
-                p = self.os_interaction.start_openport_process(share)
-                self.share_processes[p.pid]=p
+                try:
+                    p = self.os_interaction.start_openport_process(share)
+                    self.share_processes[p.pid]=p
+                except Exception, e:
+                    logger.debug(e)
 
     def stop_sharing(self,share):
         logger.info("stopping %s" % share.id)

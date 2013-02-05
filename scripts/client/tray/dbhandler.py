@@ -1,4 +1,5 @@
 import os
+import pickle
 from pysqlite2 import dbapi2 as sqlite
 from common.share import Share
 from common.session import Session
@@ -28,9 +29,11 @@ class DBHandler():
 
     def add_share(self,share):
         self.cursor.execute('update sessions set active = 0 where local_port = ?', (share.local_port,))
+        pickled_restart_command = pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
+
         self.cursor.execute('insert into sessions (server, server_port, session_token, local_port, pid, active, restart_command) '
                             'values (?, ?, ?, ?, ?, ?, ?)',
-            (share.server, share.server_port, share.server_session_token, share.local_port, share.pid, 1, share.restart_command))
+            (share.server, share.server_port, share.server_session_token, share.local_port, share.pid, 1, pickled_restart_command))
         self.connection.commit()
         share.id = self.cursor.lastrowid
         return self.get_share(self.cursor.lastrowid)
@@ -49,7 +52,13 @@ class DBHandler():
         share.local_port = row[3]
         share.pid = row[4]
         share.active = row[5]
-        share.restart_command = row[6]
+        share.restart_command = row[6].split()
+        try:
+            share.restart_command = pickle.loads(row[6].encode('ascii','ignore'))
+            pass
+        except (Exception) as e:
+            pass
+
         share.id = row[7]
         return share
 

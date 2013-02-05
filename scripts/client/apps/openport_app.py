@@ -154,7 +154,7 @@ if __name__ == '__main__':
 
     session = Session()
     session.local_port = int(args.local_port)
-    session.restart_command = ' '.join(sys.argv)
+    session.restart_command = sys.argv
     session.server_port = args.request_port
     session.server_session_token = args.request_token
 

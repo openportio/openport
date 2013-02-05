@@ -90,7 +90,7 @@ if __name__ == '__main__':
     share.server_port = args.request_port
     share.local_port = args.local_port
     share.server_session_token = args.request_token
-    share.restart_command = ' '.join(sys.argv)
+    share.restart_command = sys.argv
 
     app.MainLoop()
     open_port_file(share, callback)
