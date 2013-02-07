@@ -146,9 +146,9 @@ class OpenPortItFrame(wx.Frame):
         share = Share()
         share.filePath = path
         if self.os_interaction.is_compiled():
-            share.restart_command = ['openportit.exe']
+            share.restart_command = ['openportit.exe', path]
         else:
-            share.restart_command = ['apps/openportit.py']
+            share.restart_command = ['python.exe', 'apps/openportit.py', path]
 
         self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False)
 
@@ -164,11 +164,10 @@ class OpenPortItFrame(wx.Frame):
 
     def startOpenportProcess (self, port):
         session = Session()
-        session.local_port = port
         if self.os_interaction.is_compiled():
-            session.restart_command = ['openport_app.exe']
+            session.restart_command = ['openport_app.exe', 'apps/openport_app.py', '--local-port', '%s' % port]
         else:
-            session.restart_command = ['apps/openport_app.py']
+            session.restart_command = ['python.exe', 'apps/openport_app.py', '--local-port', '%s' % port]
 
         self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False)
 
