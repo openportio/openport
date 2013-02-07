@@ -70,28 +70,8 @@ class OsInteraction():
         return os.path.basename(sys.argv[0])
 
     def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
-        command = []
-        if share.restart_command[0][-3:] == '.py':
-            command.extend(['python.exe'])
-        command.extend( share.restart_command )
-        if not '--tray-port' in command:
-            command.extend(['--tray-port', '%s' % tray_port] )
-        if not '--request-port' in command:
-            command.extend(['--request-port', '%s' % share.server_port])
-        if not '--local-port' in command:
-            command.extend(['--local-port', '%s' % share.local_port])
-        if share.server_session_token != '':
-            command.extend(['--request-token', share.server_session_token ])
-        if hide_message and not '--hide-message' in command:
-            command.extend(['--hide-message'])
-        if no_clipboard and not '--no-clipboard' in command:
-            command.extend(['--no-clipboard'])
-#        if isinstance(share, Share):
-#            command.extend([share.filePath])
-
-#        logger.debug( command )
-        p = subprocess.Popen( command,
-            bufsize=0, executable=None, stdin=None, stdout=None, stderr=None, preexec_fn=None,
+        p = subprocess.Popen( share.restart_command,
+            bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0)
         return p
 

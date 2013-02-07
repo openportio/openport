@@ -1,9 +1,9 @@
 import os
 import sys
 import wx
-from apps.openport_app import inform_tray_app_new, inform_tray_app_error, inform_tray_app_success, app, copy_share_to_clipboard, init
+from apps.openport_app import inform_tray_app_new, inform_tray_app_error, inform_tray_app_success, app, \
+    copy_share_to_clipboard, init, get_restart_command, add_default_arguments
 
-print os.getcwd()
 from services import crypt_service
 from common.share import Share
 from services.logger_service import get_logger
@@ -43,12 +43,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
-    parser.add_argument('--no-clipboard', action='store_true', help='Do not copy the link to the clipboard.')
-    parser.add_argument('--tray-port', type=int, default=8001, help='Inform the tray app of the new share.')
-    parser.add_argument('--local-port', type=int, default=-1, help='The local port to start the share on.')
-    parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
-    parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
+    add_default_arguments(parser, local_port_required=False)
+    parser.add_argument('--file-token', default='', help='The token needed to download the file.')
     parser.add_argument('filename', help='The file you want to openport.')
     args = parser.parse_args()
 
@@ -56,6 +52,11 @@ if __name__ == '__main__':
         wx.MessageBox('You can now download your file(s) from %s\nThis link has been copied to your clipboard.' % (
         share.get_link()), 'Info', wx.OK | wx.ICON_INFORMATION)
 
+    def get_restart_command_for_share(share):
+        command = get_restart_command(share)
+        if not '--file-token' in command:
+            command.extend(['--file-token', share.token])
+        return command
 
     first_time = True
     def callback(ignore):
@@ -63,8 +64,10 @@ if __name__ == '__main__':
         if not first_time:
             return
         first_time = False
+
+        share.restart_command = get_restart_command_for_share(share)
         if args.tray_port > 0:
-            inform_tray_app_new(share, args.tray_port)
+            inform_tray_app_new(share, args.tray_port, start_tray=(not args.no_tray))
 
         share.error_observers.append(error_callback)
         share.success_observers.append(success_callback)
@@ -85,12 +88,14 @@ if __name__ == '__main__':
             inform_tray_app_success(share, args.tray_port)
 
     share = Share()
-    share.token = crypt_service.get_token()
+    if args.file_token == '':
+        share.token = crypt_service.get_token()
+    else:
+        share.token = args.file_token
     share.filePath = os.path.join(os.getcwd(), args.filename)
     share.server_port = args.request_port
     share.local_port = args.local_port
     share.server_session_token = args.request_token
-    share.restart_command = sys.argv
 
     app.MainLoop()
     open_port_file(share, callback)

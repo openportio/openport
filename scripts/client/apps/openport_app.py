@@ -5,7 +5,6 @@ import urllib, urllib2
 from time import sleep
 import wx
 
-print os.getcwd()
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from services.osinteraction import OsInteraction
 from services.logger_service import get_logger
@@ -102,7 +101,37 @@ def inform_tray_app_success(share, tray_port):
 def copy_share_to_clipboard(share):
     os_interaction.copy_to_clipboard(share.get_link().strip())
 
+def get_restart_command(session):
+    command = []
+    if sys.argv[0][-3:] == '.py':
+        command.extend(['python.exe'])
+    command.extend(sys.argv)
 
+    #if not '--tray-port' in command:
+    #    command.extend(['--tray-port', '%s' % tray_port] )
+    if not '--request-port' in command:
+        command.extend(['--request-port', '%s' % session.server_port])
+    if not '--local-port' in command:
+        command.extend(['--local-port', '%s' % session.local_port])
+    if session.server_session_token != '' and not '--request-token' in command:
+        command.extend(['--request-token', session.server_session_token ])
+    if not '--hide-message' in command:
+        command.extend(['--hide-message'])
+    if not '--no-clipboard' in command:
+        command.extend(['--no-clipboard'])
+    if not '--no-tray' in command:
+        command.extend(['--no-tray'])
+
+    return command
+
+def add_default_arguments(parser, local_port_required=True):
+    parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
+    parser.add_argument('--no-clipboard', action='store_true', help='Do not copy the link to the clipboard.')
+    parser.add_argument('--tray-port', type=int, default=8001, help='Inform the tray app of the new share.')
+    parser.add_argument('--no-tray', action="store_true", default=False, help='Do not start a tray app if none can be found.')
+    parser.add_argument('--local-port', type=int, help='The port you want to openport.', required=local_port_required, default=-1)
+    parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
+    parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
 
 
 if __name__ == '__main__':
@@ -113,12 +142,7 @@ if __name__ == '__main__':
     from common.session import Session
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
-    parser.add_argument('--no-clipboard', action='store_true', help='Do not copy the link to the clipboard.')
-    parser.add_argument('--tray-port', type=int, default=8001, help='Inform the tray app of the new session.')
-    parser.add_argument('--local-port', type=int, help='The port you want to openport.', required=True)
-    parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
-    parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
+    add_default_arguments(parser)
     args = parser.parse_args()
 
     def show_message_box(session):
@@ -131,8 +155,10 @@ if __name__ == '__main__':
         if not first_time:
             return
         first_time = False
+
+        session.restart_command = get_restart_command(session)
         if args.tray_port > 0:
-            inform_tray_app_new(session, args.tray_port)
+            inform_tray_app_new(session, args.tray_port, start_tray=(not args.no_tray))
 
         session.error_observers.append(error_callback)
         session.success_observers.append(success_callback)
@@ -154,9 +180,9 @@ if __name__ == '__main__':
 
     session = Session()
     session.local_port = int(args.local_port)
-    session.restart_command = sys.argv
     session.server_port = args.request_port
     session.server_session_token = args.request_token
 
     app.MainLoop()
     open_port(session, callback)
+
