@@ -165,9 +165,10 @@ class OpenPortItFrame(wx.Frame):
     def startOpenportProcess (self, port):
         session = Session()
         if self.os_interaction.is_compiled():
-            session.restart_command = ['openport_app.exe', 'apps/openport_app.py', '--local-port', '%s' % port]
+            session.restart_command = ['openport_app.exe', '--local-port', '%s' % port]
         else:
             session.restart_command = ['python.exe', 'apps/openport_app.py', '--local-port', '%s' % port]
+        logger.debug(session.restart_command)
 
         self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False)
 
