@@ -5,11 +5,13 @@ import os
 import sys
 import threading
 import urllib
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from apps import openport
 from apps.keyhandling import get_or_create_public_key
 from apps.openport_api import PortForwardResponse
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import xmlrunner
 print sys.path
 
 import apps.openportit
@@ -155,3 +157,5 @@ class IntegrationTest(unittest.TestCase):
         except ValueError, TypeError:
             print "huray!"
 
+if __name__ == '__main__':
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
