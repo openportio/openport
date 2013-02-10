@@ -5,7 +5,7 @@ from services.osinteraction import OsInteraction
 def get_logger(name):
     logger = logging.getLogger(name)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    ch = logging.StreamHandler(strm=stdout)
+    ch = logging.StreamHandler(stdout)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
