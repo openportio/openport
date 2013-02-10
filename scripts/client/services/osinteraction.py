@@ -7,7 +7,10 @@ import sys
 from common.share import Share
 
 
-APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
+try:
+    APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
+except:
+    APP_DATA_PATH = "~/.OpenPort"
 
 #logger = get_logger('OsInteraction')
 
