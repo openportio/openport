@@ -14,7 +14,7 @@ from apps.openport_api import PortForwardResponse
 import xmlrunner
 print sys.path
 
-import apps.openportit
+from apps.openportit import OpenportItApp
 from common.share import Share
 
 TOKEN = 'tokentest'
@@ -51,7 +51,8 @@ class IntegrationTest(unittest.TestCase):
             self.called_back = True
 
         def start_openport_it():
-            apps.openportit.open_port_file(share, callback=callback)
+            app = OpenportItApp()
+            app.open_port_file(share, callback=callback)
         thr = threading.Thread(target=start_openport_it)
         thr.setDaemon(True)
         thr.start()
@@ -97,6 +98,7 @@ class IntegrationTest(unittest.TestCase):
         def download(temp_file_path):
             try:
                 self.downloadAndCheckFile(share, temp_file_path)
+                print "download successful: %s" % temp_file_path
             except Exception, e:
                 self.errors.append(e)
 
@@ -139,15 +141,14 @@ class IntegrationTest(unittest.TestCase):
         self.start_sharing(share)
 
         i = 0
-        while i < 100 and not self.success_called_back:
+        while i < 200 and not self.success_called_back:
             i += 1
             sleep(0.01)
         print "escaped at ",i
         self.assertTrue(self.success_called_back)
         port = share.local_port
 
-        print apps.openportit.clients
-        apps.openportit.clients[port].stop()
+#        apps.openportit.clients[port].stop()
         sleep(30)
         dict = openport.request_port(
             key=get_or_create_public_key(),
