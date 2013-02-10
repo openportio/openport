@@ -26,6 +26,7 @@ class IntegrationTest(unittest.TestCase):
         share = self.get_share(path)
         self.start_sharing(share)
         temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
+        sleep(1)
         self.downloadAndCheckFile(share, temp_file)
 
     def get_share(self, path):

@@ -3,15 +3,12 @@ import sys
 import os
 import urllib, urllib2
 from time import sleep
-import wx
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from services.osinteraction import OsInteraction
 from services.logger_service import get_logger
 
 logger = get_logger('openport_app')
-
-app = wx.App(redirect=False)
 
 os_interaction = None
 
@@ -135,6 +132,8 @@ def add_default_arguments(parser, local_port_required=True):
 
 
 if __name__ == '__main__':
+    import wx
+    app = wx.App(redirect=False)
     init()
     logger.debug('client pid:%s' % os.getpid())
     import argparse
@@ -184,5 +183,9 @@ if __name__ == '__main__':
     session.server_session_token = args.request_token
 
     app.MainLoop()
-    open_port(session, callback)
+
+    def show_error(error_msg):
+        wx.MessageBox(error_msg, 'Error', wx.OK | wx.ICON_ERROR)
+
+    open_port(session, callback, show_error)
 

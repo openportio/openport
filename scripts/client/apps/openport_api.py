@@ -2,7 +2,6 @@
 import os
 
 import sys
-import wx
 from apps.keyhandling import get_or_create_public_key, PUBLIC_KEY_FILE, PRIVATE_KEY_FILE
 from apps.portforwarding import PortForwardingService
 from common.session import Session
@@ -35,8 +34,7 @@ class PortForwardResponse():
         self.account_id = dict['account_id']
         self.key_id = dict['key_id']
         self.session_token = dict['session_token']
-
-def request_open_port(local_port, restart_session_token = '', request_server_port=-1):
+def request_open_port(local_port, restart_session_token = '', request_server_port=-1, error_callback=None):
 
     public_key = get_or_create_public_key()
 
@@ -44,7 +42,8 @@ def request_open_port(local_port, restart_session_token = '', request_server_por
     dict = request_port( public_key, restart_session_token=restart_session_token, request_server_port=request_server_port )
 
     if 'error' in dict:
-        wx.MessageBox('An error has occured:\n%s' %(dict['error']), 'Error', wx.OK | wx.ICON_ERROR)
+        if error_callback:
+            error_callback('An error has occured:\n%s' %(dict['error']))
         sys.exit(8)
     logger.debug(dict)
 
@@ -55,7 +54,7 @@ def request_open_port(local_port, restart_session_token = '', request_server_por
 
     return response
 
-def open_port(session, callback=None):
+def open_port(session, callback=None, error_callback=None):
 
     import threading
     from time import sleep
@@ -65,7 +64,8 @@ def open_port(session, callback=None):
             response = request_open_port(
                 session.local_port,
                 request_server_port=session.server_port,
-                restart_session_token=session.server_session_token
+                restart_session_token=session.server_session_token,
+                error_callback=error_callback
             )
 
             session.server = response.server

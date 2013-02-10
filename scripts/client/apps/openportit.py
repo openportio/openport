@@ -1,7 +1,6 @@
 import os
 import sys
-import wx
-from apps.openport_app import inform_tray_app_new, inform_tray_app_error, inform_tray_app_success, app, \
+from apps.openport_app import inform_tray_app_new, inform_tray_app_error, inform_tray_app_success,  \
     copy_share_to_clipboard, init, get_restart_command, add_default_arguments
 
 from services import crypt_service
@@ -37,6 +36,7 @@ def open_port_file(share, callback=None):
     open_port(share, callback=callback)
 
 if __name__ == '__main__':
+    import wx
 
     init()
     logger.debug('client pid:%s' % os.getpid())
@@ -97,8 +97,6 @@ if __name__ == '__main__':
     share.local_port = args.local_port
     share.server_session_token = args.request_token
 
+    app = wx.App(redirect=False)
     app.MainLoop()
     open_port_file(share, callback)
-
-
-
