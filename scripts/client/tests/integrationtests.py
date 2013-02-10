@@ -15,7 +15,7 @@ import xmlrunner
 print sys.path
 
 import apps.openportit
-from tray.dbhandler import Share
+from common.share import Share
 
 TOKEN = 'tokentest'
 
