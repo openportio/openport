@@ -5,6 +5,8 @@ import os
 import sys
 import threading
 import urllib
+import urllib, urllib2
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from apps import openport
@@ -107,7 +109,7 @@ class IntegrationTest(unittest.TestCase):
         thr2 = threading.Thread(target=download, args=[temp_file_path_2])
         thr2.setDaemon(True)
 
-	sleep(3)
+        sleep(3)
         thr1.start()
         thr2.start()
 
@@ -129,7 +131,6 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(0, len(self.errors))
 
     def testSamePort(self):
-        #todo: add webservice to keyhandler to fill in the pids for the sessions.
         path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
         share = self.get_share(path)
         self.success_called_back = False
@@ -149,7 +150,12 @@ class IntegrationTest(unittest.TestCase):
         port = share.local_port
 
 #        apps.openportit.clients[port].stop()
-        sleep(30)
+        url = 'http://www.openport.be/debug/linkSessionsToPids'
+        data = urllib.urlencode({'key': 'batterycupspoon',})
+        req = urllib2.Request(url, data)
+        response = urllib2.urlopen(req).read()
+        self.assertEqual('done', response)
+
         dict = openport.request_port(
             key=get_or_create_public_key(),
             restart_session_token=share.server_session_token,
