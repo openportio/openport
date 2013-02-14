@@ -147,14 +147,13 @@ class IntegrationTest(unittest.TestCase):
             sleep(0.01)
         print "escaped at ",i
         self.assertTrue(self.success_called_back)
-        port = share.local_port
+        port = share.server_port
 
-#        apps.openportit.clients[port].stop()
-        url = 'http://www.openport.be/debug/linkSessionsToPids'
-        data = urllib.urlencode({'key': 'batterycupspoon',})
-        req = urllib2.Request(url, data)
+        # apparently, the request is not needed, but hey, lets keep it.
+        url = 'http://www.openport.be/debug/linkSessionsToPids?key=batterycupspoon'
+        req = urllib2.Request(url)
         response = urllib2.urlopen(req).read()
-        self.assertEqual('done', response)
+        self.assertEqual('done', response.strip())
 
         dict = openport.request_port(
             key=get_or_create_public_key(),
@@ -163,6 +162,14 @@ class IntegrationTest(unittest.TestCase):
         )
         response = PortForwardResponse(dict)
         self.assertEqual(port, response.remote_port)
+
+        dict = openport.request_port(
+            key=get_or_create_public_key(),
+            restart_session_token='not the same token',
+            request_server_port=port
+        )
+        response = PortForwardResponse(dict)
+        self.assertNotEqual(port, response.remote_port)
 
 
 
