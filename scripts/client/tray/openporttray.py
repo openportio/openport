@@ -4,13 +4,11 @@ import sys
 import threading
 import time
 import datetime
-import wx
 import urllib2
 
-from tray.server import start_server_thread
-from tray.trayicon import OpenPortItTaskBarIcon
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from tray.server import start_server_thread, start_server
 from tray.dbhandler import DBHandler
-from tray.shares_frame import SharesFrame
 from services.osinteraction import OsInteraction
 from tray.globals import Globals
 from services.logger_service import get_logger
@@ -24,8 +22,6 @@ class OpenPortDispatcher():
     def __init__(self):
         self.share_processes = {}
         self.dbhandler = DBHandler()
-
-        start_server_thread(onNewShare=self.onNewShare)
         self.os_interaction = OsInteraction()
         self.globals = Globals()
         self.start_account_checking()
@@ -58,8 +54,6 @@ class OpenPortDispatcher():
 
     def onNewShare(self, share):
         logger.info( "adding share %s" % share.id )
-        callbacks = {'stop': self.stop_sharing}
-        self.shares_frame.add_share(share, callbacks=callbacks)
         share.success_observers.append(self.onShareSuccess)
         share.error_observers.append(self.onShareError)
 
@@ -128,8 +122,9 @@ class OpenPortDispatcher():
 class GuiOpenPortDispatcher(OpenPortDispatcher):
     def __init__(self):
         super(OpenPortDispatcher, self).__init__
-        self.viewShares(None)
+        from tray.shares_frame import SharesFrame
         self.shares_frame = SharesFrame(self, -1, "OpenPort")
+        self.viewShares(None)
 
     def stop_sharing(self,share):
         super(OpenPortDispatcher, self).stop_sharing(share)
@@ -146,6 +141,10 @@ class GuiOpenPortDispatcher(OpenPortDispatcher):
         super(OpenPortDispatcher, self).onShareSuccess(share)
         self.shares_frame.notify_success(share)
 
+    def onNewShare(self, share):
+        super(OpenPortDispatcher, self).onNewShare(share)
+        callbacks = {'stop': self.stop_sharing}
+        self.shares_frame.add_share(share, callbacks=callbacks)
 
 
 def utc_epoch_to_local_datetime(utc_epoch):
@@ -162,12 +161,17 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.no_gui:
-        import daemon
-        with daemon.DaemonContext():
+       # import daemon
+      #  with daemon.DaemonContext():
             dispatcher = OpenPortDispatcher()
+            start_server(onNewShareFunc=dispatcher.onNewShare)
+        
     else:
+        import wx        
         app = wx.App(False)
         dispatcher = GuiOpenPortDispatcher()
+        start_server_thread(onNewShare=dispatcher.onNewShare)
+        
 
     if not args.dont_restart_shares:
         dispatcher.restart_sharing()

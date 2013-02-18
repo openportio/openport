@@ -89,7 +89,7 @@ class OsInteraction():
     def get_app_data_path(self, filename=''):
         try:
             os.makedirs(APP_DATA_PATH)
-        except WindowsError:
+        except Exception:
             pass
         return os.path.join(APP_DATA_PATH, filename)
 

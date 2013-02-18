@@ -131,8 +131,6 @@ class OpenportApp():
 
 
     def start(self):
-        import wx
-        app = wx.App(redirect=False)
         self.init()
         logger.debug('client pid:%s' % os.getpid())
         import argparse
@@ -144,6 +142,7 @@ class OpenportApp():
         args = parser.parse_args()
 
         def show_message_box(session):
+            import wx
             wx.MessageBox('Your local port %s is now reachable on %s' % ( session.local_port, session.get_link()), 'Info',
                 wx.OK | wx.ICON_INFORMATION)
 
@@ -180,7 +179,7 @@ class OpenportApp():
         session.server_port = args.request_port
         session.server_session_token = args.request_token
 
-        app.MainLoop()
+#        app.MainLoop()
 
         def show_error(error_msg):
             wx.MessageBox(error_msg, 'Error', wx.OK | wx.ICON_ERROR)

@@ -2,7 +2,6 @@ import cgi, urlparse
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import threading
 import traceback
-import wx
 from common.session import Session
 from dbhandler import DBHandler
 from globals import Globals
@@ -55,7 +54,7 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
 
                     save_request(share)
                     if onNewShare:
-                        wx.CallAfter(onNewShare, share)
+                        onNewShare(share)
                     global shares
                     shares[share.local_port] = share
                     logger.debug('added new share')
