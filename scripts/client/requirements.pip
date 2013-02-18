@@ -4,3 +4,4 @@ unittest-xml-reporting
 pyopenssl
 ext_http_server
 pysqlite
+python-deamon

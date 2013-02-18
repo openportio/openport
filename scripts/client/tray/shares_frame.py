@@ -19,10 +19,10 @@ class SharesFrame(wx.Frame):
     def onClose(self, evt):
         self.Hide()
 
-    def __init__(self, parent, id, title):
+    def __init__(self, parent, id, title, application):
         wx.Frame.__init__(self, parent, -1, title,
             style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
-        self.application = parent
+        self.application = application
         self.addMenuBar()
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
@@ -32,6 +32,21 @@ class SharesFrame(wx.Frame):
         iconFile = self.os_interaction.get_resource_path('logo-base.ico')
         icon = wx.Icon(iconFile, wx.BITMAP_TYPE_ICO)
         self.SetIcon(icon)
+
+        self.addTrayIcon()
+
+    def exitApp(self,event):
+        self.tbicon.RemoveIcon()
+        self.tbicon.Destroy()
+        self.application.exitApp(event)
+
+    def addTrayIcon(self):
+        self.tbicon = OpenPortItTaskBarIcon(self)
+        self.tbicon.addItem('View shares', self.viewShares)
+        self.tbicon.menu.AppendSeparator()
+        self.tbicon.addItem('Exit', self.exitApp)
+        self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.viewShares)
+
 
     def addMenuBar(self):
         menubar = wx.MenuBar()
@@ -49,6 +64,30 @@ class SharesFrame(wx.Frame):
         menubar.Append(file, '&File')
 #        menubar.Append(help, '&Help')
         self.SetMenuBar(menubar)
+
+    def showOpenportItDialog(self, event):
+        dlg = wx.FileDialog(
+            self, message="Choose a file to share",
+            defaultFile="",
+            wildcard="*",
+            style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR
+        )
+        if dlg.ShowModal() == wx.ID_OK:
+            paths = dlg.GetPaths()
+            for path in paths:
+                self.application.startOpenportItProcess(path)
+        dlg.Destroy()
+
+    def showOpenportDialog(self, event):
+        dialog = wx.NumberEntryDialog(self,
+            'Choose a port you want to open',
+            '( 1 - 65535 )',
+            'Openport - Choose a port you want to open', 80, 1, 65535)
+        dialog.ShowModal()
+
+        if dialog.GetReturnCode() == wx.ID_OK:
+            self.application.startOpenportProcess(dialog.GetValue())
+
 
     def rebuild(self):
         self.share_panels = {}

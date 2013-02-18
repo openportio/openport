@@ -17,20 +17,15 @@ from services.logger_service import get_logger
 from common.share import Share
 from common.session import Session
 
-logger = get_logger('application')
+logger = get_logger('OpenPortDispatcher')
 
-class OpenPortItFrame(wx.Frame):
+class OpenPortDispatcher():
 
-    def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, -1, title, size = (200, 150),
-            style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
-
+    def __init__(self):
         self.share_processes = {}
         self.dbhandler = DBHandler()
 
-        self.addTrayIcon()
         start_server_thread(onNewShare=self.onNewShare)
-        self.shares_frame = SharesFrame(self, -1, "OpenPort")
         self.os_interaction = OsInteraction()
         self.globals = Globals()
         self.start_account_checking()
@@ -38,22 +33,7 @@ class OpenPortItFrame(wx.Frame):
             sys.stdout = open(self.os_interaction.get_app_data_path('application.out.log'), 'a')
             sys.stderr = open(self.os_interaction.get_app_data_path('application.error.log'), 'a')
 
-        iconFile = self.os_interaction.get_resource_path('logo-base.ico')
-        icon = wx.Icon(iconFile, wx.BITMAP_TYPE_ICO)
-        self.SetIcon(icon)
-
-        self.viewShares(None)
-
-    def addTrayIcon(self):
-        self.tbicon = OpenPortItTaskBarIcon(self)
-        self.tbicon.addItem('View shares', self.viewShares)
-        self.tbicon.menu.AppendSeparator()
-        self.tbicon.addItem('Exit', self.exitApp)
-        self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.viewShares)
-
     def exitApp(self,event):
-        self.tbicon.RemoveIcon()
-        self.tbicon.Destroy()
         for pid in self.share_processes:
             p = self.os_interaction.kill_pid(pid)
             logger.info("kill pid %s successful: %s" % (pid, p))
@@ -75,10 +55,6 @@ class OpenPortItFrame(wx.Frame):
         logger.info("stopping %s" % share.id)
         self.os_interaction.kill_pid(share.pid)
         self.dbhandler.stop_share(share)
-        self.shares_frame.remove_share(share)
-
-    def viewShares(self, event):
-        self.shares_frame.Show(True)
 
     def onNewShare(self, share):
         logger.info( "adding share %s" % share.id )
@@ -90,10 +66,10 @@ class OpenPortItFrame(wx.Frame):
         self.share_processes[share.pid]=None
 
     def onShareError(self, share):
-        self.shares_frame.notify_error(share)
+        pass
 
     def onShareSuccess(self, share):
-        self.shares_frame.notify_success(share)
+        pass
 
     def start_account_checking(self):
 
@@ -129,19 +105,6 @@ class OpenPortItFrame(wx.Frame):
             raise detail
             #sys.exit(9)
 
-    def showOpenportItDialog(self, event):
-        dlg = wx.FileDialog(
-            self, message="Choose a file to share",
-            defaultFile="",
-            wildcard="*",
-            style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR
-        )
-        if dlg.ShowModal() == wx.ID_OK:
-            paths = dlg.GetPaths()
-            for path in paths:
-                self.startOpenportItProcess(path)
-        dlg.Destroy()
-
     def startOpenportItProcess (self, path):
         share = Share()
         share.filePath = path
@@ -151,16 +114,6 @@ class OpenPortItFrame(wx.Frame):
             share.restart_command = ['python.exe', 'apps/openportit.py', path]
 
         self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False)
-
-    def showOpenportDialog(self, event):
-        dialog = wx.NumberEntryDialog(self,
-            'Choose a port you want to open',
-            '( 1 - 65535 )',
-            'Openport - Choose a port you want to open', 80, 1, 65535)
-        dialog.ShowModal()
-
-        if dialog.GetReturnCode() == wx.ID_OK:
-            self.startOpenportProcess(dialog.GetValue())
 
     def startOpenportProcess (self, port):
         session = Session()
@@ -172,33 +125,59 @@ class OpenPortItFrame(wx.Frame):
 
         self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False)
 
-def main():
-    logger.debug('server pid:%s' % os.getpid() )
+class GuiOpenPortDispatcher(OpenPortDispatcher):
+    def __init__(self):
+        super(OpenPortDispatcher, self).__init__
+        self.viewShares(None)
+        self.shares_frame = SharesFrame(self, -1, "OpenPort")
 
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--restart-shares', action='store_true', help='Restart all active shares.')
-#    parser.add_argument('--tray-port', type=int, default=8001, help='Specify the port to run on.')
-    args = parser.parse_args()
-    #start_app(args.restart_shares)
-    start_app(True)
+    def stop_sharing(self,share):
+        super(OpenPortDispatcher, self).stop_sharing(share)
+        self.shares_frame.remove_share(share)
+
+    def viewShares(self, event):
+        self.shares_frame.Show(True)
+
+    def onShareError(self, share):
+        super(OpenPortDispatcher, self).onShareError(share)
+        self.shares_frame.notify_error(share)
+
+    def onShareSuccess(self, share):
+        super(OpenPortDispatcher, self).onShareSuccess(share)
+        self.shares_frame.notify_success(share)
+
+
 
 def utc_epoch_to_local_datetime(utc_epoch):
     return datetime.datetime(*time.localtime(utc_epoch)[0:6])
 
-def start_app(restart_shares):
-    app = wx.App(False)
-    frame = OpenPortItFrame(None, -1, ' ')
+if __name__ == '__main__':
+    logger.debug('server pid:%s' % os.getpid() )
 
-    if restart_shares:
-        frame.restart_sharing()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dont-restart-shares', action='store_false', help='Restart all active shares.')
+    parser.add_argument('--no-gui', action='store_true', help='Start the application headless.')
+    #    parser.add_argument('--tray-port', type=int, default=8001, help='Specify the port to run on.')
+    args = parser.parse_args()
+
+    if args.no_gui:
+        import daemon
+        with daemon.DaemonContext():
+            dispatcher = OpenPortDispatcher()
+    else:
+        app = wx.App(False)
+        dispatcher = GuiOpenPortDispatcher()
+
+    if not args.dont_restart_shares:
+        dispatcher.restart_sharing()
 
     import signal
     def handleSigTERM():
-        frame.exitApp(None)
+        dispatcher.exitApp(None)
     signal.signal(signal.SIGTERM, handleSigTERM)
 
-    app.MainLoop()
+    if not args.no_gui:
+        app.MainLoop()
 
-if __name__ == '__main__':
-    main()
+

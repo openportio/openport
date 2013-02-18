@@ -16,3 +16,7 @@ sass_stdlib.xml
 /openport.log
 
 /scripts/client/tests/test-reports/*.xml
+
+/scripts/client/env/*
+
+**/.idea/*
