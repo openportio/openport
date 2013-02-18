@@ -100,8 +100,10 @@ class OpenportApp():
     def get_restart_command(self, session):
         command = []
         if sys.argv[0][-3:] == '.py':
-            command.extend(['python.exe'])
+            command.extend(['python'])
         command.extend(sys.argv)
+        if os.path.exists('env/bin/python'):
+            command[0] = 'env/bin/python'
 
         #if not '--tray-port' in command:
         #    command.extend(['--tray-port', '%s' % tray_port] )

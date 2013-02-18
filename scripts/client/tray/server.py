@@ -114,4 +114,5 @@ def start_server_thread(onNewShare=None):
     t.start()
 
 if __name__ == '__main__':
+    print sys.argv
     start_server()

@@ -5,6 +5,7 @@ import threading
 import time
 import datetime
 import urllib2
+from time import sleep
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from tray.server import start_server_thread, start_server
@@ -88,12 +89,7 @@ class OpenPortDispatcher():
             dict = json.loads(response)
             if 'error' in dict:
                 logger.error( dict['error'] )
-            else:
-                self.shares_frame.update_account(
-                    bytes_this_month = dict['bytes_this_month'],
-                    next_counter_reset_time = utc_epoch_to_local_datetime(dict['next_counter_reset_time']),
-                    max_bytes = dict['max_bytes'],
-                )
+            return dict
         except Exception, detail:
             logger.error( "An error has occurred while communicating the the openport servers. %s" % detail )
             raise detail
@@ -105,7 +101,7 @@ class OpenPortDispatcher():
         if self.os_interaction.is_compiled():
             share.restart_command = ['openportit.exe', path]
         else:
-            share.restart_command = ['python.exe', 'apps/openportit.py', path]
+            share.restart_command = ['python', 'apps/openportit.py', path]
 
         self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False)
 
@@ -114,7 +110,7 @@ class OpenPortDispatcher():
         if self.os_interaction.is_compiled():
             session.restart_command = ['openport_app.exe', '--local-port', '%s' % port]
         else:
-            session.restart_command = ['python.exe', 'apps/openport_app.py', '--local-port', '%s' % port]
+            session.restart_command = ['python', 'apps/openport_app.py', '--local-port', '%s' % port]
         logger.debug(session.restart_command)
 
         self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False)
@@ -145,6 +141,16 @@ class GuiOpenPortDispatcher(OpenPortDispatcher):
         super(OpenPortDispatcher, self).onNewShare(share)
         callbacks = {'stop': self.stop_sharing}
         self.shares_frame.add_share(share, callbacks=callbacks)
+        
+    def check_account(self):
+        dict = super(OpenPortDispatcher, self).check_account()
+        if not 'error' in dict:
+            self.shares_frame.update_account(
+                bytes_this_month = dict['bytes_this_month'],
+                next_counter_reset_time = utc_epoch_to_local_datetime(dict['next_counter_reset_time']),
+                max_bytes = dict['max_bytes'],
+            )
+
 
 
 def utc_epoch_to_local_datetime(utc_epoch):
@@ -155,7 +161,7 @@ if __name__ == '__main__':
 
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dont-restart-shares', action='store_false', help='Restart all active shares.')
+    parser.add_argument('--dont-restart-shares', action='store_false', dest='restart_shares', help='Restart all active shares.')
     parser.add_argument('--no-gui', action='store_true', help='Start the application headless.')
     #    parser.add_argument('--tray-port', type=int, default=8001, help='Specify the port to run on.')
     args = parser.parse_args()
@@ -164,16 +170,14 @@ if __name__ == '__main__':
        # import daemon
       #  with daemon.DaemonContext():
             dispatcher = OpenPortDispatcher()
-            start_server(onNewShareFunc=dispatcher.onNewShare)
-        
     else:
         import wx        
         app = wx.App(False)
         dispatcher = GuiOpenPortDispatcher()
-        start_server_thread(onNewShare=dispatcher.onNewShare)
-        
 
-    if not args.dont_restart_shares:
+    start_server_thread(onNewShare=dispatcher.onNewShare)
+        
+    if args.restart_shares:
         dispatcher.restart_sharing()
 
     import signal
@@ -181,7 +185,11 @@ if __name__ == '__main__':
         dispatcher.exitApp(None)
     signal.signal(signal.SIGTERM, handleSigTERM)
 
-    if not args.no_gui:
+
+    if args.no_gui:
+        while True:
+            sleep(1)        
+    else:
         app.MainLoop()
 
 

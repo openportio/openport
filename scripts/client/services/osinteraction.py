@@ -57,6 +57,9 @@ class OsInteraction():
                 return e.errno != errno.ESRCH
             else:
                 return True
+                
+    def is_linux(self):
+        return platform.system() != 'Windows'
 
     def kill_pid(self, pid):
         if platform.system() == 'Windows':
@@ -67,12 +70,13 @@ class OsInteraction():
             return true
 
     def is_compiled(self):
-        return sys.argv[0][-3:] == 'exe'
+        return not self.is_linux() and sys.argv[0][-3:] == 'exe'
 
     def get_app_name(self):
         return os.path.basename(sys.argv[0])
 
     def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
+        print share.restart_command
         p = subprocess.Popen( share.restart_command,
             bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0)
