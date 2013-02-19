@@ -10,7 +10,7 @@ from time import sleep
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from tray.server import start_server_thread, start_server
 from tray.dbhandler import DBHandler
-from services.osinteraction import OsInteraction
+from services import osinteraction
 from tray.globals import Globals
 from services.logger_service import get_logger
 from common.share import Share
@@ -23,7 +23,7 @@ class OpenPortDispatcher():
     def __init__(self):
         self.share_processes = {}
         self.dbhandler = DBHandler()
-        self.os_interaction = OsInteraction()
+        self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
         self.start_account_checking()
         if self.os_interaction.is_compiled():

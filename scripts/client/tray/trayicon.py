@@ -1,5 +1,5 @@
 import wx
-from services.osinteraction import OsInteraction
+from services import osinteraction
 import os
 
 class OpenPortItTaskBarIcon(wx.TaskBarIcon):
@@ -7,9 +7,9 @@ class OpenPortItTaskBarIcon(wx.TaskBarIcon):
     def __init__(self, parent):
         wx.TaskBarIcon.__init__(self)
         self.parentApp = parent
-        osinteraction = OsInteraction()
+        self.os_interaction = osinteraction.getInstance()
 
-        self.icon = wx.Icon(osinteraction.get_resource_path('logo-base.ico'), wx.BITMAP_TYPE_ICO)
+        self.icon = wx.Icon(self.os_interaction.get_resource_path('logo-base.ico'), wx.BITMAP_TYPE_ICO)
         self.SetIcon(self.icon, "OpenPort-It")
         self.CreateMenu()
         self.items = {}

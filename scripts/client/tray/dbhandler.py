@@ -3,12 +3,12 @@ import pickle
 from pysqlite2 import dbapi2 as sqlite
 from common.share import Share
 from common.session import Session
-from services.osinteraction import OsInteraction
+from services import osinteraction
 
 class DBHandler():
 
     def __init__(self):
-        self.os_interaction = OsInteraction()
+        self.os_interaction = osinteraction.getInstance()
         self.connection = sqlite.connect(self.os_interaction.get_app_data_path('openport.db'))
         self.cursor = self.connection.cursor()
         self.init_db()

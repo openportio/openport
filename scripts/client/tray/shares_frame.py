@@ -4,10 +4,11 @@ import wx
 from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
 from common.share import Share
-from services.osinteraction import OsInteraction
+from services import osinteraction
 from tray.globals import Globals
 from services.logger_service import get_logger
 from services import qr_service, image_service
+from tray.trayicon import OpenPortItTaskBarIcon
 
 logger = get_logger(__name__)
 
@@ -21,12 +22,12 @@ class SharesFrame(wx.Frame):
 
     def __init__(self, parent, id, title, application):
         wx.Frame.__init__(self, parent, -1, title,
-            style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+                          style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
         self.application = application
         self.addMenuBar()
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        self.os_interaction = OsInteraction()
+        self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
 
         iconFile = self.os_interaction.get_resource_path('logo-base.ico')
@@ -46,7 +47,6 @@ class SharesFrame(wx.Frame):
         self.tbicon.menu.AppendSeparator()
         self.tbicon.addItem('Exit', self.exitApp)
         self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.viewShares)
-
 
     def addMenuBar(self):
         menubar = wx.MenuBar()
@@ -272,7 +272,7 @@ class ImagePanel(wx.Panel):
             dc.DrawBitmap(self.image.ConvertToBitmap(), 0,0)
 
 def main():
-    from openporttray.dbhandler import DBHandler
+    from tray.dbhandler import DBHandler
 
     def stop_sharing(share):
         logger.info( "stopping %s" % share.id )

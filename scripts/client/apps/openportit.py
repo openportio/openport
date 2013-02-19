@@ -7,7 +7,7 @@ from common.share import Share
 from services.logger_service import get_logger
 from apps.servefile import serve_file_on_port
 from apps.openport_api import open_port
-
+from time import sleep
 logger = get_logger('openportit')
 
 def get_open_port():
@@ -32,9 +32,6 @@ class OpenportItApp(OpenportApp):
         open_port(share, callback=callback)
 
     def start(self):
-        import wx
-
-        self.init()
         logger.debug('client pid:%s' % os.getpid())
         import argparse
 
@@ -43,8 +40,13 @@ class OpenportItApp(OpenportApp):
         parser.add_argument('--file-token', default='', help='The token needed to download the file.')
         parser.add_argument('filename', help='The file you want to openport.')
         args = parser.parse_args()
+        if args.no_gui:
+            args.hide_message = True
+            args.no_clipboard = True
+        self.args = args
 
         def show_message_box(share):
+            import wx
             wx.MessageBox('You can now download your file(s) from %s\nThis link has been copied to your clipboard.' % (
             share.get_link()), 'Info', wx.OK | wx.ICON_INFORMATION)
 
@@ -55,6 +57,7 @@ class OpenportItApp(OpenportApp):
             return command
 
         self.first_time = True
+
         def callback(ignore):
 #            global first_time
             if not self.first_time:
@@ -65,23 +68,15 @@ class OpenportItApp(OpenportApp):
             if args.tray_port > 0:
                 self.inform_tray_app_new(share, args.tray_port, start_tray=(not args.no_tray))
 
-            share.error_observers.append(error_callback)
-            share.success_observers.append(success_callback)
+            share.error_observers.append(self.error_callback)
+            share.success_observers.append(self.success_callback)
 
             if not args.no_clipboard:
                 self.copy_share_to_clipboard(share)
-            if not args.hide_message:
+            if args.hide_message:
+                logger.info('Your file can be downloaded from %s' % share.get_link())
+            else:
                 self.show_message_box(share)
-
-        def error_callback(share):
-            logger.debug('error')
-            if args.tray_port > 0:
-                self.inform_tray_app_error(share, args.tray_port)
-
-        def success_callback(share):
-            logger.debug('success')
-            if args.tray_port > 0:
-                self.inform_tray_app_success(share, args.tray_port)
 
         share = Share()
         if args.file_token == '':
@@ -93,9 +88,10 @@ class OpenportItApp(OpenportApp):
         share.local_port = args.local_port
         share.server_session_token = args.request_token
 
-        app = wx.App(redirect=False)
-        app.MainLoop()
         self.open_port_file(share, callback)
+
+        while True:
+            sleep(1)
 
 if __name__ == '__main__':
     app = OpenportItApp()
