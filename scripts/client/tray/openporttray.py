@@ -57,8 +57,9 @@ class OpenPortDispatcher():
         logger.info( "adding share %s" % share.id )
         share.success_observers.append(self.onShareSuccess)
         share.error_observers.append(self.onShareError)
+        share.stop_observers.append(self.stop_sharing)
 
-        self.share_processes[share.pid]=None
+        self.share_processes[share.pid] = None
 
     def onShareError(self, share):
         pass
@@ -117,33 +118,33 @@ class OpenPortDispatcher():
 
 class GuiOpenPortDispatcher(OpenPortDispatcher):
     def __init__(self):
-        super(OpenPortDispatcher, self).__init__
+        super(GuiOpenPortDispatcher, self).__init__()
         from tray.shares_frame import SharesFrame
         self.shares_frame = SharesFrame(self, -1, "OpenPort")
         self.viewShares(None)
 
     def stop_sharing(self,share):
-        super(OpenPortDispatcher, self).stop_sharing(share)
+        super(GuiOpenPortDispatcher, self).stop_sharing(share)
         self.shares_frame.remove_share(share)
 
     def viewShares(self, event):
         self.shares_frame.Show(True)
 
     def onShareError(self, share):
-        super(OpenPortDispatcher, self).onShareError(share)
+        super(GuiOpenPortDispatcher, self).onShareError(share)
         self.shares_frame.notify_error(share)
 
     def onShareSuccess(self, share):
-        super(OpenPortDispatcher, self).onShareSuccess(share)
+        super(GuiOpenPortDispatcher, self).onShareSuccess(share)
         self.shares_frame.notify_success(share)
 
     def onNewShare(self, share):
-        super(OpenPortDispatcher, self).onNewShare(share)
+        super(GuiOpenPortDispatcher, self).onNewShare(share)
         callbacks = {'stop': self.stop_sharing}
         self.shares_frame.add_share(share, callbacks=callbacks)
         
     def check_account(self):
-        dict = super(OpenPortDispatcher, self).check_account()
+        dict = super(GuiOpenPortDispatcher, self).check_account()
         if not 'error' in dict:
             self.shares_frame.update_account(
                 bytes_this_month = dict['bytes_this_month'],

@@ -77,6 +77,15 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
                 else:
                     shares[dict['local_port']].notify_error()
                     self.write_response('ok')
+            elif self.path.endswith('stopShare'):
+                logger.debug('stopShare')
+                if not dict['local_port'] in shares:
+                    logger.error('unknown key: %s in shares %s' % (dict['local_port'], shares))
+                    self.write_response('unknown')
+                else:
+                    shares[dict['local_port']].notify_stop()
+                    self.write_response('ok')
+
 
         except Exception, e:
             logger.exception(e)

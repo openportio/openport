@@ -20,6 +20,7 @@ class Session(object):
 
         self.success_observers = []
         self.error_observers = []
+        self.stop_observers = []
 
     def get_link(self):
         return '%s:%s' % (self.server, self.server_port)
@@ -47,7 +48,10 @@ class Session(object):
             self.id = ''
         self.server = dict['server']
         self.server_port = dict['server_port']
-        self.pid = dict['pid']
+        try:
+            self.pid = int(dict['pid'])
+        except ValueError, e:
+            self.pid = dict['pid']
         self.active = dict['active']
         self.account_id = dict['account_id']
         self.key_id = dict['key_id']
@@ -61,4 +65,8 @@ class Session(object):
 
     def notify_error(self):
         for observer in self.error_observers:
+            observer(self)
+
+    def notify_stop(self):
+        for observer in self.stop_observers:
             observer(self)

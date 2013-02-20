@@ -19,7 +19,11 @@ def get_open_port():
     s.close()
     return port
 
+
 class OpenportItApp(OpenportApp):
+
+    def __init__(self):
+        super(OpenportItApp, self).__init__()
 
     def open_port_file(self, share, callback=None):
         import threading
@@ -88,6 +92,7 @@ class OpenportItApp(OpenportApp):
         share.local_port = args.local_port
         share.server_session_token = args.request_token
 
+        self.session = share
         self.open_port_file(share, callback)
 
         while True:

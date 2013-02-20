@@ -3,6 +3,7 @@ import os
 import platform
 import subprocess
 import sys
+import signal
 #from services.logger_service import get_logger  #creates a circular reference
 
 #logger = get_logger('OsInteraction')
@@ -76,7 +77,7 @@ class LinuxOsInteraction(OsInteraction):
             return True
 
     def kill_pid(self, pid):
-        os.kill(pid)
+        os.kill(pid, signal.SIGKILL)
         return True
 
     def is_compiled(self):

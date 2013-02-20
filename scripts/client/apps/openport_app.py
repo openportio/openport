@@ -3,6 +3,7 @@ import sys
 import os
 import urllib, urllib2
 from time import sleep
+import signal
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from services import osinteraction
@@ -18,7 +19,7 @@ def quote_path(path):
     return os.sep.join(quoted)
 
 
-class OpenportApp():
+class OpenportApp(object):
 
     def __init__(self):
         self.tray_app_started = False
@@ -26,6 +27,25 @@ class OpenportApp():
         if self.os_interaction.is_compiled():
             sys.stdout = open(self.os_interaction.get_app_data_path('apps.out.log'), 'a')
             sys.stderr = open(self.os_interaction.get_app_data_path('apps.error.log'), 'a')
+        signal.signal(signal.SIGINT, self.handleSigTERM)
+
+    def handleSigTERM(self, signum, frame):
+        logger.debug('got signal %s' % signum)
+        if self.tray_app_started and self.session:
+            self.inform_tray_app_stop(self.session, self.args.tray_port)
+        exit(3)
+
+    def inform_tray_app_stop(self, share, tray_port, start_tray=True):
+        logger.debug('Informing tray we\'re stopping.')
+        url = 'http://127.0.0.1:%s/stopShare' % tray_port
+        try:
+            data = urllib.urlencode(share.as_dict())
+            req = urllib2.Request(url, data)
+            response = urllib2.urlopen(req).read()
+            if response.strip() != 'ok':
+                logger.error(response)
+        except Exception, detail:
+            logger.error( "An error has occured while informing the tray: %s" % detail )
 
     def start_tray_application(self):
         if self.tray_app_started:
@@ -52,7 +72,7 @@ class OpenportApp():
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req).read()
+            response = urllib2.urlopen(req, timeout=5).read()
             if response.strip() != 'ok':
                 logger.error(response)
             else:
@@ -186,6 +206,7 @@ class OpenportApp():
         def show_error(error_msg):
             import wx
             wx.MessageBox(error_msg, 'Error', wx.OK | wx.ICON_ERROR)
+        self.session = session
 
         open_port(session, callback, show_error)
 
