@@ -6,6 +6,7 @@ import time
 import datetime
 import urllib2
 from time import sleep
+from tray import dbhandler
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from tray.server import start_server_thread, start_server
@@ -22,7 +23,7 @@ class OpenPortDispatcher():
 
     def __init__(self):
         self.share_processes = {}
-        self.dbhandler = DBHandler()
+        self.dbhandler = dbhandler.getInstance()
         self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
         self.start_account_checking()

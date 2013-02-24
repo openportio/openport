@@ -271,7 +271,7 @@ class ImagePanel(wx.Panel):
         if self.image:
             dc.DrawBitmap(self.image.ConvertToBitmap(), 0,0)
 
-def main():
+if __name__ == '__main__':
     from tray.dbhandler import DBHandler
 
     def stop_sharing(share):
@@ -283,9 +283,10 @@ def main():
 
     app = wx.App(False)
     frame = SharesFrame(None, -1, ' ')
-    dbhandler = DBHandler()
+    import dbhandler
+    db_handler = dbhandler.getInstance()
 
-    shares = dbhandler.get_shares()
+    shares = db_handler.get_shares()
     callbacks = {'stop': add_share1}
     share1 = shares[0]
 
@@ -293,12 +294,9 @@ def main():
         frame.add_share(share, callbacks=callbacks)
         callbacks = {'stop': stop_sharing}
 
-
     #    frame.Show(False)
     frame.Show(True)
     app.MainLoop()
 
     pass
 
-if __name__ == '__main__':
-    main()
