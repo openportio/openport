@@ -76,7 +76,7 @@ class OsInteraction():
         return os.path.basename(sys.argv[0])
 
     def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
-        print share.restart_command
+#        print share.restart_command
         p = subprocess.Popen( share.restart_command,
             bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=None,
             close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False, startupinfo=None, creationflags=0)
@@ -103,5 +103,9 @@ class OsInteraction():
         s.wait()
         return '%s%s' % (s.stdout.read(), s.stderr.read())
 
-
+    def get_application_dir(self):
+        if self.is_compiled():
+            return os.path.abspath(os.path.dirname(os.path.dirname(__file__))) #todo: verify
+        else:
+            return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 

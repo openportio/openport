@@ -6,6 +6,7 @@ from wx._gdi import PaintDC
 from common.share import Share
 from services.osinteraction import OsInteraction
 from tray.globals import Globals
+from tray.trayicon import OpenPortItTaskBarIcon
 from services.logger_service import get_logger
 from services import qr_service, image_service
 
@@ -42,10 +43,10 @@ class SharesFrame(wx.Frame):
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)
-        self.tbicon.addItem('View shares', self.viewShares)
+        self.tbicon.addItem('View shares', self.application.viewShares)
         self.tbicon.menu.AppendSeparator()
         self.tbicon.addItem('Exit', self.exitApp)
-        self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.viewShares)
+        self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.application.viewShares)
 
 
     def addMenuBar(self):
@@ -53,10 +54,10 @@ class SharesFrame(wx.Frame):
         file = wx.Menu()
 #        help = wx.Menu()
         file.Append(101, '&New share', 'Share a new document')
-        self.Bind(wx.EVT_MENU, self.application.showOpenportItDialog, id=101)
+        self.Bind(wx.EVT_MENU, self.showOpenportItDialog, id=101)
 
         file.Append(102, '&Open Port', 'Open a new port')
-        self.Bind(wx.EVT_MENU, self.application.showOpenportDialog, id=102)
+        self.Bind(wx.EVT_MENU, self.showOpenportDialog, id=102)
         file.AppendSeparator()
         quit = wx.MenuItem(file, 105, '&Quit\tCtrl+Q', 'Quit the Application')
         self.Bind(wx.EVT_MENU, self.application.exitApp, id=105)
