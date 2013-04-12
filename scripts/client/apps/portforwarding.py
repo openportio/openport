@@ -80,9 +80,9 @@ class PortForwardingService:
             logger.info('Now forwarding remote port %s:%d to localhost:%d...' % (self.server, self.remote_port, self.local_port))
 
             self.keep_alive()
-        except KeyboardInterrupt:
+        except KeyboardInterrupt, e:
             logger.info( 'C-c: Port forwarding stopped.' )
-            sys.exit(0)
+#            sys.exit(0)
 
     def keep_alive(self):
         errorCount = 0

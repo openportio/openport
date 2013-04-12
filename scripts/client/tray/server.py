@@ -2,11 +2,13 @@ import cgi, urlparse
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import threading
 import traceback
+import sys
 from common.session import Session
 from dbhandler import DBHandler
 from globals import Globals
 from common.share import Share
 from services.logger_service import get_logger
+from tray import dbhandler
 
 logger = get_logger('server')
 
@@ -77,6 +79,15 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
                 else:
                     shares[dict['local_port']].notify_error()
                     self.write_response('ok')
+            elif self.path.endswith('stopShare'):
+                logger.debug('stopShare')
+                if not dict['local_port'] in shares:
+                    logger.error('unknown key: %s in shares %s' % (dict['local_port'], shares))
+                    self.write_response('unknown')
+                else:
+                    shares[dict['local_port']].notify_stop()
+                    #self.write_response('ok') # no need to answer
+
 
         except Exception, e:
             logger.exception(e)
@@ -91,8 +102,9 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(text)
             self.wfile.close()
         except Exception, e:
-            traceback.print_stack()
-            logger.error( e )
+#            traceback.print_stack()
+            logger.error(e)
+            #logger.error(traceback.extract_stack())
 
 def start_server(onNewShareFunc=None):
     try:
@@ -105,7 +117,7 @@ def start_server(onNewShareFunc=None):
         server.socket.close()
 
 def save_request(share):
-    db_handler = DBHandler()
+    db_handler = dbhandler.getInstance()
     return db_handler.add_share(share)
 
 def start_server_thread(onNewShare=None):

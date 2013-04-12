@@ -3,14 +3,14 @@ import sys
 import os
 import urllib, urllib2
 from time import sleep
+import signal
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-from services.osinteraction import OsInteraction
+from services import osinteraction
 from services.logger_service import get_logger
 
 logger = get_logger('openport_app')
 
-os_interaction = None
 
 def quote_path(path):
     split = path.split(os.sep)
@@ -20,37 +20,64 @@ def quote_path(path):
 
 class OpenportApp(object):
 
+class OpenportApp(object):
+
     def __init__(self):
         self.tray_app_started = False
+        self.os_interaction = osinteraction.getInstance()
+        if self.os_interaction.is_compiled():
+            sys.stdout = open(self.os_interaction.get_app_data_path('apps.out.log'), 'a')
+            sys.stderr = open(self.os_interaction.get_app_data_path('apps.error.log'), 'a')
+        signal.signal(signal.SIGINT, self.handleSigTERM)
 
-    def init(self):
-        global app
-        global os_interaction
-        os_interaction = OsInteraction()
-        if os_interaction.is_compiled():
-            sys.stdout = open(os_interaction.get_app_data_path('apps.out.log'), 'a')
-            sys.stderr = open(os_interaction.get_app_data_path('apps.error.log'), 'a')
+    def handleSigTERM(self, signum, frame):
+        logger.debug('got signal %s' % signum)
+        if self.tray_app_started and self.session:
+            self.inform_tray_app_stop(self.session, self.args.tray_port)
+        exit(3)
+
+    def inform_tray_app_stop(self, share, tray_port, start_tray=True):
+        logger.debug('Informing tray we\'re stopping.')
+        url = 'http://127.0.0.1:%s/stopShare' % tray_port
+        try:
+            data = urllib.urlencode(share.as_dict())
+            req = urllib2.Request(url, data)
+            response = urllib2.urlopen(req).read()
+            if response.strip() != 'ok':
+                logger.error(response)
+        except Exception, detail:
+            logger.error( "An error has occured while informing the tray: %s" % detail )
 
     def start_tray_application(self):
         if self.tray_app_started:
             return
         self.tray_app_started = True
 
-        if sys.argv[0][-3:] == '.py':
-            command = ['start', 'python', '-m', 'tray.openporttray']
+        extra_options = []
+        if self.args.no_gui:
+            extra_options.append('--no-gui')
+        command = self.os_interaction.get_python_exec()
+        if self.os_interaction.is_compiled():
+            command.extend([quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openporttray.exe'))])
         else:
-            command = ['start', quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openporttray.exe'))]
-        logger.debug( command )
-        subprocess.call(' '.join(command), shell=True)
+            command.extend(['-m', 'tray.openporttray'])
+        command.extend(extra_options)
+        logger.debug(command)
+        try:
+            self.os_interaction.start_process(command)
+        except Exception, e:
+            logger.error(e)
 
     def inform_tray_app_new(self, share, tray_port, start_tray=True):
         url = 'http://127.0.0.1:%s/newShare' % tray_port
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req).read()
+            response = urllib2.urlopen(req, timeout=5).read()
             if response.strip() != 'ok':
-                logger.error( response )
+                logger.error(response)
+            else:
+                self.tray_app_started = True
         except Exception, detail:
             if not start_tray:
                 logger.error( "An error has occured while informing the tray: %s" % detail )
@@ -95,7 +122,7 @@ class OpenportApp(object):
             logger.exception(detail)
 
     def copy_share_to_clipboard(self, share):
-        os_interaction.copy_to_clipboard(share.get_link().strip())
+        self.os_interaction.copy_to_clipboard(share.get_link().strip())
 
     def get_restart_command(self, session):
         command = []
@@ -130,10 +157,9 @@ class OpenportApp(object):
         parser.add_argument('--local-port', type=int, help='The port you want to openport.', required=local_port_required, default=-1)
         parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
-
+        parser.add_argument('--no-gui', action='store_true', help='Start the app without a gui.')
 
     def start(self):
-        self.init()
         logger.debug('client pid:%s' % os.getpid())
         import argparse
         from apps.openport_api import open_port
@@ -142,6 +168,10 @@ class OpenportApp(object):
         parser = argparse.ArgumentParser()
         self.add_default_arguments(parser)
         args = parser.parse_args()
+        if args.no_gui:
+            args.hide_message = True
+            args.no_clipboard = True
+        self.args = args
 
         if not args.hide_message:
             import wx
@@ -152,6 +182,7 @@ class OpenportApp(object):
                 wx.OK | wx.ICON_INFORMATION)
 
         self.first_time = True
+
         def callback(ignore):
             if not self.first_time:
                 return
@@ -161,23 +192,13 @@ class OpenportApp(object):
             if args.tray_port > 0:
                 self.inform_tray_app_new(session, args.tray_port, start_tray=(not args.no_tray))
 
-            session.error_observers.append(error_callback)
-            session.success_observers.append(success_callback)
+            session.error_observers.append(self.error_callback)
+            session.success_observers.append(self.success_callback)
 
             if not args.no_clipboard:
                 self.copy_share_to_clipboard(session)
             if not args.hide_message:
                 show_message_box(session)
-
-        def error_callback(session):
-            logger.debug('error')
-            if args.tray_port > 0:
-                self.inform_tray_app_error(session, args.tray_port)
-
-        def success_callback(session):
-            logger.debug('success')
-            if args.tray_port > 0:
-                self.inform_tray_app_success(session, args.tray_port)
 
         session = Session()
         session.local_port = int(args.local_port)
@@ -187,9 +208,22 @@ class OpenportApp(object):
 #        app.MainLoop()
 
         def show_error(error_msg):
+            import wx
             wx.MessageBox(error_msg, 'Error', wx.OK | wx.ICON_ERROR)
+        self.session = session
 
         open_port(session, callback, show_error)
+
+    def error_callback(self, session):
+        logger.debug('error')
+        if self.args.tray_port > 0 and self.tray_app_started:
+            self.inform_tray_app_error(session, self.args.tray_port)
+
+    def success_callback(self, session):
+        logger.debug('success')
+        if self.args.tray_port > 0 and self.tray_app_started:
+            self.inform_tray_app_success(session, self.args.tray_port)
+
 
 if __name__ == '__main__':
     app = OpenportApp()

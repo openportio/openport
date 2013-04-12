@@ -1,6 +1,6 @@
 import logging
 from sys import stdout
-from services.osinteraction import OsInteraction
+from services import osinteraction
 
 def get_logger(name):
     logger = logging.getLogger(name)
@@ -9,7 +9,7 @@ def get_logger(name):
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    os_interaction = OsInteraction()
+    os_interaction = osinteraction.getInstance()
     if os_interaction.is_compiled():
         fh = logging.FileHandler(os_interaction.get_app_data_path('%s.log' % os_interaction.get_app_name()))
         fh.setFormatter(formatter)
@@ -28,3 +28,4 @@ if __name__ == '__main__':
     logger.critical('%d critical' % i) ; i += 1
     logger.warning('%d warning' % i) ; i += 1
     logger.exception('%d exception' % i) ; i += 1
+

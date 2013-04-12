@@ -6,11 +6,12 @@ import time
 import datetime
 import urllib2
 from time import sleep
+from tray import dbhandler
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from tray.server import start_server_thread, start_server
 from tray.dbhandler import DBHandler
-from services.osinteraction import OsInteraction
+from services import osinteraction
 from tray.globals import Globals
 from services.logger_service import get_logger
 from common.share import Share
@@ -22,8 +23,8 @@ class OpenPortDispatcher(object):
 
     def __init__(self):
         self.share_processes = {}
-        self.dbhandler = DBHandler()
-        self.os_interaction = OsInteraction()
+        self.dbhandler = dbhandler.getInstance()
+        self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
         self.start_account_checking()
         if self.os_interaction.is_compiled():
@@ -57,8 +58,9 @@ class OpenPortDispatcher(object):
         logger.info( "adding share %s" % share.id )
         share.success_observers.append(self.onShareSuccess)
         share.error_observers.append(self.onShareError)
+        share.stop_observers.append(self.stop_sharing)
 
-        self.share_processes[share.pid]=None
+        self.share_processes[share.pid] = None
 
     def onShareError(self, share):
         pass

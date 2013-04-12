@@ -1,20 +1,78 @@
+from Queue import Queue
+from time import sleep
 import os
 import pickle
 from pysqlite2 import dbapi2 as sqlite
-from common.share import Share
 from common.session import Session
-from services.osinteraction import OsInteraction
+from services import osinteraction
+
+
+class DBTask(object):
+    def __init__(self, command, args = []):
+        self.ready = False
+        self.command = command
+        self.args = args
+
+    def block(self):
+        while not self.ready:
+            sleep(0.01)
+
+
+class DBCommandTask(DBTask):
+
+    def execute(self, cursor, connection):
+        cursor.execute(self.command, self.args)
+        connection.commit()
+        self.ready = True
+
+
+class DBQueryTask(DBTask):
+    def __init__(self, query, args=[]):
+        super(DBQueryTask, self).__init__(query, args)
+        self.result = None
+
+    def execute(self, cursor, connection):
+        cursor.execute(self.command, self.args)
+        self.result = cursor.fetchall()
+        self.ready = True
+
 
 class DBHandler():
 
     def __init__(self):
-        self.os_interaction = OsInteraction()
-        self.connection = sqlite.connect(self.os_interaction.get_app_data_path('openport.db'))
+        self.os_interaction = osinteraction.getInstance()
+        self.db_location = self.os_interaction.get_app_data_path('openport.db')
+
+        self.task_queue = Queue()
+        self.startQueueThread()
+
+    def checkQueue(self):
+        self.connection = sqlite.connect(self.db_location)
         self.cursor = self.connection.cursor()
-        self.init_db()
+        while True:
+            task = self.task_queue.get(block=True)
+            task.execute(self.cursor, self.connection)
+            self.task_queue.task_done()
+
+    def startQueueThread(self):
+        import threading
+        t = threading.Thread(target=self.checkQueue)
+        t.setDaemon(True)
+        t.start()
+
+    def executeCommand(self, command, args=[]):
+        task = DBCommandTask(command, args)
+        self.task_queue.put(task, block=True)
+        task.block()
+
+    def executeQuery(self, query, args=[]):
+        task = DBQueryTask(query, args)
+        self.task_queue.put(task, block=True)
+        task.block()
+        return task.result
 
     def init_db(self):
-        self.cursor.execute(
+        self.executeCommand(
             '''CREATE TABLE IF NOT EXISTS sessions (
             id INTEGER PRIMARY KEY,
             server VARCHAR(50),
@@ -28,21 +86,19 @@ class DBHandler():
             ''')
 
     def add_share(self,share):
-        self.cursor.execute('update sessions set active = 0 where local_port = ?', (share.local_port,))
+        self.executeCommand('update sessions set active = 0 where local_port = ?', (share.local_port,))
         pickled_restart_command = pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
 
-        self.cursor.execute('insert into sessions (server, server_port, session_token, local_port, pid, active, restart_command) '
+        self.executeCommand('insert into sessions (server, server_port, session_token, local_port, pid, active, restart_command) '
                             'values (?, ?, ?, ?, ?, ?, ?)',
             (share.server, share.server_port, share.server_session_token, share.local_port, share.pid, 1, pickled_restart_command))
-        self.connection.commit()
         share.id = self.cursor.lastrowid
         return self.get_share(self.cursor.lastrowid)
 
     def get_share(self, id):
-        self.cursor.execute('select server, server_port, session_token, local_port, pid, active, restart_command, id from sessions'
-                            ' where id = ?', (id,))
-        row = self.cursor.fetchone()
-        return self.get_share_from_row(row)
+        rows = self.executeQuery('select server, server_port, session_token, local_port, pid, active, restart_command, '
+                                 'id from sessions where id = ?', (id,))
+        return self.get_share_from_row(rows[0])
 
     def get_share_from_row(self, row):
         share = Session()
@@ -64,15 +120,29 @@ class DBHandler():
 
 
     def get_shares(self):
-        self.cursor.execute('select server, server_port, session_token, local_port, pid, active, restart_command, id from sessions'
-                            ' where active = 1')
-        return (self.get_share_from_row(row) for row in self.cursor)
+        rows = self.executeQuery('select server, server_port, session_token, local_port, pid, active, restart_command, '
+                                 'id from sessions where active = 1')
+        return (self.get_share_from_row(row) for row in rows)
 
     def stop_share(self, share):
-        self.cursor.execute('update sessions set active = 0 where id = ?', (share.id,))
-        self.connection.commit()
+        #todo: make accessible asynchronous
+        self.executeCommand('update sessions set active = 0 where id = ?', (share.id,))
 
 
+instance = None
 
+
+def getInstance():
+    global instance
+    if instance is None:
+        instance = DBHandler()
+        instance.init_db()
+    return instance
+
+
+if __name__ == '__main__':
+    db_handler = getInstance()
+    rows = db_handler.executeQuery('select count(*) from sessions')
+    print 'nr of sessions: %s' % rows[0][0]
 
 

@@ -2,7 +2,6 @@ from BaseHTTPServer import HTTPServer
 from StringIO import StringIO
 import cgi
 from urlparse import urlparse, parse_qs
-import SimpleHTTPServer
 import SocketServer
 import os
 import posixpath
@@ -10,14 +9,14 @@ import socket
 import urllib
 from OpenSSL import SSL
 from services.logger_service import get_logger
-from services.osinteraction import OsInteraction
+from services import osinteraction
 from ext_http_server import RangeHandler
 
 
 _file_serve_path = None
 _token = None
 logger = get_logger(__name__)
-osinteraction = OsInteraction()
+os_interaction = osinteraction.getInstance()
 
 class FileServeHandler(RangeHandler):
     def setup(self):

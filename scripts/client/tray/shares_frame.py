@@ -4,11 +4,12 @@ import wx
 from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
 from common.share import Share
-from services.osinteraction import OsInteraction
+from services import osinteraction
 from tray.globals import Globals
 from tray.trayicon import OpenPortItTaskBarIcon
 from services.logger_service import get_logger
 from services import qr_service, image_service
+from tray.trayicon import OpenPortItTaskBarIcon
 
 logger = get_logger(__name__)
 
@@ -22,12 +23,12 @@ class SharesFrame(wx.Frame):
 
     def __init__(self, parent, id, title, application):
         wx.Frame.__init__(self, parent, -1, title,
-            style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+                          style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
         self.application = application
         self.addMenuBar()
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        self.os_interaction = OsInteraction()
+        self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
 
         iconFile = self.os_interaction.get_resource_path('logo-base.ico')
@@ -47,7 +48,6 @@ class SharesFrame(wx.Frame):
         self.tbicon.menu.AppendSeparator()
         self.tbicon.addItem('Exit', self.exitApp)
         self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.application.viewShares)
-
 
     def addMenuBar(self):
         menubar = wx.MenuBar()
@@ -272,8 +272,8 @@ class ImagePanel(wx.Panel):
         if self.image:
             dc.DrawBitmap(self.image.ConvertToBitmap(), 0,0)
 
-def main():
-    from openporttray.dbhandler import DBHandler
+if __name__ == '__main__':
+    from tray.dbhandler import DBHandler
 
     def stop_sharing(share):
         logger.info( "stopping %s" % share.id )
@@ -284,9 +284,10 @@ def main():
 
     app = wx.App(False)
     frame = SharesFrame(None, -1, ' ')
-    dbhandler = DBHandler()
+    import dbhandler
+    db_handler = dbhandler.getInstance()
 
-    shares = dbhandler.get_shares()
+    shares = db_handler.get_shares()
     callbacks = {'stop': add_share1}
     share1 = shares[0]
 
@@ -294,12 +295,9 @@ def main():
         frame.add_share(share, callbacks=callbacks)
         callbacks = {'stop': stop_sharing}
 
-
     #    frame.Show(False)
     frame.Show(True)
     app.MainLoop()
 
     pass
 
-if __name__ == '__main__':
-    main()
