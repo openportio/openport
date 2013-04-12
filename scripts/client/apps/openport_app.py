@@ -18,6 +18,7 @@ def quote_path(path):
     quoted = ['"%s"' % dir if ' ' in dir else dir for dir in split]
     return os.sep.join(quoted)
 
+class OpenportApp(object):
 
 class OpenportApp(object):
 
@@ -172,8 +173,11 @@ class OpenportApp(object):
             args.no_clipboard = True
         self.args = args
 
-        def show_message_box(session):
+        if not args.hide_message:
             import wx
+            self.app = wx.App(redirect=False)
+
+        def show_message_box(session):
             wx.MessageBox('Your local port %s is now reachable on %s' % ( session.local_port, session.get_link()), 'Info',
                 wx.OK | wx.ICON_INFORMATION)
 

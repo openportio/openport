@@ -19,7 +19,7 @@ from common.session import Session
 
 logger = get_logger('OpenPortDispatcher')
 
-class OpenPortDispatcher():
+class OpenPortDispatcher(object):
 
     def __init__(self):
         self.share_processes = {}
@@ -75,7 +75,13 @@ class OpenPortDispatcher():
                 if self.globals.account_id == -1:
                     time.sleep(1)
                 else:
-                    self.check_account()
+                    try:
+                        dict = self.check_account()
+                        self.show_account_status(dict)
+                    except Exception, detail:
+                        logger.error( "An error has occurred while communicating the the openport servers. %s" % detail )
+                        pass
+
                     time.sleep(60)
         t = threading.Thread(target=check_account_loop)
         t.setDaemon(True)
@@ -84,35 +90,35 @@ class OpenPortDispatcher():
     def check_account(self):
         url = 'http://www.openport.be/api/v1/account/%s/%s' %(self.globals.account_id, self.globals.key_id)
         logger.info('checking account: %s' % url)
-        try:
-            req = urllib2.Request(url)
-            response = urllib2.urlopen(req).read()
-            logger.debug( response )
-            dict = json.loads(response)
-            if 'error' in dict:
-                logger.error( dict['error'] )
-            return dict
-        except Exception, detail:
-            logger.error( "An error has occurred while communicating the the openport servers. %s" % detail )
-            raise detail
-            #sys.exit(9)
+        req = urllib2.Request(url)
+        response = urllib2.urlopen(req).read()
+        logger.debug( response )
+        dict = json.loads(response)
+        if 'error' in dict:
+            raise Exception( logger.error( dict['error'] ) )
+        return dict
+
+    def show_account_status(self, dict):
+        pass #catching a signal and showing info?
 
     def startOpenportItProcess (self, path):
         share = Share()
         share.filePath = path
+        app_dir = self.os_interaction.get_application_dir()
         if self.os_interaction.is_compiled():
-            share.restart_command = ['openportit.exe', path]
+            share.restart_command = [os.path.join(app_dir, 'openportit.exe'), path]
         else:
-            share.restart_command = ['python', 'apps/openportit.py', path]
+            share.restart_command = ['python', os.path.join(app_dir, 'apps/openportit.py'), path]
 
         self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False)
 
     def startOpenportProcess (self, port):
         session = Session()
+        app_dir = self.os_interaction.get_application_dir()
         if self.os_interaction.is_compiled():
-            session.restart_command = ['openport_app.exe', '--local-port', '%s' % port]
+            session.restart_command = [os.path.join(app_dir, 'openport_app.exe'), '--local-port', '%s' % port]
         else:
-            session.restart_command = ['python', 'apps/openport_app.py', '--local-port', '%s' % port]
+            session.restart_command = ['python', os.path.join(app_dir,'apps/openport_app.py'), '--local-port', '%s' % port]
         logger.debug(session.restart_command)
 
         self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False)
@@ -121,39 +127,35 @@ class GuiOpenPortDispatcher(OpenPortDispatcher):
     def __init__(self):
         super(GuiOpenPortDispatcher, self).__init__()
         from tray.shares_frame import SharesFrame
-        self.shares_frame = SharesFrame(self, -1, "OpenPort")
+        self.shares_frame = SharesFrame(None, -1, "OpenPort", self)
         self.viewShares(None)
 
     def stop_sharing(self,share):
         super(GuiOpenPortDispatcher, self).stop_sharing(share)
-        self.shares_frame.remove_share(share)
+        wx.CallAfter( self.shares_frame.remove_share, share)
 
     def viewShares(self, event):
         self.shares_frame.Show(True)
 
     def onShareError(self, share):
         super(GuiOpenPortDispatcher, self).onShareError(share)
-        self.shares_frame.notify_error(share)
+        wx.CallAfter( self.shares_frame.notify_error, share)
 
     def onShareSuccess(self, share):
         super(GuiOpenPortDispatcher, self).onShareSuccess(share)
-        self.shares_frame.notify_success(share)
+        wx.CallAfter( self.shares_frame.notify_success, share)
 
     def onNewShare(self, share):
         super(GuiOpenPortDispatcher, self).onNewShare(share)
         callbacks = {'stop': self.stop_sharing}
-        self.shares_frame.add_share(share, callbacks=callbacks)
-        
-    def check_account(self):
-        dict = super(GuiOpenPortDispatcher, self).check_account()
-        if not 'error' in dict:
-            self.shares_frame.update_account(
-                bytes_this_month = dict['bytes_this_month'],
-                next_counter_reset_time = utc_epoch_to_local_datetime(dict['next_counter_reset_time']),
-                max_bytes = dict['max_bytes'],
-            )
+        wx.CallAfter( self.shares_frame.add_share, share, callbacks )
 
-
+    def show_account_status(self, dict):
+        wx.CallAfter( self.shares_frame.update_account,
+            bytes_this_month = dict['bytes_this_month'],
+            next_counter_reset_time = utc_epoch_to_local_datetime(dict['next_counter_reset_time']),
+            max_bytes = dict['max_bytes']
+        )
 
 def utc_epoch_to_local_datetime(utc_epoch):
     return datetime.datetime(*time.localtime(utc_epoch)[0:6])

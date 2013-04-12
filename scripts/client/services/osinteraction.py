@@ -14,7 +14,7 @@ class OsInteraction():
         return os.path.basename(sys.argv[0])
 
     def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
-        print share.restart_command
+#        print share.restart_command
         self.start_process(share.restart_command)
 
     def start_process(self, args):
@@ -46,6 +46,11 @@ class OsInteraction():
         s.wait()
         return '%s%s' % (s.stdout.read(), s.stderr.read())
 
+    def get_application_dir(self):
+        if self.is_compiled():
+            return os.path.abspath(os.path.dirname(os.path.dirname(__file__))) #todo: verify
+        else:
+            return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 class LinuxOsInteraction(OsInteraction):
     def __init__(self):
