@@ -7,7 +7,7 @@ import signal
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from services import osinteraction
-from services.logger_service import get_logger
+from services.logger_service import get_logger, set_log_level
 
 logger = get_logger('openport_app')
 
@@ -17,8 +17,6 @@ def quote_path(path):
     logger.debug( split )
     quoted = ['"%s"' % dir if ' ' in dir else dir for dir in split]
     return os.sep.join(quoted)
-
-class OpenportApp(object):
 
 class OpenportApp(object):
 
@@ -158,6 +156,7 @@ class OpenportApp(object):
         parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
         parser.add_argument('--no-gui', action='store_true', help='Start the app without a gui.')
+        parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
 
     def start(self):
         logger.debug('client pid:%s' % os.getpid())
@@ -168,6 +167,10 @@ class OpenportApp(object):
         parser = argparse.ArgumentParser()
         self.add_default_arguments(parser)
         args = parser.parse_args()
+        if args.verbose:
+            from logging import DEBUG
+            set_log_level(DEBUG)
+
         if args.no_gui:
             args.hide_message = True
             args.no_clipboard = True
