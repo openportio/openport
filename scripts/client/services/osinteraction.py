@@ -15,7 +15,7 @@ class OsInteraction():
 
     def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
         print share.restart_command
-        self.start_process(share.restart_command)
+        return self.start_process(share.restart_command)
 
     def start_process(self, args):
         p = subprocess.Popen(args,

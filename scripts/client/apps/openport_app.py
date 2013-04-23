@@ -28,6 +28,8 @@ class OpenportApp(object):
             sys.stdout = open(self.os_interaction.get_app_data_path('apps.out.log'), 'a')
             sys.stderr = open(self.os_interaction.get_app_data_path('apps.error.log'), 'a')
         signal.signal(signal.SIGINT, self.handleSigTERM)
+        # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
+        #signal.signal(signal.SIGTERM, self.handleSigTERM)
 
     def handleSigTERM(self, signum, frame):
         logger.debug('got signal %s' % signum)

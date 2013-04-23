@@ -125,7 +125,6 @@ class DBHandler():
         return (self.get_share_from_row(row) for row in rows)
 
     def stop_share(self, share):
-        #todo: make accessible asynchronous
         self.executeCommand('update sessions set active = 0 where id = ?', (share.id,))
 
 
