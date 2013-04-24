@@ -122,7 +122,7 @@ class DBHandler():
     def get_shares(self):
         rows = self.executeQuery('select server, server_port, session_token, local_port, pid, active, restart_command, '
                                  'id from sessions where active = 1')
-        return (self.get_share_from_row(row) for row in rows)
+        return list(self.get_share_from_row(row) for row in rows)
 
     def stop_share(self, share):
         self.executeCommand('update sessions set active = 0 where id = ?', (share.id,))

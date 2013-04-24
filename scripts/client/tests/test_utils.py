@@ -9,23 +9,26 @@ class SimpleTcpServer(object):
         self.HOST = '127.0.0.1' # Symbolic name meaning the local host
         self.PORT = port
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.HOST, self.PORT))
-        self.s.listen(1)
+        self.s.listen(5)
+        self.connections_accepted = 0
 
     def run(self):
-        self.conn, self.address = self.s.accept()
-        print 'Connected by', self.address
         while 1:
-            data = self.conn.recv(1024)
-
-            if not data:
-                break
-            self.conn.send(data)
-            break
-        self.close()
+            print "connections accepted: ", self.connections_accepted
+            self.connections_accepted += 1
+            conn, self.address = self.s.accept()
+            print 'Connected by', self.address
+            data = conn.recv(1024)
+            if data:
+                conn.send(data)
+            conn.shutdown(socket.SHUT_RDWR)
+            conn.close()
 
     def close(self):
-        self.conn.close()
+        self.s.shutdown(socket.SHUT_RDWR)
+        self.s.close()
 
     def runThreaded(self):
         import threading
@@ -39,13 +42,13 @@ class SimpleTcpClient(object):
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error, msg:
             sys.stderr.write("[ERROR] %s\n" % msg[1])
-            sys.exit(1)
+#            sys.exit(1)
 
         try:
             self.sock.connect((host, port))
         except socket.error, msg:
             sys.stderr.write("[ERROR] %s\n" % msg[1])
-            sys.exit(2)
+#            sys.exit(2)
 
 
     def send(self, request):

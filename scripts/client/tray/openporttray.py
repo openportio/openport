@@ -16,6 +16,7 @@ from tray.globals import Globals
 from services.logger_service import get_logger, set_log_level
 from common.share import Share
 from common.session import Session
+from services.utils import nonBlockRead
 
 logger = get_logger('OpenPortDispatcher')
 
@@ -39,12 +40,22 @@ class OpenPortDispatcher(object):
 
     def restart_sharing(self):
         shares = self.dbhandler.get_shares()
+        logger.debug('restarting shares - amount: %s' % len(list(shares)))
         for share in shares:
             if self.os_interaction.pid_is_running(share.pid):
+                logger.debug('share still running: %s' % share.restart_command)
                 self.onNewShare(share)
             else:
                 try:
+                    logger.debug('starting share: %s' % share.restart_command)
                     p = self.os_interaction.start_openport_process(share)
+                    sleep(1)
+                    if p.poll() is not None:
+                        logger.debug('could not start openport process: StdOut:%s\nStdErr' %
+                                     (nonBlockRead(p.stdout), nonBlockRead(p.stderr) ) )
+                    else:
+                        logger.debug('started app %s' % share.restart_command)
+
                     self.share_processes[p.pid]=p
                 except Exception, e:
                     logger.debug(e)
@@ -104,6 +115,9 @@ class OpenPortDispatcher(object):
             raise detail
             #sys.exit(9)
 
+    def show_account_status(self, dict):
+        pass #catching a signal and showing info? #logging to /proc ?
+
     def startOpenportItProcess (self, path):
         share = Share()
         share.filePath = path
@@ -123,7 +137,7 @@ class OpenPortDispatcher(object):
         else:
             session.restart_command = ['python', os.path.join(app_dir,'apps/openport_app.py'), '--local-port', '%s' % port]
         logger.debug(session.restart_command)
-        sys.stdout.flush()
+
         self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False)
 
 class GuiOpenPortDispatcher(OpenPortDispatcher):
@@ -183,28 +197,30 @@ if __name__ == '__main__':
         logger.debug('You are seeing debug output.')
 
     if args.no_gui:
-       # import daemon
-      #  with daemon.DaemonContext():
-            dispatcher = OpenPortDispatcher()
+        # import daemon
+        #  with daemon.DaemonContext():
+        dispatcher = OpenPortDispatcher()
     else:
-        import wx        
+        import wx
         app = wx.App(False)
         dispatcher = GuiOpenPortDispatcher()
 
     start_server_thread(onNewShare=dispatcher.onNewShare)
-        
+
     if args.restart_shares:
         dispatcher.restart_sharing()
 
     import signal
-    def handleSigTERM():
+    def handleSigTERM(signum, frame):
+        logger.debug('got a signal %s, frame %s going down' % (signum, frame))
         dispatcher.exitApp(None)
     signal.signal(signal.SIGTERM, handleSigTERM)
+    signal.signal(signal.SIGINT, handleSigTERM)
 
 
     if args.no_gui:
         while True:
-            sleep(1)        
+            sleep(1)
     else:
         app.MainLoop()
 

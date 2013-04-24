@@ -4,29 +4,23 @@ __author__ = 'Jan'
 import subprocess
 import unittest
 import os
-import fcntl
 import signal
+from services import osinteraction
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumber
+from services.utils import nonBlockRead
 
-
-def nonBlockRead(output):
-    fd = output.fileno()
-    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
-    try:
-        return output.read()
-    except:
-        return False
 
 class app_tests(unittest.TestCase):
     def setUp(self):
         self.processes_to_kill = []
+        self.osinteraction = osinteraction.getInstance()
 
     def tearDown(self):
         for p in self.processes_to_kill:
             try:
                 os.kill(p.pid, signal.SIGKILL)
+                p.wait()
             except Exception, e:
                 pass
 
@@ -72,6 +66,7 @@ class app_tests(unittest.TestCase):
             pass
 
         port = get_open_port()
+        print 'localport :', port
         s = SimpleTcpServer(port)
         s.runThreaded()
 
@@ -83,7 +78,7 @@ class app_tests(unittest.TestCase):
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_tray)
         self.processes_to_kill.append(p_app)
-        sleep(5)
+        sleep(10)
 
         process_output = nonBlockRead(p_app.stdout)
         print lineNumber(), 'output: ', process_output
@@ -94,33 +89,55 @@ class app_tests(unittest.TestCase):
         remote_host, remote_port = self.getRemoteHostAndPort(process_output)
         print lineNumber(), "remote port:", remote_port
 
+        c = SimpleTcpClient(remote_host, remote_port)
+        request = 'hello'
+        response = c.send(request)
+        self.assertEqual(request, response.strip())
+        c.close()
+   #     s.close()
+
         os.kill(p_app.pid, signal.SIGKILL)
-        p_tray.kill()
+        self.assertNotEqual(p_app.wait(), None)
+        while self.osinteraction.pid_is_running(p_app.pid):
+            print "waiting for pid to be killed: %s" % p_app.pid
+            sleep(1)
+        os.kill(p_tray.pid, signal.SIGINT)
+        print 'waiting for tray to be killed'
+        p_tray.wait()
+        print lineNumber(),  "tray.stdout:", nonBlockRead(p_tray.stdout)
+        print lineNumber(),  "tray.stderr:", nonBlockRead(p_tray.stderr)
 
         print lineNumber(),  "p_app stdout:", nonBlockRead(p_app.stdout)
 
-        p_tray = subprocess.Popen(['env/bin/python', 'tray/openporttray.py', '--no-gui', '--database', db_file, '--verbose'],
+        sleep(5)
+
+  #      s = SimpleTcpServer(port)
+  #      s.runThreaded()
+
+        p_tray2 = subprocess.Popen(['env/bin/python', 'tray/openporttray.py', '--no-gui', '--database', db_file, '--verbose'],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.processes_to_kill.append(p_tray)
+        self.processes_to_kill.append(p_tray2)
         sleep(10)
 
-        print lineNumber(),  "tray.stdout:", nonBlockRead(p_tray.stdout)
-        print lineNumber(),  "tray.stderr:",nonBlockRead(p_tray.stderr)
-        self.check_application_is_still_alive(p_tray)
+        print lineNumber(),  "tray.stdout:", nonBlockRead(p_tray2.stdout)
+        print lineNumber(),  "tray.stderr:",nonBlockRead(p_tray2.stderr)
+        self.check_application_is_still_alive(p_tray2)
 
         c = SimpleTcpClient(remote_host, remote_port)
         request = 'hello'
         response = c.send(request)
         self.assertEqual(request, response.strip())
 
-        p_tray.kill()
+        os.kill(p_tray2.pid, signal.SIGINT)
+        p_tray2.wait()
+        print lineNumber(),  "tray.stdout:", nonBlockRead(p_tray2.stdout)
+        print lineNumber(),  "tray.stderr:",nonBlockRead(p_tray2.stderr)
 
         response = c.send(request)
         self.assertNotEqual(request, response.strip())
 
         c.close()
         s.close()
-
 
 
     def getRemoteHostAndPort(self, output):

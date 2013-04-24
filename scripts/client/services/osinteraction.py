@@ -49,7 +49,7 @@ class OsInteraction():
 
 class LinuxOsInteraction(OsInteraction):
     def __init__(self):
-        self.APP_DATA_PATH = "~/.OpenPort"
+        self.APP_DATA_PATH = os.path.join(os.path.expanduser('~/.openport'))
 
     def copy_to_clipboard(self, text):
         from Tkinter import Tk
