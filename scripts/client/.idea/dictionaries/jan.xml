@@ -2,6 +2,8 @@
   <dictionary name="jan">
     <words>
       <w>openport</w>
+      <w>stderr</w>
+      <w>stdout</w>
     </words>
   </dictionary>
 </component>

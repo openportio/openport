@@ -39,9 +39,9 @@ class DBQueryTask(DBTask):
 
 class DBHandler():
 
-    def __init__(self):
+    def __init__(self, db_location):
         self.os_interaction = osinteraction.getInstance()
-        self.db_location = self.os_interaction.get_app_data_path('openport.db')
+        self.db_location = db_location
 
         self.task_queue = Queue()
         self.startQueueThread()
@@ -130,11 +130,17 @@ class DBHandler():
 
 instance = None
 
+db_location = ''
 
 def getInstance():
+    if db_location == '':
+        os_interaction = osinteraction.getInstance()
+        global db_location
+        db_location = os_interaction.get_app_data_path('openport.db')
+
     global instance
     if instance is None:
-        instance = DBHandler()
+        instance = DBHandler(db_location)
         instance.init_db()
     return instance
 
