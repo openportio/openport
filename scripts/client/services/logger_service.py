@@ -2,6 +2,10 @@ import logging
 from sys import stdout
 from services import osinteraction
 
+log_level = logging.INFO
+
+loggers = []
+
 def get_logger(name):
     logger = logging.getLogger(name)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -15,8 +19,8 @@ def get_logger(name):
         fh.setFormatter(formatter)
         fh.setLevel(logging.WARNING)
         logger.addHandler(fh)
-
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(log_level)
+    loggers.append(logger)
     return logger
 
 if __name__ == '__main__':
@@ -29,3 +33,8 @@ if __name__ == '__main__':
     logger.warning('%d warning' % i) ; i += 1
     logger.exception('%d exception' % i) ; i += 1
 
+def set_log_level(new_log_level):
+    global log_level
+    log_level=new_log_level
+    for logger in loggers:
+        logger.setLevel(log_level)

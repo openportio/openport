@@ -49,7 +49,7 @@ def request_open_port(local_port, restart_session_token = '', request_server_por
 
     response = PortForwardResponse(dict)
 
-    if request_server_port != '' and request_server_port != response.remote_port:
+    if request_server_port != -1 and request_server_port != response.remote_port:
         logger.error( 'Did not get requested server port (%s), but got %s' % (request_server_port, response.remote_port))
 
     return response

@@ -7,9 +7,10 @@ import datetime
 import urllib2
 from time import sleep
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 from tray import dbhandler
+
 from tray.server import start_server_thread, start_server
+from tray.dbhandler import DBHandler
 from services import osinteraction
 from tray.globals import Globals
 from services.logger_service import get_logger
@@ -58,7 +59,8 @@ class OpenPortDispatcher():
         share.success_observers.append(self.onShareSuccess)
         share.error_observers.append(self.onShareError)
         share.stop_observers.append(self.stop_sharing)
-        self.share_processes[share.pid] = share
+
+        self.share_processes[share.pid] = None
 
     def onShareError(self, share):
         pass
