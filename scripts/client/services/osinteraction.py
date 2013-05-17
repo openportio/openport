@@ -15,7 +15,7 @@ class OsInteraction():
 
     def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
 #        print share.restart_command
-        self.start_process(share.restart_command)
+        return self.start_process(share.restart_command)
 
     def start_process(self, args):
         p = subprocess.Popen(args,
@@ -46,15 +46,10 @@ class OsInteraction():
         s.wait()
         return '%s%s' % (s.stdout.read(), s.stderr.read())
 
-    def get_application_dir(self):
-        if self.is_compiled():
-            return os.path.abspath(os.path.dirname(os.path.dirname(__file__))) #todo: verify
-        else:
-            return os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 class LinuxOsInteraction(OsInteraction):
     def __init__(self):
-        self.APP_DATA_PATH = "~/.OpenPort"
+        self.APP_DATA_PATH = os.path.join(os.path.expanduser('~/.openport'))
 
     def copy_to_clipboard(self, text):
         from Tkinter import Tk

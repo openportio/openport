@@ -14,11 +14,10 @@ def get_logger(name):
     logger.addHandler(ch)
 
     os_interaction = osinteraction.getInstance()
-    if os_interaction.is_compiled():
-        fh = logging.FileHandler(os_interaction.get_app_data_path('%s.log' % os_interaction.get_app_name()))
-        fh.setFormatter(formatter)
-        fh.setLevel(logging.WARNING)
-        logger.addHandler(fh)
+    fh = logging.FileHandler(os_interaction.get_app_data_path('%s.log' % os_interaction.get_app_name()))
+    fh.setFormatter(formatter)
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
     logger.setLevel(log_level)
     loggers.append(logger)
     return logger
