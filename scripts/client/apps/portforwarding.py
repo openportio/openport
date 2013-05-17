@@ -107,7 +107,7 @@ class PortForwardingService:
         try:
             transport = self.client.get_transport()
             transport.set_keepalive(30)
-            logger.info('requesting forward from remote port %s' % (self.remote_port,))
+            logger.debug('requesting forward from remote port %s' % (self.remote_port,))
             transport.request_port_forward('', self.remote_port)
             while True:
                 chan = transport.accept(1000)
@@ -125,7 +125,7 @@ class PortForwardingService:
         This will connect the channel to the localhost at the given port.
         """
         local_server = 'localhost'
-        logger.info('Opening socket %s:%s'% (local_server, self.local_port))
+        logger.debug('Opening socket %s:%s'% (local_server, self.local_port))
         sock = socket.socket()
         try:
             sock.connect((local_server, self.local_port))
@@ -133,7 +133,7 @@ class PortForwardingService:
             logger.error('Forwarding request to %s:%d failed: %r' % (local_server, self.local_port, e))
             return
 
-        logger.info('Connected!  Tunnel open %r -> %r -> %r' % (chan.origin_addr,
+        logger.debug('Connected!  Tunnel open %r -> %r -> %r' % (chan.origin_addr,
                                                             chan.getpeername(), (local_server, self.local_port)))
         while True:
             r, w, x = select.select([sock, chan], [], [])
@@ -149,6 +149,6 @@ class PortForwardingService:
                 sock.send(data)
         chan.close()
         sock.close()
-        logger.info('Tunnel closed from %r' % (chan.origin_addr,))
+        logger.debug('Tunnel closed from %r' % (chan.origin_addr,))
 
 

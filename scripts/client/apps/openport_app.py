@@ -32,7 +32,7 @@ class OpenportApp(object):
         logger.debug('got signal %s' % signum)
         if self.tray_app_started and self.session:
             self.inform_tray_app_stop(self.session, self.args.tray_port)
-        exit(3)
+        sys.exit(3)
 
     def inform_tray_app_stop(self, share, tray_port, start_tray=True):
         logger.debug('Informing tray we\'re stopping.')
