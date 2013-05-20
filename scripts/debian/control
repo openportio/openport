@@ -1,0 +1,12 @@
+Source: openport-client
+Maintainer: Jan De Bleser <jandebleser@gmail.com>
+Section: misc
+Priority: optional
+Standards-Version: ??
+Build-Depends: python, python-dev, python-pip, python-virtualenv, libsqlite3-dev
+
+Package: openport-client
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Opens a port from your machine to the outside world.
+ The port is forwarded to the openport servers and is accessable from anywhere in the world.

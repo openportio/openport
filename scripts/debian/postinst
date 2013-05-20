@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /usr/share/openport-client
+bash -ex ./install.sh
