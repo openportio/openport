@@ -17,7 +17,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Description of the service"
 NAME=openport-tray
-DAEMON=/home/jan/openport/scripts/client/tray.sh
+DAEMON=/usr/share/openport-client/tray.sh
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

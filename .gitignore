@@ -18,6 +18,7 @@ sass_stdlib.xml
 /scripts/client/tests/test-reports/*.xml
 
 /scripts/client/env/*
+/scripts/package/*
 
 **/.idea/*
 *~
