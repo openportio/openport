@@ -1,5 +1,7 @@
 import cgi, urlparse
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+import signal
+import os
 import threading
 import traceback
 import sys
@@ -92,6 +94,19 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
         except Exception, e:
             logger.exception(e)
             self.write_response('an error has occurred')
+
+    def do_GET(self):
+        logger.debug('got get on path:%s'%self.path)
+        logger.debug(self.client_address[0])
+        if self.path.endswith('ping'):
+            self.write_response('pong')
+        elif self.path.endswith('exit') and self.client_address[0] == '127.0.0.1':
+            self.write_response('ok')
+            logger.debug('shutting down due to exit call')
+            os.kill(os.getpid(), signal.SIGINT)
+        else:
+            self.write_response('what?')
+
 
     def write_response(self, text):
         try:

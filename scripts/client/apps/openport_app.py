@@ -42,7 +42,7 @@ class OpenportApp(object):
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req).read()
+            response = urllib2.urlopen(req, timeout=1).read()
             if response.strip() != 'ok':
                 logger.error(response)
         except Exception, detail:
@@ -63,10 +63,13 @@ class OpenportApp(object):
             command.extend(['-m', 'tray.openporttray'])
         command.extend(extra_options)
         logger.debug(command)
-        try:
-            self.os_interaction.start_process(command)
-        except Exception, e:
-            logger.error(e)
+        def start_tray():
+            try:
+                output = self.os_interaction.run_command_silent(command) #hangs
+                logger.debug('tray stopped: %s ' % output)
+            except Exception, e:
+                logger.error(e)
+        self.os_interaction.spawnDaemon(start_tray)
 
     def inform_tray_app_new(self, share, tray_port, start_tray=True):
         url = 'http://127.0.0.1:%s/newShare' % tray_port
@@ -92,7 +95,7 @@ class OpenportApp(object):
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req).read()
+            response = urllib2.urlopen(req, timeout=5).read()
             if response.strip() != 'ok':
                 logger.error( response )
             if response.strip() == 'unknown':
@@ -109,7 +112,7 @@ class OpenportApp(object):
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req).read()
+            response = urllib2.urlopen(req, timeout=5).read()
             if response.strip() != 'ok':
                 logger.error( response )
             if response.strip() == 'unknown':

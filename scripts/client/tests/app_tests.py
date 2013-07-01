@@ -1,4 +1,5 @@
 from time import sleep
+import urllib2
 
 __author__ = 'Jan'
 import subprocess
@@ -23,6 +24,8 @@ class app_tests(unittest.TestCase):
                 p.wait()
             except Exception, e:
                 pass
+
+        self.killTray()
 
     def testOpenportApp(self):
         port = get_open_port()
@@ -144,3 +147,67 @@ class app_tests(unittest.TestCase):
         import re
         m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', output)
         return m.group(1), int(m.group(2))
+
+
+    def testTraySpawning(self):
+        self.assertFalse(self.trayIsRunning())
+        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
+        try:
+            os.remove(db_file)
+        except OSError:
+            pass
+
+        port = get_open_port()
+
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        p_app = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port, '--no-gui',
+                                  '--verbose'],
+                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app)
+        sleep(5)
+        process_output = nonBlockRead(p_app.stdout)
+        print lineNumber(), 'output: ', process_output
+
+        self.check_application_is_still_alive(p_app)
+        self.assertTrue(self.trayIsRunning())
+
+        remote_host, remote_port = self.getRemoteHostAndPort(process_output)
+        print lineNumber(), "remote port:", remote_port
+
+        os.kill(p_app.pid, signal.SIGKILL)
+        p_app.wait()
+        sleep(1)
+        self.assertTrue(self.trayIsRunning())
+        self.killTray()
+        self.assertFalse(self.trayIsRunning())
+
+    def killTray(self):
+        url = 'http://localhost:8001/exit'
+        try:
+            req = urllib2.Request(url)
+            response = urllib2.urlopen(req, timeout=1).read()
+            if response.strip() != 'ok':
+                print lineNumber(), response
+        except Exception, detail:
+            print detail
+
+
+    def trayIsRunning(self):
+        url = 'http://localhost:8001/ping'
+        try:
+            req = urllib2.Request(url)
+            response = urllib2.urlopen(req, timeout=5).read()
+            if response.strip() != 'pong':
+                print lineNumber(), response
+                return False
+            else:
+                return True
+        except Exception, detail:
+            return False
+
+
+
+
+
+
+

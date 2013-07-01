@@ -6,10 +6,11 @@ APPLICATION=openport-client
 PACKAGE=openport-client-$VERSION
 TARBALL=openport-client_$VERSION.orig.tar.gz
 
-#sudo apt-get install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder
+sudo apt-get install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder
 
 mkdir $PACKAGE
 cp client $PACKAGE/ -r
+#rm $PACKAGE/client/env -rf
 tar -czf $TARBALL $PACKAGE
 rm -rf $PACKAGE
 rm -rf package

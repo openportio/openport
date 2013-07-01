@@ -4,12 +4,14 @@ import platform
 import subprocess
 import sys
 import signal
-#from services.logger_service import get_logger  #creates a circular reference
 
-#logger = get_logger('OsInteraction')
+class OsInteraction(object):
 
+    def __init__(self, use_logger=True):
+        if use_logger:
+            from services.logger_service import get_logger
+            self.logger = get_logger('OsInteraction')
 
-class OsInteraction():
     def get_app_name(self):
         return os.path.basename(sys.argv[0])
 
@@ -34,6 +36,7 @@ class OsInteraction():
         return os.path.join(dir, path)
 
     def get_app_data_path(self, filename=''):
+        #Do not use the logger!
         try:
             os.makedirs(self.APP_DATA_PATH)
         except Exception:
@@ -48,7 +51,8 @@ class OsInteraction():
 
 
 class LinuxOsInteraction(OsInteraction):
-    def __init__(self):
+    def __init__(self, use_logger=True):
+        super(LinuxOsInteraction, self).__init__(use_logger)
         self.APP_DATA_PATH = os.path.join(os.path.expanduser('~/.openport'))
 
     def copy_to_clipboard(self, text):
@@ -89,9 +93,39 @@ class LinuxOsInteraction(OsInteraction):
         else:
             return ['python']
 
+    def spawnDaemon(self, func):
+        # do the UNIX double-fork magic, see Stevens' "Advanced
+        # Programming in the UNIX Environment" for details (ISBN 0201563177)
+        try:
+            pid = os.fork()
+            if pid > 0:
+                # parent process, return and keep running
+                return
+        except OSError, e:
+            self.logger.error("fork #1 failed: %d (%s)" % (e.errno, e.strerror) )
+            sys.exit(1)
+
+        os.setsid()
+
+        # do second fork
+        try:
+            pid = os.fork()
+            if pid > 0:
+                # exit from second parent
+                sys.exit(0)
+        except OSError, e:
+            self.logger.error("fork #2 failed: %d (%s)" % (e.errno, e.strerror) )
+            sys.exit(1)
+
+        func()
+
+        # all done
+        os._exit(os.EX_OK)
+
 
 class WindowsOsInteraction(OsInteraction):
-    def __init(self):
+    def __init(self, use_logger=True):
+        super(WindowsOsInteraction, self).__init__(use_logger)
         self.APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
 
     def copy_to_clipboard(self, text):
@@ -123,6 +157,9 @@ class WindowsOsInteraction(OsInteraction):
             return ['start', 'env/Scripts/python.exe']
         else:
             return ['start', 'python.exe']
+    def spawnDaemon(self, func):
+        #TODO!
+        func()
 
 def is_linux():
     return platform.system() != 'Windows'
@@ -132,3 +169,9 @@ def getInstance():
         return LinuxOsInteraction()
     else:
         return WindowsOsInteraction()
+
+def getInstance(use_logger=True):
+    if is_linux():
+        return LinuxOsInteraction(use_logger)
+    else:
+        return WindowsOsInteraction(use_logger)

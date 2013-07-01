@@ -9,11 +9,12 @@ loggers = []
 def get_logger(name):
     logger = logging.getLogger(name)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
     ch = logging.StreamHandler(stdout)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    os_interaction = osinteraction.getInstance()
+    os_interaction = osinteraction.getInstance(use_logger=False)
     fh = logging.FileHandler(os_interaction.get_app_data_path('%s.log' % os_interaction.get_app_name()))
     fh.setFormatter(formatter)
     fh.setLevel(logging.DEBUG)
