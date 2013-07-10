@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=1.0
+VERSION=1.1.1
 
 APPLICATION=openport-client
 PACKAGE=openport-client-$VERSION
@@ -26,4 +26,4 @@ dch --create -v $(echo $VERSION)-1 --package $APPLICATION
 debuild -us -uc
 
 cd ../..
-sudo dpkg -i package/openport-client_1.0-1_i386.deb
+sudo dpkg -i package/openport-client_$(echo $VERSION)-1_i386.deb

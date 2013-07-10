@@ -124,7 +124,7 @@ class LinuxOsInteraction(OsInteraction):
 
 
 class WindowsOsInteraction(OsInteraction):
-    def __init(self, use_logger=True):
+    def __init__(self, use_logger=True):
         super(WindowsOsInteraction, self).__init__(use_logger)
         self.APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
 
