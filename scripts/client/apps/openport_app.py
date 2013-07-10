@@ -4,10 +4,12 @@ import os
 import urllib, urllib2
 from time import sleep
 import signal
+import getpass
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from services import osinteraction
 from services.logger_service import get_logger, set_log_level
+from servics.osinteraction import is_linux
 
 logger = get_logger('openport_app')
 
@@ -128,12 +130,16 @@ class OpenportApp(object):
         self.os_interaction.copy_to_clipboard(share.get_link().strip())
 
     def get_restart_command(self, session):
-        command = []
+        if is_linux():
+            command = ['sudo', '-u', getpass.getuser()]
+        else:
+            command = []
         if sys.argv[0][-3:] == '.py':
-            command.extend(['python'])
+            if os.path.exists('env/bin/python'):
+                command.extend('env/bin/python')
+            else:
+                command.extend(['python'])
         command.extend(sys.argv)
-        if os.path.exists('env/bin/python'):
-            command[0] = 'env/bin/python'
 
         #if not '--tray-port' in command:
         #    command.extend(['--tray-port', '%s' % tray_port] )
