@@ -9,7 +9,7 @@ import getpass
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from services import osinteraction
 from services.logger_service import get_logger, set_log_level
-from servics.osinteraction import is_linux
+from services.osinteraction import is_linux
 
 logger = get_logger('openport_app')
 
@@ -28,7 +28,10 @@ class OpenportApp(object):
         if self.os_interaction.is_compiled():
             sys.stdout = open(self.os_interaction.get_app_data_path('apps.out.log'), 'a')
             sys.stderr = open(self.os_interaction.get_app_data_path('apps.error.log'), 'a')
-        signal.signal(signal.SIGINT, self.handleSigTERM)
+        try:
+            signal.signal(signal.SIGINT, self.handleSigTERM)
+        except ValueError:
+            pass
         # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
         #signal.signal(signal.SIGTERM, self.handleSigTERM)
 
@@ -136,7 +139,7 @@ class OpenportApp(object):
             command = []
         if sys.argv[0][-3:] == '.py':
             if os.path.exists('env/bin/python'):
-                command.extend('env/bin/python')
+                command.extend(['env/bin/python'])
             else:
                 command.extend(['python'])
         command.extend(sys.argv)
