@@ -5,8 +5,7 @@ from tray import dbhandler
 
 class IntegrationTest(unittest.TestCase):
     def setUp(self):
-        self.dbhandler = dbhandler.DBHandler()
-        self.dbhandler.db_location = 'testfiles/db_test.db'
+        self.dbhandler = dbhandler.DBHandler('testfiles/db_test.db')
         self.dbhandler.init_db()
 
     def testSaveShare(self):

@@ -5,6 +5,7 @@ import threading
 import time
 import datetime
 import urllib2
+import traceback
 from time import sleep
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from tray import dbhandler
@@ -51,14 +52,15 @@ class OpenPortDispatcher(object):
                     p = self.os_interaction.start_openport_process(share)
                     sleep(1)
                     if p.poll() is not None:
-                        logger.debug('could not start openport process: StdOut:%s\nStdErr' %
+                        logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
                                      (nonBlockRead(p.stdout), nonBlockRead(p.stderr) ) )
                     else:
                         logger.debug('started app %s' % share.restart_command)
 
                     self.share_processes[p.pid]=p
                 except Exception, e:
-                    logger.debug(e)
+                    tb = traceback.format_exc()
+                    logger.error(tb)
 
     def stop_sharing(self,share):
         logger.info("stopping %s" % share.id)
@@ -101,7 +103,7 @@ class OpenPortDispatcher(object):
 
     def check_account(self):
         url = 'http://www.openport.be/api/v1/account/%s/%s' %(self.globals.account_id, self.globals.key_id)
-        logger.info('checking account: %s' % url)
+        logger.debug('checking account: %s' % url)
         try:
             req = urllib2.Request(url)
             response = urllib2.urlopen(req).read()
