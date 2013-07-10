@@ -6,7 +6,7 @@ APPLICATION=openport-client
 PACKAGE=openport-client-$VERSION
 TARBALL=openport-client_$VERSION.orig.tar.gz
 
-sudo apt-get install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder
+sudo apt-get install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder python-dev python-pip python-virtualenv libsqlite3-dev
 
 mkdir $PACKAGE
 cp client $PACKAGE/ -r
