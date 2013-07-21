@@ -53,7 +53,7 @@ class OsInteraction(object):
 class LinuxOsInteraction(OsInteraction):
     def __init__(self, use_logger=True):
         super(LinuxOsInteraction, self).__init__(use_logger)
-        self.APP_DATA_PATH = os.path.join(os.path.expanduser('~/.openport'))
+        self.APP_DATA_PATH = '/root/.openport' if os.getuid() == 0 else os.path.join(os.path.expanduser('~/.openport'))
 
     def copy_to_clipboard(self, text):
         from Tkinter import Tk
