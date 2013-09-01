@@ -2,7 +2,7 @@ import pickle
 
 class Session(object):
     def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=0, account_id=-1,
-                 key_id=-1, local_port=-1, server_session_token='', restart_command=''):
+                 key_id=-1, local_port=-1, server_session_token='', restart_command='', http_forward=False):
         #todo: why is this ever a dict?
         if type(_id) == dict:
             self.id = -1
@@ -17,6 +17,7 @@ class Session(object):
         self.local_port = local_port
         self.server_session_token = server_session_token
         self.restart_command = restart_command
+        self.http_forward = http_forward
 
         self.success_observers = []
         self.error_observers = []
@@ -37,7 +38,8 @@ class Session(object):
             'key_id': self.key_id,
             'local_port': self.local_port,
             'server_session_token': self.server_session_token,
-            'restart_command' : pickle.dumps(self.restart_command)
+            'restart_command' : pickle.dumps(self.restart_command),
+            'http_forward': self.http_forward
         }
 
     def from_dict(self, dict):
@@ -58,6 +60,7 @@ class Session(object):
         self.local_port = dict['local_port']
         self.server_session_token = dict['server_session_token']
         self.restart_command = pickle.loads(dict['restart_command'])
+        self.http_forward = dict['http_forward']
 
     def notify_success(self):
         for observer in self.success_observers:

@@ -171,6 +171,7 @@ class OpenportApp(object):
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
         parser.add_argument('--no-gui', action='store_true', help='Start the app without a gui.')
         parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
+        parser.add_argument('--http-forward', action='store_true', help='Request an http forward, so you can connect to port 80 on the server.')
 
     def start(self):
         logger.debug('client pid:%s' % os.getpid())
@@ -221,6 +222,7 @@ class OpenportApp(object):
         session.local_port = int(args.local_port)
         session.server_port = args.request_port
         session.server_session_token = args.request_token
+        session.http_forward = args.http_forward
 
 #        app.MainLoop()
 

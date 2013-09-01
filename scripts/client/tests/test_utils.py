@@ -2,6 +2,44 @@ import socket
 import sys
 from time import sleep
 import inspect
+from StringIO import StringIO
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+import urllib2
+
+class TestHTTPServer(object):
+    def __init__(self, port):
+        self.server = HTTPServer(('', port), TestHTTPRequestHandler)
+
+    def reply(self, response):
+        self.server.response_string = response #what a hack
+
+    def runThreaded(self):
+        import threading
+        thr = threading.Thread(target=self.server.serve_forever, args=())
+        thr.setDaemon(True)
+        thr.start()
+
+class TestHTTPRequestHandler(BaseHTTPRequestHandler):
+
+    def __init__(self, request, client_address, httpServer):
+        self._response_string = httpServer.response_string
+        BaseHTTPRequestHandler.__init__(self, request, client_address, httpServer)
+
+    def do_GET(self):
+        self._response_string = "hello"
+
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.send_header("Content-Length", str(len(self._response_string)))
+        self.end_headers()
+        self.wfile.write(self._response_string)
+        self.wfile.close()
+
+class SimpleHTTPClient(object):
+
+    def get(self, url):
+        req = urllib2.Request(url)
+        return urllib2.urlopen(req).read()
 
 class SimpleTcpServer(object):
 
@@ -79,13 +117,23 @@ def lineNumber():
 
 if __name__ == '__main__':
 
+#    port = get_open_port()
+#    s = SimpleTcpServer(port)
+#    s.runThreaded()
+#    sleep(1)
+#
+#    c = SimpleTcpClient('localhost', port)
+#
+#    var = raw_input('Enter something: ')
+#    print 'you entered ', var
+#    print 'server replied', c.send(var)
+
     port = get_open_port()
-    s = SimpleTcpServer(port)
+    s = TestHTTPServer(port)
+    s.reply('hooray')
     s.runThreaded()
     sleep(1)
 
-    c = SimpleTcpClient('localhost', port)
+    c = SimpleHTTPClient()
 
-    var = raw_input('Enter something: ')
-    print 'you entered ', var
-    print 'server replied', c.send(var)
+    print 'server replied', c.get('http://localhost:%s' % port)

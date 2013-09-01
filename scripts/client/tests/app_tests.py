@@ -8,7 +8,7 @@ import os
 import signal
 from services import osinteraction
 
-from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumber
+from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumber, SimpleHTTPClient, TestHTTPServer
 from services.utils import nonBlockRead
 
 
@@ -205,9 +205,36 @@ class app_tests(unittest.TestCase):
         except Exception, detail:
             return False
 
+    def testOpenportAppWithHttpForward(self):
+        response = 'cha cha cha'
+        port = get_open_port()
+        s = TestHTTPServer(port)
+        s.reply(response)
+        s.runThreaded()
 
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
+        p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port, '--no-gui',
+                              '--no-tray', '--http-forward'],
+            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        sleep(5)
+        process_output = nonBlockRead(p.stdout)
+        print 'output: ', process_output
 
+        if p.poll() is not None: # process terminated
+            print 'error: %s' % nonBlockRead(p.stderr)
+            self.fail('p.poll() should be None but was %s' % p.poll())
 
+        remote_host, remote_port = self.getRemoteHostAndPort(process_output)
+        self.assertEqual( 80, remote_port)
+
+        c = SimpleHTTPClient()
+        actual_response = c.get(remote_host)
+        self.assertEqual(actual_response, response.strip())
+
+        c.close()
+        s.close()
+        p.kill()
 
 

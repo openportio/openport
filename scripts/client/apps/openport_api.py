@@ -34,12 +34,12 @@ class PortForwardResponse():
         self.account_id = dict['account_id']
         self.key_id = dict['key_id']
         self.session_token = dict['session_token']
-def request_open_port(local_port, restart_session_token = '', request_server_port=-1, error_callback=None):
+def request_open_port(local_port, restart_session_token = '', request_server_port=-1, error_callback=None, http_forward=False):
 
     public_key = get_or_create_public_key()
 
     logger.debug("requesting port forward - remote port: %s, restart session token: %s" % (request_server_port, restart_session_token))
-    dict = request_port( public_key, restart_session_token=restart_session_token, request_server_port=request_server_port )
+    dict = request_port( public_key, restart_session_token=restart_session_token, request_server_port=request_server_port, http_forward=http_forward)
 
     if 'error' in dict:
         if error_callback:
@@ -65,7 +65,8 @@ def open_port(session, callback=None, error_callback=None):
                 session.local_port,
                 request_server_port=session.server_port,
                 restart_session_token=session.server_session_token,
-                error_callback=error_callback
+                error_callback=error_callback,
+                http_forward=session.http_forward
             )
 
             session.server = response.server
