@@ -148,6 +148,11 @@ class app_tests(unittest.TestCase):
         m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', output)
         return m.group(1), int(m.group(2))
 
+    def getRemoteAddress(self, output):
+        print 'output:%s' % output
+        import re
+        m = re.search(r'Now forwarding remote address ([a-z\\.]*) to localhost', output)
+        return m.group(1)
 
     def testTraySpawning(self):
         self.assertFalse(self.trayIsRunning())
@@ -226,15 +231,14 @@ class app_tests(unittest.TestCase):
             print 'error: %s' % nonBlockRead(p.stderr)
             self.fail('p.poll() should be None but was %s' % p.poll())
 
-        remote_host, remote_port = self.getRemoteHostAndPort(process_output)
-        self.assertEqual( 80, remote_port)
+        remote_host = self.getRemoteAddress(process_output)
 
         c = SimpleHTTPClient()
-        actual_response = c.get(remote_host)
+        actual_response = c.get('http://localhost:%s' % port)
+        self.assertEqual(actual_response, response.strip())
+        actual_response = c.get('http://%s' % remote_host)
         self.assertEqual(actual_response, response.strip())
 
-        c.close()
-        s.close()
         p.kill()
 
 

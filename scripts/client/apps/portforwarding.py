@@ -28,7 +28,8 @@ class PortForwardingService:
                  private_key_file,
                  error_callback=None,
                  success_callback=None,
-                 fallback_server_ssh_port=None):
+                 fallback_server_ssh_port=None,
+                 http_forward_address=None):
         self.local_port       = local_port
         self.remote_port      = remote_port
         self.server           = server
@@ -39,6 +40,7 @@ class PortForwardingService:
         self.error_callback   = error_callback
         self.success_callback = success_callback
         self.fallback_server_ssh_port = fallback_server_ssh_port
+        self.http_forward_address = http_forward_address
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy( IgnoreUnknownHostKeyPolicy() )
 
@@ -77,7 +79,10 @@ class PortForwardingService:
             thr = threading.Thread(target=self._forward_local_port)
             thr.setDaemon(True)
             thr.start()
-            logger.info('Now forwarding remote port %s:%d to localhost:%d...' % (self.server, self.remote_port, self.local_port))
+            if self.http_forward_address is None:
+                logger.info('Now forwarding remote port %s:%d to localhost:%d...' % (self.server, self.remote_port, self.local_port))
+            else:
+                logger.info('Now forwarding remote address %s to localhost:%d...' % (self.http_forward_address, self.local_port))
 
             self.keep_alive()
         except KeyboardInterrupt, e:

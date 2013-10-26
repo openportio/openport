@@ -26,8 +26,6 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
         BaseHTTPRequestHandler.__init__(self, request, client_address, httpServer)
 
     def do_GET(self):
-        self._response_string = "hello"
-
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.send_header("Content-Length", str(len(self._response_string)))

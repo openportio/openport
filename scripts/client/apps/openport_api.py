@@ -16,13 +16,14 @@ FALLBACK_SERVER_SSH_PORT = 443
 SERVER_SSH_USER = 'open'
 
 class PortForwardResponse():
-    def __init__(self, server='', remote_port=-1, message='', account_id=-1, key_id=-1, local_port=-1, session_token=''):
+    def __init__(self, server='', remote_port=-1, message='', account_id=-1, key_id=-1, local_port=-1, session_token='', http_forward_address=None):
         self.server = server
         self.remote_port = remote_port
         self.message = message
         self.account_id = account_id
         self.key_id = key_id
         self.session_token = session_token
+        self.http_forward_address = http_forward_address
 
     def __init__(self,dict):
         self.from_dict(dict)
@@ -34,6 +35,7 @@ class PortForwardResponse():
         self.account_id = dict['account_id']
         self.key_id = dict['key_id']
         self.session_token = dict['session_token']
+        self.http_forward_address = dict['http_forward_address']
 def request_open_port(local_port, restart_session_token = '', request_server_port=-1, error_callback=None, http_forward=False):
 
     public_key = get_or_create_public_key()
@@ -75,6 +77,7 @@ def open_port(session, callback=None, error_callback=None):
             session.account_id = response.account_id
             session.key_id = response.key_id
             session.server_session_token = response.session_token
+            session.http_forward_address = response.http_forward_address
 
             if callback is not None:
                 import threading
@@ -92,7 +95,8 @@ def open_port(session, callback=None, error_callback=None):
                 PRIVATE_KEY_FILE,
                 success_callback=session.notify_success,
                 error_callback=session.notify_error,
-                fallback_server_ssh_port = FALLBACK_SERVER_SSH_PORT
+                fallback_server_ssh_port = FALLBACK_SERVER_SSH_PORT,
+                http_forward_address = session.http_forward_address
             )
             portForwardingService.start() #hangs
         except Exception as e:
