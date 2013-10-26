@@ -79,7 +79,7 @@ class PortForwardingService:
             thr = threading.Thread(target=self._forward_local_port)
             thr.setDaemon(True)
             thr.start()
-            if self.http_forward_address is None:
+            if self.http_forward_address is None or self.http_forward_address == '':
                 logger.info('Now forwarding remote port %s:%d to localhost:%d...' % (self.server, self.remote_port, self.local_port))
             else:
                 logger.info('Now forwarding remote address %s to localhost:%d...' % (self.http_forward_address, self.local_port))

@@ -28,7 +28,7 @@ def request_port(key, url='http://www.openport.be/post', restart_session_token =
             'public_key': key,
             'request_port': request_server_port,
             'restart_session_token': restart_session_token,
-            'http_forward': http_forward})
+            'http_forward': 'on' if http_forward else '' })
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
         dict = json.loads(response)
