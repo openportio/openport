@@ -5,6 +5,7 @@ class Globals():
         def __init__(self):
             self.account_id = -1
             self.key_id = -1
+            self.openport_address = "www.openport.be"
 
     # storage for the instance reference
     __instance = None

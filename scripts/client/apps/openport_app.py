@@ -10,6 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from services import osinteraction
 from services.logger_service import get_logger, set_log_level
 from services.osinteraction import is_linux
+from tray.globals import Globals
 
 logger = get_logger('openport_app')
 
@@ -25,6 +26,8 @@ class OpenportApp(object):
     def __init__(self):
         self.tray_app_started = False
         self.os_interaction = osinteraction.getInstance()
+        self.globals = Globals()
+        self.args = None
         if self.os_interaction.is_compiled():
             sys.stdout = open(self.os_interaction.get_app_data_path('apps.out.log'), 'a')
             sys.stderr = open(self.os_interaction.get_app_data_path('apps.error.log'), 'a')
@@ -32,8 +35,8 @@ class OpenportApp(object):
             signal.signal(signal.SIGINT, self.handleSigTERM)
         except ValueError:
             pass
-        # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
-        #signal.signal(signal.SIGTERM, self.handleSigTERM)
+            # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
+            #signal.signal(signal.SIGTERM, self.handleSigTERM)
 
     def handleSigTERM(self, signum, frame):
         logger.debug('got signal %s' % signum)
@@ -172,16 +175,10 @@ class OpenportApp(object):
         parser.add_argument('--no-gui', action='store_true', help='Start the app without a gui.')
         parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
         parser.add_argument('--http-forward', action='store_true', help='Request an http forward, so you can connect to port 80 on the server.')
+        parser.add_argument('--server', default='www.openport.be', help=argparse.SUPPRESS)
 
-    def start(self):
+    def init_app(self, args):
         logger.debug('client pid:%s' % os.getpid())
-        import argparse
-        from apps.openport_api import open_port
-        from common.session import Session
-
-        parser = argparse.ArgumentParser()
-        self.add_default_arguments(parser)
-        args = parser.parse_args()
         if args.verbose:
             from logging import DEBUG
             set_log_level(DEBUG)
@@ -189,15 +186,30 @@ class OpenportApp(object):
         if args.no_gui:
             args.hide_message = True
             args.no_clipboard = True
+
+        if args.no_tray:
+            args.tray_port = -1
+
+        self.globals.server = args.server
+
         self.args = args
+
+    def start(self):
+        from apps.openport_api import open_port
+        from common.session import Session
+        parser = argparse.ArgumentParser()
+        self.add_default_arguments(parser)
+        args = parser.parse_args()
+        self.init_app(args)
 
         if not args.hide_message:
             import wx
             self.app = wx.App(redirect=False)
 
         def show_message_box(session):
-            wx.MessageBox('Your local port %s is now reachable on %s' % ( session.local_port, session.get_link()), 'Info',
-                wx.OK | wx.ICON_INFORMATION)
+            if not args.hide_message:
+                wx.MessageBox('Your local port %s is now reachable on %s' % ( session.local_port, session.get_link()), 'Info',
+                          wx.OK | wx.ICON_INFORMATION)
 
         self.first_time = True
 
@@ -224,14 +236,15 @@ class OpenportApp(object):
         session.server_session_token = args.request_token
         session.http_forward = args.http_forward
 
-#        app.MainLoop()
+        #        app.MainLoop()
 
         def show_error(error_msg):
-            import wx
-            wx.MessageBox(error_msg, 'Error', wx.OK | wx.ICON_ERROR)
+            if not args.hide_message:
+                import wx
+                wx.MessageBox(error_msg, 'Error', wx.OK | wx.ICON_ERROR)
         self.session = session
 
-        open_port(session, callback, show_error)
+        open_port(session, callback, show_error, server=self.args.server)
 
     def error_callback(self, session):
         logger.debug('error')
@@ -246,4 +259,6 @@ class OpenportApp(object):
 
 if __name__ == '__main__':
     app = OpenportApp()
+    import argparse
+
     app.start()

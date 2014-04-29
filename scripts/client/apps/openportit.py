@@ -33,26 +33,26 @@ class OpenportItApp(OpenportApp):
         thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, share.local_port, share.token))
         thr.setDaemon(True)
         thr.start()
-        open_port(share, callback=callback)
+        open_port(share, callback=callback, server=self.args.server)
 
     def start(self):
         logger.debug('client pid:%s' % os.getpid())
         import argparse
+
 
         parser = argparse.ArgumentParser()
         self.add_default_arguments(parser, local_port_required=False)
         parser.add_argument('--file-token', default='', help='The token needed to download the file.')
         parser.add_argument('filename', help='The file you want to openport.')
         args = parser.parse_args()
-        if args.no_gui:
-            args.hide_message = True
-            args.no_clipboard = True
-        self.args = args
+
+        self.init_app(args)
 
         def show_message_box(share):
-            import wx
-            wx.MessageBox('You can now download your file(s) from %s\nThis link has been copied to your clipboard.' % (
-            share.get_link()), 'Info', wx.OK | wx.ICON_INFORMATION)
+            if not args.hide_message:
+                import wx
+                wx.MessageBox('You can now download your file(s) from %s\nThis link has been copied to your clipboard.' % (
+                share.get_link()), 'Info', wx.OK | wx.ICON_INFORMATION)
 
         def get_restart_command_for_share(share):
             command = self.get_restart_command(share)
@@ -80,7 +80,7 @@ class OpenportItApp(OpenportApp):
             if args.hide_message:
                 logger.info('Your file can be downloaded from %s' % share.get_link())
             else:
-                self.show_message_box(share)
+                show_message_box(share)
 
         share = Share()
         if args.file_token == '':

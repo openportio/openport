@@ -42,7 +42,7 @@ class IntegrationTest(unittest.TestCase):
         def callback(share):
 
             print share.as_dict()
-            self.assertEquals('www.openport.be', share.server)
+            self.assertEquals('test.openport.be', share.server)
             self.assertTrue(share.server_port>= 2000)
            # self.assertTrue(share.server_port<= 51000)
 
@@ -54,6 +54,7 @@ class IntegrationTest(unittest.TestCase):
 
         def start_openport_it():
             app = OpenportItApp()
+            app.args.server = 'test.openport.be'
             app.open_port_file(share, callback=callback)
         thr = threading.Thread(target=start_openport_it)
         thr.setDaemon(True)
@@ -150,7 +151,7 @@ class IntegrationTest(unittest.TestCase):
         port = share.server_port
 
         # apparently, the request is not needed, but hey, lets keep it.
-        url = 'http://www.openport.be/debug/linkSessionsToPids?key=batterycupspoon'
+        url = 'http://test.openport.be/debug/linkSessionsToPids?key=batterycupspoon'
         req = urllib2.Request(url)
         response = urllib2.urlopen(req).read()
         self.assertEqual('done', response.strip())
