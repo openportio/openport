@@ -7,10 +7,15 @@ import signal
 import getpass
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+
+from UserDict import UserDict
+import argparse
 from services import osinteraction
 from services.logger_service import get_logger, set_log_level
 from services.osinteraction import is_linux
 from tray.globals import Globals
+from apps.openport_api import open_port
+from common.session import Session
 
 logger = get_logger('openport_app')
 
@@ -27,7 +32,8 @@ class OpenportApp(object):
         self.tray_app_started = False
         self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
-        self.args = None
+        self.args = UserDict()
+        self.session = None
         if self.os_interaction.is_compiled():
             sys.stdout = open(self.os_interaction.get_app_data_path('apps.out.log'), 'a')
             sys.stderr = open(self.os_interaction.get_app_data_path('apps.error.log'), 'a')
@@ -195,19 +201,18 @@ class OpenportApp(object):
         self.args = args
 
     def start(self):
-        from apps.openport_api import open_port
-        from common.session import Session
         parser = argparse.ArgumentParser()
         self.add_default_arguments(parser)
-        args = parser.parse_args()
-        self.init_app(args)
+        self.args = parser.parse_args()
 
-        if not args.hide_message:
+        self.init_app(self.args)
+
+        if not self.args.hide_message:
             import wx
             self.app = wx.App(redirect=False)
 
         def show_message_box(session):
-            if not args.hide_message:
+            if not self.args.hide_message:
                 wx.MessageBox('Your local port %s is now reachable on %s' % ( session.local_port, session.get_link()), 'Info',
                           wx.OK | wx.ICON_INFORMATION)
 
@@ -219,29 +224,32 @@ class OpenportApp(object):
             self.first_time = False
 
             session.restart_command = self.get_restart_command(session)
-            if args.tray_port > 0:
-                self.inform_tray_app_new(session, args.tray_port, start_tray=(not args.no_tray))
+            if self.args.tray_port > 0:
+                self.inform_tray_app_new(session, self.args.tray_port, start_tray=(not self.args.no_tray))
 
             session.error_observers.append(self.error_callback)
             session.success_observers.append(self.success_callback)
 
-            if not args.no_clipboard:
+            if not self.args.no_clipboard:
                 self.copy_share_to_clipboard(session)
-            if not args.hide_message:
+            if not self.args.hide_message:
                 show_message_box(session)
 
         session = Session()
-        session.local_port = int(args.local_port)
-        session.server_port = args.request_port
-        session.server_session_token = args.request_token
-        session.http_forward = args.http_forward
+        session.local_port = int(self.args.local_port)
+        session.server_port = self.args.request_port
+        session.server_session_token = self.args.request_token
+        session.http_forward = self.args.http_forward
 
         #        app.MainLoop()
 
         def show_error(error_msg):
-            if not args.hide_message:
+            if not self.args.hide_message:
                 import wx
                 wx.MessageBox(error_msg, 'Error', wx.OK | wx.ICON_ERROR)
+            else:
+                print error_msg
+
         self.session = session
 
         open_port(session, callback, show_error, server=self.args.server)
@@ -259,6 +267,5 @@ class OpenportApp(object):
 
 if __name__ == '__main__':
     app = OpenportApp()
-    import argparse
 
     app.start()

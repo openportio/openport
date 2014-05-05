@@ -63,8 +63,11 @@ class SimpleTcpServer(object):
             conn.close()
 
     def close(self):
-        self.s.shutdown(socket.SHUT_RDWR)
-        self.s.close()
+        try:
+            self.s.shutdown(socket.SHUT_RDWR)
+            self.s.close()
+        except:
+            pass
 
     def runThreaded(self):
         import threading

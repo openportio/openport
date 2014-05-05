@@ -75,8 +75,7 @@ class app_tests(unittest.TestCase):
         s.runThreaded()
 
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
-        p_tray = subprocess.Popen(['env/bin/python', 'tray/openporttray.py', '--no-gui', '--database', db_file,
-                                   '--server', 'test.openport.be'],
+        p_tray = subprocess.Popen(['env/bin/python', 'tray/openporttray.py', '--no-gui', '--database', db_file],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         p_app = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port, '--no-gui',
                                   '--no-tray', '--verbose', '--server', 'test.openport.be'],
@@ -120,7 +119,7 @@ class app_tests(unittest.TestCase):
   #      s.runThreaded()
 
         p_tray2 = subprocess.Popen(['env/bin/python', 'tray/openporttray.py', '--no-gui', '--database', db_file,
-                                    '--verbose', '--server', 'test.openport.be'],
+                                    '--verbose'],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_tray2)
         sleep(10)

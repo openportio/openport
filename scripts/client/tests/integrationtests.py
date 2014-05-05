@@ -17,7 +17,11 @@ import xmlrunner
 print sys.path
 
 from apps.openportit import OpenportItApp
+from apps.openport_api import open_port
 from common.share import Share
+from common.session import Session
+
+from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumber, SimpleHTTPClient, TestHTTPServer
 
 TOKEN = 'tokentest'
 
@@ -179,6 +183,49 @@ class IntegrationTest(unittest.TestCase):
             raise ValueError
         except ValueError, TypeError:
             print "huray!"
+
+    def test_http_forward(self):
+
+        response = 'cha cha cha'
+        port = get_open_port()
+        s = TestHTTPServer(port)
+        s.reply(response)
+        s.runThreaded()
+
+        def callback(ignore):
+            print "callback"
+
+        def show_error(error_msg):
+            print "error:" + error_msg
+
+        session = Session()
+        session.local_port = port
+        session.server_port = 80
+        session.server_session_token = None
+        session.http_forward = True
+
+        def start_openport():
+            open_port(session, callback, show_error, server="test.openport.be")
+
+        thr = threading.Thread(target=start_openport)
+        thr.setDaemon(True)
+        thr.start()
+
+        sleep(5)
+
+        remote_port = session.server_port
+        self.assertEqual(80, remote_port)
+        remote_host = session.remote_host
+        print "remote host:" + remote_host
+        self.assertTrue(".u.test.openport.be" in remote_host)
+
+        c = SimpleHTTPClient()
+        actual_response = c.get('http://localhost:%s' % port)
+        self.assertEqual(actual_response, response.strip())
+        actual_response = c.get('http://%s' % remote_host)
+        self.assertEqual(actual_response, response.strip())
+
+        # todo: kill thread
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
