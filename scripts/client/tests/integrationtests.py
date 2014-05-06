@@ -213,9 +213,9 @@ class IntegrationTest(unittest.TestCase):
 
         sleep(5)
 
-        remote_port = session.server_port
-        self.assertEqual(80, remote_port)
-        remote_host = session.remote_host
+#        remote_port = session.server_port
+#        self.assertEqual(80, remote_port)
+        remote_host = session.http_forward_address
         print "remote host:" + remote_host
         self.assertTrue(".u.test.openport.be" in remote_host)
 

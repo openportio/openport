@@ -136,7 +136,7 @@ class app_tests(unittest.TestCase):
         os.kill(p_tray2.pid, signal.SIGINT)
         p_tray2.wait()
         print lineNumber(),  "tray.stdout:", nonBlockRead(p_tray2.stdout)
-        print lineNumber(),  "tray.stderr:",nonBlockRead(p_tray2.stderr)
+        print lineNumber(),  "tray.stderr:", nonBlockRead(p_tray2.stderr)
 
         response = c.send(request)
         self.assertNotEqual(request, response.strip())

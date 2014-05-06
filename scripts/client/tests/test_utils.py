@@ -33,11 +33,16 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(self._response_string)
         self.wfile.close()
 
+
 class SimpleHTTPClient(object):
 
     def get(self, url):
-        req = urllib2.Request(url)
-        return urllib2.urlopen(req).read()
+        try:
+            req = urllib2.Request(url)
+            return urllib2.urlopen(req).read()
+        except Exception as detail:
+            print "An error has occurred: ", detail, detail.read()
+            raise detail
 
 class SimpleTcpServer(object):
 
