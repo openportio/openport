@@ -35,6 +35,6 @@ if __name__ == '__main__':
 
 def set_log_level(new_log_level):
     global log_level
-    log_level=new_log_level
+    log_level = new_log_level
     for logger in loggers:
         logger.setLevel(log_level)

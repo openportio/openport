@@ -12,6 +12,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from apps import openport
 from apps.keyhandling import get_or_create_public_key
 from apps.openport_api import PortForwardResponse
+from services.logger_service import set_log_level
+import logging
 
 import xmlrunner
 print sys.path
@@ -26,6 +28,9 @@ from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumb
 TOKEN = 'tokentest'
 
 class IntegrationTest(unittest.TestCase):
+
+    def setUp(self):
+        set_log_level(logging.DEBUG)
 
     def testStartShare(self):
         path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.png')
@@ -155,10 +160,10 @@ class IntegrationTest(unittest.TestCase):
         port = share.server_port
 
         # apparently, the request is not needed, but hey, lets keep it.
-        url = 'http://test.openport.be/debug/linkSessionsToPids?key=batterycupspoon'
-        req = urllib2.Request(url)
-        response = urllib2.urlopen(req).read()
-        self.assertEqual('done', response.strip())
+        #url = 'http://test.openport.be/debug/linkSessionsToPids?key=batterycupspoon'
+        #req = urllib2.Request(url)
+        #response = urllib2.urlopen(req).read()
+        #self.assertEqual('done', response.strip())
 
         dict = openport.request_port(
             url='http://test.openport.be/post',
@@ -212,7 +217,7 @@ class IntegrationTest(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
 
-        sleep(5)
+        sleep(10)
 
 #        remote_port = session.server_port
 #        self.assertEqual(80, remote_port)
