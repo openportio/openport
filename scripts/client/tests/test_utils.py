@@ -5,6 +5,9 @@ import inspect
 from StringIO import StringIO
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import urllib2
+from services.logger_service import get_logger
+
+logger = get_logger(__file__)
 
 class TestHTTPServer(object):
     def __init__(self, port):
@@ -37,11 +40,13 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
 class SimpleHTTPClient(object):
 
     def get(self, url):
+        logger.debug('sending get request ' + url)
         try:
             req = urllib2.Request(url)
             return urllib2.urlopen(req).read()
         except Exception as detail:
-            print "An error has occurred: ", detail, detail.read()
+            print "An error has occurred: ", detail
+            print "detail: ", detail.read()
             raise detail
 
 class SimpleTcpServer(object):

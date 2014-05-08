@@ -15,11 +15,40 @@ class OsInteraction(object):
     def get_app_name(self):
         return os.path.basename(sys.argv[0])
 
+    @staticmethod
+    def unset_variable(args, variable):
+        result = []
+        result.extend(args)
+        if variable not in args:
+            return result
+        location = result.index(variable)
+        result.pop(location)
+        if len(result) > location and len(result[location]) > 0 and result[location][0] != '-':
+            result.pop(location)
+        return result
+
+    @staticmethod
+    def set_variable(args, variable, value=None):
+        result = OsInteraction.unset_variable(args, variable)
+        result.append(variable)
+        if value is not None:
+            result.append(str(value))
+        return result
+
     def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
 #        print share.restart_command
-        return self.start_process(share.restart_command)
+        command = share.restart_command
+
+        assert isinstance(command, list)
+        if hide_message: command = OsInteraction.set_variable(command, "--hide-message")
+        if no_clipboard: command = OsInteraction.set_variable(command, "--no-clipboard")
+        command = OsInteraction.set_variable(command, "--tray-port", tray_port)
+
+        return self.start_process(command)
 
     def start_process(self, args):
+        if self.logger:
+            self.logger.debug('Running command: %s' % args)
         p = subprocess.Popen(args,
                              bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              preexec_fn=None, close_fds=False, shell=False, cwd=None, env=None,

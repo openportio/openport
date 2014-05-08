@@ -48,7 +48,7 @@ def request_open_port(local_port, restart_session_token = '', request_server_por
 
     if 'error' in dict:
         if error_callback:
-            error_callback('An error has occured:\n%s' %(dict['error']))
+            error_callback('An error has occurred:\n%s' %(dict['error']))
         sys.exit(8)
     logger.debug(dict)
 

@@ -161,6 +161,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual('done', response.strip())
 
         dict = openport.request_port(
+            url='http://test.openport.be/post',
             key=get_or_create_public_key(),
             restart_session_token=share.server_session_token,
             request_server_port=port

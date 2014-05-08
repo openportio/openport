@@ -5,6 +5,7 @@ import urllib, urllib2
 from time import sleep
 import signal
 import getpass
+import traceback
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
@@ -12,7 +13,7 @@ from UserDict import UserDict
 import argparse
 from services import osinteraction
 from services.logger_service import get_logger, set_log_level
-from services.osinteraction import is_linux
+from services.osinteraction import is_linux, OsInteraction
 from tray.globals import Globals
 from apps.openport_api import open_port
 from common.session import Session
@@ -53,6 +54,7 @@ class OpenportApp(object):
     def inform_tray_app_stop(self, share, tray_port, start_tray=True):
         logger.debug('Informing tray we\'re stopping.')
         url = 'http://127.0.0.1:%s/stopShare' % tray_port
+        logger.debug('sending get request ' + url)
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
@@ -60,23 +62,27 @@ class OpenportApp(object):
             if response.strip() != 'ok':
                 logger.error(response)
         except Exception, detail:
-            logger.error( "An error has occured while informing the tray: %s" % detail )
+            logger.error("An error has occured while informing the tray: %s" % detail)
 
     def start_tray_application(self):
         if self.tray_app_started:
             return
         self.tray_app_started = True
 
-        extra_options = []
-        if self.args.no_gui:
-            extra_options.append('--no-gui')
         command = self.os_interaction.get_python_exec()
         if self.os_interaction.is_compiled():
             command.extend([quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openporttray.exe'))])
         else:
             command.extend(['-m', 'tray.openporttray'])
-        command.extend(extra_options)
-        logger.debug(command)
+        command = OsInteraction.set_variable(command, '--tray-port', self.args.tray_port)
+        command = OsInteraction.set_variable(command, '--database', self.args.tray_database)
+        command = OsInteraction.set_variable(command, '--server', self.args.server)
+        if self.args.no_gui:
+            command = OsInteraction.set_variable(command, '--no-gui')
+        logger.debug('starting tray: %s' % command)
+    #    output = self.os_interaction.run_command_silent(command) #hangs
+    #    logger.debug('tray stopped: %s ' % output)
+
         def start_tray():
             try:
                 output = self.os_interaction.run_command_silent(command) #hangs
@@ -87,6 +93,7 @@ class OpenportApp(object):
 
     def inform_tray_app_new(self, share, tray_port, start_tray=True):
         url = 'http://127.0.0.1:%s/newShare' % tray_port
+        logger.debug('sending get request ' + url)
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
@@ -96,16 +103,19 @@ class OpenportApp(object):
             else:
                 self.tray_app_started = True
         except Exception, detail:
+            logger.debug('Error occurred while informing the tray, starting the tray: %s' % start_tray)
             if not start_tray:
-                logger.error( "An error has occured while informing the tray: %s" % detail )
+                tb = traceback.format_exc()
+                logger.error('An error has occurred while informing the tray: %s\n%s' % (detail, tb))
             else:
                 self.start_tray_application()
-                sleep(3)
+                sleep(5)
                 self.inform_tray_app_new(share, tray_port, start_tray=False)
 
 
     def inform_tray_app_error(self, share, tray_port):
         url = 'http://127.0.0.1:%s/errorShare' % tray_port
+        logger.debug('sending get request ' + url)
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
@@ -123,6 +133,7 @@ class OpenportApp(object):
 
     def inform_tray_app_success(self, share, tray_port):
         url = 'http://127.0.0.1:%s/successShare' % tray_port
+        logger.debug('sending get request ' + url)
         try:
             data = urllib.urlencode(share.as_dict())
             req = urllib2.Request(url, data)
@@ -155,18 +166,15 @@ class OpenportApp(object):
 
         #if not '--tray-port' in command:
         #    command.extend(['--tray-port', '%s' % tray_port] )
-        if not '--request-port' in command:
-            command.extend(['--request-port', '%s' % session.server_port])
-        if not '--local-port' in command:
-            command.extend(['--local-port', '%s' % session.local_port])
-        if session.server_session_token != '' and not '--request-token' in command:
-            command.extend(['--request-token', session.server_session_token ])
-        if not '--hide-message' in command:
-            command.extend(['--hide-message'])
-        if not '--no-clipboard' in command:
-            command.extend(['--no-clipboard'])
-        if not '--no-tray' in command:
-            command.extend(['--no-tray'])
+        command = OsInteraction.set_variable(command, '--request-port', session.server_port)
+        command = OsInteraction.set_variable(command, '--local-port', session.local_port)
+        if session.server_session_token != '':
+            command = OsInteraction.set_variable(command, '--request-token', session.server_session_token)
+        command = OsInteraction.set_variable(command, '--hide-message')
+        command = OsInteraction.set_variable(command, '--no-clipboard')
+        command = OsInteraction.set_variable(command, '--start-tray', False)
+        command = OsInteraction.unset_variable(command, '--tray-database')
+        command = OsInteraction.set_variable(command, '--tray-port', self.args.tray_port)
 
         return command
 
@@ -174,7 +182,8 @@ class OpenportApp(object):
         parser.add_argument('--hide-message', action='store_true', help='Do not show the message.')
         parser.add_argument('--no-clipboard', action='store_true', help='Do not copy the link to the clipboard.')
         parser.add_argument('--tray-port', type=int, default=8001, help='Inform the tray app of the new share.')
-        parser.add_argument('--no-tray', action="store_true", default=False, help='Do not start a tray app if none can be found.')
+        parser.add_argument('--start-tray', type=bool, default=True, help='Do not start a tray app if none can be found.')
+        parser.add_argument('--tray-database', type=str, default='', help='The database the tray should use if launched from this app.')
         parser.add_argument('--local-port', type=int, help='The port you want to openport.', required=local_port_required, default=-1)
         parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
@@ -193,7 +202,7 @@ class OpenportApp(object):
             args.hide_message = True
             args.no_clipboard = True
 
-        if args.no_tray:
+        if not args.start_tray:
             args.tray_port = -1
 
         self.globals.server = args.server
@@ -225,7 +234,7 @@ class OpenportApp(object):
 
             session.restart_command = self.get_restart_command(session)
             if self.args.tray_port > 0:
-                self.inform_tray_app_new(session, self.args.tray_port, start_tray=(not self.args.no_tray))
+                self.inform_tray_app_new(session, self.args.tray_port, start_tray=self.args.start_tray)
 
             session.error_observers.append(self.error_callback)
             session.success_observers.append(self.success_callback)

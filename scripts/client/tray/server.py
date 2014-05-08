@@ -15,7 +15,7 @@ from tray import dbhandler
 logger = get_logger('server')
 
 onNewShare = None
-
+globals = Globals()
 shares = {}
 
 class ShareRequestHandler(BaseHTTPRequestHandler):
@@ -51,7 +51,6 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
                         share = Session()
                     share.from_dict(dict)
 
-                    globals = Globals()
                     globals.account_id = share.account_id
                     globals.key_id = share.key_id
 #                    logger.debug( 'path: <%s>' % share.filePath )
@@ -104,6 +103,8 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
             self.write_response('ok')
             logger.debug('shutting down due to exit call')
             os.kill(os.getpid(), signal.SIGINT)
+        elif self.path.endswith('active_count'):
+            self.write_response(str(len(shares)))
         else:
             self.write_response('what?')
 
@@ -123,7 +124,7 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
 
 def start_server(onNewShareFunc=None):
     try:
-        server = HTTPServer(('', 8001), ShareRequestHandler)
+        server = HTTPServer(('', globals.tray_port), ShareRequestHandler)
         global onNewShare
         onNewShare=onNewShareFunc
         logger.info( 'Starting server' )

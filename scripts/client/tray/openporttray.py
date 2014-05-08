@@ -49,18 +49,20 @@ class OpenPortDispatcher(object):
             else:
                 try:
                     logger.debug('starting share: %s' % share.restart_command)
-                    p = self.os_interaction.start_openport_process(share)
+                    p = self.os_interaction.start_openport_process(share, tray_port=Globals().tray_port)
                     sleep(1)
                     if p.poll() is not None:
                         logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
-                                     (nonBlockRead(p.stdout), nonBlockRead(p.stderr) ) )
+                                     (nonBlockRead(p.stdout), nonBlockRead(p.stderr)))
                     else:
                         logger.debug('started app %s' % share.restart_command)
+                        sleep(1)
+                        logger.debug('app output: stdout: %s stderr: %s' % (nonBlockRead(p.stdout), nonBlockRead(p.stderr)))
 
-                    self.share_processes[p.pid]=p
+                    self.share_processes[p.pid] = p
                 except Exception, e:
                     tb = traceback.format_exc()
-                    logger.error(tb)
+                    logger.error('Error: <<<' + tb + ' >>>')
 
     def stop_sharing(self,share):
         logger.info("stopping %s" % share.id)
@@ -93,7 +95,7 @@ class OpenPortDispatcher(object):
                         dict = self.check_account()
                         self.show_account_status(dict)
                     except Exception, detail:
-                        logger.error( "An error has occurred while communicating the the openport servers. %s" % detail )
+                        logger.error("An error has occurred while communicating the the openport servers. %s" % detail)
                         pass
 
                     time.sleep(60)
@@ -102,7 +104,7 @@ class OpenPortDispatcher(object):
         t.start()
 
     def check_account(self):
-        url = 'http://www.openport.be/api/v1/account/%s/%s' %(self.globals.account_id, self.globals.key_id)
+        url = 'http://%s/api/v1/account/%s/%s' % (self.globals.openport_address, self.globals.account_id, self.globals.key_id)
         logger.debug('checking account: %s' % url)
         try:
             req = urllib2.Request(url)
@@ -129,7 +131,8 @@ class OpenPortDispatcher(object):
         else:
             share.restart_command = ['python', os.path.join(app_dir, 'apps/openportit.py'), path]
 
-        self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False)
+        self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False,
+                                                   tray_port=Globals().tray_port)
 
     def startOpenportProcess (self, port):
         session = Session()
@@ -140,7 +143,8 @@ class OpenPortDispatcher(object):
             session.restart_command = ['python', os.path.join(app_dir,'apps/openport_app.py'), '--local-port', '%s' % port]
         logger.debug(session.restart_command)
 
-        self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False)
+        self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False,
+                                                   tray_port=Globals().tray_port)
 
 class GuiOpenPortDispatcher(OpenPortDispatcher):
     def __init__(self):
@@ -188,7 +192,9 @@ if __name__ == '__main__':
     parser.add_argument('--no-gui', action='store_true', help='Start the application headless.')
     parser.add_argument('--verbose', action='store_true', help='Be verbose.')
     parser.add_argument('--database', '-d', action='store', help='Use the following database file.', default='')
-    #    parser.add_argument('--tray-port', type=int, default=8001, help='Specify the port to run on.')
+    parser.add_argument('--tray-port', '-p', action='store', type=int,
+                        help='The port the tray communicates on with it''s child processes.', default=8001) #TODO random port??
+    parser.add_argument('--server', '-s', action='store', type=str, default='www.openport.be', help=argparse.SUPPRESS)
     args = parser.parse_args()
 
     dbhandler.db_location = args.database
@@ -207,7 +213,12 @@ if __name__ == '__main__':
         app = wx.App(False)
         dispatcher = GuiOpenPortDispatcher()
 
+    Globals().tray_port = args.tray_port
+    Globals().openport_address = args.server
+
     start_server_thread(onNewShare=dispatcher.onNewShare)
+
+    sleep(1)
 
     if args.restart_shares:
         dispatcher.restart_sharing()
@@ -218,7 +229,6 @@ if __name__ == '__main__':
         dispatcher.exitApp(None)
     signal.signal(signal.SIGTERM, handleSigTERM)
     signal.signal(signal.SIGINT, handleSigTERM)
-
 
     if args.no_gui:
         while True:
