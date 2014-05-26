@@ -1,15 +1,18 @@
 import os
 import paramiko
+import StringIO
 
 HOME_DIR = os.path.expanduser('~')
 PRIVATE_KEY_FILE = os.path.join(HOME_DIR, '.ssh', 'id_rsa')
 PUBLIC_KEY_FILE =  os.path.join(HOME_DIR, '.ssh', 'id_rsa.pub')
+
 
 def get_or_create_public_key():
     if not os.path.exists(PRIVATE_KEY_FILE) or not os.path.exists(PUBLIC_KEY_FILE):
         write_new_key(PRIVATE_KEY_FILE, PUBLIC_KEY_FILE)
 
     return open(PUBLIC_KEY_FILE, 'r').readline()
+
 
 def write_new_key(private_key_filename, public_key_filename):
 #	print 'writing keys: %s %s' %( private_key_filename, public_key_filename)
@@ -24,4 +27,19 @@ def write_new_key(private_key_filename, public_key_filename):
     import getpass
     username = getpass.getuser()
     o = open(public_key_filename ,'w').write("ssh-rsa %s %s \n" % (pk.get_base64(), username))
+
+
+def create_new_key_pair():
+    key = paramiko.RSAKey.generate(1024)
+
+    private_key = StringIO.StringIO()
+    key.write_private_key(private_key)
+    private_key.seek(0)
+
+    pk = paramiko.RSAKey(file_obj=private_key)
+    import getpass
+    username = getpass.getuser()
+    public_key = "ssh-rsa %s %s \n" % (pk.get_base64(), username)
+
+    return private_key.getvalue(), public_key
 

@@ -10,7 +10,7 @@ import urllib, urllib2
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from apps import openport
-from apps.keyhandling import get_or_create_public_key
+from apps.keyhandling import get_or_create_public_key, create_new_key_pair
 from apps.openport_api import PortForwardResponse
 from services.logger_service import set_log_level
 import logging
@@ -27,10 +27,12 @@ from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumb
 
 TOKEN = 'tokentest'
 
+
 class IntegrationTest(unittest.TestCase):
 
     def setUp(self):
         set_log_level(logging.DEBUG)
+        self.test_server = 'test.openport.be'
 
     def testStartShare(self):
         path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.png')
@@ -51,7 +53,7 @@ class IntegrationTest(unittest.TestCase):
         def callback(share):
 
             print share.as_dict()
-            self.assertEquals('test.openport.be', share.server)
+            self.assertEquals(self.test_server, share.server)
             self.assertTrue(share.server_port>= 2000)
            # self.assertTrue(share.server_port<= 51000)
 
@@ -63,15 +65,15 @@ class IntegrationTest(unittest.TestCase):
 
         def start_openport_it():
             app = OpenportItApp()
-            app.args.server = 'test.openport.be'
+            app.args.server = self.test_server
             app.open_port_file(share, callback=callback)
         thr = threading.Thread(target=start_openport_it)
         thr.setDaemon(True)
         thr.start()
 
         i = 0
-        while i < 1000 and not self.called_back:
-            i+=1
+        while i < 10 and not self.called_back:
+            i += 1
             sleep(1)
         self.assertTrue(self.called_back)
         return share
@@ -88,7 +90,7 @@ class IntegrationTest(unittest.TestCase):
         url = share.get_link()
         print 'downloading %s' % url
         try:
-            urllib.urlretrieve (url, temp_file)
+            urllib.urlretrieve(url, temp_file)
         except Exception, e:
             print e
         print "file downloaded: %s" % url
@@ -140,7 +142,7 @@ class IntegrationTest(unittest.TestCase):
 
         self.assertEqual(0, len(self.errors))
 
-    def testSamePort(self):
+    def test_same_port(self):
         path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
         share = self.get_share(path)
         self.success_called_back = False
@@ -160,13 +162,13 @@ class IntegrationTest(unittest.TestCase):
         port = share.server_port
 
         # apparently, the request is not needed, but hey, lets keep it.
-        #url = 'http://test.openport.be/debug/linkSessionsToPids?key=batterycupspoon'
+        #url = 'http://%s/debug/linkSessionsToPids?key=batterycupspoon' % self.test_server
         #req = urllib2.Request(url)
         #response = urllib2.urlopen(req).read()
         #self.assertEqual('done', response.strip())
 
         dict = openport.request_port(
-            url='http://test.openport.be/post',
+            url='http://%s/post' % self.test_server,
             key=get_or_create_public_key(),
             restart_session_token=share.server_session_token,
             request_server_port=port
@@ -175,6 +177,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(port, response.remote_port)
 
         dict = openport.request_port(
+            url='http://%s/post' % self.test_server,
             key=get_or_create_public_key(),
             restart_session_token='not the same token',
             request_server_port=port
@@ -182,6 +185,36 @@ class IntegrationTest(unittest.TestCase):
         response = PortForwardResponse(dict)
         self.assertNotEqual(port, response.remote_port)
 
+    def test_same_port_new_key(self):
+
+        private_key, public_key = create_new_key_pair()
+
+        dictionary = openport.request_port(
+            url='http://%s/post' % self.test_server,
+            key=public_key
+        )
+
+        response = PortForwardResponse(dictionary)
+
+        dictionary2 = openport.request_port(
+            url='http://%s/post' % self.test_server,
+            key=public_key,
+            restart_session_token=response.session_token,
+            request_server_port=response.remote_port
+        )
+
+        response2 = PortForwardResponse(dictionary2)
+
+        self.assertEqual(response2.remote_port, response.remote_port)
+
+        dictionary3 = openport.request_port(
+            url='http://%s/post' % self.test_server,
+            key=public_key,
+            restart_session_token='not the same token',
+            request_server_port=response.remote_port
+        )
+        response3 = PortForwardResponse(dictionary3)
+        self.assertNotEqual(response3.remote_port, response.remote_port)
 
 
     def exceptionTest(self):
@@ -211,7 +244,7 @@ class IntegrationTest(unittest.TestCase):
         session.http_forward = True
 
         def start_openport():
-            open_port(session, callback, show_error, server="test.openport.be")
+            open_port(session, callback, show_error, server=self.test_server)
 
         thr = threading.Thread(target=start_openport)
         thr.setDaemon(True)
@@ -222,8 +255,8 @@ class IntegrationTest(unittest.TestCase):
 #        remote_port = session.server_port
 #        self.assertEqual(80, remote_port)
         remote_host = session.http_forward_address
-        print "remote host:" + remote_host
-        self.assertTrue(".u.test.openport.be" in remote_host)
+        print 'remote host:' + remote_host
+        self.assertTrue('.u.%s' % self.test_server in remote_host)
 
         c = SimpleHTTPClient()
         actual_response = c.get('http://localhost:%s' % port)

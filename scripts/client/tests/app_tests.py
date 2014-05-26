@@ -95,7 +95,7 @@ class AppTests(unittest.TestCase):
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_tray)
         self.processes_to_kill.append(p_app)
-        sleep(10)
+        sleep(15)
 
         process_output = AppTests.get_all_output(p_app)
         print lineNumber(), 'output: ', process_output
@@ -186,7 +186,7 @@ class AppTests(unittest.TestCase):
                                   '--verbose', '--server', 'test.openport.be', '--tray-port', str(tray_port)],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
-        sleep(10)
+        sleep(15)
         process_output = AppTests.get_all_output(p_app)
         print lineNumber(), 'output: ', process_output
 
@@ -335,7 +335,7 @@ class AppTests(unittest.TestCase):
                               '--no-gui', '--start-tray', 'False', '--http-forward', '--server', 'test.openport.be'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
-        sleep(10)
+        sleep(15)
         process_output = AppTests.get_all_output(p)
         print 'output app: ', process_output
 
