@@ -35,14 +35,12 @@ class OsInteraction(object):
             result.append(str(value))
         return result
 
-    def start_openport_process(self, share, hide_message=True, no_clipboard=True, tray_port=8001):
+    def start_openport_process(self, share, manager_port=8001):
 #        print share.restart_command
         command = share.restart_command
 
         assert isinstance(command, list)
-        if hide_message: command = OsInteraction.set_variable(command, "--hide-message")
-        if no_clipboard: command = OsInteraction.set_variable(command, "--no-clipboard")
-        command = OsInteraction.set_variable(command, "--tray-port", tray_port)
+        command = OsInteraction.set_variable(command, "--manager-port", manager_port)
 
         return self.start_process(command)
 

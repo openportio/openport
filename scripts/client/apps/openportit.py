@@ -69,8 +69,8 @@ class OpenportItApp(OpenportApp):
             self.first_time = False
 
             share.restart_command = get_restart_command_for_share(share)
-            if args.tray_port > 0:
-                self.inform_tray_app_new(share, args.tray_port, start_tray=(not args.no_tray))
+            if args.manager_port > 0:
+                self.inform_manager_app_new(share, args.manager_port, start_manager=(not args.no_manager))
 
             share.error_observers.append(self.error_callback)
             share.success_observers.append(self.success_callback)

@@ -9,6 +9,7 @@ from services.logger_service import get_logger
 
 logger = get_logger(__file__)
 
+
 class TestHTTPServer(object):
     def __init__(self, port):
         self.server = HTTPServer(('', port), TestHTTPRequestHandler)
@@ -21,6 +22,7 @@ class TestHTTPServer(object):
         thr = threading.Thread(target=self.server.serve_forever, args=())
         thr.setDaemon(True)
         thr.start()
+
 
 class TestHTTPRequestHandler(BaseHTTPRequestHandler):
 
@@ -48,6 +50,7 @@ class SimpleHTTPClient(object):
             print "An error has occurred: ", detail
             print "detail: ", detail.read()
             raise detail
+
 
 class SimpleTcpServer(object):
 
@@ -85,6 +88,7 @@ class SimpleTcpServer(object):
         thr.setDaemon(True)
         thr.start()
 
+
 class SimpleTcpClient(object):
     def __init__(self, host, port):
         try:
@@ -113,6 +117,7 @@ class SimpleTcpClient(object):
     def close(self):
         self.sock.close()
 
+
 def get_open_port():
     import socket
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -121,6 +126,7 @@ def get_open_port():
     port = s.getsockname()[1]
     s.close()
     return port
+
 
 def lineNumber():
     """Returns the current line number in our program."""

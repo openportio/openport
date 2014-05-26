@@ -1,6 +1,7 @@
 import unittest
+
 from common.share import Share
-from tray import dbhandler
+from manager import dbhandler
 
 
 class IntegrationTest(unittest.TestCase):

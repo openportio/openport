@@ -7,8 +7,11 @@ import sys
 setup(
     windows=[
         {
-            'script': 'tray/openporttray.py',
+            'script': 'gui/openportgui.py',
             'icon_resources': [(1, 'resources/logo-base.ico')]
+        },
+        {
+            'script': 'manager/openportmanager.py',
         },
         {
             'script': 'apps/openportit.py',

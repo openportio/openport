@@ -6,7 +6,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Start Openport clients
-# Description:       Starts all the openport clients still known by the tray.
+# Description:       Starts all the openport clients still known by the manager.
 ### END INIT INFO
 
 # Author: Jan De Bleser <jan@dangersoftware.be>
@@ -16,9 +16,9 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="The openport service"
-NAME=openport-tray
-DAEMON=/usr/share/openport-client/tray.sh
-DAEMONNAME=tray.sh
+NAME=openport-manager
+DAEMON=/usr/share/openport-client/manager.sh
+DAEMONNAME=manager.sh
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

@@ -6,7 +6,7 @@
 !define INSTDIR "$PROGRAMFILES\${APPNAME}"
 !define OPENPORTIT_EXE "openportit.exe"
 !define OPENPORT_EXE "openport_app.exe"
-!define OPENPORT_TRAY_EXE "openporttray.exe"
+!define OPENPORT_MANAGER_EXE "openport-manager.exe"
 
 Name "${APPNAME}"
 OutFile "${APPNAME}.exe"
@@ -65,7 +65,7 @@ Section # hidden section
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "InstallLocation" "$INSTDIR"
 	
 	# Start Menu
-	createShortCut "$SMPROGRAMS\${APPNAME}.lnk" "$INSTDIR\${OPENPORT_TRAY_EXE}" "" "$INSTDIR\logo-base.ico"
+	createShortCut "$SMPROGRAMS\${APPNAME}.lnk" "$INSTDIR\${OPENPORT_MANAGER_EXE}" "" "$INSTDIR\logo-base.ico"
 	
 SectionEnd
 

@@ -8,7 +8,7 @@ from services import osinteraction
 
 
 class DBTask(object):
-    def __init__(self, command, args = []):
+    def __init__(self, command, args=[]):
         self.ready = False
         self.command = command
         self.args = args

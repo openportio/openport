@@ -1,16 +1,17 @@
-import cgi, urlparse
+import cgi
+import urlparse
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
-import os
 import threading
-import traceback
 import sys
+
+from manager import dbhandler
+import os
 from common.session import Session
-from dbhandler import DBHandler
-from globals import Globals
+from manager.globals import Globals
 from common.share import Share
 from services.logger_service import get_logger
-from tray import dbhandler
+
 
 logger = get_logger('server')
 
@@ -124,10 +125,10 @@ class ShareRequestHandler(BaseHTTPRequestHandler):
 
 def start_server(onNewShareFunc=None):
     try:
-        server = HTTPServer(('', globals.tray_port), ShareRequestHandler)
+        server = HTTPServer(('', globals.manager_port), ShareRequestHandler)
         global onNewShare
         onNewShare=onNewShareFunc
-        logger.info( 'Starting server' )
+        logger.info('Starting server')
         server.serve_forever()
     except KeyboardInterrupt:
         server.socket.close()

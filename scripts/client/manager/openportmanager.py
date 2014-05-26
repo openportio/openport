@@ -1,27 +1,30 @@
 import json
-import os
 import sys
 import threading
 import time
 import datetime
 import urllib2
 import traceback
+import signal
 from time import sleep
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from tray import dbhandler
 
-from tray.server import start_server_thread, start_server
-from tray.dbhandler import DBHandler
+from manager import dbhandler
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from manager.server import start_server_thread
 from services import osinteraction
-from tray.globals import Globals
+from manager.globals import Globals
 from services.logger_service import get_logger, set_log_level
 from common.share import Share
 from common.session import Session
 from services.utils import nonBlockRead
 
-logger = get_logger('OpenPortDispatcher')
+logger = get_logger('OpenPortManager')
 
-class OpenPortDispatcher(object):
+
+class OpenPortManager(object):
 
     def __init__(self):
         self.share_processes = {}
@@ -49,7 +52,7 @@ class OpenPortDispatcher(object):
             else:
                 try:
                     logger.debug('starting share: %s' % share.restart_command)
-                    p = self.os_interaction.start_openport_process(share, tray_port=Globals().tray_port)
+                    p = self.os_interaction.start_openport_process(share, manager_port=Globals().manager_port)
                     sleep(1)
                     if p.poll() is not None:
                         logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
@@ -132,7 +135,7 @@ class OpenPortDispatcher(object):
             share.restart_command = ['python', os.path.join(app_dir, 'apps/openportit.py'), path]
 
         self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False,
-                                                   tray_port=Globals().tray_port)
+                                                   manager_port=Globals().manager_port)
 
     def startOpenportProcess (self, port):
         session = Session()
@@ -144,56 +147,22 @@ class OpenPortDispatcher(object):
         logger.debug(session.restart_command)
 
         self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False,
-                                                   tray_port=Globals().tray_port)
+                                                   manager_port=Globals().manager_port)
 
-class GuiOpenPortDispatcher(OpenPortDispatcher):
-    def __init__(self):
-        super(GuiOpenPortDispatcher, self).__init__()
-        from tray.shares_frame import SharesFrame
-        self.shares_frame = SharesFrame(None, -1, "OpenPort", self)
-        self.viewShares(None)
-
-    def stop_sharing(self,share):
-        super(GuiOpenPortDispatcher, self).stop_sharing(share)
-        wx.CallAfter( self.shares_frame.remove_share, share)
-
-    def viewShares(self, event):
-        self.shares_frame.Show(True)
-
-    def onShareError(self, share):
-        super(GuiOpenPortDispatcher, self).onShareError(share)
-        wx.CallAfter( self.shares_frame.notify_error, share)
-
-    def onShareSuccess(self, share):
-        super(GuiOpenPortDispatcher, self).onShareSuccess(share)
-        wx.CallAfter( self.shares_frame.notify_success, share)
-
-    def onNewShare(self, share):
-        super(GuiOpenPortDispatcher, self).onNewShare(share)
-        callbacks = {'stop': self.stop_sharing}
-        wx.CallAfter( self.shares_frame.add_share, share, callbacks )
-
-    def show_account_status(self, dict):
-        wx.CallAfter( self.shares_frame.update_account,
-            bytes_this_month = dict['bytes_this_month'],
-            next_counter_reset_time = utc_epoch_to_local_datetime(dict['next_counter_reset_time']),
-            max_bytes = dict['max_bytes']
-        )
 
 def utc_epoch_to_local_datetime(utc_epoch):
     return datetime.datetime(*time.localtime(utc_epoch)[0:6])
 
 if __name__ == '__main__':
-    logger.debug('server pid:%s' % os.getpid() )
+    logger.debug('server pid:%s' % os.getpid())
 
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--dont-restart-shares', action='store_false', dest='restart_shares', help='Restart all active shares.')
-    parser.add_argument('--no-gui', action='store_true', help='Start the application headless.')
     parser.add_argument('--verbose', action='store_true', help='Be verbose.')
     parser.add_argument('--database', '-d', action='store', help='Use the following database file.', default='')
-    parser.add_argument('--tray-port', '-p', action='store', type=int,
-                        help='The port the tray communicates on with it''s child processes.', default=8001) #TODO random port??
+    parser.add_argument('--manager-port', '-p', action='store', type=int,
+                        help='The port the manager communicates on with it''s child processes.', default=8001) #TODO random port??
     parser.add_argument('--server', '-s', action='store', type=str, default='www.openport.be', help=argparse.SUPPRESS)
     args = parser.parse_args()
 
@@ -204,36 +173,25 @@ if __name__ == '__main__':
         set_log_level(DEBUG)
         logger.debug('You are seeing debug output.')
 
-    if args.no_gui:
-        # import daemon
-        #  with daemon.DaemonContext():
-        dispatcher = OpenPortDispatcher()
-    else:
-        import wx
-        app = wx.App(False)
-        dispatcher = GuiOpenPortDispatcher()
+    manager = OpenPortManager()
 
-    Globals().tray_port = args.tray_port
+    Globals().manager_port = args.manager_port
     Globals().openport_address = args.server
 
-    start_server_thread(onNewShare=dispatcher.onNewShare)
+    start_server_thread(onNewShare=manager.onNewShare)
 
     sleep(1)
 
     if args.restart_shares:
-        dispatcher.restart_sharing()
+        manager.restart_sharing()
 
-    import signal
     def handleSigTERM(signum, frame):
         logger.debug('got a signal %s, frame %s going down' % (signum, frame))
-        dispatcher.exitApp(None)
+        manager.exitApp(None)
     signal.signal(signal.SIGTERM, handleSigTERM)
     signal.signal(signal.SIGINT, handleSigTERM)
 
-    if args.no_gui:
-        while True:
-            sleep(1)
-    else:
-        app.MainLoop()
+    while True:
+        sleep(1)
 
 

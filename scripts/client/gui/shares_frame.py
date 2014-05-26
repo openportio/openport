@@ -1,15 +1,17 @@
-import os
 import datetime
+
+from manager import dbhandler
+import os
 import wx
 from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
 from common.share import Share
 from services import osinteraction
-from tray.globals import Globals
-from tray.trayicon import OpenPortItTaskBarIcon
+from manager.globals import Globals
 from services.logger_service import get_logger
 from services import qr_service, image_service
-from tray.trayicon import OpenPortItTaskBarIcon
+from gui.trayicon import OpenPortItTaskBarIcon
+
 
 logger = get_logger(__name__)
 
@@ -273,7 +275,6 @@ class ImagePanel(wx.Panel):
             dc.DrawBitmap(self.image.ConvertToBitmap(), 0,0)
 
 if __name__ == '__main__':
-    from tray.dbhandler import DBHandler
 
     def stop_sharing(share):
         logger.info( "stopping %s" % share.id )
@@ -284,7 +285,6 @@ if __name__ == '__main__':
 
     app = wx.App(False)
     frame = SharesFrame(None, -1, ' ')
-    import dbhandler
     db_handler = dbhandler.getInstance()
 
     shares = db_handler.get_shares()

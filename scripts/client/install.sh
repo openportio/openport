@@ -3,5 +3,5 @@
 virtualenv env
 env/bin/pip install -r requirements.pip
 
-sudo ln -s -f $(pwd)/openport-tray /etc/init.d/openport-tray
-sudo update-rc.d openport-tray defaults
+sudo ln -s -f $(pwd)/openport-manager /etc/init.d/openport-manager
+sudo update-rc.d openport-manager defaults
