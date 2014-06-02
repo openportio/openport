@@ -124,6 +124,11 @@ class DBHandler():
                                  'id from sessions where active = 1')
         return list(self.get_share_from_row(row) for row in rows)
 
+    def get_share_by_local_port(self, local_port):
+        rows = self.executeQuery('select server, server_port, session_token, local_port, pid, active, restart_command, '
+                                 'id from sessions where active = 1 and local_port=%s' % local_port)
+        return list(self.get_share_from_row(row) for row in rows)
+
     def stop_share(self, share):
         self.executeCommand('update sessions set active = 0 where id = ?', (share.id,))
 
@@ -131,6 +136,7 @@ class DBHandler():
 instance = None
 
 db_location = ''
+
 
 def getInstance():
     if db_location == '':

@@ -8,11 +8,11 @@ import traceback
 import signal
 from time import sleep
 
-from manager import dbhandler
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+from manager import dbhandler
 from manager.server import start_server_thread
 from services import osinteraction
 from manager.globals import Globals
@@ -149,6 +149,27 @@ class OpenPortManager(object):
         self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False,
                                                    manager_port=Globals().manager_port)
 
+    def print_shares(self):
+        shares = self.dbhandler.get_shares()
+        logger.debug('listing shares - amount: %s' % len(list(shares)))
+        for share in shares:
+            print self.get_share_line(share)
+
+    def get_share_line(self, share):
+               #"pid: %s - " % share.pid + \
+        return "localport: %s - " % share.local_port + \
+               "remote port: %s - " % share.server_port + \
+               "running: %s" % self.os_interaction.pid_is_running(share.pid)
+
+    def kill(self, local_port):
+        shares = self.dbhandler.get_share_by_local_port(local_port)
+        if len(shares) > 0:
+            share = shares[0]
+            if self.os_interaction.pid_is_running(share.pid):
+                self.os_interaction.kill_pid(share.pid)
+            self.dbhandler.stop_share(share)
+        self.print_shares()
+
 
 def utc_epoch_to_local_datetime(utc_epoch):
     return datetime.datetime(*time.localtime(utc_epoch)[0:6])
@@ -164,6 +185,8 @@ if __name__ == '__main__':
     parser.add_argument('--manager-port', '-p', action='store', type=int,
                         help='The port the manager communicates on with it''s child processes.', default=8001) #TODO random port??
     parser.add_argument('--server', '-s', action='store', type=str, default='www.openport.be', help=argparse.SUPPRESS)
+    parser.add_argument('--list', '-l', action='store_true', help="list shares and exit")
+    parser.add_argument('--kill', '-k', action='store', type=int, help="list shares and exit", default=0)
     args = parser.parse_args()
 
     dbhandler.db_location = args.database
@@ -177,6 +200,14 @@ if __name__ == '__main__':
 
     Globals().manager_port = args.manager_port
     Globals().openport_address = args.server
+
+    if args.list:
+        manager.print_shares()
+        exit()
+
+    if args.kill:
+        manager.kill(args.kill)
+        exit()
 
     start_server_thread(onNewShare=manager.onNewShare)
 

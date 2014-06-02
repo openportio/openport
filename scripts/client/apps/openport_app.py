@@ -19,6 +19,7 @@ from services.osinteraction import is_linux, OsInteraction
 from manager.globals import Globals
 from apps.openport_api import open_port
 from common.session import Session
+from services import key_registration_service
 
 logger = get_logger('openport_app')
 
@@ -174,10 +175,14 @@ class OpenportApp(object):
         return command
 
     def add_default_arguments(self, parser, local_port_required=True):
+
+        group = parser.add_mutually_exclusive_group(required=local_port_required)
+        group.add_argument('--local-port', type=int, help='The port you want to openport.', default=-1)
+        group.add_argument('--register-key', default='', help='Use this to add your link your client to your account.')
+
         parser.add_argument('--manager-port', type=int, default=8001, help='Inform the manager app of the new share.')
         parser.add_argument('--start-manager', type=bool, default=True, help='Do not start a manager app if none can be found.')
         parser.add_argument('--manager-database', type=str, default='', help='The database the manager should use if launched from this app.')
-        parser.add_argument('--local-port', type=int, help='The port you want to openport.', required=local_port_required, default=-1)
         parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
         parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
@@ -201,6 +206,8 @@ class OpenportApp(object):
         parser = argparse.ArgumentParser()
         self.add_default_arguments(parser)
         self.args = parser.parse_args()
+
+        key_registration_service.register_key(self.args, self.args.server)
 
         self.init_app(self.args)
 
