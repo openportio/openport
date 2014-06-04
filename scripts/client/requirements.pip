@@ -8,4 +8,5 @@ python-daemon
 argparse
 
 #For testing: 
+unittest2
 selenium

@@ -1,6 +1,6 @@
 __author__ = 'jan'
 
-from integrationtests import IntegrationTest
+from integration_tests import IntegrationTest
 
 
 class LiveIntegrationTest(IntegrationTest):
