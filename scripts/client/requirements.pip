@@ -6,3 +6,6 @@ ext_http_server
 pysqlite
 python-daemon
 argparse
+
+#For testing: 
+selenium

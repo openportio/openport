@@ -1,5 +1,6 @@
 import sys
-import urllib, urllib2
+import urllib
+import urllib2
 from apps.keyhandling import get_or_create_public_key
 
 try:
@@ -30,6 +31,7 @@ def register_key(args, server='www.openport.be'):
             dictionary = json.loads(response)
             if not 'status' in dictionary or dictionary['status'] != 'ok':
                 raise Exception('Did not get status ok: %s' % dictionary)
+            print "key successfully registered"
 
         except Exception, detail:
             print "An error has occurred while communicating the the openport servers. ", detail

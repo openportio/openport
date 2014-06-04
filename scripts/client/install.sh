@@ -1,5 +1,6 @@
 #!/bin/sh
-#sudo apt-get install python-pip python-virtualenv python-dev libsqlite3-dev
+#sudo apt-get install python-pip python-virtualenv python-dev libsqlite3-dev phantomjs
+# brew install phantomjs
 virtualenv env
 env/bin/pip install -r requirements.pip
 

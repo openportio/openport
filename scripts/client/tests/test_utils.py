@@ -1,11 +1,17 @@
+import os
 import socket
 import sys
+import signal
+import re
 from time import sleep
 import inspect
-from StringIO import StringIO
+import subprocess
+import threading
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import urllib2
 from services.logger_service import get_logger
+from services.utils import nonBlockRead
+
 
 logger = get_logger(__file__)
 
@@ -154,3 +160,54 @@ if __name__ == '__main__':
     c = SimpleHTTPClient()
 
     print 'server replied', c.get('http://localhost:%s' % port)
+
+
+def get_all_output(p):
+    if p.poll() is None:
+        return nonBlockRead(p.stdout), nonBlockRead(p.stderr)
+    else:
+        return p.stdout.read(), p.stderr.read()
+
+
+def run_command_with_timeout(args, timeout_s):
+
+    class Command(object):
+        def __init__(self, cmd):
+            self.cmd = cmd
+            self.process = None
+
+        def run(self, timeout):
+            def target():
+                #print 'Thread started'
+                self.process = subprocess.Popen(self.cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                self.process.wait()
+                #self.process.communicate()
+                #print 'Thread finished'
+
+            thread = threading.Thread(target=target)
+            thread.start()
+
+            thread.join(timeout)
+            if thread.is_alive():
+                print 'Terminating process'
+                self.process.terminate()
+                thread.join()
+            print self.process.returncode
+            return get_all_output(self.process)
+
+    c = Command(args)
+    return c.run(timeout_s)
+
+
+def get_remote_host_and_port(output):
+    m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', output)
+    return m.group(1), int(m.group(2))
+
+
+def kill_all_processes(processes_to_kill):
+    for p in processes_to_kill:
+        try:
+            os.kill(p.pid, signal.SIGKILL)
+            p.wait()
+        except Exception as e:
+            pass
