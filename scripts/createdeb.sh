@@ -8,6 +8,8 @@ TARBALL=openport-client_$VERSION.orig.tar.gz
 
 sudo apt-get install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder python-dev python-pip python-virtualenv libsqlite3-dev
 
+# if you have errors from locale: sudo dpkg-reconfigure locales
+
 mkdir $PACKAGE
 cp client $PACKAGE/ -r
 #rm $PACKAGE/client/env -rf
@@ -26,4 +28,4 @@ dch --create -v $(echo $VERSION)-1 --package $APPLICATION
 debuild -us -uc
 
 cd ../..
-sudo dpkg -i package/openport-client_$(echo $VERSION)-1_i386.deb
+sudo dpkg -i package/openport-client_$(echo $VERSION)-1_*.deb

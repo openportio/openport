@@ -3,7 +3,7 @@ Maintainer: Jan De Bleser <jandebleser@gmail.com>
 Section: misc
 Priority: optional
 Standards-Version: ??
-Build-Depends: python, python-dev, python-pip, python-virtualenv, libsqlite3-dev
+Build-Depends: python, python-dev, python-pip, python-virtualenv, libsqlite3-dev, libffi-dev
 
 Package: openport-client
 Architecture: any
