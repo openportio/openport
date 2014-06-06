@@ -10,4 +10,8 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 cd $DIR
 
-env/bin/python apps/openport_app.py --local-port $1
+if [ "$#" -eq 1 ]; then
+	env/bin/python apps/openport_app.py --local-port $1
+else
+	env/bin/python apps/openport_app.py "$@"
+fi
