@@ -6,7 +6,7 @@ class Globals():
             self.account_id = -1
             self.key_id = -1
             self.openport_address = "www.openport.be"
-            self.manager_port = -1
+            self.manager_port = 8001
 
     # storage for the instance reference
     __instance = None

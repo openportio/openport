@@ -10,8 +10,7 @@ import threading
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import urllib2
 from services.logger_service import get_logger
-from services.utils import nonBlockRead
-
+from services.utils import get_all_output
 
 logger = get_logger(__file__)
 
@@ -54,7 +53,8 @@ class SimpleHTTPClient(object):
             return urllib2.urlopen(req).read()
         except Exception as detail:
             print "An error has occurred: ", detail
-            print "detail: ", detail.read()
+            sleep(1)
+            #print "detail: ", detail.read()
             raise detail
 
 
@@ -160,13 +160,6 @@ if __name__ == '__main__':
     c = SimpleHTTPClient()
 
     print 'server replied', c.get('http://localhost:%s' % port)
-
-
-def get_all_output(p):
-    if p.poll() is None:
-        return nonBlockRead(p.stdout), nonBlockRead(p.stderr)
-    else:
-        return p.stdout.read(), p.stderr.read()
 
 
 def run_command_with_timeout(args, timeout_s):

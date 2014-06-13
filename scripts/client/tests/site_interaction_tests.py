@@ -3,19 +3,16 @@ import unittest
 import os
 import sys
 import subprocess
+import xmlrunner
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
-from test_utils import run_command_with_timeout, get_remote_host_and_port, get_all_output, kill_all_processes
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from services.utils import get_all_output
 
-from services.logger_service import set_log_level
-import logging
-
-import xmlrunner
-print sys.path
+from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
 
 
 class SiteInteractionTest(unittest.TestCase):
@@ -130,3 +127,7 @@ class SiteInteractionTest(unittest.TestCase):
             elem.click()
         except NoSuchElementException:
             self.fail("session not found")
+
+
+if __name__ == '__main__':
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

@@ -1,4 +1,8 @@
 import unittest
+import sys
+import xmlrunner
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from common.share import Share
 from manager import dbhandler
@@ -22,3 +26,6 @@ class IntegrationTest(unittest.TestCase):
         share2 = self.dbhandler.get_share(share.id)
 
         self.assertEquals(2022, share2.local_port)
+
+if __name__ == '__main__':
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

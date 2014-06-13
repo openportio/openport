@@ -1,22 +1,29 @@
-from time import sleep
-import urllib2
-
 __author__ = 'Jan'
+import urllib2
 import subprocess
 import unittest
 import os
 import signal
+import sys
+import xmlrunner
+from time import sleep
+import logging
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+from services.utils import get_all_output
+
 from services import osinteraction
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumber, SimpleHTTPClient, TestHTTPServer
-from test_utils import get_all_output, run_command_with_timeout, get_remote_host_and_port, kill_all_processes
-from services.logger_service import get_logger
+from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
+from services.logger_service import get_logger, set_log_level
 
 logger = get_logger(__name__)
 
 
 class AppTests(unittest.TestCase):
     def setUp(self):
+        set_log_level(logging.DEBUG)
         self.processes_to_kill = []
         self.osinteraction = osinteraction.getInstance()
         self.manager_port = -1
@@ -25,34 +32,25 @@ class AppTests(unittest.TestCase):
         kill_all_processes(self.processes_to_kill)
         self.kill_manager(self.manager_port)
 
-    def testOpenportApp(self):
+    def test_openport_app(self):
         port = get_open_port()
-        s = SimpleTcpServer(port)
-        s.runThreaded()
 
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
         p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port,
-                              '--start-manager', 'False', '--server', 'www.openport.be', '--verbose'],
+                              '--start-manager', 'False', '--server', 'test.openport.be', '--verbose',
+                              '--manager-port', '-1'],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         sleep(5)
         process_output = get_all_output(p)
-        print 'output: ', process_output
-
-        if p.poll() is not None: # process terminated
-            print get_all_output(p)
-            self.fail('p.poll() should be None but was %s' % p.poll())
+        print 'std_out: ', process_output[0]
+        print 'std_err: ', process_output[1]
+        self.check_application_is_still_alive(p)
 
         remote_host, remote_port = get_remote_host_and_port(process_output[0])
 
-        c = SimpleTcpClient(remote_host, remote_port)
-        request = 'hello'
-        response = c.send(request)
-        self.assertEqual(request, response.strip())
-
-        c.close()
-        s.close()
+        self.check_tcp_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
         p.kill()
 
     def check_application_is_still_alive(self, p):
@@ -89,7 +87,8 @@ class AppTests(unittest.TestCase):
         sleep(15)
 
         process_output = get_all_output(p_app)
-        print lineNumber(), 'output: ', process_output
+        print 'std_out: ', process_output[0]
+        print 'std_err: ', process_output[1]
 
         self.check_application_is_still_alive(p_manager)
         self.check_application_is_still_alive(p_app)
@@ -112,9 +111,11 @@ class AppTests(unittest.TestCase):
         os.kill(p_manager.pid, signal.SIGINT)
         print 'waiting for manager to be killed'
         p_manager.wait()
-        print lineNumber(),  "manager:", get_all_output(p_manager)
 
-        print lineNumber(),  "p_app:", get_all_output(p_app)
+        for out in get_all_output(p_manager):
+            print lineNumber(),  'manager:', out
+        for out in get_all_output(p_app):
+            print lineNumber(), 'p_app: ', out
 
         sleep(5)
 
@@ -126,8 +127,8 @@ class AppTests(unittest.TestCase):
                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
         sleep(10)
-
-        print lineNumber(),  "manager:", get_all_output(p_manager2)
+        for out in get_all_output(p_manager2):
+            print lineNumber(), 'p_manager2: ', out
         self.check_application_is_still_alive(p_manager2)
 
         c = SimpleTcpClient(remote_host, remote_port)
@@ -137,7 +138,8 @@ class AppTests(unittest.TestCase):
 
         os.kill(p_manager2.pid, signal.SIGINT)
         p_manager2.wait()
-        print lineNumber(),  "manager:", get_all_output(p_manager2)
+        for out in get_all_output(p_manager2):
+            print lineNumber(), 'p_manager2: ', out
 
         response = c.send(request)
         self.assertNotEqual(request, response.strip())
@@ -173,7 +175,8 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_app)
         sleep(15)
         process_output = get_all_output(p_app)
-        print lineNumber(), 'output: ', process_output
+        for out in process_output:
+            print lineNumber(), 'p_app: ', out
 
         self.check_application_is_still_alive(p_app)
         self.assertTrue(self.managerIsRunning(manager_port))
@@ -186,6 +189,7 @@ class AppTests(unittest.TestCase):
         sleep(1)
         self.assertTrue(self.managerIsRunning(manager_port))
         self.kill_manager(manager_port)
+        sleep(1)
         self.assertFalse(self.managerIsRunning(manager_port))
 
     def test_restart_manager_on_different_port(self):
@@ -210,7 +214,8 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_app)
         sleep(15)
         process_output = get_all_output(p_app)
-        print lineNumber(), 'output app: ', process_output
+        for out in process_output:
+            print lineNumber(), 'p_app: ', out
         remote_host, remote_port = get_remote_host_and_port(process_output[0])
         print lineNumber(), "remote port:", remote_port
 
@@ -218,7 +223,7 @@ class AppTests(unittest.TestCase):
         self.assertTrue(self.managerIsRunning(manager_port))
 
         self.kill_manager(manager_port)
-        self.kill_all_processes(self.processes_to_kill)
+        kill_all_processes(self.processes_to_kill)
 
         new_manager_port = get_open_port()
         print 'new manager port:', new_manager_port
@@ -231,7 +236,8 @@ class AppTests(unittest.TestCase):
 
         sleep(15)
         process_output = get_all_output(p_manager2)
-        print lineNumber(), 'output manager: ', process_output
+        for out in process_output:
+            print lineNumber(), 'p_manager2: ', out
         self.assertEqual(1, self.get_share_count_of_manager(new_manager_port))
 
         self.check_http_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
@@ -248,7 +254,10 @@ class AppTests(unittest.TestCase):
         self.assertEqual(actual_response, response.strip())
         url = 'http://%s:%s' % (remote_host, remote_port) if remote_port != 80 else 'http://%s' % remote_host
         print 'checking url:', url
-        actual_response = c.get(url)
+        try:
+            actual_response = c.get(url)
+        except urllib2.URLError, e:
+            self.fail('Http forward failed')
         self.assertEqual(actual_response, response.strip())
         print 'http portforward ok'
         s.server.shutdown()
@@ -261,11 +270,11 @@ class AppTests(unittest.TestCase):
         s.runThreaded()
 
         cl = SimpleTcpClient('127.0.0.1', local_port)
-        self.assertEqual(text, cl.send(text))
+        self.assertEqual(text, cl.send(text).strip())
         cl.close()
 
         cr = SimpleTcpClient(remote_host, remote_port)
-        self.assertEqual(text, cr.send(text))
+        self.assertEqual(text, cr.send(text).strip())
         cr.close()
         print 'tcp portforward ok'
         s.close()
@@ -307,22 +316,22 @@ class AppTests(unittest.TestCase):
         except Exception, detail:
             return False
 
-    def testOpenportAppWithHttpForward(self):
+    def test_openport_app_with_http_forward(self):
         port = get_open_port()
 
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
         p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
-                              '--start-manager', 'False', '--http-forward', '--server', 'test.openport.be'],
+                              '--start-manager', 'False', '--http-forward', '--server', 'test.openport.be',
+                              '--manager-port', '-1'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         sleep(15)
         process_output = get_all_output(p)
-        print 'output app: ', process_output
+        for out in process_output:
+            print 'output: ', out
 
         self.check_application_is_still_alive(p)
-        if p.poll() is not None: # process terminated
-            self.fail('p.poll() should be None but was %s' % p.poll())
 
         remote_host = self.getRemoteAddress(process_output[0])
 
@@ -334,3 +343,6 @@ class AppTests(unittest.TestCase):
         self.assertEqual(('hello\n', ''), run_command_with_timeout(['echo', 'hello'], 1))
         self.assertEqual(('hello\n', ''), run_command_with_timeout(['bash', '-c',  'echo hello; sleep 2'], 1))
 
+
+if __name__ == '__main__':
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

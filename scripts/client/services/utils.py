@@ -9,3 +9,10 @@ def nonBlockRead(output):
         return output.read()
     except:
         return False
+
+
+def get_all_output(p):
+    if p.poll() is None:
+        return nonBlockRead(p.stdout), nonBlockRead(p.stderr)
+    else:
+        return p.stdout.read(), p.stderr.read()

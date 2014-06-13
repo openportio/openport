@@ -108,6 +108,8 @@ class OpenportApp(object):
             if not start_manager:
                 tb = traceback.format_exc()
                 logger.error('An error has occurred while informing the manager: %s\n%s' % (detail, tb))
+                if type(detail) is urllib2.HTTPError and detail.getcode() == 500:
+                    logger.error('error detail: ' + detail.read())
             else:
                 self.start_manager_application()
                 sleep(5)
@@ -126,6 +128,11 @@ class OpenportApp(object):
             if response.strip() == 'unknown':
                 logger.critical('this share is no longer known by the manager, exiting')
                 sys.exit(1)
+        except urllib2.HTTPError, e:
+            logger.error('error informing manager of error: ' + e)
+            if e.getcode() == 500:
+                logger.error('error detail: ' + e.read())
+            sys.exit(1)
         except urllib2.URLError, error:
             logger.exception(error)
             sys.exit(1)
@@ -144,6 +151,11 @@ class OpenportApp(object):
             if response.strip() == 'unknown':
                 logger.critical('this share is no longer known by the manager, exiting')
                 sys.exit(1)
+        except urllib2.HTTPError, e:
+            logger.error('error informing manager of success: ' + e)
+            if e.getcode() == 500:
+                logger.error('error detail: ' + e.read())
+            sys.exit(1)
         except urllib2.URLError, error:
             logger.exception(error)
             sys.exit(1)
@@ -241,12 +253,12 @@ class OpenportApp(object):
         open_port(session, callback, show_error, server=self.args.server)
 
     def error_callback(self, session):
-        logger.debug('error')
+        logger.debug('error_callback')
         if self.args.manager_port > 0 and self.manager_app_started:
             self.inform_manager_app_error(session, self.args.manager_port)
 
     def success_callback(self, session):
-        logger.debug('success')
+        logger.debug('success_callback')
         if self.args.manager_port > 0 and self.manager_app_started:
             self.inform_manager_app_success(session, self.args.manager_port)
 

@@ -38,8 +38,14 @@ class OpenPortManager(object):
 
     def exitApp(self,event):
         for pid in self.share_processes:
-            p = self.os_interaction.kill_pid(pid)
-            logger.info("kill pid %s successful: %s" % (pid, p))
+            try:
+                logger.info("trying to kill pid %s" % (pid,))
+                p = self.os_interaction.kill_pid(pid)
+                logger.info("kill pid %s successful: %s" % (pid, p))
+            except Exception, e:
+                tb = traceback.format_exc()
+                logger.error(e)
+                logger.error(tb)
         sys.exit()
 
     def restart_sharing(self):
@@ -134,7 +140,7 @@ class OpenPortManager(object):
         else:
             share.restart_command = ['python', os.path.join(app_dir, 'apps/openportit.py'), path]
 
-        self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False,
+        p = self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False,
                                                    manager_port=Globals().manager_port)
 
     def startOpenportProcess (self, port):
