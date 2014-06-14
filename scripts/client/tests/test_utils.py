@@ -46,7 +46,7 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
 
 class SimpleHTTPClient(object):
 
-    def get(self, url):
+    def get(self, url, print500=True):
         logger.debug('sending get request ' + url)
         try:
             req = urllib2.Request(url)
@@ -55,6 +55,8 @@ class SimpleHTTPClient(object):
             print "An error has occurred: ", detail
             sleep(1)
             #print "detail: ", detail.read()
+            if print500 and detail.getcode() == 500:
+                print detail.read()
             raise detail
 
 
@@ -121,6 +123,7 @@ class SimpleTcpClient(object):
         return response
 
     def close(self):
+#        self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
 
 

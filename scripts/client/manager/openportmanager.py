@@ -42,6 +42,8 @@ class OpenPortManager(object):
                 logger.info("trying to kill pid %s" % (pid,))
                 p = self.os_interaction.kill_pid(pid)
                 logger.info("kill pid %s successful: %s" % (pid, p))
+                if self.share_processes[pid] is not None:
+                    logger.debug('child process output: ' + self.share_processes[pid].communicate())
             except Exception, e:
                 tb = traceback.format_exc()
                 logger.error(e)
@@ -64,7 +66,7 @@ class OpenPortManager(object):
                         logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
                                      (nonBlockRead(p.stdout), nonBlockRead(p.stderr)))
                     else:
-                        logger.debug('started app %s' % share.restart_command)
+                        logger.debug('started app with pid %s : %s' % (p.pid, share.restart_command))
                         sleep(1)
                         logger.debug('app output: stdout: %s stderr: %s' % (nonBlockRead(p.stdout), nonBlockRead(p.stderr)))
 
@@ -142,6 +144,7 @@ class OpenPortManager(object):
 
         p = self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False,
                                                    manager_port=Globals().manager_port)
+        self.share_processes[p.pid] = p
 
     def startOpenportProcess (self, port):
         session = Session()
@@ -152,8 +155,9 @@ class OpenPortManager(object):
             session.restart_command = ['python', os.path.join(app_dir,'apps/openport_app.py'), '--local-port', '%s' % port]
         logger.debug(session.restart_command)
 
-        self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False,
+        p = self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False,
                                                    manager_port=Globals().manager_port)
+        self.share_processes[p.pid] = p
 
     def print_shares(self):
         shares = self.dbhandler.get_shares()
@@ -172,7 +176,12 @@ class OpenPortManager(object):
         if len(shares) > 0:
             share = shares[0]
             if self.os_interaction.pid_is_running(share.pid):
+                logger.debug('pid is running, will kill it:' + share.pid)
                 self.os_interaction.kill_pid(share.pid)
+                if share.pid in self.share_processes:
+                    logger.debug('pid found in share_processes')
+                    if self.share_processes[share.pid] is not None:
+                        logger.debug('output from child process: ' + self.share_processes[share.pid].communicate())
             self.dbhandler.stop_share(share)
         self.print_shares()
 

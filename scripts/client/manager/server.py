@@ -23,8 +23,8 @@ shares = {}
 
 @route('/newShare', method='POST')
 def new_share(name='newShare'):
-
     form_data = request.forms
+    logger.debug('new share ' + str(dict(form_data.iteritems())))
 
     if form_data['local_port'] in shares:
         #update existing share

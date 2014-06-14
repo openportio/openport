@@ -107,8 +107,8 @@ class LinuxOsInteraction(OsInteraction):
         else:
             return True
 
-    def kill_pid(self, pid):
-        os.kill(pid, signal.SIGKILL)
+    def kill_pid(self, pid, signal=signal.SIGKILL):
+        os.kill(pid, signal)
         return True
 
     def is_compiled(self):
@@ -172,7 +172,7 @@ class WindowsOsInteraction(OsInteraction):
         #                    return True
         #            return False
 
-    def kill_pid(self, pid):
+    def kill_pid(self, pid, signal='Ignore'):
         a = self.run_command_silent(['taskkill', '/pid', '%s' % pid, '/f', '/t'])
         return a.startswith('SUCCESS')
 
