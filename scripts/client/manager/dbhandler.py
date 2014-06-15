@@ -6,6 +6,12 @@ from pysqlite2 import dbapi2 as sqlite
 from common.session import Session
 from services import osinteraction
 
+TIMEOUT = 10
+
+
+class TimeOutException(BaseException):
+    pass
+
 
 class DBTask(object):
     def __init__(self, command, args=[]):
@@ -13,8 +19,12 @@ class DBTask(object):
         self.command = command
         self.args = args
 
-    def block(self):
+    def block(self, timeout=None):
+        time = 0
         while not self.ready:
+            if timeout is not None and time > timeout:
+                raise TimeOutException()
+            time += 0.01
             sleep(0.01)
 
 
@@ -45,14 +55,20 @@ class DBHandler():
 
         self.task_queue = Queue()
         self.startQueueThread()
+        self.stopped = False
+        self.queue_exception = None
 
     def checkQueue(self):
-        self.connection = sqlite.connect(self.db_location)
-        self.cursor = self.connection.cursor()
-        while True:
-            task = self.task_queue.get(block=True)
-            task.execute(self.cursor, self.connection)
-            self.task_queue.task_done()
+        try:
+            self.connection = sqlite.connect(self.db_location)
+            self.cursor = self.connection.cursor()
+            while not self.stopped:
+                task = self.task_queue.get(block=True)
+                task.execute(self.cursor, self.connection)
+                self.task_queue.task_done()
+        except Exception, e:
+            self.queue_exception = e
+            raise e
 
     def startQueueThread(self):
         import threading
@@ -61,14 +77,18 @@ class DBHandler():
         t.start()
 
     def executeCommand(self, command, args=[]):
+        if self.queue_exception:
+            raise self.queue_exception
         task = DBCommandTask(command, args)
         self.task_queue.put(task, block=True)
-        task.block()
+        task.block(TIMEOUT)
 
     def executeQuery(self, query, args=[]):
+        if self.queue_exception:
+            raise self.queue_exception
         task = DBQueryTask(query, args)
         self.task_queue.put(task, block=True)
-        task.block()
+        task.block(TIMEOUT)
         return task.result
 
     def init_db(self):
@@ -132,6 +152,8 @@ class DBHandler():
     def stop_share(self, share):
         self.executeCommand('update sessions set active = 0 where id = ?', (share.id,))
 
+    def stop(self):
+        self.stopped = True
 
 instance = None
 
@@ -139,9 +161,10 @@ db_location = ''
 
 
 def getInstance():
+    global db_location
+
     if db_location == '':
         os_interaction = osinteraction.getInstance()
-        global db_location
         db_location = os_interaction.get_app_data_path('openport.db')
 
     global instance
@@ -149,6 +172,13 @@ def getInstance():
         instance = DBHandler(db_location)
         instance.init_db()
     return instance
+
+
+def destroy_instance():
+    global instance
+    if instance is not None:
+        instance.stop()
+    instance = None
 
 
 if __name__ == '__main__':

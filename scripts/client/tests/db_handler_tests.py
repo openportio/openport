@@ -8,10 +8,15 @@ from common.share import Share
 from manager import dbhandler
 
 
-class IntegrationTest(unittest.TestCase):
+class DBHandlerTests(unittest.TestCase):
     def setUp(self):
-        self.dbhandler = dbhandler.DBHandler('testfiles/db_test.db')
+        self.test_db = os.path.join(os.path.dirname(__file__), 'testfiles', 'db_test.db')
+        self.dbhandler = dbhandler.DBHandler(self.test_db)
         self.dbhandler.init_db()
+
+    def tearDown(self):
+        self.dbhandler.stop()
+        os.remove(self.test_db)
 
     def testSaveShare(self):
         share = Share()
