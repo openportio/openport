@@ -23,5 +23,18 @@ class IntegrationTest(unittest.TestCase):
                          OsInteraction.set_variable(args, '--four', False))
         self.assertEqual(args, OsInteraction.unset_variable(args, '--not-there'))
 
+    def test_strip_sudo_command(self):
+        self.assertEqual(['ls', 'test'], OsInteraction.strip_sudo_command(['sudo', '-u', 'jan', 'ls', 'test']))
+        self.assertEqual(['ls', 'test'], OsInteraction.strip_sudo_command(['sudo', 'ls', 'test']))
+        self.assertEqual(['ls', 'test'], OsInteraction.strip_sudo_command(['ls', 'test']))
+
+    def test_get_variable(self):
+        self.assertEqual('jan', OsInteraction.get_variable(['sudo', '-u', 'jan', 'ls', 'test'], '-u'))
+        self.assertEqual(None, OsInteraction.get_variable(['ls', 'test'], '-u'))
+        self.assertEqual('jan', OsInteraction.get_variable(['sudo', '-u', 'jan', 'ls', '-u', 'test'], '-u'))
+        self.assertEqual('jan', OsInteraction.get_variable(['sudo', '-u', 'jan'], '-u'))
+        self.assertEqual(None, OsInteraction.get_variable(['ls', '-u'], '-u'))
+
+
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

@@ -4,6 +4,8 @@ import platform
 import subprocess
 import sys
 import signal
+import getpass
+
 
 class OsInteraction(object):
 
@@ -35,12 +37,42 @@ class OsInteraction(object):
             result.append(str(value))
         return result
 
+    @staticmethod
+    def strip_sudo_command(command):
+        if command[0] != 'sudo':
+            return command
+        result = command[1:]
+        while result[0][0] == '-':
+            result = OsInteraction.unset_variable(result, result[0])
+        return result
+
+    @staticmethod
+    def get_sudo_user_from_command(command):
+        if command[0] != 'sudo':
+            return command
+
+        return OsInteraction.get_variable(command, '-u')
+
+    @staticmethod
+    def get_variable(command, variable):
+        try:
+            location = command.index(variable)
+        except ValueError:
+            return None
+        if location < len(command) - 1:
+            return command[location + 1]
+        else:
+            return None
+
+
     def start_openport_process(self, share, manager_port=8001):
 #        print share.restart_command
         command = share.restart_command
 
         assert isinstance(command, list)
         command = OsInteraction.set_variable(command, "--manager-port", manager_port)
+        if OsInteraction.get_sudo_user_from_command(command) == getpass.getuser():
+            command = OsInteraction.strip_sudo_command(command)
 
         return self.start_process(command)
 

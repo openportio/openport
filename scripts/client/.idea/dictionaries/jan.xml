@@ -4,6 +4,7 @@
       <w>openport</w>
       <w>stderr</w>
       <w>stdout</w>
+      <w>sudo</w>
     </words>
   </dictionary>
 </component>
