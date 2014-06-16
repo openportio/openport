@@ -282,6 +282,8 @@ class AppTests(unittest.TestCase):
         p_manager = subprocess.Popen(['env/bin/python', 'manager/openportmanager.py', '--database', db_file,
                                     '--verbose', '--manager-port', str(manager_port), '--server', 'test.openport.be'],
                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_manager)
+
         sleep(1)
         self.assertTrue(self.managerIsRunning(manager_port))
 
@@ -296,6 +298,7 @@ class AppTests(unittest.TestCase):
                                   '--verbose', '--server', 'test.openport.be', '--manager-port', str(manager_port),
                                   '--http-forward'],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app)
         print "p_app pid:", p_app.pid
         sleep(5)
         process_output = get_all_output(p_manager)
@@ -336,6 +339,8 @@ class AppTests(unittest.TestCase):
         p_manager = subprocess.Popen(['env/bin/python', 'manager/openportmanager.py', '--database', db_file,
                             '--verbose', '--manager-port', str(manager_port), '--server', 'test.openport.be'],
                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_manager)
+
         sleep(10)
         process_output = get_all_output(p_manager)
         print lineNumber(), 'p_manager std_out: ', process_output[0]
