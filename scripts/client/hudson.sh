@@ -1,5 +1,5 @@
 #!/bin/bash
-ps -ef | grep python | grep openport | grep -v grep | awk '{print $2}' | xargs kill
+ps -ef | grep python | grep openport | grep -v grep | awk '{print $2}' | xargs -r kill
 cd scripts/client
 virtualenv env
 #sudo apt-get install libmysqlclient-dev python-dev nodejs sloccount libffi-dev
