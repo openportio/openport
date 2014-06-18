@@ -44,6 +44,8 @@ class SiteInteractionTest(unittest.TestCase):
         elem2 = self.browser.find_element_by_name("password")
         elem2.send_keys("test")
         elem.send_keys(Keys.RETURN)
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
+
 
     def test_login_to_site(self):
         self.login_to_site()
@@ -87,7 +89,10 @@ class SiteInteractionTest(unittest.TestCase):
     def get_key_binding_token(self):
         self.browser.get('http://test.openport.be/user/keys')
         self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
-        code_elem = self.browser.find_elements_by_xpath("//*[contains(text(), '--register-key')]")[0]
+        try:
+            code_elem = self.browser.find_elements_by_xpath("//*[contains(text(), '--register-key')]")[0]
+        except IndexError:
+            self.fail('register key div not found in DOM. Check screenshot %s.png' % inspect.stack()[0][3])
         return code_elem.text.strip().split()[-1]
 
     def test_kill_session(self):

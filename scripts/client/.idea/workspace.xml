@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
-    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Added installation script for the packages required by the tests">
+    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Added screenshots to debug the site_interaction_tests">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/site_interaction_tests.py" afterPath="$PROJECT_DIR$/tests/site_interaction_tests.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -38,7 +38,7 @@
       <file leaf-file-name="site_interaction_tests.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tests/site_interaction_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="89" column="0" selection-start="3457" selection-end="3457" vertical-scroll-proportion="0.4695122" vertical-offset="1181" max-vertical-offset="2220">
+            <state line="96" column="0" selection-start="3887" selection-end="3887" vertical-scroll-proportion="0.8548387" vertical-offset="1175" max-vertical-offset="2295">
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
               </folding>
@@ -1049,7 +1049,11 @@
       <created>1403118684421</created>
       <updated>1403118684421</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="Added screenshots to debug the site_interaction_tests">
+      <created>1403119909833</created>
+      <updated>1403119909833</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1134,7 +1138,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="better storing and passing of the restart command.&#10;Also hiding some black command screens." />
     <MESSAGE value="api changed in python 2.7" />
     <MESSAGE value="fallback ssh port 443 (for firewalls)" />
     <MESSAGE value="Fixed the samePort integration test" />
@@ -1159,7 +1162,8 @@
     <MESSAGE value="Fixed problem with tests launching too many openport processes" />
     <MESSAGE value="More fixing the tests" />
     <MESSAGE value="Added installation script for the packages required by the tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added installation script for the packages required by the tests" />
+    <MESSAGE value="Added screenshots to debug the site_interaction_tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added screenshots to debug the site_interaction_tests" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1212,7 +1216,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/tests/site_interaction_tests.py</url>
-          <line>81</line>
+          <line>83</line>
           <option name="timeStamp" value="117" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
@@ -1556,7 +1560,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/site_interaction_tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="89" column="0" selection-start="3457" selection-end="3457" vertical-scroll-proportion="0.4695122" vertical-offset="1181" max-vertical-offset="2220">
+        <state line="96" column="0" selection-start="3887" selection-end="3887" vertical-scroll-proportion="0.8548387" vertical-offset="1175" max-vertical-offset="2295">
           <folding>
             <element signature="e#0#22#0" expanded="true" />
           </folding>
