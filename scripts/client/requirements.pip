@@ -11,3 +11,4 @@ bottle
 #For testing: 
 unittest2
 selenium
+nose

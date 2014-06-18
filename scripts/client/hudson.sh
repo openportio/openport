@@ -7,4 +7,4 @@ virtualenv env
 #env/bin/easy_install -U distribute
 #env/bin/easy_install unittest-xml-reporting
 env/bin/pip install -r requirements.pip
-env/bin/unit2 discover tests "*_tests.py" || echo there was an error: $?
+env/bin/nosetests --nocapture --with-xunit tests/*_tests.py || echo there was an error: $?
