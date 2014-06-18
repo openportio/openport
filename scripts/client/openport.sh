@@ -8,7 +8,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-cd $DIR
+cd "$DIR"
 
 if [ "$#" -eq 1 ]; then
 	env/bin/python apps/openport_app.py --local-port $1

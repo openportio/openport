@@ -197,6 +197,8 @@ def run_command_with_timeout(args, timeout_s):
 
 def get_remote_host_and_port(output):
     m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', output)
+    if m is None:
+        raise Exception('remote host and port not found in output: %s' % output)
     return m.group(1), int(m.group(2))
 
 

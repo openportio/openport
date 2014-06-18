@@ -5,8 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
-    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Made the tests a bit more robust">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hudson.sh" afterPath="$PROJECT_DIR$/hudson.sh" />
+    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Don't run xargs if the lines are empty">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/app_tests.py" afterPath="$PROJECT_DIR$/tests/app_tests.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/openport.sh" afterPath="$PROJECT_DIR$/openport.sh" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_app.py" afterPath="$PROJECT_DIR$/apps/openport_app.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test_utils.py" afterPath="$PROJECT_DIR$/tests/test_utils.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="client.iws" />
@@ -35,19 +38,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="site_interaction_tests.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/site_interaction_tests.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="127" column="38" selection-start="5143" selection-end="5143" vertical-scroll-proportion="-17.538462" vertical-offset="1314" max-vertical-offset="1935">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="openportmanager.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="200" column="58" selection-start="8352" selection-end="8359" vertical-scroll-proportion="-5.3076925" vertical-offset="2712" max-vertical-offset="3585">
+            <state line="200" column="58" selection-start="8352" selection-end="8359" vertical-scroll-proportion="0.0" vertical-offset="3000" max-vertical-offset="3735">
               <folding />
             </state>
           </provider>
@@ -56,7 +50,7 @@
       <file leaf-file-name="install.sh" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/install.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="33" selection-start="222" selection-end="222" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="210">
+            <state line="6" column="33" selection-start="222" selection-end="222" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="210">
               <folding />
             </state>
           </provider>
@@ -65,16 +59,16 @@
       <file leaf-file-name="app_tests.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/app_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="226" column="16" selection-start="8590" selection-end="8590" vertical-scroll-proportion="-9.384615" vertical-offset="3011" max-vertical-offset="7380">
+            <state line="178" column="25" selection-start="6729" selection-end="6729" vertical-scroll-proportion="0.0" vertical-offset="2670" max-vertical-offset="7545">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="hudson.sh" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="hudson.sh" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/hudson.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="35" selection-start="334" selection-end="334" vertical-scroll-proportion="0.2549575" vertical-offset="0" max-vertical-offset="353">
+            <state line="10" column="0" selection-start="462" selection-end="462" vertical-scroll-proportion="0.0" vertical-offset="150" max-vertical-offset="240">
               <folding />
             </state>
           </provider>
@@ -83,7 +77,7 @@
       <file leaf-file-name="integration_tests.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/integration_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="41" column="15" selection-start="1176" selection-end="1176" vertical-scroll-proportion="0.0" vertical-offset="423" max-vertical-offset="4050">
+            <state line="41" column="15" selection-start="1176" selection-end="1176" vertical-scroll-proportion="0.0" vertical-offset="615" max-vertical-offset="4155">
               <folding />
             </state>
           </provider>
@@ -92,7 +86,7 @@
       <file leaf-file-name="os_interaction_tests.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/os_interaction_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="79" selection-start="1930" selection-end="1930" vertical-scroll-proportion="0.0" vertical-offset="247" max-vertical-offset="675">
+            <state line="34" column="79" selection-start="1930" selection-end="1930" vertical-scroll-proportion="0.0" vertical-offset="510" max-vertical-offset="690">
               <folding>
                 <marker date="1402959757000" expanded="true" signature="229:2018" placeholder="..." />
                 <marker date="1402959757000" expanded="true" signature="1221:1523" placeholder="..." />
@@ -102,25 +96,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dbhandler.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="24" selection-start="596" selection-end="596" vertical-scroll-proportion="31.73077" vertical-offset="1215" max-vertical-offset="2925">
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-                <marker date="1402872069000" expanded="true" signature="234:243" placeholder="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="osinteraction.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/services/osinteraction.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="76" column="42" selection-start="2225" selection-end="2225" vertical-scroll-proportion="-9.384615" vertical-offset="896" max-vertical-offset="3630">
-              <folding>
-                <element signature="e#0#12#0" expanded="true" />
-              </folding>
+            <state line="76" column="42" selection-start="2225" selection-end="2225" vertical-scroll-proportion="0.0" vertical-offset="896" max-vertical-offset="3630">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -128,7 +108,25 @@
       <file leaf-file-name="test_utils.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/test_utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="199" column="0" selection-start="5491" selection-end="5491" vertical-scroll-proportion="0.0" vertical-offset="2688" max-vertical-offset="3045">
+            <state line="200" column="45" selection-start="5554" selection-end="5554" vertical-scroll-proportion="0.0" vertical-offset="3000" max-vertical-offset="3255">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="openport.sh" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/openport.sh">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="17" column="0" selection-start="545" selection-end="545" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="openport_app.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="179" column="69" selection-start="7318" selection-end="7318" vertical-scroll-proportion="0.16425121" vertical-offset="2463" max-vertical-offset="4035">
               <folding />
             </state>
           </provider>
@@ -169,7 +167,6 @@
         <option value="$PROJECT_DIR$/apps/openportit.py" />
         <option value="$PROJECT_DIR$/nsis/clean.nsi" />
         <option value="$PROJECT_DIR$/openport.py" />
-        <option value="$PROJECT_DIR$/openport.sh" />
         <option value="$PROJECT_DIR$/py2exe_win.py" />
         <option value="$PROJECT_DIR$/services/key_registration_service.py" />
         <option value="$PROJECT_DIR$/tests/__main__.py" />
@@ -177,20 +174,21 @@
         <option value="$PROJECT_DIR$/manager/globals.py" />
         <option value="$PROJECT_DIR$/services/utils.py" />
         <option value="$PROJECT_DIR$/tests/site_interaction_tests.py" />
-        <option value="$PROJECT_DIR$/apps/openport_app.py" />
         <option value="$PROJECT_DIR$/common/session.py" />
-        <option value="$PROJECT_DIR$/tests/test_utils.py" />
         <option value="$PROJECT_DIR$/manager/server.py" />
         <option value="$PROJECT_DIR$/requirements.pip" />
         <option value="$PROJECT_DIR$/tests/db_handler2_tests.py" />
         <option value="$PROJECT_DIR$/tests/db_handler_tests.py" />
         <option value="$PROJECT_DIR$/manager/dbhandler.py" />
-        <option value="$PROJECT_DIR$/tests/app_tests.py" />
         <option value="$PROJECT_DIR$/tests/os_interaction_tests.py" />
         <option value="$PROJECT_DIR$/services/osinteraction.py" />
         <option value="$PROJECT_DIR$/manager/openportmanager.py" />
         <option value="$PROJECT_DIR$/tests/integration_tests.py" />
         <option value="$PROJECT_DIR$/hudson.sh" />
+        <option value="$PROJECT_DIR$/tests/app_tests.py" />
+        <option value="$PROJECT_DIR$/tests/test_utils.py" />
+        <option value="$PROJECT_DIR$/openport.sh" />
+        <option value="$PROJECT_DIR$/apps/openport_app.py" />
       </list>
     </option>
   </component>
@@ -321,6 +319,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="tests" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="apps" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1017,7 +1029,11 @@
       <created>1402990357550</created>
       <updated>1402990357550</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="Don't run xargs if the lines are empty">
+      <created>1402990589199</created>
+      <updated>1402990589199</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1041,29 +1057,29 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="1440" height="790" extended-state="0" />
+    <frame x="0" y="22" width="1440" height="790" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.1218716" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2965616" sideWeight="0.49786553" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.5764331" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21212122" sideWeight="0.63649637" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5630373" sideWeight="0.49468085" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.57165605" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5565069" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.42120343" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.42024964" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32930514" sideWeight="0.6433121" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32930514" sideWeight="0.6433121" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2965616" sideWeight="0.49786553" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
     <layout-to-restore>
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1083,9 +1099,9 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.5764331" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21212122" sideWeight="0.63649637" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26490983" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26490983" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
     </layout-to-restore>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -1126,7 +1142,8 @@
     <MESSAGE value="Stripping the sudo command if the user running the manager is the same as the user that started the share." />
     <MESSAGE value="Moved hudson script to separate file" />
     <MESSAGE value="Made the tests a bit more robust" />
-    <option name="LAST_COMMIT_MESSAGE" value="Made the tests a bit more robust" />
+    <MESSAGE value="Don't run xargs if the lines are empty" />
+    <option name="LAST_COMMIT_MESSAGE" value="Don't run xargs if the lines are empty" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1164,12 +1181,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/tests/app_tests.py</url>
-          <line>389</line>
+          <line>391</line>
           <option name="timeStamp" value="107" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/tests/app_tests.py</url>
-          <line>485</line>
+          <line>487</line>
           <option name="timeStamp" value="108" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
@@ -1189,7 +1206,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/tests/app_tests.py</url>
-          <line>426</line>
+          <line>428</line>
           <option name="timeStamp" value="126" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
@@ -1243,11 +1260,6 @@
     <entry file="file://$PROJECT_DIR$/gui/shares_frame.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="12" column="9" selection-start="331" selection-end="331" vertical-scroll-proportion="0.46496814" vertical-offset="34" max-vertical-offset="4635" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/openport.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="51" selection-start="467" selection-end="467" vertical-scroll-proportion="0.59800667" vertical-offset="0" max-vertical-offset="301" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/manager.sh">
@@ -1369,9 +1381,7 @@
     </entry>
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/threading.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="531" column="0" selection-start="16964" selection-end="16964" vertical-scroll-proportion="0.0" vertical-offset="7848" max-vertical-offset="14655">
-          <folding />
-        </state>
+        <state line="531" column="0" selection-start="16964" selection-end="16964" vertical-scroll-proportion="0.0" vertical-offset="7848" max-vertical-offset="14655" />
       </provider>
     </entry>
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/urllib2.py">
@@ -1384,11 +1394,6 @@
         <state line="30" column="28" selection-start="1306" selection-end="1313" vertical-scroll-proportion="0.41761363" vertical-offset="303" max-vertical-offset="21585" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="108" column="41" selection-start="4310" selection-end="4320" vertical-scroll-proportion="-4.1538463" vertical-offset="1392" max-vertical-offset="4005" />
-      </provider>
-    </entry>
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/socket.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="166" column="0" selection-start="5472" selection-end="5472" vertical-scroll-proportion="0.0" vertical-offset="2358" max-vertical-offset="8490" />
@@ -1396,16 +1401,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/common/share.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="15" selection-start="51" selection-end="51" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="420">
-          <folding />
-        </state>
+        <state line="2" column="15" selection-start="51" selection-end="51" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="420" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/env/lib/python2.6/site-packages/bottle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="1801" column="6" selection-start="73093" selection-end="73093" vertical-scroll-proportion="-0.5382263" vertical-offset="27191" max-vertical-offset="56070">
-          <folding />
-        </state>
+        <state line="1801" column="6" selection-start="73093" selection-end="73093" vertical-scroll-proportion="-0.5382263" vertical-offset="27191" max-vertical-offset="56070" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/common/session.py">
@@ -1436,38 +1437,31 @@
     </entry>
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/unittest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="288" column="0" selection-start="10139" selection-end="10139" vertical-scroll-proportion="0.0" vertical-offset="4176" max-vertical-offset="13155">
-          <folding />
-        </state>
+        <state line="288" column="0" selection-start="10139" selection-end="10139" vertical-scroll-proportion="0.0" vertical-offset="4176" max-vertical-offset="13155" />
       </provider>
     </entry>
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/Queue.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="149" column="8" selection-start="5648" selection-end="5648" vertical-scroll-proportion="0.33144477" vertical-offset="2088" max-vertical-offset="3720">
-          <folding />
-        </state>
+        <state line="149" column="8" selection-start="5648" selection-end="5648" vertical-scroll-proportion="0.33144477" vertical-offset="2088" max-vertical-offset="3720" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/db_handler_tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="38" selection-start="797" selection-end="797" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="570">
-          <folding />
-        </state>
+        <state line="30" column="38" selection-start="797" selection-end="797" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="570" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="26" column="24" selection-start="596" selection-end="596" vertical-scroll-proportion="31.73077" vertical-offset="1215" max-vertical-offset="2925">
           <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <marker date="1402872069000" expanded="true" signature="234:243" placeholder="..." />
+            <element signature="e#0#23#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/site_interaction_tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="127" column="38" selection-start="5143" selection-end="5143" vertical-scroll-proportion="-17.538462" vertical-offset="1314" max-vertical-offset="1935">
+        <state line="127" column="38" selection-start="5143" selection-end="5143" vertical-scroll-proportion="0.0" vertical-offset="1905" max-vertical-offset="2070">
           <folding />
         </state>
       </provider>
@@ -1485,30 +1479,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/services/osinteraction.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="76" column="42" selection-start="2225" selection-end="2225" vertical-scroll-proportion="-9.384615" vertical-offset="896" max-vertical-offset="3630">
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/test_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="199" column="0" selection-start="5491" selection-end="5491" vertical-scroll-proportion="0.0" vertical-offset="2688" max-vertical-offset="3045">
+        <state line="76" column="42" selection-start="2225" selection-end="2225" vertical-scroll-proportion="0.0" vertical-offset="896" max-vertical-offset="3630">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="200" column="58" selection-start="8352" selection-end="8359" vertical-scroll-proportion="-5.3076925" vertical-offset="2712" max-vertical-offset="3585">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tests/app_tests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="226" column="16" selection-start="8590" selection-end="8590" vertical-scroll-proportion="-9.384615" vertical-offset="3011" max-vertical-offset="7380">
+        <state line="200" column="58" selection-start="8352" selection-end="8359" vertical-scroll-proportion="0.0" vertical-offset="3000" max-vertical-offset="3735">
           <folding />
         </state>
       </provider>
@@ -1529,7 +1507,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/hudson.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="35" selection-start="334" selection-end="334" vertical-scroll-proportion="0.2549575" vertical-offset="0" max-vertical-offset="353">
+        <state line="10" column="0" selection-start="462" selection-end="462" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="240">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/app_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="178" column="25" selection-start="6729" selection-end="6729" vertical-scroll-proportion="0.0" vertical-offset="2670" max-vertical-offset="7545">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/test_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="200" column="45" selection-start="5554" selection-end="5554" vertical-scroll-proportion="0.0" vertical-offset="3000" max-vertical-offset="3255">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/openport.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="17" column="0" selection-start="545" selection-end="545" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="179" column="69" selection-start="7318" selection-end="7318" vertical-scroll-proportion="0.16425121" vertical-offset="2463" max-vertical-offset="4035">
           <folding />
         </state>
       </provider>

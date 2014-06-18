@@ -174,6 +174,8 @@ class AppTests(unittest.TestCase):
         print 'getRemoteAddress - output:%s' % output
         import re
         m = re.search(r'Now forwarding remote address ([a-z\\.]*) to localhost', output)
+        if m is None:
+            raise Exception('address not found in output: %s' % output)
         return m.group(1)
 
     def test_manager_spawning(self):

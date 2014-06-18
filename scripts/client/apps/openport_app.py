@@ -78,8 +78,10 @@ class OpenportApp(object):
         else:
             command.extend(['-m', 'manager.openportmanager'])
         command = OsInteraction.set_variable(command, '--manager-port', self.args.manager_port)
-        command = OsInteraction.set_variable(command, '--database', self.args.manager_database)
-        command = OsInteraction.set_variable(command, '--server', self.args.server)
+        if self.args.manager_database:
+            command = OsInteraction.set_variable(command, '--database', self.args.manager_database)
+        if self.args.server:
+            command = OsInteraction.set_variable(command, '--server', self.args.server)
         logger.debug('starting manager: %s' % command)
     #    output = self.os_interaction.run_command_silent(command) #hangs
     #    logger.debug('manager stopped: %s ' % output)
