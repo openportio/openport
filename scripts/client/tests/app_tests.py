@@ -102,6 +102,7 @@ class AppTests(unittest.TestCase):
         p_manager = subprocess.Popen(['env/bin/python', 'manager/openportmanager.py', '--database', db_file,
                                    '--verbose', '--manager-port', str(manager_port)],
                                   stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        sleep(3)
         p_app = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port,
                                   '--verbose', '--server', 'test.openport.be', '--manager-port', str(manager_port)],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -195,7 +196,8 @@ class AppTests(unittest.TestCase):
 
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         p_app = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port,
-                                  '--verbose', '--server', 'test.openport.be', '--manager-port', str(manager_port)],
+                                  '--verbose', '--server', 'test.openport.be', '--manager-port', str(manager_port),
+                                  '--manager-database', db_file],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
         sleep(15)
@@ -298,7 +300,7 @@ class AppTests(unittest.TestCase):
 
         p_app = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port,
                                   '--verbose', '--server', 'test.openport.be', '--manager-port', str(manager_port),
-                                  '--http-forward'],
+                                  '--http-forward', '--manager-database', db_file],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
         print "p_app pid:", p_app.pid

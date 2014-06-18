@@ -107,7 +107,8 @@ class SiteInteractionTest(unittest.TestCase):
     def start_session(self, local_port):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port,
-                              '--start-manager', 'False', '--server', 'test.openport.be', '--verbose'],
+                              '--start-manager', 'False', '--server', 'test.openport.be', '--verbose', '--manager-port',
+                              -1],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         return p
