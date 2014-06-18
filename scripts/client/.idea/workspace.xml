@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
-    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Added screenshots to debug the site_interaction_tests">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/site_interaction_tests.py" afterPath="$PROJECT_DIR$/tests/site_interaction_tests.py" />
+    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Fail test, don't raise error">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hudson.sh" afterPath="$PROJECT_DIR$/hudson.sh" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="client.iws" />
@@ -35,10 +35,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="site_interaction_tests.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="site_interaction_tests.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/site_interaction_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="96" column="0" selection-start="3887" selection-end="3887" vertical-scroll-proportion="0.8548387" vertical-offset="1175" max-vertical-offset="2295">
+            <state line="96" column="0" selection-start="3887" selection-end="3887" vertical-scroll-proportion="-6.0227275" vertical-offset="1175" max-vertical-offset="2295">
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
               </folding>
@@ -73,10 +73,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="hudson.sh" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="hudson.sh" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/hudson.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="10" column="0" selection-start="462" selection-end="462" vertical-scroll-proportion="0.0" vertical-offset="150" max-vertical-offset="240">
+            <state line="9" column="50" selection-start="470" selection-end="470" vertical-scroll-proportion="0.38135594" vertical-offset="0" max-vertical-offset="354">
               <folding />
             </state>
           </provider>
@@ -182,13 +182,13 @@
         <option value="$PROJECT_DIR$/services/osinteraction.py" />
         <option value="$PROJECT_DIR$/manager/openportmanager.py" />
         <option value="$PROJECT_DIR$/tests/integration_tests.py" />
-        <option value="$PROJECT_DIR$/hudson.sh" />
         <option value="$PROJECT_DIR$/tests/test_utils.py" />
         <option value="$PROJECT_DIR$/openport.sh" />
         <option value="$PROJECT_DIR$/apps/openport_app.py" />
         <option value="$PROJECT_DIR$/tests/app_tests.py" />
         <option value="$PROJECT_DIR$/install_tests.sh" />
         <option value="$PROJECT_DIR$/tests/site_interaction_tests.py" />
+        <option value="$PROJECT_DIR$/hudson.sh" />
       </list>
     </option>
   </component>
@@ -1053,7 +1053,11 @@
       <created>1403119909833</created>
       <updated>1403119909833</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Fail test, don't raise error">
+      <created>1403121219191</created>
+      <updated>1403121219192</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1090,7 +1094,7 @@
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5630373" sideWeight="0.49468085" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.57165605" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5565069" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.41977078" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.41977078" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1138,7 +1142,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="api changed in python 2.7" />
     <MESSAGE value="fallback ssh port 443 (for firewalls)" />
     <MESSAGE value="Fixed the samePort integration test" />
     <MESSAGE value="Passing the server so the client can connect to the test server." />
@@ -1163,7 +1166,8 @@
     <MESSAGE value="More fixing the tests" />
     <MESSAGE value="Added installation script for the packages required by the tests" />
     <MESSAGE value="Added screenshots to debug the site_interaction_tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added screenshots to debug the site_interaction_tests" />
+    <MESSAGE value="Fail test, don't raise error" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fail test, don't raise error" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1491,13 +1495,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/hudson.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="0" selection-start="462" selection-end="462" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="240">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/openport.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state line="17" column="0" selection-start="545" selection-end="545" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
@@ -1560,10 +1557,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/site_interaction_tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="96" column="0" selection-start="3887" selection-end="3887" vertical-scroll-proportion="0.8548387" vertical-offset="1175" max-vertical-offset="2295">
+        <state line="96" column="0" selection-start="3887" selection-end="3887" vertical-scroll-proportion="-6.0227275" vertical-offset="1175" max-vertical-offset="2295">
           <folding>
             <element signature="e#0#22#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hudson.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="50" selection-start="470" selection-end="470" vertical-scroll-proportion="0.38135594" vertical-offset="0" max-vertical-offset="354">
+          <folding />
         </state>
       </provider>
     </entry>
