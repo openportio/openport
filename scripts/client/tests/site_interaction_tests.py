@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 import xmlrunner
+import inspect
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -33,6 +34,7 @@ class SiteInteractionTest(unittest.TestCase):
 
     def test_site_is_online(self):
         self.browser.get('http://test.openport.be/')
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
         self.assertTrue('OpenPort' in self.browser.title)
 
     def login_to_site(self):
@@ -45,6 +47,7 @@ class SiteInteractionTest(unittest.TestCase):
 
     def test_login_to_site(self):
         self.login_to_site()
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
         self.assertTrue('Welcome, Subscriber' in self.browser.page_source)
 
     def remove_all_keys_from_account(self):
@@ -75,6 +78,7 @@ class SiteInteractionTest(unittest.TestCase):
         sleep(2)
         try:
             self.browser.get('http://test.openport.be/user/keys')
+            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
             elem = self.browser.find_element_by_partial_link_text("Remove")
         except NoSuchElementException:
             self.fail('key not added to account')
@@ -82,6 +86,7 @@ class SiteInteractionTest(unittest.TestCase):
 
     def get_key_binding_token(self):
         self.browser.get('http://test.openport.be/user/keys')
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
         code_elem = self.browser.find_elements_by_xpath("//*[contains(text(), '--register-key')]")[0]
         return code_elem.text.strip().split()[-1]
 
