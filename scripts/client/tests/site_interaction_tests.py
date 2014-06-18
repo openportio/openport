@@ -18,7 +18,11 @@ from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_
 class SiteInteractionTest(unittest.TestCase):
 
     def setUp(self):
-        self.browser = webdriver.PhantomJS('/usr/local/bin/phantomjs')
+        if os.path.exists('/usr/bin/phantomjs'):
+            self.browser = webdriver.PhantomJS('/usr/bin/phantomjs')
+        else:
+            self.browser = webdriver.PhantomJS('/usr/local/bin/phantomjs')
+
         self.browser.set_window_size(1124, 850)
         #self.browser = webdriver.Firefox()
         self.processes_to_kill = []
@@ -108,7 +112,7 @@ class SiteInteractionTest(unittest.TestCase):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port,
                               '--start-manager', 'False', '--server', 'test.openport.be', '--verbose', '--manager-port',
-                              -1],
+                              '-1'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         return p
