@@ -1,10 +1,11 @@
 import socket
 import threading
 import paramiko
-import sys
 import time
 import select
 from services.logger_service import get_logger
+from socket import error as SocketError
+import errno
 
 logger = get_logger(__name__)
 
@@ -140,18 +141,26 @@ class PortForwardingService:
 
         logger.debug('Connected!  Tunnel open %r -> %r -> %r' % (chan.origin_addr,
                                                             chan.getpeername(), (local_server, self.local_port)))
-        while True:
-            r, w, x = select.select([sock, chan], [], [])
-            if sock in r:
-                data = sock.recv(1024)
-                if not len(data):
-                    break
-                chan.send(data)
-            if chan in r:
-                data = chan.recv(1024)
-                if not len(data):
-                    break
-                sock.send(data)
+
+        try:
+            while True:
+                r, w, x = select.select([sock, chan], [], [])
+                if sock in r:
+                    data = sock.recv(1024)
+                    if not len(data):
+                        break
+                    chan.send(data)
+                if chan in r:
+                    data = chan.recv(1024)
+                    if not len(data):
+                        break
+                    sock.send(data)
+        except SocketError as e:
+            if e.errno == errno.ECONNRESET:
+                logger.debug('Got a connection reset by peer.')
+            else:
+                raise
+
         chan.close()
         sock.close()
         logger.debug('Tunnel closed from %r' % (chan.origin_addr,))
