@@ -216,7 +216,7 @@ class AppTests(unittest.TestCase):
         sleep(1)
         self.assertTrue(self.managerIsRunning(manager_port))
         self.kill_manager(manager_port)
-        sleep(1)
+        sleep(5)
         self.assertFalse(self.managerIsRunning(manager_port))
 
     def test_restart_manager_on_different_port(self):
