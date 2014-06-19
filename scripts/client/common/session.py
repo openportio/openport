@@ -2,7 +2,7 @@ import pickle
 
 
 class Session(object):
-    def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=0, account_id=-1,
+    def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=1, account_id=-1,
                  key_id=-1, local_port=-1, server_session_token='', restart_command='', http_forward=False,
                  http_forward_address=''):
         #todo: why is this ever a dict?

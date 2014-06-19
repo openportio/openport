@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
-    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Added script to create exe's + some changes to make the exe's cleaner">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/portforwarding.py" afterPath="$PROJECT_DIR$/apps/portforwarding.py" />
+    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="@@@">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/create_exes.sh" afterPath="$PROJECT_DIR$/create_exes.sh" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/dbhandler.py" afterPath="$PROJECT_DIR$/manager/dbhandler.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_app.py" afterPath="$PROJECT_DIR$/apps/openport_app.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/openportmanager.py" afterPath="$PROJECT_DIR$/manager/openportmanager.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/server.py" afterPath="$PROJECT_DIR$/manager/server.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/session.py" afterPath="$PROJECT_DIR$/common/session.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="client.iws" />
@@ -35,28 +40,55 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="app_tests.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/app_tests.py">
+      <file leaf-file-name="openportmanager.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="218" column="16" selection-start="8287" selection-end="8287" vertical-scroll-proportion="-9.384615" vertical-offset="2891" max-vertical-offset="7440">
+            <state line="194" column="61" selection-start="7992" selection-end="7992" vertical-scroll-proportion="0.6594203" vertical-offset="2487" max-vertical-offset="3930">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="requirements.pip" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/requirements.pip">
+      <file leaf-file-name="share.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/common/share.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="11" selection-start="118" selection-end="118" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
+            <state line="2" column="15" selection-start="51" selection-end="51" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="420">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="create_exes.sh" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/create_exes.sh">
+      <file leaf-file-name="session.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/common/session.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="54" selection-start="64" selection-end="64" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="135">
+            <state line="3" column="6" selection-start="22" selection-end="22" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1290">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="logdict2.6.8.final.0-1.log" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/build/openport_app/logdict2.6.8.final.0-1.log">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="1016" column="313" selection-start="222440" selection-end="222440" vertical-scroll-proportion="0.0" vertical-offset="15098" max-vertical-offset="15675">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dbhandler.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="115" column="52" selection-start="3534" selection-end="3534" vertical-scroll-proportion="0.0" vertical-offset="165" max-vertical-offset="2820">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="server.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/manager/server.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="33" column="0" selection-start="759" selection-end="759" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="1875">
               <folding />
             </state>
           </provider>
@@ -65,19 +97,8 @@
       <file leaf-file-name="osinteraction.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/services/osinteraction.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="76" column="33" selection-start="2203" selection-end="2216" vertical-scroll-proportion="-6.5" vertical-offset="881" max-vertical-offset="3540">
+            <state line="231" column="4" selection-start="7186" selection-end="7186" vertical-scroll-proportion="-9.576923" vertical-offset="3126" max-vertical-offset="3540">
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="live_integration_tests.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/live_integration_tests.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="16" column="37" selection-start="390" selection-end="390" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
-              <folding>
-                <element signature="e#19#29#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -85,47 +106,25 @@
       <file leaf-file-name="openport_app.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="74" column="0" selection-start="2590" selection-end="2590" vertical-scroll-proportion="-3.6153846" vertical-offset="896" max-vertical-offset="4185">
+            <state line="254" column="21" selection-start="11181" selection-end="11181" vertical-scroll-proportion="-7.6153846" vertical-offset="3492" max-vertical-offset="4230">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="portforwarding.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/apps/portforwarding.py">
+      <file leaf-file-name="openport.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/openport.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="159" column="21" selection-start="6399" selection-end="6399" vertical-scroll-proportion="0.8305085" vertical-offset="2091" max-vertical-offset="2610">
-              <folding>
-                <element signature="e#0#13#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="errno.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/errno.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="100" column="13" selection-start="1551" selection-end="1551" vertical-scroll-proportion="-2.4615386" vertical-offset="1436" max-vertical-offset="3990">
+            <state line="5" column="31" selection-start="119" selection-end="119" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="180">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="logger_service.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/services/logger_service.py">
+      <file leaf-file-name="openport.sh" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/openport.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="135" max-vertical-offset="690">
-              <folding>
-                <element signature="e#0#14#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="tee.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/tee.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="0" selection-start="169" selection-end="169" vertical-scroll-proportion="-1.9444444" vertical-offset="0" max-vertical-offset="855">
+            <state line="13" column="24" selection-start="463" selection-end="463" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
               <folding />
             </state>
           </provider>
@@ -172,14 +171,10 @@
         <option value="$PROJECT_DIR$/tests/live_integration_tests.py" />
         <option value="$PROJECT_DIR$/manager/globals.py" />
         <option value="$PROJECT_DIR$/services/utils.py" />
-        <option value="$PROJECT_DIR$/common/session.py" />
-        <option value="$PROJECT_DIR$/manager/server.py" />
         <option value="$PROJECT_DIR$/tests/db_handler2_tests.py" />
         <option value="$PROJECT_DIR$/tests/db_handler_tests.py" />
-        <option value="$PROJECT_DIR$/manager/dbhandler.py" />
         <option value="$PROJECT_DIR$/tests/os_interaction_tests.py" />
         <option value="$PROJECT_DIR$/services/osinteraction.py" />
-        <option value="$PROJECT_DIR$/manager/openportmanager.py" />
         <option value="$PROJECT_DIR$/tests/integration_tests.py" />
         <option value="$PROJECT_DIR$/tests/test_utils.py" />
         <option value="$PROJECT_DIR$/openport.sh" />
@@ -188,10 +183,14 @@
         <option value="$PROJECT_DIR$/install_tests.sh" />
         <option value="$PROJECT_DIR$/tests/app_tests.py" />
         <option value="$PROJECT_DIR$/requirements.pip" />
-        <option value="$PROJECT_DIR$/create_exes.sh" />
         <option value="$PROJECT_DIR$/common/tee.py" />
-        <option value="$PROJECT_DIR$/apps/openport_app.py" />
         <option value="$PROJECT_DIR$/apps/portforwarding.py" />
+        <option value="$PROJECT_DIR$/create_exes.sh" />
+        <option value="$PROJECT_DIR$/apps/openport_app.py" />
+        <option value="$PROJECT_DIR$/common/session.py" />
+        <option value="$PROJECT_DIR$/manager/dbhandler.py" />
+        <option value="$PROJECT_DIR$/manager/server.py" />
+        <option value="$PROJECT_DIR$/manager/openportmanager.py" />
       </list>
     </option>
   </component>
@@ -363,7 +362,53 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="dist" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="common" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="build" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="build" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="openport_app" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1118,7 +1163,11 @@
       <created>1403184003782</created>
       <updated>1403184003782</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="Better handling of connection resets by peer">
+      <created>1403184851493</created>
+      <updated>1403184851493</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1149,13 +1198,13 @@
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.1218716" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2965616" sideWeight="0.49786553" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2965616" sideWeight="0.49786553" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.5764331" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21212122" sideWeight="0.63649637" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5630373" sideWeight="0.49468085" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.57165605" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5565069" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.41977078" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.41977078" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32857144" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1166,28 +1215,6 @@
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
-    <layout-to-restore>
-      <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.1218716" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32930514" sideWeight="0.6433121" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2965616" sideWeight="0.49786553" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.36389685" sideWeight="0.49468085" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.57165605" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5565069" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.5764331" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21212122" sideWeight="0.63649637" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26490983" sideWeight="0.95164835" order="1" side_tool="false" content_ui="tabs" />
-    </layout-to-restore>
   </component>
   <component name="Vcs.Log.UiProperties">
     <option name="RECENTLY_FILTERED_USER_GROUPS">
@@ -1203,7 +1230,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="Fixed test for the http forwarding" />
     <MESSAGE value="Added integration tests for http forwarding&#10;It's now possible to run the tray on different ports&#10;Starting the tray from the app is more robust&#10;Better logging&#10;&#10;Fixed formatting" />
     <MESSAGE value="fixed integration tests" />
     <MESSAGE value="Added extra integration tests to test the handling of new keys" />
@@ -1228,7 +1254,8 @@
     <MESSAGE value="Using nose tests to generate xml output" />
     <MESSAGE value="Fixed tests by given the manager more time to shut down + upgraded the phantomjs driver" />
     <MESSAGE value="Added script to create exe's + some changes to make the exe's cleaner" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added script to create exe's + some changes to make the exe's cleaner" />
+    <MESSAGE value="Better handling of connection resets by peer" />
+    <option name="LAST_COMMIT_MESSAGE" value="Better handling of connection resets by peer" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1251,17 +1278,17 @@
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/manager/openportmanager.py</url>
-          <line>116</line>
+          <line>117</line>
           <option name="timeStamp" value="89" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/manager/server.py</url>
-          <line>94</line>
+          <line>89</line>
           <option name="timeStamp" value="98" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/manager/server.py</url>
-          <line>90</line>
+          <line>85</line>
           <option name="timeStamp" value="99" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
@@ -1301,17 +1328,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/manager/dbhandler.py</url>
-          <line>179</line>
+          <line>178</line>
           <option name="timeStamp" value="134" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/manager/dbhandler.py</url>
-          <line>178</line>
+          <line>177</line>
           <option name="timeStamp" value="135" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/manager/openportmanager.py</url>
-          <line>203</line>
+          <line>219</line>
           <option name="timeStamp" value="137" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
@@ -1327,28 +1354,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/services/crypt_service.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="647" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/openportit.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="72" column="104" selection-start="2413" selection-end="2413" vertical-scroll-proportion="0.72024727" vertical-offset="479" max-vertical-offset="1485">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/openport.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="62" selection-start="99" selection-end="150" vertical-scroll-proportion="0.11591963" vertical-offset="0" max-vertical-offset="647" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/services/image_service.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="647" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/apps/openport.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="9" column="0" selection-start="106" selection-end="308" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1485" />
@@ -1444,28 +1449,9 @@
         <state line="166" column="0" selection-start="5472" selection-end="5472" vertical-scroll-proportion="0.0" vertical-offset="2358" max-vertical-offset="8490" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/share.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="15" selection-start="51" selection-end="51" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="420" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/env/lib/python2.6/site-packages/bottle.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="1801" column="6" selection-start="73093" selection-end="73093" vertical-scroll-proportion="-0.5382263" vertical-offset="27191" max-vertical-offset="56070">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/session.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="0" selection-start="952" selection-end="952" vertical-scroll-proportion="0.0" vertical-offset="538" max-vertical-offset="1290">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/manager/server.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="19" selection-start="453" selection-end="453" vertical-scroll-proportion="0.0" vertical-offset="300" max-vertical-offset="2190">
           <folding />
         </state>
       </provider>
@@ -1487,15 +1473,6 @@
         <state line="30" column="38" selection-start="797" selection-end="797" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="570" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="24" selection-start="596" selection-end="596" vertical-scroll-proportion="31.73077" vertical-offset="1215" max-vertical-offset="2925">
-          <folding>
-            <element signature="e#0#23#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tests/os_interaction_tests.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="34" column="79" selection-start="1930" selection-end="1930" vertical-scroll-proportion="0.0" vertical-offset="202" max-vertical-offset="675">
@@ -1507,23 +1484,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="200" column="58" selection-start="8352" selection-end="8359" vertical-scroll-proportion="0.0" vertical-offset="3000" max-vertical-offset="3735">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/install.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state line="6" column="33" selection-start="222" selection-end="222" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="210">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/openport.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="0" selection-start="545" selection-end="545" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
           <folding />
         </state>
       </provider>
@@ -1562,7 +1525,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="141" column="22" selection-start="6085" selection-end="6090" vertical-scroll-proportion="-4.659091" vertical-offset="1910" max-vertical-offset="2295">
           <folding>
-            <element signature="e#0#22#0" expanded="true" />
+            <element signature="e#0#22#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1578,7 +1541,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="16" column="37" selection-start="390" selection-end="390" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
           <folding>
-            <element signature="e#19#29#0" expanded="true" />
+            <element signature="e#19#29#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1593,13 +1556,6 @@
     <entry file="file://$PROJECT_DIR$/requirements.pip">
       <provider selected="true" editor-type-id="text-editor">
         <state line="9" column="11" selection-start="118" selection-end="118" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/create_exes.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1" column="54" selection-start="64" selection-end="64" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="135">
           <folding />
         </state>
       </provider>
@@ -1620,20 +1576,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/services/osinteraction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="76" column="33" selection-start="2203" selection-end="2216" vertical-scroll-proportion="-6.5" vertical-offset="881" max-vertical-offset="3540">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="0" selection-start="2590" selection-end="2590" vertical-scroll-proportion="-3.6153846" vertical-offset="896" max-vertical-offset="4185">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/errno.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="100" column="13" selection-start="1551" selection-end="1551" vertical-scroll-proportion="-2.4615386" vertical-offset="1436" max-vertical-offset="3990">
@@ -1643,10 +1585,101 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/apps/portforwarding.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="159" column="21" selection-start="6399" selection-end="6399" vertical-scroll-proportion="0.8305085" vertical-offset="2091" max-vertical-offset="2610">
+        <state line="160" column="0" selection-start="6442" selection-end="6442" vertical-scroll-proportion="0.0" vertical-offset="2106" max-vertical-offset="2610">
           <folding>
-            <element signature="e#0#13#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/create_exes.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="0" selection-start="150" selection-end="150" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="135">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/openport.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="31" selection-start="119" selection-end="119" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="180">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/openport.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="13" column="24" selection-start="463" selection-end="463" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/__builtin__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="206" column="4" selection-start="6924" selection-end="6924" vertical-scroll-proportion="0.3318182" vertical-offset="2944" max-vertical-offset="73575">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/sys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="198" column="46" selection-start="7604" selection-end="7604" vertical-scroll-proportion="0.7189696" vertical-offset="2663" max-vertical-offset="6885">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/services/osinteraction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="231" column="4" selection-start="7186" selection-end="7186" vertical-scroll-proportion="-9.576923" vertical-offset="3126" max-vertical-offset="3540">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build/openport_app/logdict2.6.8.final.0-1.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1016" column="313" selection-start="222440" selection-end="222440" vertical-scroll-proportion="0.0" vertical-offset="15098" max-vertical-offset="15675">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="254" column="21" selection-start="11181" selection-end="11181" vertical-scroll-proportion="-7.6153846" vertical-offset="3492" max-vertical-offset="4230">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="115" column="52" selection-start="3534" selection-end="3534" vertical-scroll-proportion="0.0" vertical-offset="165" max-vertical-offset="2820">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/session.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="6" selection-start="22" selection-end="22" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1290">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/share.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="15" selection-start="51" selection-end="51" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="420">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manager/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="33" column="0" selection-start="759" selection-end="759" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="1875">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="194" column="61" selection-start="7992" selection-end="7992" vertical-scroll-proportion="0.6594203" vertical-offset="2487" max-vertical-offset="3930">
+          <folding />
         </state>
       </provider>
     </entry>

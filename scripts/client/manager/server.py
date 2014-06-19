@@ -26,28 +26,23 @@ def new_share(name='newShare'):
     form_data = request.forms
     logger.debug('new share ' + str(dict(form_data.iteritems())))
 
-    if form_data['local_port'] in shares:
-        #update existing share
-        share = shares[form_data['local_port']]
-        share.from_dict(form_data)
+    if form_data['type'] == 'Share':
+        share = Share()
     else:
-        if form_data['type'] == 'Share':
-            share = Share()
-        else:
-            share = Session()
-        share.from_dict(form_data)
+        share = Session()
+    share.from_dict(form_data)
 
-        globals.account_id = share.account_id
-        globals.key_id = share.key_id
+    globals.account_id = share.account_id
+    globals.key_id = share.key_id
 #                    logger.debug( 'path: <%s>' % share.filePath )
 
-        save_request(share)
-        if onNewShare:
-            onNewShare(share)
-        global shares
-        shares[share.local_port] = share
-        logger.debug('added new share')
-        logger.debug(shares)
+    save_request(share)
+    if onNewShare:
+        onNewShare(share)
+    global shares
+    shares[share.local_port] = share
+    logger.debug('added new share')
+    logger.debug(shares)
     return 'ok'
 
 

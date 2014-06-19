@@ -33,8 +33,9 @@ class OpenPortManager(object):
         self.globals = Globals()
         self.start_account_checking()
         if self.os_interaction.is_compiled():
-            sys.stdout = open(self.os_interaction.get_app_data_path('application.out.log'), 'a')
-            sys.stderr = open(self.os_interaction.get_app_data_path('application.error.log'), 'a')
+            from common.tee import TeeStdErr, TeeStdOut
+            TeeStdOut(self.os_interaction.get_app_data_path('openportmanager.out.log'), 'a')
+            TeeStdErr(self.os_interaction.get_app_data_path('openportmanager.error.log'), 'a')
 
     def exitApp(self,event):
         for pid in self.share_processes:
@@ -150,7 +151,10 @@ class OpenPortManager(object):
         session = Session()
         app_dir = self.os_interaction.get_application_dir()
         if self.os_interaction.is_compiled():
-            session.restart_command = [os.path.join(app_dir, 'openport_app.exe'), '--local-port', '%s' % port]
+            path = os.path.join(app_dir, 'openport.exe')
+            if not os.path.exists(path):
+                path = os.path.join(app_dir, 'openport')
+            session.restart_command = [path, '--local-port', '%s' % port]
         else:
             session.restart_command = ['python', os.path.join(app_dir,'apps/openport_app.py'), '--local-port', '%s' % port]
         logger.debug(session.restart_command)
@@ -176,7 +180,7 @@ class OpenPortManager(object):
         if len(shares) > 0:
             share = shares[0]
             if self.os_interaction.pid_is_running(share.pid):
-                logger.debug('pid is running, will kill it:' + share.pid)
+                logger.debug('pid is running, will kill it: %s' % share.pid)
                 self.os_interaction.kill_pid(share.pid)
                 if share.pid in self.share_processes:
                     logger.debug('pid found in share_processes')
@@ -184,6 +188,18 @@ class OpenPortManager(object):
                         logger.debug('output from child process: ' + str(self.share_processes[share.pid].communicate()))
             self.dbhandler.stop_share(share)
         self.print_shares()
+
+    def kill_all(self):
+        shares = self.dbhandler.get_shares()
+        for share in shares:
+            if self.os_interaction.pid_is_running(share.pid):
+                logger.debug('pid is running, will kill it: %s' % share.pid)
+                self.os_interaction.kill_pid(share.pid)
+                if share.pid in self.share_processes:
+                    logger.debug('pid found in share_processes')
+                    if self.share_processes[share.pid] is not None:
+                        logger.debug('output from child process: ' + str(self.share_processes[share.pid].communicate()))
+            self.dbhandler.stop_share(share)
 
 
 def utc_epoch_to_local_datetime(utc_epoch):
@@ -201,7 +217,8 @@ if __name__ == '__main__':
                         help='The port the manager communicates on with it''s child processes.', default=8001) #TODO random port??
     parser.add_argument('--server', '-s', action='store', type=str, default='www.openport.be', help=argparse.SUPPRESS)
     parser.add_argument('--list', '-l', action='store_true', help="list shares and exit")
-    parser.add_argument('--kill', '-k', action='store', type=int, help="list shares and exit", default=0)
+    parser.add_argument('--kill', '-k', action='store', type=int, help="Stop a share", default=0)
+    parser.add_argument('--kill-all', '-K', action='store_true', help="Stop all shares")
     args = parser.parse_args()
 
     dbhandler.db_location = args.database
@@ -213,16 +230,22 @@ if __name__ == '__main__':
 
     manager = OpenPortManager()
 
+    logger.debug('db location: ' + dbhandler.db_location)
+
     Globals().manager_port = args.manager_port
     Globals().openport_address = args.server
 
     if args.list:
         manager.print_shares()
-        exit()
+        sys.exit()
 
     if args.kill:
         manager.kill(args.kill)
-        exit()
+        sys.exit()
+
+    if args.kill_all:
+        manager.kill_all()
+        sys.exit()
 
     start_server_thread(onNewShare=manager.onNewShare)
 

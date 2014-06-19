@@ -105,7 +105,7 @@ class DBHandler():
             )
             ''')
 
-    def add_share(self,share):
+    def add_share(self, share):
         self.executeCommand('update sessions set active = 0 where local_port = ?', (share.local_port,))
         pickled_restart_command = pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
 
@@ -137,7 +137,6 @@ class DBHandler():
 
         share.id = row[7]
         return share
-
 
     def get_shares(self):
         rows = self.executeQuery('select server, server_port, session_token, local_port, pid, active, restart_command, '

@@ -203,6 +203,7 @@ class OpenportApp(object):
         group = parser.add_mutually_exclusive_group(required=local_port_required)
         group.add_argument('--local-port', type=int, help='The port you want to openport.', default=-1)
         group.add_argument('--register-key', default='', help='Use this to add your link your client to your account.')
+        group.add_argument('port', nargs='?', type=int, help='The port you want to openport.', default=-1)
 
         parser.add_argument('--manager-port', type=int, default=8001, help='Inform the manager app of the new share.')
         parser.add_argument('--start-manager', type=bool, default=True, help='Do not start a manager app if none can be found.')
@@ -223,6 +224,8 @@ class OpenportApp(object):
             args.manager_port = -1
 
         self.globals.server = args.server
+        if args.port > 0:
+            args.local_port = args.port
 
         self.args = args
 
