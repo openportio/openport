@@ -26,7 +26,7 @@ logger = get_logger('openport_app')
 
 def quote_path(path):
     split = path.split(os.sep)
-    logger.debug( split )
+    #logger.debug( split )
     quoted = ['"%s"' % dir if ' ' in dir else dir for dir in split]
     return os.sep.join(quoted)
 
@@ -39,8 +39,9 @@ class OpenportApp(object):
         self.args = UserDict()
         self.session = None
         if self.os_interaction.is_compiled():
-            sys.stdout = open(self.os_interaction.get_app_data_path('apps.out.log'), 'a')
-            sys.stderr = open(self.os_interaction.get_app_data_path('apps.error.log'), 'a')
+            from common.tee import TeeStdErr, TeeStdOut
+            TeeStdOut(self.os_interaction.get_app_data_path('openport_app.out.log'), 'a')
+            TeeStdErr(self.os_interaction.get_app_data_path('openport_app.error.log'), 'a')
         try:
             signal.signal(signal.SIGINT, self.handleSigTERM)
         except ValueError:
@@ -72,10 +73,14 @@ class OpenportApp(object):
             return
         self.manager_app_started = True
 
-        command = self.os_interaction.get_python_exec()
         if self.os_interaction.is_compiled():
-            command.extend([quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openportmanager.exe'))])
+            command = []
+            path = quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openportmanager.exe'))
+            if not os.path.exists(path):
+                path = quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openportmanager'))
+            command.extend([path])
         else:
+            command = self.os_interaction.get_python_exec()
             command.extend(['-m', 'manager.openportmanager'])
         command = OsInteraction.set_variable(command, '--manager-port', self.args.manager_port)
         if self.args.manager_database:
@@ -109,7 +114,8 @@ class OpenportApp(object):
             logger.debug('Error occurred while informing the manager, starting the manager: %s' % start_manager)
             if not start_manager:
                 tb = traceback.format_exc()
-                logger.error('An error has occurred while informing the manager: %s\n%s' % (detail, tb))
+                logger.exception('Could not communicate with the manager app to inform of a new share.')
+                logger.debug('%s\n%s'%(detail, tb))
                 if type(detail) is urllib2.HTTPError and detail.getcode() == 500:
                     logger.error('error detail: ' + detail.read())
             else:
@@ -136,7 +142,9 @@ class OpenportApp(object):
                 logger.error('error detail: ' + e.read())
             sys.exit(1)
         except urllib2.URLError, error:
-            logger.exception(error)
+            logger.exception('Could not communicate with the manager app to inform of an error.')
+            tb = traceback.format_exc()
+            logger.debug('%s\n%s' % (error, tb))
             sys.exit(1)
         except Exception, detail:
             logger.exception(detail)
@@ -159,7 +167,9 @@ class OpenportApp(object):
                 logger.error('error detail: ' + e.read())
             sys.exit(1)
         except urllib2.URLError, error:
-            logger.exception(error)
+            logger.exception('Could not communicate with the manager app to inform of a success.')
+            tb = traceback.format_exc()
+            logger.debug('%s\n%s' % (error, tb))
             sys.exit(1)
         except Exception, detail:
             logger.exception(detail)
