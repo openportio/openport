@@ -5,13 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
-    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="@@@">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/create_exes.sh" afterPath="$PROJECT_DIR$/create_exes.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/dbhandler.py" afterPath="$PROJECT_DIR$/manager/dbhandler.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_app.py" afterPath="$PROJECT_DIR$/apps/openport_app.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/openportmanager.py" afterPath="$PROJECT_DIR$/manager/openportmanager.py" />
+    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Some cleaning up of the executables:&#10;You can now do &quot;openport 22&quot; &#10;added --kill-all to the manager&#10;fixed issue with restarting shares on the same port">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/server.py" afterPath="$PROJECT_DIR$/manager/server.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common/session.py" afterPath="$PROJECT_DIR$/common/session.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="client.iws" />
@@ -40,10 +35,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="openportmanager.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="openportmanager.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="194" column="61" selection-start="7992" selection-end="7992" vertical-scroll-proportion="0.6594203" vertical-offset="2487" max-vertical-offset="3930">
+            <state line="187" column="87" selection-start="7725" selection-end="7725" vertical-scroll-proportion="-6.4615383" vertical-offset="2487" max-vertical-offset="3930">
               <folding />
             </state>
           </provider>
@@ -85,10 +80,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="server.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="server.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/manager/server.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="33" column="0" selection-start="759" selection-end="759" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="1875">
+            <state line="86" column="9" selection-start="2228" selection-end="2228" vertical-scroll-proportion="0.6231884" vertical-offset="792" max-vertical-offset="1905">
               <folding />
             </state>
           </provider>
@@ -189,8 +184,8 @@
         <option value="$PROJECT_DIR$/apps/openport_app.py" />
         <option value="$PROJECT_DIR$/common/session.py" />
         <option value="$PROJECT_DIR$/manager/dbhandler.py" />
-        <option value="$PROJECT_DIR$/manager/server.py" />
         <option value="$PROJECT_DIR$/manager/openportmanager.py" />
+        <option value="$PROJECT_DIR$/manager/server.py" />
       </list>
     </option>
   </component>
@@ -1167,7 +1162,11 @@
       <created>1403184851493</created>
       <updated>1403184851493</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="Some cleaning up of the executables:&#10;You can now do &quot;openport 22&quot; &#10;added --kill-all to the manager&#10;fixed issue with restarting shares on the same port">
+      <created>1403189845141</created>
+      <updated>1403189845141</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1230,7 +1229,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="Added integration tests for http forwarding&#10;It's now possible to run the tray on different ports&#10;Starting the tray from the app is more robust&#10;Better logging&#10;&#10;Fixed formatting" />
     <MESSAGE value="fixed integration tests" />
     <MESSAGE value="Added extra integration tests to test the handling of new keys" />
     <MESSAGE value="Moved the gui and manager to separate modules" />
@@ -1255,7 +1253,8 @@
     <MESSAGE value="Fixed tests by given the manager more time to shut down + upgraded the phantomjs driver" />
     <MESSAGE value="Added script to create exe's + some changes to make the exe's cleaner" />
     <MESSAGE value="Better handling of connection resets by peer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Better handling of connection resets by peer" />
+    <MESSAGE value="Some cleaning up of the executables:&#10;You can now do &quot;openport 22&quot; &#10;added --kill-all to the manager&#10;fixed issue with restarting shares on the same port" />
+    <option name="LAST_COMMIT_MESSAGE" value="Some cleaning up of the executables:&#10;You can now do &quot;openport 22&quot; &#10;added --kill-all to the manager&#10;fixed issue with restarting shares on the same port" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1283,12 +1282,12 @@
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/manager/server.py</url>
-          <line>89</line>
+          <line>91</line>
           <option name="timeStamp" value="98" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/manager/server.py</url>
-          <line>85</line>
+          <line>86</line>
           <option name="timeStamp" value="99" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
@@ -1669,16 +1668,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/manager/server.py">
+    <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="33" column="0" selection-start="759" selection-end="759" vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="1875">
+        <state line="187" column="87" selection-start="7725" selection-end="7725" vertical-scroll-proportion="-6.4615383" vertical-offset="2487" max-vertical-offset="3930">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
+    <entry file="file://$PROJECT_DIR$/manager/server.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="194" column="61" selection-start="7992" selection-end="7992" vertical-scroll-proportion="0.6594203" vertical-offset="2487" max-vertical-offset="3930">
+        <state line="86" column="9" selection-start="2228" selection-end="2228" vertical-scroll-proportion="0.6231884" vertical-offset="792" max-vertical-offset="1905">
           <folding />
         </state>
       </provider>

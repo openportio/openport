@@ -80,11 +80,13 @@ def stop_share():
     logger.debug('stopShare')
     form_data = request.forms
 
-    if not form_data['local_port'] in shares:
-        logger.error('unknown key: %s in shares %s' % (form_data['local_port'], shares))
+    local_port = form_data['local_port']
+    if not local_port in shares:
+        logger.error('unknown key: %s in shares %s' % (local_port, shares))
         return 'unknown'
     else:
-        shares[form_data['local_port']].notify_stop()
+        shares[local_port].notify_stop()
+        shares.pop(local_port)
         #self.write_response('ok') # no need to answer
 
 
