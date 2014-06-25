@@ -211,7 +211,7 @@ def start_manager():
     logger.debug('server pid:%s' % os.getpid())
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dont-restart-shares', action='store_false', dest='restart_shares', help='Restart all active shares.')
+    parser.add_argument('--restart-shares', action='store_true', help='Restart all active shares.')
     parser.add_argument('--verbose', action='store_true', help='Be verbose.')
     parser.add_argument('--database', '-d', action='store', help='Use the following database file.', default='')
     parser.add_argument('--manager-port', '-p', action='store', type=int,

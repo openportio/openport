@@ -15,11 +15,11 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="The openport service"
+DESC="The openport manager service"
 NAME=openport-manager
-DAEMON=/usr/share/openport-client/manager.sh
-DAEMONNAME=manager.sh
-DAEMON_ARGS=""
+DAEMON=/usr/share/openport
+DAEMONNAME=openport-manager
+DAEMON_ARGS="manager --restart-shares"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 

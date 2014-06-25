@@ -82,7 +82,8 @@ class OpenportApp(object):
             command.extend([path])
         else:
             command = self.os_interaction.get_python_exec()
-            command.extend(['apps/openport_app.py', 'manager'])
+            command.extend(['apps/openport_app.py'])
+        command.append('manager')
         command = OsInteraction.set_variable(command, '--manager-port', self.args.manager_port)
         if self.args.manager_database:
             command = OsInteraction.set_variable(command, '--database', self.args.manager_database)
@@ -190,7 +191,6 @@ class OpenportApp(object):
         #if not '--manager-port' in command:
         #    command.extend(['--manager-port', '%s' % manager_port] )
         command = OsInteraction.set_variable(command, '--request-port', session.server_port)
-        command = OsInteraction.set_variable(command, '--local-port', session.local_port)
         if session.server_session_token != '':
             command = OsInteraction.set_variable(command, '--request-token', session.server_session_token)
         command = OsInteraction.set_variable(command, '--start-manager', False)
@@ -208,14 +208,16 @@ class OpenportApp(object):
         # This is a hack to make the command to start the manager work.
         group.add_argument('manager', nargs='?', type=int, help='Start the manager for openport.', default=-1)
 
-        parser.add_argument('--manager-port', type=int, default=8001, help='Inform the manager app of the new share.')
-        parser.add_argument('--start-manager', type=bool, default=True, help='Do not start a manager app if none can be found.')
-        parser.add_argument('--manager-database', type=str, default='', help='The database the manager should use if launched from this app.')
+        parser.add_argument('--manager-port', type=int, default=8001, help=argparse.SUPPRESS)
+        parser.add_argument('--start-manager', type=bool, default=True, help='Start a manager app if none can be found.')
+        parser.add_argument('--manager-database', type=str, default='', help=argparse.SUPPRESS)
         parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
         parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
         parser.add_argument('--http-forward', action='store_true', help='Request an http forward, so you can connect to port 80 on the server.')
         parser.add_argument('--server', default='www.openport.be', help=argparse.SUPPRESS)
+        parser.add_argument('--restart-on-reboot', '-R', action='store_true', help='Restart this share when the manager app is started.')
+
 
     def init_app(self, args):
         logger.debug('client pid:%s' % os.getpid())
@@ -223,7 +225,7 @@ class OpenportApp(object):
             from logging import DEBUG
             set_log_level(DEBUG)
 
-        if not args.start_manager:
+        if not args.restart_on_reboot:
             args.manager_port = -1
 
         self.globals.server = args.server
