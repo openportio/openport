@@ -9,6 +9,7 @@ import signal
 from time import sleep
 
 import os
+import argparse
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -205,10 +206,10 @@ class OpenPortManager(object):
 def utc_epoch_to_local_datetime(utc_epoch):
     return datetime.datetime(*time.localtime(utc_epoch)[0:6])
 
-if __name__ == '__main__':
+
+def start_manager():
     logger.debug('server pid:%s' % os.getpid())
 
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--dont-restart-shares', action='store_false', dest='restart_shares', help='Restart all active shares.')
     parser.add_argument('--verbose', action='store_true', help='Be verbose.')
@@ -264,3 +265,5 @@ if __name__ == '__main__':
         sleep(1)
 
 
+if __name__ == '__main__':
+    start_manager()

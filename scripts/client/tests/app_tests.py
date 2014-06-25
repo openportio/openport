@@ -256,7 +256,7 @@ class AppTests(unittest.TestCase):
         print 'new manager port:', new_manager_port
         self.assertNotEqual(manager_port, new_manager_port)
 
-        p_manager2 = subprocess.Popen(['env/bin/python', 'manager/openportmanager.py', '--database', db_file,
+        p_manager2 = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', 'manager', '--database', db_file,
                                     '--verbose', '--manager-port', str(new_manager_port), '--server', 'test.openport.be'],
                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
@@ -283,7 +283,7 @@ class AppTests(unittest.TestCase):
             pass
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
-        p_manager = subprocess.Popen(['env/bin/python', 'manager/openportmanager.py', '--database', db_file,
+        p_manager = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', 'manager', '--database', db_file,
                                     '--verbose', '--manager-port', str(manager_port), '--server', 'test.openport.be'],
                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager)
@@ -340,7 +340,7 @@ class AppTests(unittest.TestCase):
         print p_app.communicate()
         self.assertFalse(self.osinteraction.pid_is_running(p_app.pid))
         # Restarting manager, should restart port-forwarding app
-        p_manager = subprocess.Popen(['env/bin/python', 'manager/openportmanager.py', '--database', db_file,
+        p_manager = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', 'manager', '--database', db_file,
                             '--verbose', '--manager-port', str(manager_port), '--server', 'test.openport.be'],
                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager)

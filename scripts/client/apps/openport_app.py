@@ -20,6 +20,7 @@ from manager.globals import Globals
 from apps.openport_api import open_port
 from common.session import Session
 from services import key_registration_service
+from manager import openportmanager
 
 logger = get_logger('openport_app')
 
@@ -75,13 +76,13 @@ class OpenportApp(object):
 
         if self.os_interaction.is_compiled():
             command = []
-            path = quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openportmanager.exe'))
+            path = quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport.exe'))
             if not os.path.exists(path):
-                path = quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openportmanager'))
+                path = quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport'))
             command.extend([path])
         else:
             command = self.os_interaction.get_python_exec()
-            command.extend(['-m', 'manager.openportmanager'])
+            command.extend(['apps/openport_app.py', 'manager'])
         command = OsInteraction.set_variable(command, '--manager-port', self.args.manager_port)
         if self.args.manager_database:
             command = OsInteraction.set_variable(command, '--database', self.args.manager_database)
@@ -204,6 +205,8 @@ class OpenportApp(object):
         group.add_argument('--local-port', type=int, help='The port you want to openport.', default=-1)
         group.add_argument('--register-key', default='', help='Use this to add your link your client to your account.')
         group.add_argument('port', nargs='?', type=int, help='The port you want to openport.', default=-1)
+        # This is a hack to make the command to start the manager work.
+        group.add_argument('manager', nargs='?', type=int, help='Start the manager for openport.', default=-1)
 
         parser.add_argument('--manager-port', type=int, default=8001, help='Inform the manager app of the new share.')
         parser.add_argument('--start-manager', type=bool, default=True, help='Do not start a manager app if none can be found.')
@@ -279,6 +282,12 @@ class OpenportApp(object):
 
 
 if __name__ == '__main__':
+
+    if len(sys.argv) > 1 and sys.argv[1] == 'manager':
+        sys.argv.remove('manager')
+        openportmanager.start_manager()
+        sys.exit()
+
     app = OpenportApp()
 
     app.start()
