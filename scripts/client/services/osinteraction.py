@@ -197,16 +197,14 @@ class OsInteraction(object):
 
         return read_queue(q_stdout), read_queue(q_stderr)
 
-
 class LinuxOsInteraction(OsInteraction):
-
 
     def __init__(self, use_logger=True):
         super(LinuxOsInteraction, self).__init__(use_logger)
+        import os
+        import fcntl
         self.APP_DATA_PATH = '/root/.openport' if os.getuid() == 0 else os.path.join(os.path.expanduser('~/.openport'))
 
-        import fcntl
-        import os
 
     def nonBlockRead(self, output):
         fd = output.fileno()
