@@ -11,9 +11,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from services.utils import get_all_output
 
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
+from services import osinteraction
 
 
 class SiteInteractionTest(unittest.TestCase):
@@ -27,6 +27,7 @@ class SiteInteractionTest(unittest.TestCase):
         self.browser.set_window_size(1124, 850)
         #self.browser = webdriver.Firefox()
         self.processes_to_kill = []
+        self.os_interaction = osinteraction.getInstance()
 
     def tearDown(self):
         kill_all_processes(self.processes_to_kill)
@@ -104,7 +105,7 @@ class SiteInteractionTest(unittest.TestCase):
 
         p = self.start_session(8888)
         sleep(5)
-        process_output = get_all_output(p)
+        process_output = self.os_interaction.get_all_output(p)
         print "process output: ", process_output
         remote_host, server_port = get_remote_host_and_port(process_output[0])
         print 'server port: %s' % server_port
@@ -114,7 +115,7 @@ class SiteInteractionTest(unittest.TestCase):
         sleep(2)
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
         sleep(20)
-        process_output = get_all_output(p)
+        process_output = self.os_interaction.get_all_output(p)
         print "process output: ", process_output
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
 

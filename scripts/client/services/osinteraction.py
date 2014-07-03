@@ -128,7 +128,7 @@ class OsInteraction(object):
                              creationflags=creation_flags, shell=False,
                              close_fds=is_linux())
 
-        self.print_output_continuously(s)
+        return self.print_output_continuously(s)
 
     def print_output_continuously(self, s):
         def append_output(initial, extra):
