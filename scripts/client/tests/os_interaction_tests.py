@@ -48,6 +48,7 @@ class OsInteractionTest(unittest.TestCase):
         p = subprocess.Popen(['python', '-c', "from time import sleep; print 'aaa'; sleep(1); print 'bbb'"],
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              bufsize=1, close_fds=False)
+        sleep(0.1)
         self.assertEqual(('aaa', False), self.os_interaction.non_block_read(p))
         sleep(2)
         self.assertEqual(('bbb', False), self.os_interaction.non_block_read(p))
