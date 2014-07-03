@@ -121,10 +121,10 @@ class OsInteraction(object):
         return s.communicate()
 
     def run_command_and_print_output_continuously(self, command_array):
-        DETACHED_PROCESS = 8 # only needed for windows
+        creation_flags = self.get_detached_process_creation_flag()
         s = subprocess.Popen(command_array,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             creationflags=DETACHED_PROCESS, shell=False,
+                             creationflags=creation_flags, shell=False,
                              close_fds=is_linux())
 
         def append_output(initial, extra):
@@ -205,6 +205,8 @@ class LinuxOsInteraction(OsInteraction):
         import fcntl
         self.APP_DATA_PATH = '/root/.openport' if os.getuid() == 0 else os.path.join(os.path.expanduser('~/.openport'))
 
+    def get_detached_process_creation_flag(self):
+        return 0
 
     def nonBlockRead(self, output):
         fd = output.fileno()
@@ -289,6 +291,9 @@ class WindowsOsInteraction(OsInteraction):
     def __init__(self, use_logger=True):
         super(WindowsOsInteraction, self).__init__(use_logger)
         self.APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
+
+    def get_detached_process_creation_flag(self):
+        return 8
 
     def copy_to_clipboard(self, text):
         #print 'copying to clipboard: %s' % text
