@@ -6,7 +6,7 @@ import getpass
 import sys
 from threading import Thread
 from time import sleep
-
+import signal
 
 try:
     from Queue import Queue, Empty
@@ -91,7 +91,7 @@ class OsInteraction(object):
             self.logger.debug('Running command: %s' % args)
         p = subprocess.Popen(args,
                              bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             preexec_fn=None, close_fds=False, shell=True, cwd=None, env=None,
+                             preexec_fn=None, close_fds=is_linux(), shell=False, cwd=None, env=None,
                              universal_newlines=False, startupinfo=None, creationflags=0)
         return p
 
@@ -112,8 +112,9 @@ class OsInteraction(object):
             pass
         return os.path.join(self.APP_DATA_PATH, filename)
 
-
     def run_shell_command(self, command):
+        if isinstance(command, list):
+            command = ' '.join(['"%s"' % arg for arg in command])
         s = subprocess.Popen(command,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              shell=True,
@@ -127,6 +128,9 @@ class OsInteraction(object):
                              creationflags=creation_flags, shell=False,
                              close_fds=is_linux())
 
+        self.print_output_continuously(s)
+
+    def print_output_continuously(self, s):
         def append_output(initial, extra):
             if not initial:
                 return extra if extra and len(extra) > 0 else False
@@ -138,8 +142,10 @@ class OsInteraction(object):
         all_output = [False, False]
         while True:
             output = self.get_all_output(s)
-            self.logger.debug('silent command stdout: %s' % output[0])
-            self.logger.debug('silent command stderr: %s' % output[1])
+            if output[0]:
+                self.logger.debug('silent command stdout: %s' % output[0])
+            if output[1]:
+                self.logger.debug('silent command stderr: %s' % output[1])
 
             all_output[0] = append_output(all_output[0], output[0])
             all_output[1] = append_output(all_output[1], output[1])
@@ -147,11 +153,18 @@ class OsInteraction(object):
                 break
             sleep(1)
         output = s.communicate()
-        self.logger.debug('silent command stdout: %s' % output[0])
-        self.logger.debug('silent command stderr: %s' % output[1])
+        if output[0]:
+            self.logger.debug('silent command stdout: %s' % output[0])
+        if output[1]:
+            self.logger.debug('silent command stderr: %s' % output[1])
         all_output[0] = append_output(all_output[0], output[0])
         all_output[1] = append_output(all_output[1], output[1])
         return all_output
+
+    def print_output_continuously_threaded(self, s):
+        t_stdout = Thread(target=self.print_output_continuously, args=(s,))
+        t_stdout.daemon = True
+        t_stdout.start()
 
     def get_all_output(self, p):
         return self.non_block_read(p)
@@ -242,10 +255,10 @@ class LinuxOsInteraction(OsInteraction):
         else:
             return True
 
-    def kill_pid(self, pid, signal=None):
-        if signal is None:
-            signal = signal.SIGKILL
-        os.kill(pid, signal)
+    def kill_pid(self, pid, kill_signal=None):
+        if kill_signal is None:
+            kill_signal = signal.SIGKILL
+        os.kill(pid, kill_signal)
         return True
 
     def is_compiled(self):

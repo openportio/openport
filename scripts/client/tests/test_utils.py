@@ -176,7 +176,13 @@ def run_command_with_timeout(args, timeout_s):
         def run(self, timeout):
             def target():
                 #print 'Thread started'
-                self.process = subprocess.Popen(self.cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+                command = self.cmd
+                if not osinteraction.is_linux():
+                    command = ' '.join(['"%s"' % arg for arg in self.cmd])
+
+
+                self.process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                                shell=not osinteraction.is_linux())
                 self.process.wait()
                 #self.process.communicate()
                 #print 'Thread finished'

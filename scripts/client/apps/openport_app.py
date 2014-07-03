@@ -20,7 +20,7 @@ from manager.globals import Globals
 from apps.openport_api import open_port
 from common.session import Session
 from services import key_registration_service
-from manager import openportmanager
+from manager import openportmanager, dbhandler
 
 logger = get_logger('openport_app')
 
@@ -49,6 +49,8 @@ class OpenportApp(object):
             pass
             # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
             #signal.signal(signal.SIGTERM, self.handleSigTERM)
+
+        self.db_handler = dbhandler.getInstance()
 
     def handleSigTERM(self, signum, frame):
         logger.debug('got signal %s' % signum)
@@ -170,13 +172,16 @@ class OpenportApp(object):
         except Exception, detail:
             logger.exception(detail)
 
+    def save_share(self, share):
+        self.db_handler.add_share(share)
+
     def get_restart_command(self, session):
         if is_linux():
             command = ['sudo', '-u', getpass.getuser()]
         else:
             command = []
         if sys.argv[0][-3:] == '.py':
-            command.append(self.os_interaction.get_python_exec())
+            command.extend(self.os_interaction.get_python_exec())
         command.extend(sys.argv)
 
         #if not '--manager-port' in command:
@@ -252,6 +257,12 @@ class OpenportApp(object):
         session.local_port = int(self.args.local_port)
         session.server_port = self.args.request_port
         session.server_session_token = self.args.request_token
+        if not session.server_session_token:
+            db_share = self.db_handler.get_share_by_local_port(session.local_port)
+            if db_share:
+                logger.debug("retrieved db share session token: %s" % db_share[0].server_session_token)
+                session.server_session_token = db_share[0].server_session_token
+                session.server_port = db_share[0].server_port
         session.http_forward = self.args.http_forward
 
         #        app.MainLoop()
@@ -270,6 +281,7 @@ class OpenportApp(object):
 
     def success_callback(self, session):
         logger.debug('success_callback')
+        self.save_share(session)
         if self.args.manager_port > 0 and self.manager_app_started:
             self.inform_manager_app_success(session, self.args.manager_port)
 

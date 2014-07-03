@@ -49,6 +49,27 @@ class AppTests(unittest.TestCase):
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                               '--start-manager', 'False', '--server', 'test.openport.be', '--verbose',
                               '--manager-port', '-1'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        sleep(10)
+        process_output = self.osinteraction.get_all_output(p)
+        print 'std_out: ', process_output[0]
+        print 'std_err: ', process_output[1]
+        self.check_application_is_still_alive(p)
+        self.assertFalse(self.managerIsRunning(8001))
+
+        remote_host, remote_port = get_remote_host_and_port(process_output[0])
+
+        self.check_tcp_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
+        p.kill()
+
+    def test_openport_app_same_port(self):
+        port = get_open_port()
+
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+
+        p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--server', 'test.openport.be', '--verbose'],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         sleep(5)
@@ -59,7 +80,39 @@ class AppTests(unittest.TestCase):
 
         remote_host, remote_port = get_remote_host_and_port(process_output[0])
 
-        self.check_tcp_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
+
+        s = SimpleTcpServer(port)
+        s.runThreaded()
+
+        c = SimpleTcpClient(remote_host, remote_port)
+        request = 'hello'
+        response = c.send(request)
+        self.assertEqual(request, response.strip())
+        c.close()
+
+        p.kill()
+
+        p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--server', 'test.openport.be', '--verbose'],
+            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        sleep(5)
+        process_output = self.osinteraction.get_all_output(p)
+        print 'std_out: ', process_output[0]
+        print 'std_err: ', process_output[1]
+        self.check_application_is_still_alive(p)
+
+        new_remote_host, new_remote_port = get_remote_host_and_port(process_output[0])
+
+        self.assertEqual(remote_port, new_remote_port)
+
+        c = SimpleTcpClient(new_remote_host, new_remote_port)
+        request = 'hello'
+        response = c.send(request)
+        self.assertEqual(request, response.strip())
+        c.close()
+        s.close()
+
         p.kill()
 
     def test_openport_app_http_forward(self):
@@ -161,18 +214,26 @@ class AppTests(unittest.TestCase):
                                        '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
                                       stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
-        sleep(10)
+        sleep(15)
         for out in self.osinteraction.get_all_output(p_manager2):
             print lineNumber(), 'p_manager2: ', out
         self.check_application_is_still_alive(p_manager2)
+        self.assertEqual(1, self.get_share_count_of_manager(manager_port))
 
         c = SimpleTcpClient(remote_host, remote_port)
+        cl = SimpleTcpClient('127.0.0.1', port)
         request = 'hello'
+        try:
+            response = cl.send(request)
+        except:
+            self.fail('local share has not been restarted')
+        self.assertEqual(request, response.strip(), 'getting response locally failed')
+
         try:
             response = c.send(request)
         except:
-            self.fail('share has not been restarted')
-        self.assertEqual(request, response.strip())
+            self.fail('remote share has not been restarted')
+        self.assertEqual(request, response.strip(), 'getting response through proxy failed')
 
         os.kill(p_manager2.pid, signal.SIGINT)
         p_manager2.wait()
@@ -359,7 +420,7 @@ class AppTests(unittest.TestCase):
             self.fail('expecting an exception')
         except:
             pass
-        #print p_app.communicate()
+        print p_app.communicate()
         self.assertFalse(self.osinteraction.pid_is_running(p_app.pid))
         # Restarting manager, should restart port-forwarding app
         p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', db_file,
@@ -524,10 +585,20 @@ class AppTests(unittest.TestCase):
         self.check_http_port_forward(remote_host, port)
 
     def test_run_run_command_with_timeout(self):
-        self.assertEqual((False, False), run_command_with_timeout(['sleep', '1'], 2))
-        self.assertEqual((False, False), run_command_with_timeout(['sleep', '2'], 1))
-        self.assertEqual(('hello', False), run_command_with_timeout(['echo', 'hello'], 1))
-        self.assertEqual(('hello', False), run_command_with_timeout(['bash', '-c',  'echo hello; sleep 2'], 1))
+        self.assertEqual((False, False), run_command_with_timeout(['python', '-c', 'from time import sleep;sleep(1)'], 2))
+        self.assertEqual((False, False), run_command_with_timeout(['python', '-c', 'from time import sleep;sleep(2)'], 1))
+        self.assertEqual(('hello', False), run_command_with_timeout(['python', '-c', 'print "hello"'], 1))
+        self.assertEqual(('hello', False), run_command_with_timeout(['python', '-c', 'from time import sleep;print "hello";sleep(2)'], 1))
+
+    def test_shell_behaviour(self):
+        p = subprocess.Popen('''python -c "print 'hello'"''', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(('hello', False), self.osinteraction.get_all_output(p))
+
+        p = subprocess.Popen(['python', '-c', 'print "hello"'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(('hello', False), self.osinteraction.get_all_output(p))
+
+
+
 
 
 if __name__ == '__main__':

@@ -62,6 +62,7 @@ class OpenPortManager(object):
                 try:
                     logger.debug('starting share: %s' % share.restart_command)
                     p = self.os_interaction.start_openport_process(share, manager_port=Globals().manager_port)
+                    self.os_interaction.print_output_continuously_threaded(p)
                     sleep(1)
                     if p.poll() is not None:
                         logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
