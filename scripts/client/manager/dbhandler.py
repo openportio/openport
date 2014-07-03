@@ -1,8 +1,10 @@
-from Queue import Queue
+from Queue import Queue, Empty
 from time import sleep
-import os
 import pickle
-from pysqlite2 import dbapi2 as sqlite
+try:
+    from pysqlite2 import dbapi2 as sqlite
+except ImportError:
+    import sqlite3 as sqlite
 from common.session import Session
 from services import osinteraction
 
@@ -47,7 +49,7 @@ class DBQueryTask(DBTask):
         self.ready = True
 
 
-class DBHandler():
+class DBHandler(object):
 
     def __init__(self, db_location):
         self.os_interaction = osinteraction.getInstance()
@@ -63,9 +65,13 @@ class DBHandler():
             self.connection = sqlite.connect(self.db_location)
             self.cursor = self.connection.cursor()
             while not self.stopped:
-                task = self.task_queue.get(block=True)
-                task.execute(self.cursor, self.connection)
-                self.task_queue.task_done()
+                try:
+                    task = self.task_queue.get(block=True, timeout=1)
+                    task.execute(self.cursor, self.connection)
+                    self.task_queue.task_done()
+                except Empty:
+                    pass
+            self.connection.close()
         except Exception, e:
             self.queue_exception = e
             raise e

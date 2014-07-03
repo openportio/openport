@@ -20,7 +20,6 @@ from manager.globals import Globals
 from services.logger_service import get_logger, set_log_level
 from common.share import Share
 from common.session import Session
-from services.utils import nonBlockRead
 
 logger = get_logger('OpenPortManager')
 
@@ -45,7 +44,7 @@ class OpenPortManager(object):
                 p = self.os_interaction.kill_pid(pid)
                 logger.info("kill pid %s successful: %s" % (pid, p))
                 if self.share_processes[pid] is not None:
-                    logger.debug('child process output: ' + str(self.share_processes[pid].communicate()))
+                    logger.debug('child process output: ' + str(self.os_interaction.non_block_read(self.share_processes[pid])))
             except Exception, e:
                 tb = traceback.format_exc()
                 logger.error(e)
@@ -66,11 +65,11 @@ class OpenPortManager(object):
                     sleep(1)
                     if p.poll() is not None:
                         logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
-                                     (nonBlockRead(p.stdout), nonBlockRead(p.stderr)))
+                                     self.os_interaction.non_block_read(p))
                     else:
                         logger.debug('started app with pid %s : %s' % (p.pid, share.restart_command))
                         sleep(1)
-                        logger.debug('app output: stdout: %s stderr: %s' % (nonBlockRead(p.stdout), nonBlockRead(p.stderr)))
+                        logger.debug('app output: stdout: %s stderr: %s' % self.os_interaction.non_block_read(p))
 
                     self.share_processes[p.pid] = p
                 except Exception, e:
@@ -186,7 +185,7 @@ class OpenPortManager(object):
                 if share.pid in self.share_processes:
                     logger.debug('pid found in share_processes')
                     if self.share_processes[share.pid] is not None:
-                        logger.debug('output from child process: ' + str(self.share_processes[share.pid].communicate()))
+                        logger.debug('output from child process: ' + str(self.os_interaction.non_block_read(self.share_processes[share.pid])))
             self.dbhandler.stop_share(share)
         self.print_shares()
 
@@ -199,7 +198,7 @@ class OpenPortManager(object):
                 if share.pid in self.share_processes:
                     logger.debug('pid found in share_processes')
                     if self.share_processes[share.pid] is not None:
-                        logger.debug('output from child process: ' + str(self.share_processes[share.pid].communicate()))
+                        logger.debug('output from child process: ' + str(self.os_interaction.non_block_read(self.share_processes[share.pid])))
             self.dbhandler.stop_share(share)
 
 

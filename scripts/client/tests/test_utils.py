@@ -10,7 +10,7 @@ import threading
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import urllib2
 from services.logger_service import get_logger
-from services.utils import get_all_output
+from services import osinteraction
 
 logger = get_logger(__file__)
 
@@ -101,6 +101,7 @@ class SimpleTcpClient(object):
     def __init__(self, host, port):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(5)
         except socket.error, msg:
             sys.stderr.write("[ERROR] %s\n" % msg[1])
 #            sys.exit(1)
@@ -175,7 +176,7 @@ def run_command_with_timeout(args, timeout_s):
         def run(self, timeout):
             def target():
                 #print 'Thread started'
-                self.process = subprocess.Popen(self.cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                self.process = subprocess.Popen(self.cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
                 self.process.wait()
                 #self.process.communicate()
                 #print 'Thread finished'
@@ -189,7 +190,7 @@ def run_command_with_timeout(args, timeout_s):
                 self.process.terminate()
                 thread.join()
             print self.process.returncode
-            return get_all_output(self.process)
+            return osinteraction.getInstance().get_all_output(self.process)
 
     c = Command(args)
     return c.run(timeout_s)

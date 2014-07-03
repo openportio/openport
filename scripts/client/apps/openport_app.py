@@ -73,6 +73,8 @@ class OpenportApp(object):
         if self.manager_app_started:
             return
         self.manager_app_started = True
+        #logger.debug('setting cwd to: %s' % os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+        os.chdir(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
         if self.os_interaction.is_compiled():
             command = []
@@ -90,16 +92,8 @@ class OpenportApp(object):
         if self.args.server:
             command = OsInteraction.set_variable(command, '--server', self.args.server)
         logger.debug('starting manager: %s' % command)
-    #    output = self.os_interaction.run_command_silent(command) #hangs
-    #    logger.debug('manager stopped: %s ' % output)
-
-        def start_manager():
-            try:
-                output = self.os_interaction.run_command_silent(command) #hangs
-                logger.debug('manager stopped: %s ' % output)
-            except Exception, e:
-                logger.error(e)
-        self.os_interaction.spawnDaemon(start_manager)
+        self.os_interaction.spawn_daemon(command)
+        logger.debug("manager started")
 
     def inform_manager_app_new(self, share, manager_port, start_manager=True):
         url = 'http://127.0.0.1:%s/newShare' % manager_port
@@ -182,10 +176,7 @@ class OpenportApp(object):
         else:
             command = []
         if sys.argv[0][-3:] == '.py':
-            if os.path.exists('env/bin/python'):
-                command.extend(['env/bin/python'])
-            else:
-                command.extend(['python'])
+            command.append(self.os_interaction.get_python_exec())
         command.extend(sys.argv)
 
         #if not '--manager-port' in command:

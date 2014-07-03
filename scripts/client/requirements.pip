@@ -1,10 +1,12 @@
+pycrypto
+ecdsa
 paramiko
 #wxPython
 unittest-xml-reporting
 pyopenssl
 ext_http_server
-pysqlite
-python-daemon
+#pysqlite
+#python-daemon
 argparse
 bottle
 pyinstaller

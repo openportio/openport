@@ -2,9 +2,18 @@ import errno
 import os
 import platform
 import subprocess
-import sys
-import signal
 import getpass
+import sys
+from threading import Thread
+from time import sleep
+
+
+try:
+    from Queue import Queue, Empty
+except ImportError:
+    from queue import Queue, Empty  # python 3.x
+
+ON_POSIX = 'posix' in sys.builtin_module_names
 
 
 class OsInteraction(object):
@@ -13,6 +22,7 @@ class OsInteraction(object):
         if use_logger:
             from services.logger_service import get_logger
             self.logger = get_logger('OsInteraction')
+        self.output_queues = {}
 
     def get_app_name(self):
         return os.path.basename(sys.argv[0])
@@ -81,7 +91,7 @@ class OsInteraction(object):
             self.logger.debug('Running command: %s' % args)
         p = subprocess.Popen(args,
                              bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             preexec_fn=None, close_fds=False, shell=False, cwd=None, env=None,
+                             preexec_fn=None, close_fds=False, shell=True, cwd=None, env=None,
                              universal_newlines=False, startupinfo=None, creationflags=0)
         return p
 
@@ -102,17 +112,110 @@ class OsInteraction(object):
             pass
         return os.path.join(self.APP_DATA_PATH, filename)
 
-    def run_command_silent(self, command_array):
+
+    def run_shell_command(self, command):
+        s = subprocess.Popen(command,
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             shell=True,
+                             close_fds=is_linux())
+        return s.communicate()
+
+    def run_command_and_print_output_continuously(self, command_array):
+        DETACHED_PROCESS = 8 # only needed for windows
         s = subprocess.Popen(command_array,
-                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=False)
-        s.wait()
-        return '%s%s' % (s.stdout.read(), s.stderr.read())
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             creationflags=DETACHED_PROCESS, shell=False,
+                             close_fds=is_linux())
+
+        def append_output(initial, extra):
+            if not initial:
+                return extra if extra and len(extra) > 0 else False
+            elif not extra or len(extra) == 0:
+                return initial
+            else:
+                return initial + os.linesep + extra
+
+        all_output = [False, False]
+        while True:
+            output = self.get_all_output(s)
+            self.logger.debug('silent command stdout: %s' % output[0])
+            self.logger.debug('silent command stderr: %s' % output[1])
+
+            all_output[0] = append_output(all_output[0], output[0])
+            all_output[1] = append_output(all_output[1], output[1])
+            if s.poll() is not None:
+                break
+            sleep(1)
+        output = s.communicate()
+        self.logger.debug('silent command stdout: %s' % output[0])
+        self.logger.debug('silent command stderr: %s' % output[1])
+        all_output[0] = append_output(all_output[0], output[0])
+        all_output[1] = append_output(all_output[1], output[1])
+        return all_output
+
+    def get_all_output(self, p):
+        return self.non_block_read(p)
+
+    def non_block_read(self, process):
+
+        if process.pid in self.output_queues:
+            q_stdout = self.output_queues[process.pid][0]
+            q_stderr = self.output_queues[process.pid][1]
+        else:
+
+            def enqueue_output(out, queue):
+                for line in iter(out.readline, b''):
+                    queue.put(line)
+#                out.close()
+
+            q_stdout = Queue()
+            t_stdout = Thread(target=enqueue_output, args=(process.stdout, q_stdout))
+            t_stdout.daemon = True # thread dies with the program
+            t_stdout.start()
+
+            q_stderr = Queue()
+            t_stderr = Thread(target=enqueue_output, args=(process.stderr, q_stderr))
+            t_stderr.daemon = True # thread dies with the program
+            t_stderr.start()
+            sleep(0.1)
+            self.output_queues[process.pid] = (q_stdout, q_stderr)
+
+        def read_queue(q):
+            # read line without blocking
+            empty = True
+            output = ''
+            try:
+                while True:
+                    output += '%s\n' % q.get_nowait()
+                    empty = False
+            except Empty:
+                if empty:
+                    return False
+                else:
+                    return output.rstrip('\n\r')
+                #return False if empty else output
+
+        return read_queue(q_stdout), read_queue(q_stderr)
 
 
 class LinuxOsInteraction(OsInteraction):
+
+
     def __init__(self, use_logger=True):
         super(LinuxOsInteraction, self).__init__(use_logger)
         self.APP_DATA_PATH = '/root/.openport' if os.getuid() == 0 else os.path.join(os.path.expanduser('~/.openport'))
+
+        import fcntl
+        import os
+
+    def nonBlockRead(self, output):
+        fd = output.fileno()
+        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+        try:
+            return output.read()
+        except:
+            return False
 
     def copy_to_clipboard(self, text):
         from Tkinter import Tk
@@ -139,7 +242,9 @@ class LinuxOsInteraction(OsInteraction):
         else:
             return True
 
-    def kill_pid(self, pid, signal=signal.SIGKILL):
+    def kill_pid(self, pid, signal=None):
+        if signal is None:
+            signal = signal.SIGKILL
         os.kill(pid, signal)
         return True
 
@@ -152,7 +257,7 @@ class LinuxOsInteraction(OsInteraction):
         else:
             return ['python']
 
-    def spawnDaemon(self, func):
+    def spawn_daemon(self, command):
         # do the UNIX double-fork magic, see Stevens' "Advanced
         # Programming in the UNIX Environment" for details (ISBN 0201563177)
         try:
@@ -176,7 +281,7 @@ class LinuxOsInteraction(OsInteraction):
             self.logger.error("fork #2 failed: %d (%s)" % (e.errno, e.strerror) )
             sys.exit(1)
 
-        func()
+        self.run_command_and_print_output_continuously(command)
 
         # all done
         os._exit(os.EX_OK)
@@ -205,20 +310,30 @@ class WindowsOsInteraction(OsInteraction):
         #            return False
 
     def kill_pid(self, pid, signal='Ignore'):
-        a = self.run_command_silent(['taskkill', '/pid', '%s' % pid, '/f', '/t'])
-        return a.startswith('SUCCESS')
+        a = self.run_shell_command(['taskkill', '/pid', '%s' % pid, '/f', '/t'])
+        return a[0].startswith('SUCCESS')
 
     def is_compiled(self):
         return sys.argv[0][-3:] == 'exe'
 
     def get_python_exec(self):
+        #self.logger.debug('getting python exec. Cwd: %s' % os.getcwd())
         if os.path.exists('env/Scripts/python.exe'):
-            return ['start', 'env/Scripts/python.exe']
+            return ['env\\Scripts\\python.exe']
         else:
-            return ['start', 'python.exe']
-    def spawnDaemon(self, func):
-        #TODO!
-        func()
+            return ['python.exe']
+
+    def spawn_daemon(self, command):
+        def foo():
+            try:
+                output = self.run_command_and_print_output_continuously(command)
+                self.logger.debug('daemon stopped: %s ' % output)
+            except Exception, e:
+                self.logger.error(e)
+
+        t = Thread(target=foo)
+        t.setDaemon(True)
+        t.start()
 
 def is_linux():
     return platform.system() != 'Windows'

@@ -2,6 +2,7 @@ import unittest
 import sys
 import xmlrunner
 import os
+from time import sleep
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from common.share import Share
@@ -16,6 +17,7 @@ class DBHandlerTests(unittest.TestCase):
 
     def tearDown(self):
         self.dbhandler.stop()
+        sleep(1)
         os.remove(self.test_db)
 
     def testSaveShare(self):

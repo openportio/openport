@@ -18,7 +18,7 @@ import logging
 import xmlrunner
 print sys.path
 
-from apps.openportit import OpenportItApp
+#from apps.openportit import OpenportItApp
 from apps.openport_api import open_port
 from common.share import Share
 from common.session import Session
