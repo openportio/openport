@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
 import xmlrunner
-from services.osinteraction import OsInteraction, getInstance
+from services.osinteraction import OsInteraction, getInstance, is_linux
 import subprocess
 from time import sleep
 from services.logger_service import set_log_level
@@ -47,7 +47,7 @@ class OsInteractionTest(unittest.TestCase):
     def test_non_block_read(self):
         p = subprocess.Popen(['python', '-c', "from time import sleep; print 'aaa'; sleep(1); print 'bbb'"],
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             bufsize=1, close_fds=False)
+                             bufsize=1, close_fds=is_linux())
         sleep(0.1)
         self.assertEqual(('aaa', False), self.os_interaction.non_block_read(p))
         sleep(2)

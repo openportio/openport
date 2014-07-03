@@ -182,7 +182,7 @@ def run_command_with_timeout(args, timeout_s):
 
 
                 self.process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                                shell=not osinteraction.is_linux())
+                                                shell=not osinteraction.is_linux(), close_fds=osinteraction.is_linux())
                 self.process.wait()
                 #self.process.communicate()
                 #print 'Thread finished'
