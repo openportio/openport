@@ -106,13 +106,15 @@ class SiteInteractionTest(unittest.TestCase):
             pass
 
         self.login_to_site()
+        self.remove_all_keys_from_account()
         key_binding_token = self.get_key_binding_token()
         self.register_key(key_binding_token)
 
         p = self.start_session(8888, db_file=db_file)
         sleep(5)
         process_output = self.os_interaction.get_all_output(p)
-        print "process output: ", process_output
+        print "process output stdout: ", process_output[0]
+        print "process output stderr: ", process_output[1]
         remote_host, server_port = get_remote_host_and_port(process_output[0])
         print 'server port: %s' % server_port
 
@@ -122,8 +124,10 @@ class SiteInteractionTest(unittest.TestCase):
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
         sleep(20)
         process_output = self.os_interaction.get_all_output(p)
-        print "process output: ", process_output
+        print "process output stdout: ", process_output[0]
+        print "process output stderr: ", process_output[1]
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
+        self.assertEquals(9, p.poll())
 
     def test_restart_killed_session(self):
 
@@ -134,6 +138,7 @@ class SiteInteractionTest(unittest.TestCase):
             pass
 
         self.login_to_site()
+        self.remove_all_keys_from_account()
         key_binding_token = self.get_key_binding_token()
         self.register_key(key_binding_token)
 
@@ -152,6 +157,8 @@ class SiteInteractionTest(unittest.TestCase):
         process_output = self.os_interaction.get_all_output(p)
         print "process output: ", process_output
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
+        self.assertEquals(9, p.poll())
+
 
         p = self.start_session(8888, db_file=db_file)
         sleep(5)

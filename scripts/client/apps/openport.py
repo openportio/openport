@@ -1,4 +1,7 @@
 #!/usr/bin/python
+import warnings
+
+warnings.warn("deprecated", DeprecationWarning)
 
 import os
 from sys import argv
@@ -16,7 +19,8 @@ except ImportError:
         print 'You need python 2.6 or simplejson to run this application.'
         sys.exit(1)
 
-def request_port(key, url='http://www.openport.be/post', restart_session_token = '', request_server_port=-1, http_forward = False ):
+def request_port(public_key, local_port=None, url='http://www.openport.be/post', restart_session_token='',
+                 request_server_port=-1, http_forward=False, automatic_restart=False):
     """
     Requests a port on the server using the openPort protocol
     return a tuple with ( server_ip, server_port, message )
@@ -25,10 +29,13 @@ def request_port(key, url='http://www.openport.be/post', restart_session_token =
 
     try:
         data = urllib.urlencode({
-            'public_key': key,
+            'public_key': public_key,
             'request_port': request_server_port,
             'restart_session_token': restart_session_token,
-            'http_forward': 'on' if http_forward else '' })
+            'http_forward': 'on' if http_forward else '',
+            'automatic_restart': 'on' if automatic_restart else '',
+            'local_port': local_port,
+            })
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
         dict = json.loads(response)

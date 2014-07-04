@@ -170,7 +170,7 @@ class IntegrationTest(unittest.TestCase):
 
         dict = openport.request_port(
             url='http://%s/post' % self.test_server,
-            key=get_or_create_public_key(),
+            public_key=get_or_create_public_key(),
             restart_session_token=share.server_session_token,
             request_server_port=port
         )
@@ -179,7 +179,7 @@ class IntegrationTest(unittest.TestCase):
 
         dict = openport.request_port(
             url='http://%s/post' % self.test_server,
-            key=get_or_create_public_key(),
+            public_key=get_or_create_public_key(),
             restart_session_token='not the same token',
             request_server_port=port
         )
@@ -192,14 +192,14 @@ class IntegrationTest(unittest.TestCase):
 
         dictionary = openport.request_port(
             url='http://%s/post' % self.test_server,
-            key=public_key
+            public_key=public_key
         )
 
         response = PortForwardResponse(dictionary)
 
         dictionary2 = openport.request_port(
             url='http://%s/post' % self.test_server,
-            key=public_key,
+            public_key=public_key,
             restart_session_token=response.session_token,
             request_server_port=response.remote_port
         )
@@ -210,7 +210,7 @@ class IntegrationTest(unittest.TestCase):
 
         dictionary3 = openport.request_port(
             url='http://%s/post' % self.test_server,
-            key=public_key,
+            public_key=public_key,
             restart_session_token='not the same token',
             request_server_port=response.remote_port
         )
