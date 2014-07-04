@@ -56,8 +56,8 @@ class DBHandler(object):
         self.db_location = db_location
 
         self.task_queue = Queue()
-        self.startQueueThread()
         self.stopped = False
+        self.startQueueThread()
         self.queue_exception = None
 
     def checkQueue(self):
