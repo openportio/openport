@@ -50,7 +50,7 @@ class OpenportApp(object):
             # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
             #signal.signal(signal.SIGTERM, self.handleSigTERM)
 
-        self.db_handler = dbhandler.getInstance()
+        self.db_handler = None
 
     def handleSigTERM(self, signum, frame):
         logger.debug('got signal %s' % signum)
@@ -234,6 +234,10 @@ class OpenportApp(object):
         parser = argparse.ArgumentParser()
         self.add_default_arguments(parser)
         self.args = parser.parse_args()
+
+        if self.args.manager_database != '':
+            dbhandler.db_location = self.args.manager_database
+        self.db_handler = dbhandler.getInstance()
 
         key_registration_service.register_key(self.args, self.args.server)
 

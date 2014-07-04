@@ -99,11 +99,17 @@ class SiteInteractionTest(unittest.TestCase):
     def test_kill_session(self):
         """ Start a session. Check that it exists on the server. Kill it. Make sure is doesn't restart."""
 
+        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
+        try:
+            os.remove(db_file)
+        except OSError:
+            pass
+
         self.login_to_site()
         key_binding_token = self.get_key_binding_token()
         self.register_key(key_binding_token)
 
-        p = self.start_session(8888)
+        p = self.start_session(8888, db_file=db_file)
         sleep(5)
         process_output = self.os_interaction.get_all_output(p)
         print "process output: ", process_output
@@ -119,11 +125,51 @@ class SiteInteractionTest(unittest.TestCase):
         print "process output: ", process_output
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
 
-    def start_session(self, local_port):
+    def test_restart_killed_session(self):
+
+        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
+        try:
+            os.remove(db_file)
+        except OSError:
+            pass
+
+        self.login_to_site()
+        key_binding_token = self.get_key_binding_token()
+        self.register_key(key_binding_token)
+
+        p = self.start_session(8888, db_file=db_file)
+        sleep(5)
+        process_output = self.os_interaction.get_all_output(p)
+        print "process output: ", process_output
+        remote_host, server_port = get_remote_host_and_port(process_output[0])
+        print 'server port: %s' % server_port
+
+        self.assertTrue(self.session_exists_on_site(server_port))
+        self.kill_session(server_port)
+        sleep(2)
+        self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
+        sleep(20)
+        process_output = self.os_interaction.get_all_output(p)
+        print "process output: ", process_output
+        self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
+
+        p = self.start_session(8888, db_file=db_file)
+        sleep(5)
+        process_output = self.os_interaction.get_all_output(p)
+        print "process output: ", process_output
+        remote_host, server_port = get_remote_host_and_port(process_output[0])
+        print 'server port: %s' % server_port
+
+        self.assertTrue(self.session_exists_on_site(server_port), 'session was not allowed back on the server.')
+
+
+    def start_session(self, local_port, db_file=None):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
-        p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port,
-                              '--start-manager', 'False', '--server', 'test.openport.be', '--verbose', '--manager-port',
-                              '-1'],
+        command = ['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port, '--start-manager',
+                   'False', '--server', 'test.openport.be', '--verbose', '--manager-port', '-1']
+        if db_file:
+            command.extend(['--manager-database', db_file])
+        p = subprocess.Popen(command,
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         return p
