@@ -9,9 +9,8 @@ import urllib, urllib2
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from apps import openport
 from apps.keyhandling import get_or_create_public_key, create_new_key_pair
-from apps.openport_api import PortForwardResponse
+from apps.openport_api import PortForwardResponse, request_port
 from services.logger_service import set_log_level
 import logging
 
@@ -168,7 +167,7 @@ class IntegrationTest(unittest.TestCase):
         #response = urllib2.urlopen(req).read()
         #self.assertEqual('done', response.strip())
 
-        dict = openport.request_port(
+        dict = request_port(
             url='http://%s/post' % self.test_server,
             public_key=get_or_create_public_key(),
             restart_session_token=share.server_session_token,
@@ -177,7 +176,7 @@ class IntegrationTest(unittest.TestCase):
         response = PortForwardResponse(dict)
         self.assertEqual(port, response.remote_port)
 
-        dict = openport.request_port(
+        dict = request_port(
             url='http://%s/post' % self.test_server,
             public_key=get_or_create_public_key(),
             restart_session_token='not the same token',
@@ -190,14 +189,14 @@ class IntegrationTest(unittest.TestCase):
 
         private_key, public_key = create_new_key_pair()
 
-        dictionary = openport.request_port(
+        dictionary = request_port(
             url='http://%s/post' % self.test_server,
             public_key=public_key
         )
 
         response = PortForwardResponse(dictionary)
 
-        dictionary2 = openport.request_port(
+        dictionary2 = request_port(
             url='http://%s/post' % self.test_server,
             public_key=public_key,
             restart_session_token=response.session_token,
@@ -208,7 +207,7 @@ class IntegrationTest(unittest.TestCase):
 
         self.assertEqual(response2.remote_port, response.remote_port)
 
-        dictionary3 = openport.request_port(
+        dictionary3 = request_port(
             url='http://%s/post' % self.test_server,
             public_key=public_key,
             restart_session_token='not the same token',

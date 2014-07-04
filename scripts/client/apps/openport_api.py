@@ -52,13 +52,14 @@ def request_port(public_key, local_port=None, url='http://www.openport.be/post',
             'restart_session_token': restart_session_token,
             'http_forward': 'on' if http_forward else '',
             'automatic_restart': 'on' if automatic_restart else '',
-            'local_port': local_port,
+            'local_port': local_port if local_port else '',
             })
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
         dict = json.loads(response)
         return dict
     except Exception, detail:
+        logger.debug('error: got response: %s' % response)
         print "An error has occurred while communicating the the openport servers. ", detail, detail.read()
         raise detail
 
