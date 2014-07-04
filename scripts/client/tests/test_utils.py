@@ -202,6 +202,46 @@ def run_command_with_timeout(args, timeout_s):
     return c.run(timeout_s)
 
 
+
+
+def run_command_with_timeout_return_process(args, timeout_s):
+
+    class Command(object):
+        def __init__(self, cmd):
+            self.cmd = cmd
+            self.process = None
+
+        def run(self, timeout):
+            command = self.cmd
+            if not osinteraction.is_linux():
+                command = ' '.join(['"%s"' % arg for arg in self.cmd])
+            self.process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                            shell=not osinteraction.is_linux(), close_fds=osinteraction.is_linux())
+
+            def kill_target():
+                wait_thread.join(timeout)
+                if wait_thread.is_alive():
+                    print 'Terminating process'
+                    self.process.terminate()
+                    wait_thread.join()
+
+            def wait_target():
+                self.process.wait()
+
+            wait_thread = threading.Thread(target=wait_target)
+            wait_thread.setDaemon(True)
+            wait_thread.start()
+
+            kill_thread = threading.Thread(target=kill_target)
+            kill_thread.setDaemon(True)
+            kill_thread.start()
+
+            return self.process
+
+    c = Command(args)
+    return c.run(timeout_s)
+
+
 def get_remote_host_and_port(output):
     m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', output)
     if m is None:

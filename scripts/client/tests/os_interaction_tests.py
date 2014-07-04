@@ -11,6 +11,7 @@ from services.osinteraction import OsInteraction, getInstance, is_linux
 import subprocess
 from time import sleep
 from services.logger_service import set_log_level
+from test_utils import run_command_with_timeout, run_command_with_timeout_return_process
 
 
 class OsInteractionTest(unittest.TestCase):
@@ -45,7 +46,11 @@ class OsInteractionTest(unittest.TestCase):
         self.assertEqual(None, OsInteraction.get_variable(['ls', '-u'], '-u'))
 
     def test_non_block_read(self):
-        p = subprocess.Popen(['python', '-c', "from time import sleep; print 'aaa'; sleep(1); print 'bbb'"],
+        # The flush is needed for the tests.
+        # See http://stackoverflow.com/questions/6257800/incremental-output-with-subprocess-pipe
+
+        p = subprocess.Popen(['python', '-c', "from time import sleep;import sys; print 'aaa'; sys.stdout.flush(); "
+                                              "sleep(1); print 'bbb'"],
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              bufsize=1, close_fds=is_linux())
         sleep(0.1)
@@ -58,9 +63,30 @@ class OsInteractionTest(unittest.TestCase):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = self.os_interaction.get_python_exec()
         print command
-        command.extend(['-c', 'from time import sleep; print "aaa"; sleep(3); print "bbb"'])
+        command.extend(['-c', "from time import sleep;import sys; print 'aaa'; sys.stdout.flush(); "
+                                              "sleep(1); print 'bbb'"])
         output = self.os_interaction.run_command_and_print_output_continuously(command)
         self.assertEqual(['aaa%sbbb' % os.linesep, False], output)
+
+    def test_run_command_and_print_output_continuously__kill_app(self):
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        command = self.os_interaction.get_python_exec()
+        print command
+        command.extend(['-c', "from time import sleep;import sys; print 'aaa'; sys.stdout.flush(); "
+                                              "sleep(5); print 'bbb'"])
+        s = run_command_with_timeout_return_process(command, 1)
+        sleep(1.5)
+        output = self.os_interaction.print_output_continuously(s)
+        self.assertEqual(['aaa', False], output)
+
+    def test_get_all_output__kill_app(self):
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        command = self.os_interaction.get_python_exec()
+        print command
+        command.extend(['-c', "from time import sleep;import sys; print 'aaa'; sys.stdout.flush(); "
+                                              "sleep(3); print 'bbb'"])
+        output = run_command_with_timeout(command, 1)
+        self.assertEqual(('aaa', False), output)
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

@@ -9,8 +9,15 @@
     <content url="file://C:/Python26/Lib/site-packages/aufmachen-0.1_dev-py2.6.egg/tmp">
       <excludeFolder url="file://C:/Python26/Lib/site-packages/aufmachen-0.1_dev-py2.6.egg/tmp" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 2.7.3 virtualenv at ~/swprojects/openport-client/scripts/client/env" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="PyDocumentationSettings">
+    <option name="myDocStringFormat" value="Plain" />
+  </component>
+  <component name="TestRunnerService">
+    <option name="projectConfiguration" value="Unittests" />
+    <option name="PROJECT_TEST_RUNNER" value="Unittests" />
   </component>
 </module>
 

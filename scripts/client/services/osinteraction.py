@@ -137,7 +137,8 @@ class OsInteraction(object):
             elif not extra or len(extra) == 0:
                 return initial
             else:
-                return initial + os.linesep + extra
+                newline = '' if initial.endswith(os.linesep) else os.linesep
+                return initial + newline + extra
 
         all_output = [False, False]
         while True:
@@ -199,7 +200,9 @@ class OsInteraction(object):
             output = ''
             try:
                 while True:
-                    output += '%s\n' % q.get_nowait()
+                    output += '%s' % q.get_nowait()
+                    if not output.endswith(os.linesep):
+                        output += os.linesep
                     empty = False
             except Empty:
                 if empty:
