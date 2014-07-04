@@ -588,9 +588,9 @@ class AppTests(unittest.TestCase):
         self.assertEqual((False, False), run_command_with_timeout(['python', '-c', 'from time import sleep;sleep(1)'], 2))
         self.assertEqual((False, False), run_command_with_timeout(['python', '-c', 'from time import sleep;sleep(2)'], 1))
         self.assertEqual(('hello', False), run_command_with_timeout(['python', '-c', 'print "hello"'], 1))
-        self.assertEqual(('hello', False), run_command_with_timeout(['python', '-c',
-                                                                     'from time import sleep;print "hello";sleep(2)'],
-                                                                    1))
+        self.assertEqual(('hello', False), run_command_with_timeout(['python', '-c', 'from time import sleep;import sys'
+                                                                                     ';print "hello";sys.stdout.flush()'
+                                                                                     ';sleep(2)'], 1))
 
     def test_shell_behaviour(self):
         p = subprocess.Popen('''python -c "print 'hello'"''', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
