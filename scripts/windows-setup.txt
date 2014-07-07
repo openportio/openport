@@ -19,6 +19,11 @@ http://www.microsoft.com/en-us/download/details.aspx?id=29
 install opensll for 64 bit:
 http://slproweb.com/download/Win64OpenSSL-1_0_0m.exe
 
+install pywin32 (for pyinstaller)
+http://sourceforge.net/projects/pywin32/files/pywin32/
+then run (in scripts folder)
+env/Scripts/easy_install "C:\Users\Jan\Downloads\pywin32-219.win32-py2.7.exe"
+
 
 in scripts folder:
 pip install virtualenv
