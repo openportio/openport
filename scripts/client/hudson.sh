@@ -8,3 +8,4 @@ virtualenv env
 #env/bin/easy_install unittest-xml-reporting
 env/bin/pip install -r requirements.pip
 env/bin/nosetests --nocapture --with-xunit tests/*_tests.py || echo there was an error: $?
+./create_exes.sh

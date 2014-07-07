@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
-    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Passing the localport to the openport servers.&#10;Fixing the sys.exit calls in the openport_api module&#10;Passing whether the session was automatically restarted&#10;">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/integration_tests.py" afterPath="$PROJECT_DIR$/tests/integration_tests.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_api.py" afterPath="$PROJECT_DIR$/apps/openport_api.py" />
+    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Fixed integration tests">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="client.iws" />
@@ -70,7 +68,7 @@
       <file leaf-file-name="openport_api.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/apps/openport_api.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="54" column="58" selection-start="1958" selection-end="1958" vertical-scroll-proportion="0.46686748" vertical-offset="655" max-vertical-offset="2400">
+            <state line="44" column="59" selection-start="1574" selection-end="1574" vertical-scroll-proportion="0.46686748" vertical-offset="505" max-vertical-offset="2400">
               <folding>
                 <element signature="e#22#31#0" expanded="true" />
               </folding>
@@ -562,32 +560,7 @@
       </UpdatedFiles>
     </UpdateInfo>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests in live_integration_tests">
-    <configuration default="false" name="Unittest SiteInteractionTest.test_restart_killed_session" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="client" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/site_interaction_tests.py" />
-      <option name="CLASS_NAME" value="SiteInteractionTest" />
-      <option name="METHOD_NAME" value="test_restart_killed_session" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_METHOD" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PUREUNITTEST" value="true" />
-      <option name="PARAMS" value="" />
-      <option name="USE_PARAM" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python tests.Unittests in app_tests">
     <configuration default="false" name="Unittest SiteInteractionTest.test_kill_session" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -677,6 +650,31 @@
       <module name="client" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/live_integration_tests.py" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Unittests in app_tests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="client" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/app_tests.py" />
       <option name="CLASS_NAME" value="" />
       <option name="METHOD_NAME" value="" />
       <option name="FOLDER_NAME" value="" />
@@ -1085,19 +1083,19 @@
       <item index="9" class="java.lang.String" itemvalue="Python tests.Unittests in IntegrationTest.testMultiThread" />
       <item index="10" class="java.lang.String" itemvalue="Python tests.Unittests in integrationtests" />
       <item index="11" class="java.lang.String" itemvalue="Python tests.Unnamed" />
-      <item index="12" class="java.lang.String" itemvalue="Python tests.Unittest SiteInteractionTest.test_restart_killed_session" />
-      <item index="13" class="java.lang.String" itemvalue="Python tests.Unittest SiteInteractionTest.test_kill_session" />
-      <item index="14" class="java.lang.String" itemvalue="Python tests.Unittests in site_interaction_tests" />
-      <item index="15" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_same_port" />
-      <item index="16" class="java.lang.String" itemvalue="Python tests.Unittests in live_integration_tests" />
+      <item index="12" class="java.lang.String" itemvalue="Python tests.Unittest SiteInteractionTest.test_kill_session" />
+      <item index="13" class="java.lang.String" itemvalue="Python tests.Unittests in site_interaction_tests" />
+      <item index="14" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_same_port" />
+      <item index="15" class="java.lang.String" itemvalue="Python tests.Unittests in live_integration_tests" />
+      <item index="16" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in live_integration_tests" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_same_port" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in site_interaction_tests" />
-        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittest SiteInteractionTest.test_kill_session" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittest SiteInteractionTest.test_restart_killed_session" />
+        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
+        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in live_integration_tests" />
+        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_same_port" />
+        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests in site_interaction_tests" />
+        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittest SiteInteractionTest.test_kill_session" />
       </list>
     </recent_temporary>
   </component>
@@ -1322,7 +1320,11 @@
       <created>1404509723768</created>
       <updated>1404509723768</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="Fixed integration tests">
+      <created>1404510736971</created>
+      <updated>1404510736972</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1347,7 +1349,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1440" height="790" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.1218716" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1355,11 +1357,11 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2965616" sideWeight="0.28541225" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.5764331" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21212122" sideWeight="0.63649637" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21212122" sideWeight="0.63649637" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5630373" sideWeight="0.49468085" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.57165605" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5565069" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.41404012" sideWeight="0.71458775" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.41404012" sideWeight="0.71458775" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32808024" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1385,7 +1387,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="Moved hudson script to separate file" />
     <MESSAGE value="Made the tests a bit more robust" />
     <MESSAGE value="Don't run xargs if the lines are empty" />
     <MESSAGE value="Fixed problem with tests launching too many openport processes" />
@@ -1410,7 +1411,8 @@
     <MESSAGE value="Should fix timing issue in DBHandler" />
     <MESSAGE value="Found problem with restarting killed sessions.&#10;Created a new test to show the problem." />
     <MESSAGE value="Passing the localport to the openport servers.&#10;Fixing the sys.exit calls in the openport_api module&#10;Passing whether the session was automatically restarted&#10;" />
-    <option name="LAST_COMMIT_MESSAGE" value="Passing the localport to the openport servers.&#10;Fixing the sys.exit calls in the openport_api module&#10;Passing whether the session was automatically restarted&#10;" />
+    <MESSAGE value="Fixed integration tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed integration tests" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1791,7 +1793,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/apps/openport_api.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="54" column="58" selection-start="1958" selection-end="1958" vertical-scroll-proportion="0.46686748" vertical-offset="655" max-vertical-offset="2400">
+        <state line="44" column="59" selection-start="1574" selection-end="1574" vertical-scroll-proportion="0.46686748" vertical-offset="505" max-vertical-offset="2400">
           <folding>
             <element signature="e#22#31#0" expanded="true" />
           </folding>
