@@ -90,7 +90,7 @@ class OsInteraction(object):
         if self.logger:
             self.logger.debug('Running command: %s' % args)
         p = subprocess.Popen(args,
-                             bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              preexec_fn=None, close_fds=is_linux(), shell=False, cwd=None, env=None,
                              universal_newlines=False, startupinfo=None, creationflags=0)
         return p
@@ -116,7 +116,7 @@ class OsInteraction(object):
         if isinstance(command, list):
             command = ' '.join(['"%s"' % arg for arg in command])
         s = subprocess.Popen(command,
-                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              shell=True,
                              close_fds=is_linux())
         return s.communicate()
@@ -124,7 +124,7 @@ class OsInteraction(object):
     def run_command_and_print_output_continuously(self, command_array):
         creation_flags = self.get_detached_process_creation_flag()
         s = subprocess.Popen(command_array,
-                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                              creationflags=creation_flags, shell=False,
                              close_fds=is_linux())
 
@@ -144,9 +144,9 @@ class OsInteraction(object):
         while True:
             output = self.get_all_output(s)
             if output[0]:
-                self.logger.debug('silent command stdout: %s' % output[0])
+                self.logger.debug('silent command stdout: <<<<%s>>>>' % output[0])
             if output[1]:
-                self.logger.debug('silent command stderr: %s' % output[1])
+                self.logger.debug('silent command stderr: <<<<%s>>>>' % output[1])
 
             all_output[0] = append_output(all_output[0], output[0])
             all_output[1] = append_output(all_output[1], output[1])
@@ -160,6 +160,7 @@ class OsInteraction(object):
             self.logger.debug('silent command stderr: %s' % output[1])
         all_output[0] = append_output(all_output[0], output[0])
         all_output[1] = append_output(all_output[1], output[1])
+        self.logger.debug('application stopped: <<%s>>' % all_output)
         return all_output
 
     def print_output_continuously_threaded(self, s):
@@ -188,9 +189,9 @@ class OsInteraction(object):
             t_stdout.start()
 
             q_stderr = Queue()
-            t_stderr = Thread(target=enqueue_output, args=(process.stderr, q_stderr))
-            t_stderr.daemon = True # thread dies with the program
-            t_stderr.start()
+            #t_stderr = Thread(target=enqueue_output, args=(process.stderr, q_stderr))
+            #t_stderr.daemon = True # thread dies with the program
+            #t_stderr.start()
             sleep(0.1)
             self.output_queues[process.pid] = (q_stdout, q_stderr)
 
