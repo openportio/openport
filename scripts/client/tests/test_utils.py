@@ -51,13 +51,13 @@ class SimpleHTTPClient(object):
         try:
             req = urllib2.Request(url)
             return urllib2.urlopen(req).read()
+        except urllib2.HTTPError, e:
+            if print500 and e.getcode() == 500:
+                print e.read()
+            raise
         except Exception as detail:
             print "An error has occurred: ", detail
-            sleep(1)
-            #print "detail: ", detail.read()
-            if print500 and detail.getcode() == 500:
-                print detail.read()
-            raise detail
+            raise
 
 
 class SimpleTcpServer(object):

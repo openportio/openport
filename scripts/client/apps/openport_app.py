@@ -155,12 +155,12 @@ class OpenportApp(object):
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req, timeout=5).read()
             if response.strip() != 'ok':
-                logger.error( response )
+                logger.error(response)
             if response.strip() == 'unknown':
                 logger.critical('this share is no longer known by the manager, exiting')
                 sys.exit(1)
         except urllib2.HTTPError, e:
-            logger.error('error informing manager of success: ' + e)
+            logger.error('error informing manager of success: %s ' % e)
             if e.getcode() == 500:
                 logger.error('error detail: ' + e.read())
             sys.exit(1)
