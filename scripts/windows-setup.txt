@@ -1,0 +1,36 @@
+install python
+https://www.python.org/downloads/windows/
+
+install pip
+https://bootstrap.pypa.io/get-pip.py
+
+modify path: add
+;c:\Python27;c:\Python27\scripts
+
+download pywin32:
+http://sourceforge.net/projects/pywin32/files/pywin32/Build%20214/
+
+install git bash:
+http://git-scm.com/download/win
+
+install Microsoft Visual C++ 2008 Redistributable Package (x86):
+http://www.microsoft.com/en-us/download/details.aspx?id=29
+
+install opensll for 64 bit:
+http://slproweb.com/download/Win64OpenSSL-1_0_0m.exe
+
+install pywin32 (for pyinstaller)
+http://sourceforge.net/projects/pywin32/files/pywin32/
+then run (in scripts folder)
+env/Scripts/easy_install "C:\Users\Jan\Downloads\pywin32-219.win32-py2.7.exe"
+
+
+in scripts folder:
+pip install virtualenv
+virtualenv env
+env/scripts/pip install -r requirements.pip
+
+
+if that doesnt work:
+install visual studio 2008:
+http://go.microsoft.com/?linkid=7729279

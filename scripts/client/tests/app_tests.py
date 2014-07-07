@@ -68,7 +68,7 @@ class AppTests(unittest.TestCase):
 
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
-        p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port,
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                               '--server', 'test.openport.be', '--verbose'],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
@@ -92,7 +92,7 @@ class AppTests(unittest.TestCase):
 
         p.kill()
 
-        p = subprocess.Popen(['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % port,
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                               '--server', 'test.openport.be', '--verbose'],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
@@ -143,10 +143,8 @@ class AppTests(unittest.TestCase):
 
     def test_manager(self):
         db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
-        try:
+        if os.path.exists(db_file):
             os.remove(db_file)
-        except OSError:
-            pass
 
         port = get_open_port()
         print 'localport :', port
@@ -261,10 +259,8 @@ class AppTests(unittest.TestCase):
         self.assertFalse(self.managerIsRunning(manager_port))
 
         db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
-        try:
+        if os.path.exists(db_file):
             os.remove(db_file)
-        except OSError:
-            pass
 
         port = get_open_port()
         print 'local port: ', port
@@ -300,10 +296,8 @@ class AppTests(unittest.TestCase):
         self.manager_port = manager_port
         self.assertFalse(self.managerIsRunning(manager_port))
         db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport_manager_different_port.db')
-        try:
+        if os.path.exists(db_file):
             os.remove(db_file)
-        except OSError:
-            pass
 
         port = get_open_port()
         print 'local port: ', port
@@ -337,6 +331,7 @@ class AppTests(unittest.TestCase):
                                     '--server', 'test.openport.be', '--restart-shares'],
                                     stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
+        self.manager_port = new_manager_port
 
         sleep(15)
         process_output = self.osinteraction.get_all_output(p_manager2)
@@ -344,7 +339,19 @@ class AppTests(unittest.TestCase):
             print lineNumber(), 'p_manager2: ', out
         self.assertEqual(1, self.get_share_count_of_manager(new_manager_port))
 
-        self.check_http_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
+        print "http://%s:%s" % (remote_host, remote_port)
+        failed = False
+        try:
+            self.check_http_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
+        except:
+            failed = True
+        sleep(5)
+
+        process_output = self.osinteraction.get_all_output(p_manager2)
+        for out in process_output:
+            print lineNumber(), 'p_manager2 - final: ', out
+        if failed:
+            self.fail()
 
     def test_manager_kills_restarted_openport_processes(self):
 
@@ -587,9 +594,9 @@ class AppTests(unittest.TestCase):
     def test_run_run_command_with_timeout(self):
         self.assertEqual((False, False), run_command_with_timeout(['python', '-c', 'from time import sleep;sleep(1)'], 2))
         self.assertEqual((False, False), run_command_with_timeout(['python', '-c', 'from time import sleep;sleep(2)'], 1))
-        self.assertEqual(('hello', False), run_command_with_timeout(['python', '-c', 'print "hello"'], 1))
+        self.assertEqual(('hello', False), run_command_with_timeout(['python', '-c', "print 'hello'"], 1))
         self.assertEqual(('hello', False), run_command_with_timeout(['python', '-c', 'from time import sleep;import sys'
-                                                                                     ';print "hello";sys.stdout.flush()'
+                                                                                     ";print 'hello';sys.stdout.flush()"
                                                                                      ';sleep(2)'], 1))
 
     def test_shell_behaviour(self):

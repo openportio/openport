@@ -4,9 +4,11 @@ from services import osinteraction
 
 log_level = logging.INFO
 
-loggers = []
+loggers = {}
 
 def get_logger(name):
+    if name in loggers:
+        return loggers[name]
     logger = logging.getLogger(name)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -20,7 +22,7 @@ def get_logger(name):
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
     logger.setLevel(log_level)
-    loggers.append(logger)
+    loggers[name] = logger
     return logger
 
 if __name__ == '__main__':
@@ -36,5 +38,5 @@ if __name__ == '__main__':
 def set_log_level(new_log_level):
     global log_level
     log_level = new_log_level
-    for logger in loggers:
+    for name, logger in loggers.iteritems():
         logger.setLevel(log_level)

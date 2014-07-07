@@ -24,7 +24,7 @@ shares = {}
 @route('/newShare', method='POST')
 def new_share(name='newShare'):
     form_data = request.forms
-    logger.debug('new share ' + str(dict(form_data.iteritems())))
+    logger.debug('/newShare ' + str(dict(form_data.iteritems())))
 
     if form_data['type'] == 'Share':
         share = Share()
@@ -52,7 +52,7 @@ def success_share_get():
 
 @route('/successShare', method='POST')
 def success_share():
-    logger.debug('success')
+    logger.debug('/successShare')
     form_data = request.forms
 
     if not form_data['local_port'] in shares:
@@ -65,7 +65,7 @@ def success_share():
 
 @route('/errorShare', method='POST')
 def error_share():
-    logger.debug('error')
+    logger.debug('/errorShare')
     form_data = request.forms
     if not form_data['local_port'] in shares:
         logger.error('unknown key: %s in shares %s' % (form_data['local_port'], shares))
@@ -77,7 +77,7 @@ def error_share():
 
 @route('/stopShare', method='POST')
 def stop_share():
-    logger.debug('stopShare')
+    logger.debug('/stopShare')
     form_data = request.forms
 
     local_port = form_data['local_port']
@@ -97,6 +97,7 @@ def ping():
 
 @route('/exit', method='GET', )
 def exit_manager():
+    logger.debug('/exit')
     if request.remote_addr == '127.0.0.1':
         def shutdown():
             sleep(1)
@@ -110,6 +111,7 @@ def exit_manager():
 
 @route('/active_count', method='GET')
 def active_count():
+    logger.debug('/active_count')
     return str(len(shares))
 
 
@@ -117,7 +119,7 @@ def start_server(onNewShareFunc=None):
     global onNewShare
     onNewShare = onNewShareFunc
     try:
-        run(host='localhost', port=globals.manager_port)
+        run(host='127.0.0.1', port=globals.manager_port, server='cherrypy')
     except KeyboardInterrupt:
         pass
 

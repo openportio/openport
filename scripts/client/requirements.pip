@@ -9,6 +9,7 @@ ext_http_server
 #python-daemon
 argparse
 bottle
+cherrypy
 pyinstaller
 
 #For testing: 
