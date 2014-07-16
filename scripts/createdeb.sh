@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=1.1.1
+VERSION=2.0.0
 
 APPLICATION=openport-client
 PACKAGE=openport-client-$VERSION
@@ -11,7 +11,10 @@ sudo apt-get install build-essential autoconf automake autotools-dev dh-make deb
 # if you have errors from locale: sudo dpkg-reconfigure locales
 
 mkdir $PACKAGE
-cp client $PACKAGE/ -r
+mkdir -p $PACKAGE/usr/bin
+mkdir -p $PACKAGE/etc/init.d
+cp client/dist/* $PACKAGE/usr/bin/ -r
+cp client/openport.startup $PACKAGE/etc/init.d/openport
 #rm $PACKAGE/client/env -rf
 tar -czf $TARBALL $PACKAGE
 rm -rf $PACKAGE
@@ -24,8 +27,11 @@ cd $PACKAGE
 cp ../../debian . -r
 echo "8" > debian/compat
 ls debian/
-dch --create -v $(echo $VERSION)-1 --package $APPLICATION 
+DEB_BUILD_OPTIONS="noopt nostrip"
+dch --create -v $(echo $VERSION)-1 --package $APPLICATION "test test"
 debuild -us -uc
 
 cd ../..
+sudo rm -rf /usr/bin/openport
 sudo dpkg -i package/openport-client_$(echo $VERSION)-1_*.deb
+openport

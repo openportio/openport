@@ -17,7 +17,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="The openport manager service"
 NAME=openport-manager
-DAEMON=/usr/share/openport
+DAEMON=/usr/bin/openport
 DAEMONNAME=openport-manager
 DAEMON_ARGS="manager --restart-shares"
 PIDFILE=/var/run/$NAME.pid
