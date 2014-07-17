@@ -41,7 +41,7 @@ class SiteInteractionTest(unittest.TestCase):
     def login_to_site(self):
         self.browser.get('http://test.openport.be/user/login')
         elem = self.browser.find_element_by_name("username")
-        elem.send_keys("jan")
+        elem.send_keys("jandebleser+test@gmail.com")
         elem2 = self.browser.find_element_by_name("password")
         elem2.send_keys("test")
         elem.send_keys(Keys.RETURN)
@@ -54,15 +54,19 @@ class SiteInteractionTest(unittest.TestCase):
         self.assertTrue('Welcome, Subscriber' in self.browser.page_source)
 
     def remove_all_keys_from_account(self):
-        self.browser.get('http://test.openport.be/user/keys')
-        try:
-            while True:
-                js_confirm = 'window.confirm = function(){return true;}'
-                self.browser.execute_script(js_confirm)
-                elem = self.browser.find_element_by_partial_link_text("Remove")
+        while True:
+            self.browser.get('http://test.openport.be/user/keys')
+            try:
+                elem = self.browser.find_element_by_partial_link_text("Edit")
                 elem.click()
-        except NoSuchElementException:
-            pass
+            except NoSuchElementException:
+                break
+            js_confirm = 'window.confirm = function(){return true;}'
+            self.browser.execute_script(js_confirm)
+            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
+
+            elem = self.browser.find_element_by_partial_link_text("Remove")
+            elem.click()
 
     def register_key(self, key_binding_token):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
@@ -82,7 +86,8 @@ class SiteInteractionTest(unittest.TestCase):
         try:
             self.browser.get('http://test.openport.be/user/keys')
             self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
-            elem = self.browser.find_element_by_partial_link_text("Remove")
+            elems = self.browser.find_elements_by_partial_link_text("Edit")
+            self.assertEqual(1, len(elems), 'more than 1 key found')
         except NoSuchElementException:
             self.fail('key not added to account')
         #todo: what if key is linked to different account? -> test
