@@ -11,7 +11,7 @@ class LiveIntegrationTest(IntegrationTest):
 
     def setUp(self):
         IntegrationTest.setUp(self)
-        self.test_server='openport.be'
+        self.test_server='openport.io'
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
