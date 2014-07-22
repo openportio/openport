@@ -11,6 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from apps.keyhandling import get_or_create_public_key, create_new_key_pair
 from apps.openport_api import PortForwardResponse, request_port
 from services.logger_service import set_log_level
+from services.crypt_service import get_token
 import logging
 
 import xmlrunner
@@ -36,7 +37,7 @@ class IntegrationTest(unittest.TestCase):
         path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.png')
         share = self.get_share(path)
         self.start_sharing(share)
-        temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
+        temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath) + get_token(3))
         sleep(5)
         print 'temp file: ' + temp_file
         self.downloadAndCheckFile(share, temp_file)
@@ -91,7 +92,7 @@ class IntegrationTest(unittest.TestCase):
             urllib.urlretrieve(url, temp_file)
         except Exception, e:
             print e
-        print "file downloaded: %s" % url
+        print "url %s downloaded to %s" % (url, temp_file)
         self.assertTrue(os.path.exists(temp_file), 'the downloaded file does not exist')
         self.assertTrue(filecmp.cmp(share.filePath, temp_file), 'the file compare did not succeed')
         os.remove(temp_file)
@@ -160,7 +161,7 @@ class IntegrationTest(unittest.TestCase):
         self.start_sharing(share)
 
         i = 0
-        while i < 200 and not self.success_called_back:
+        while i < 400 and not self.success_called_back:
             i += 1
             sleep(0.01)
         print "escaped at ",i
