@@ -33,7 +33,7 @@ class IntegrationTest(unittest.TestCase):
         set_log_level(logging.DEBUG)
         self.test_server = 'test.openport.be'
 
-    def testStartShare(self):
+    def test_start_share(self):
         path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.png')
         share = self.get_share(path)
         self.start_sharing(share)
@@ -78,15 +78,14 @@ class IntegrationTest(unittest.TestCase):
         self.assertTrue(self.called_back)
         return share
 
-
     def downloadAndCheckFile(self, share, temp_file):
+        print "removing file %s" % temp_file
         try:
             os.remove(temp_file)
-        except Exception:
+        except:
             pass
-        print "removing file"
         self.assertFalse(os.path.exists(temp_file))
-        print "file removed"
+        print "file %s removed" % temp_file
         url = share.get_link()
         print 'downloading %s' % url
         try:
@@ -98,49 +97,53 @@ class IntegrationTest(unittest.TestCase):
         self.assertTrue(filecmp.cmp(share.filePath, temp_file))
         os.remove(temp_file)
 
-
-    def testMultiThread(self):
+    def test_multi_thread(self):
         path = os.path.join(os.path.dirname(__file__), 'testfiles/WALL_DANGER_SOFTWARE.jpg')
         share = self.get_share(path)
         self.start_sharing(share)
-        temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
-        temp_file_path_1 = temp_file  + '1'
-        temp_file_path_2 = temp_file  + '2'
-
-        self.errors = []
-
-        def download(temp_file_path):
-            try:
-                self.downloadAndCheckFile(share, temp_file_path)
-                print "download successful: %s" % temp_file_path
-            except Exception, e:
-                self.errors.append(e)
-
-        thr1 = threading.Thread(target=download, args=[temp_file_path_1])
-        thr1.setDaemon(True)
-        thr2 = threading.Thread(target=download, args=[temp_file_path_2])
-        thr2.setDaemon(True)
-
         sleep(3)
-        thr1.start()
-        thr2.start()
 
-        seen_both_files_at_the_same_time = False
+        temp_file_path = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
+        number_of_threads = 5
+        errors = []
 
-        i = 0
-        while i < 6000 and (thr1.isAlive() or thr2.isAlive()):
+        def download(file_path):
+            try:
+                self.downloadAndCheckFile(share, file_path)
+                print "download successful: %s" % file_path
+            except Exception, e:
+                errors.append(e)
+
+        threads = []
+        for i in range(number_of_threads):
+            threads.append(threading.Thread(target=download, args=['%s%s' % (temp_file_path, i)]))
+            threads[-1].setDaemon(True)
+            threads[-1].start()
+
+        seen_multiple_files_at_the_same_time = False
+
+        for j in range(6000):
+            seen_one_file = False
+            for i in range(number_of_threads):
+                if os.path.exists('%s%s' % (temp_file_path, i)) and seen_one_file:
+                    seen_multiple_files_at_the_same_time = True
+                    break
+                elif os.path.exists('%s%s' % (temp_file_path, i)):
+                    seen_one_file = True
+                seen_multiple_files_at_the_same_time = True
+
+            some_threads_are_still_running = False
+            for thread in threads:
+                if thread.isAlive():
+                    some_threads_are_still_running = True
+            if not some_threads_are_still_running:
+                break
             sleep(0.01)
-            i += 1
-            if os.path.exists(temp_file_path_1) and os.path.exists(temp_file_path_2):
-                seen_both_files_at_the_same_time = True
 
-        self.assertTrue(seen_both_files_at_the_same_time)
+        self.assertTrue(seen_multiple_files_at_the_same_time)
 
-        self.assertFalse(thr1.isAlive())
-        self.assertFalse(thr2.isAlive())
-
-
-        self.assertEqual(0, len(self.errors))
+        if errors:
+            self.fail('number of errors: %s First error: %s' % (len(errors), errors[0]))
 
     def test_same_port(self):
         path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
