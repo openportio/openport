@@ -81,9 +81,13 @@ class PortForwardingService:
             thr.setDaemon(True)
             thr.start()
             if self.http_forward_address is None or self.http_forward_address == '':
-                logger.info('Now forwarding remote port %s:%d to localhost:%d...' % (self.server, self.remote_port, self.local_port))
+                logger.info('Now forwarding remote port %s:%d to localhost:%d .\n'
+                            'You can keep track of your shares on https://openport.io/user .'
+                            % (self.server, self.remote_port, self.local_port))
             else:
-                logger.info('Now forwarding remote address %s to localhost:%d...' % (self.http_forward_address, self.local_port))
+                logger.info('Now forwarding remote address %s to localhost:%d .\n'
+                            'You can keep track of your shares on https://openport.io/user .'
+                            % (self.http_forward_address, self.local_port))
 
             self.keep_alive()
         except KeyboardInterrupt, e:
