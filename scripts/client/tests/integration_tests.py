@@ -5,7 +5,6 @@ import os
 import sys
 import threading
 import urllib
-import urllib, urllib2
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -22,7 +21,7 @@ from apps.openport_api import open_port
 from common.share import Share
 from common.session import Session
 
-from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumber, SimpleHTTPClient, TestHTTPServer
+from test_utils import get_open_port, SimpleHTTPClient, TestHTTPServer
 
 TOKEN = 'tokentest'
 
@@ -54,11 +53,11 @@ class IntegrationTest(unittest.TestCase):
 
             print share.as_dict()
             self.assertEquals(self.test_server, share.server)
-            self.assertTrue(share.server_port>= 2000)
+            self.assertTrue(share.server_port >= 2000, 'expection serverport >= 2000 but was %s' % share.server_port)
            # self.assertTrue(share.server_port<= 51000)
 
-            self.assertTrue(share.account_id > 0)
-            self.assertTrue(share.key_id > 0)
+            self.assertTrue(share.account_id > 0, 'share.account_id was %s' % share.account_id)
+            self.assertTrue(share.key_id > 0, 'share.key_id was %s' % share.key_id)
 
             print 'called back, thanks :)'
             self.called_back = True
@@ -75,7 +74,7 @@ class IntegrationTest(unittest.TestCase):
         while i < 10 and not self.called_back:
             i += 1
             sleep(1)
-        self.assertTrue(self.called_back)
+        self.assertTrue(self.called_back, 'I was not called back in the given time')
         return share
 
     def downloadAndCheckFile(self, share, temp_file):
@@ -93,8 +92,8 @@ class IntegrationTest(unittest.TestCase):
         except Exception, e:
             print e
         print "file downloaded: %s" % url
-        self.assertTrue(os.path.exists(temp_file))
-        self.assertTrue(filecmp.cmp(share.filePath, temp_file))
+        self.assertTrue(os.path.exists(temp_file), 'the downloaded file does not exist')
+        self.assertTrue(filecmp.cmp(share.filePath, temp_file), 'the file compare did not succeed')
         os.remove(temp_file)
 
     def test_multi_thread(self):
@@ -104,7 +103,7 @@ class IntegrationTest(unittest.TestCase):
         sleep(3)
 
         temp_file_path = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
-        number_of_threads = 5
+        number_of_threads = 10
         errors = []
 
         def download(file_path):
@@ -130,13 +129,17 @@ class IntegrationTest(unittest.TestCase):
                     break
                 elif os.path.exists('%s%s' % (temp_file_path, i)):
                     seen_one_file = True
-                seen_multiple_files_at_the_same_time = True
+                    print 'seen one file from thread %s' % i
+            if seen_multiple_files_at_the_same_time:
+                break
 
             some_threads_are_still_running = False
             for thread in threads:
                 if thread.isAlive():
                     some_threads_are_still_running = True
+                    break
             if not some_threads_are_still_running:
+                print "all threads stopped"
                 break
             sleep(0.01)
 
