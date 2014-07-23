@@ -10,9 +10,15 @@ ext_http_server
 argparse
 bottle
 cherrypy
+wsgiserver2
 pyinstaller
 
 #For testing: 
 unittest2
 selenium
 nose
+
+
+# For the error 'no module named wsgiserver2':
+# cd scripts/client/env/lib/python2.7/site-packages/cherrypy/wsgiserver
+# wget https://bitbucket.org/cherrypy/cherrypy/raw/9c2d91cac2e84f166d75f748a836ffe8f244c56c/cherrypy/wsgiserver/wsgiserver2.py

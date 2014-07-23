@@ -1,12 +1,16 @@
 from Queue import Queue, Empty
 from time import sleep
 import pickle
+import traceback
 try:
     from pysqlite2 import dbapi2 as sqlite
 except ImportError:
     import sqlite3 as sqlite
 from common.session import Session
+from services.logger_service import get_logger
 from services import osinteraction
+
+logger = get_logger('dbhandler')
 
 TIMEOUT = 10
 
@@ -73,6 +77,8 @@ class DBHandler(object):
                     pass
             self.connection.close()
         except Exception, e:
+            tb = traceback.format_exc()
+            logger.debug('%s\n%s'%(e, tb))
             self.queue_exception = e
             raise e
 
