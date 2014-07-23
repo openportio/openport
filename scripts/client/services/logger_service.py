@@ -6,19 +6,22 @@ log_level = logging.INFO
 
 loggers = {}
 
+long_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+short_formatter = logging.Formatter('%(levelname)s - %(message)s')
+
+
 def get_logger(name):
     if name in loggers:
         return loggers[name]
     logger = logging.getLogger(name)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     ch = logging.StreamHandler(stdout)
-    ch.setFormatter(formatter)
+    ch.setFormatter(short_formatter)
     logger.addHandler(ch)
 
     os_interaction = osinteraction.getInstance(use_logger=False)
     fh = logging.FileHandler(os_interaction.get_app_data_path('%s.log' % os_interaction.get_app_name()))
-    fh.setFormatter(formatter)
+    fh.setFormatter(long_formatter)
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
     logger.setLevel(log_level)
@@ -35,8 +38,12 @@ if __name__ == '__main__':
     logger.warning('%d warning' % i) ; i += 1
     logger.exception('%d exception' % i) ; i += 1
 
+
 def set_log_level(new_log_level):
     global log_level
     log_level = new_log_level
     for name, logger in loggers.iteritems():
         logger.setLevel(log_level)
+        if log_level == logging.DEBUG:
+            for handler in logger.handlers:
+                handler.setFormatter(long_formatter)
