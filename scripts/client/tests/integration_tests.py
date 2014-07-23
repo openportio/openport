@@ -92,7 +92,7 @@ class IntegrationTest(unittest.TestCase):
             urllib.urlretrieve(url, temp_file)
         except Exception, e:
             print e
-        print "url %s downloaded to %s" % (url, temp_file)
+        print "url %s downloaded to %s" % (url, temp_file)<
         self.assertTrue(os.path.exists(temp_file), 'the downloaded file does not exist')
         self.assertTrue(filecmp.cmp(share.filePath, temp_file), 'the file compare did not succeed')
         os.remove(temp_file)

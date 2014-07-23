@@ -20,6 +20,7 @@ from manager.globals import Globals
 from services.logger_service import get_logger, set_log_level
 from common.share import Share
 from common.session import Session
+from manager.globals import DEFAULT_SERVER
 
 logger = get_logger('OpenPortManager')
 
@@ -216,7 +217,7 @@ def start_manager():
     parser.add_argument('--database', '-d', action='store', help='Use the following database file.', default='')
     parser.add_argument('--manager-port', '-p', action='store', type=int,
                         help='The port the manager communicates on with it''s child processes.', default=8001) #TODO random port??
-    parser.add_argument('--server', '-s', action='store', type=str, default='www.openport.be', help=argparse.SUPPRESS)
+    parser.add_argument('--server', '-s', action='store', type=str, default=DEFAULT_SERVER, help=argparse.SUPPRESS)
     parser.add_argument('--list', '-l', action='store_true', help="list shares and exit")
     parser.add_argument('--kill', '-k', action='store', type=int, help="Stop a share", default=0)
     parser.add_argument('--kill-all', '-K', action='store_true', help="Stop all shares")

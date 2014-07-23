@@ -33,7 +33,7 @@ InstallDir ${INSTDIR}
 !insertmacro MUI_PAGE_INSTFILES
 
 !define MUI_FINISHPAGE_LINK "Visit the OpenPort website for documentation and support"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://www.openport.be/"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://www.openport.io/"
 
 ;!define MUI_FINISHPAGE_RUN
 ;!define MUI_FINISHPAGE_RUN_TEXT "Run ${APPNAME}"
@@ -46,7 +46,7 @@ InstallDir ${INSTDIR}
 ;--------------------------------
 ; Language and Branding
 !insertmacro MUI_LANGUAGE "English"
-BrandingText "http://www.openport.be/"
+BrandingText "http://www.openport.io/"
 
 Section # hidden section
 	setOutPath $INSTDIR

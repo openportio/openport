@@ -2,6 +2,8 @@
 import warnings
 
 warnings.warn("deprecated", DeprecationWarning)
+from manager.globals import DEFAULT_SERVER
+
 
 import os
 from sys import argv
@@ -19,7 +21,7 @@ except ImportError:
         print 'You need python 2.6 or simplejson to run this application.'
         sys.exit(1)
 
-def request_port(public_key, local_port=None, url='http://www.openport.be/post', restart_session_token='',
+def request_port(public_key, local_port=None, url='http://%s/post' % DEFAULT_SERVER, restart_session_token='',
                  request_server_port=-1, http_forward=False, automatic_restart=False):
     """
     Requests a port on the server using the openPort protocol

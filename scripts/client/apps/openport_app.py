@@ -22,6 +22,8 @@ from common.session import Session
 from services import key_registration_service
 from manager import openportmanager, dbhandler
 
+from manager.globals import DEFAULT_SERVER
+
 logger = get_logger('openport_app')
 
 
@@ -91,7 +93,7 @@ class OpenportApp(object):
         command = OsInteraction.set_variable(command, '--manager-port', self.args.manager_port)
         if self.args.manager_database:
             command = OsInteraction.set_variable(command, '--database', self.args.manager_database)
-        if self.args.server:
+        if self.args.server and not self.args.server == DEFAULT_SERVER:
             command = OsInteraction.set_variable(command, '--server', self.args.server)
         logger.debug('starting manager: %s' % command)
         self.os_interaction.spawn_daemon(command)
@@ -211,7 +213,7 @@ class OpenportApp(object):
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
         parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
         parser.add_argument('--http-forward', action='store_true', help='Request an http forward, so you can connect to port 80 on the server.')
-        parser.add_argument('--server', default='www.openport.be', help=argparse.SUPPRESS)
+        parser.add_argument('--server', default=DEFAULT_SERVER, help=argparse.SUPPRESS)
         parser.add_argument('--restart-on-reboot', '-R', action='store_true', help='Restart this share when the manager app is started.')
 
 

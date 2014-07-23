@@ -14,6 +14,8 @@ logger = get_logger('openport_api')
 SERVER_SSH_PORT = 22
 FALLBACK_SERVER_SSH_PORT = 443
 SERVER_SSH_USER = 'open'
+from manager.globals import DEFAULT_SERVER
+
 
 class PortForwardResponse():
     def __init__(self, server='', remote_port=-1, message='', account_id=-1, key_id=-1, local_port=-1, session_token='', http_forward_address=None):
@@ -38,7 +40,7 @@ class PortForwardResponse():
         self.http_forward_address = dict['http_forward_address']
 
 
-def request_port(public_key, local_port=None, url='http://www.openport.be/post', restart_session_token='',
+def request_port(public_key, local_port=None, url='http://%s/post' % DEFAULT_SERVER, restart_session_token='',
                  request_server_port=-1, http_forward=False, automatic_restart=False):
     """
     Requests a port on the server using the openPort protocol
@@ -65,7 +67,7 @@ def request_port(public_key, local_port=None, url='http://www.openport.be/post',
 
 
 def request_open_port(local_port, restart_session_token='', request_server_port=-1, error_callback=None,
-                      http_forward=False, stop_callback=None, server='www.openport.be', automatic_restart=False):
+                      http_forward=False, stop_callback=None, server=DEFAULT_SERVER, automatic_restart=False):
 
     public_key = get_or_create_public_key()
 
@@ -95,7 +97,7 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
     return response
 
 
-def open_port(session, callback=None, error_callback=None, server='www.openport.be'):
+def open_port(session, callback=None, error_callback=None, server=DEFAULT_SERVER):
 
     from time import sleep
     automatic_restart = False

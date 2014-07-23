@@ -88,5 +88,13 @@ class OsInteractionTest(unittest.TestCase):
         output = run_command_with_timeout(command, 1)
         self.assertEqual(('aaa', False), output)
 
+    def test_get_all_output__simple(self):
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        command = self.os_interaction.get_python_exec()
+        print command
+        command.extend(['-c', "print 'hello'"])
+        output = run_command_with_timeout(command, 1)
+        self.assertEqual(('hello', False), output)
+
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

@@ -2,6 +2,7 @@ import sys
 import urllib
 import urllib2
 from apps.keyhandling import get_or_create_public_key
+from manager.globals import DEFAULT_SERVER
 
 try:
     import json
@@ -13,7 +14,7 @@ except ImportError:
         sys.exit(1)
 
 
-def register_key(args, server='www.openport.be'):
+def register_key(args, server=DEFAULT_SERVER):
     if args.register_key:
 
         public_key = get_or_create_public_key()

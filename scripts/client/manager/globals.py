@@ -1,11 +1,13 @@
 
+DEFAULT_SERVER = 'www.openport.io'
+
 class Globals():
 
     class __impl:
         def __init__(self):
             self.account_id = -1
             self.key_id = -1
-            self.openport_address = "www.openport.be"
+            self.openport_address = DEFAULT_SERVER
             self.manager_port = 8001
 
     # storage for the instance reference
