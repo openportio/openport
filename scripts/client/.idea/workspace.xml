@@ -5,17 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
-    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Made tests more robust">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nsis/clean.nsi" afterPath="$PROJECT_DIR$/nsis/clean.nsi" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/globals.py" afterPath="$PROJECT_DIR$/manager/globals.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/integration_tests.py" afterPath="$PROJECT_DIR$/tests/integration_tests.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/services/key_registration_service.py" afterPath="$PROJECT_DIR$/services/key_registration_service.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nsis/license.txt" afterPath="$PROJECT_DIR$/nsis/license.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport.py" afterPath="$PROJECT_DIR$/apps/openport.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_api.py" afterPath="$PROJECT_DIR$/apps/openport_api.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_app.py" afterPath="$PROJECT_DIR$/apps/openport_app.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/openportmanager.py" afterPath="$PROJECT_DIR$/manager/openportmanager.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/os_interaction_tests.py" afterPath="$PROJECT_DIR$/tests/os_interaction_tests.py" />
+    <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Syntax error">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/fix phantomjs problem.sh" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="client.iws" />
@@ -44,15 +35,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="globals.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/manager/globals.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="9" column="50" selection-start="213" selection-end="213" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="540">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="openport.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/apps/openport.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -107,6 +89,26 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="integration_tests.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tests/integration_tests.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="94" column="58" selection-start="3012" selection-end="3012" vertical-scroll-proportion="0.0" vertical-offset="1165" max-vertical-offset="4245">
+              <folding>
+                <element signature="e#0#14#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="fix phantomjs problem.sh" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/docs/fix phantomjs problem.sh">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="15" column="0" selection-start="347" selection-end="347" vertical-scroll-proportion="0.74013156" vertical-offset="0" max-vertical-offset="510">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="openport_app.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -118,19 +120,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="requirements.pip" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="requirements.pip" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/requirements.pip">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="0" selection-start="133" selection-end="133" vertical-scroll-proportion="0.5027933" vertical-offset="0" max-vertical-offset="435">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="openportmanager.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="20" selection-start="505" selection-end="548" vertical-scroll-proportion="-6.3461537" vertical-offset="0" max-vertical-offset="3975">
+            <state line="12" column="0" selection-start="133" selection-end="133" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="435">
               <folding />
             </state>
           </provider>
@@ -187,7 +180,6 @@
         <option value="$PROJECT_DIR$/tests/site_interaction_tests.py" />
         <option value="$PROJECT_DIR$/tests/live_integration_tests.py" />
         <option value="$PROJECT_DIR$/apps/portforwarding.py" />
-        <option value="$PROJECT_DIR$/tests/integration_tests.py" />
         <option value="$PROJECT_DIR$/tests/os_interaction_tests.py" />
         <option value="$PROJECT_DIR$/manager/globals.py" />
         <option value="$PROJECT_DIR$/manager/openportmanager.py" />
@@ -198,6 +190,8 @@
         <option value="$PROJECT_DIR$/nsis/license.txt" />
         <option value="$PROJECT_DIR$/services/key_registration_service.py" />
         <option value="$PROJECT_DIR$/requirements.pip" />
+        <option value="$PROJECT_DIR$/tests/integration_tests.py" />
+        <option value="$PROJECT_DIR$/docs/fix phantomjs problem.sh" />
       </list>
     </option>
   </component>
@@ -383,95 +377,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="testfiles" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="services" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nsis" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="manager" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="common" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="apps" />
+              <option name="myItemId" value="docs" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -633,7 +539,7 @@
       </UpdatedFiles>
     </UpdateInfo>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests in app_tests">
+  <component name="RunManager" selected="Python tests.Unittests in site_interaction_tests">
     <configuration default="false" name="Unittest IntegrationTest.test_start_share" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -648,31 +554,6 @@
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/integration_tests.py" />
       <option name="CLASS_NAME" value="IntegrationTest" />
       <option name="METHOD_NAME" value="test_start_share" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_METHOD" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PUREUNITTEST" value="true" />
-      <option name="PARAMS" value="" />
-      <option name="USE_PARAM" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Unittest AppTests.test_openport_app_http_forward" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="client" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/app_tests.py" />
-      <option name="CLASS_NAME" value="AppTests" />
-      <option name="METHOD_NAME" value="test_openport_app_http_forward" />
       <option name="FOLDER_NAME" value="" />
       <option name="TEST_TYPE" value="TEST_METHOD" />
       <option name="PATTERN" value="" />
@@ -757,6 +638,42 @@
       <option name="USE_PARAM" value="false" />
       <RunnerSettings RunnerId="PythonRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Unittests in site_interaction_tests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="client" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/site_interaction_tests.py" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="true" type="BashConfigurationType" factoryName="Bash">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="INTERPRETER_PATH" value="/bin/bash" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <module name="client" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="py.test">
@@ -1155,18 +1072,18 @@
       <item index="10" class="java.lang.String" itemvalue="Python tests.Unittests in integrationtests" />
       <item index="11" class="java.lang.String" itemvalue="Python tests.Unnamed" />
       <item index="12" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_start_share" />
-      <item index="13" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_openport_app_http_forward" />
-      <item index="14" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
-      <item index="15" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager" />
-      <item index="16" class="java.lang.String" itemvalue="Python tests.Unittest OsInteractionTest.test_get_all_output__simple" />
+      <item index="13" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
+      <item index="14" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager" />
+      <item index="15" class="java.lang.String" itemvalue="Python tests.Unittest OsInteractionTest.test_get_all_output__simple" />
+      <item index="16" class="java.lang.String" itemvalue="Python tests.Unittests in site_interaction_tests" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittest OsInteractionTest.test_get_all_output__simple" />
-        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_start_share" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_openport_app_http_forward" />
+        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in site_interaction_tests" />
+        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
+        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager" />
+        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittest OsInteractionTest.test_get_all_output__simple" />
+        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_start_share" />
       </list>
     </recent_temporary>
   </component>
@@ -1423,7 +1340,15 @@
       <created>1406133704760</created>
       <updated>1406133704760</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="Cleaned up some references to openport.be">
+      <created>1406133749486</created>
+      <updated>1406133749486</updated>
+    </task>
+    <task id="LOCAL-00061" summary="Syntax error">
+      <created>1406134935594</created>
+      <updated>1406134935594</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1486,8 +1411,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="On error, the build should still produce test reports" />
-    <MESSAGE value="Using nose tests to generate xml output" />
     <MESSAGE value="Fixed tests by given the manager more time to shut down + upgraded the phantomjs driver" />
     <MESSAGE value="Added script to create exe's + some changes to make the exe's cleaner" />
     <MESSAGE value="Better handling of connection resets by peer" />
@@ -1511,7 +1434,9 @@
     <MESSAGE value="Now mentioning the site in the app's message" />
     <MESSAGE value="Made tests more robust" />
     <MESSAGE value="Removed bad requirement" />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed bad requirement" />
+    <MESSAGE value="Cleaned up some references to openport.be" />
+    <MESSAGE value="Syntax error" />
+    <option name="LAST_COMMIT_MESSAGE" value="Syntax error" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1605,11 +1530,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/tests/__main__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="19" selection-start="19" selection-end="19" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="297" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/services/utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="13" column="18" selection-start="247" selection-end="261" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330" />
@@ -1789,20 +1709,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/integration_tests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="94" column="59" selection-start="3013" selection-end="3013" vertical-scroll-proportion="-9.423077" vertical-offset="1165" max-vertical-offset="4245">
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/apps/portforwarding.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="87" column="78" selection-start="3565" selection-end="3565" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2670">
           <folding>
-            <element signature="e#0#13#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1909,7 +1820,23 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/requirements.pip">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="0" selection-start="133" selection-end="133" vertical-scroll-proportion="0.5027933" vertical-offset="0" max-vertical-offset="435">
+        <state line="12" column="0" selection-start="133" selection-end="133" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="435">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/integration_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="94" column="58" selection-start="3012" selection-end="3012" vertical-scroll-proportion="0.0" vertical-offset="1165" max-vertical-offset="4245">
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/docs/fix phantomjs problem.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="0" selection-start="347" selection-end="347" vertical-scroll-proportion="0.74013156" vertical-offset="0" max-vertical-offset="510">
           <folding />
         </state>
       </provider>
