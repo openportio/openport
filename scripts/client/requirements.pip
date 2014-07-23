@@ -10,7 +10,6 @@ ext_http_server
 argparse
 bottle
 cherrypy
-wsgiserver2
 pyinstaller
 
 #For testing: 
