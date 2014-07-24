@@ -10,6 +10,7 @@ sudo apt-get install build-essential autoconf automake autotools-dev dh-make deb
 
 # if you have errors from locale: sudo dpkg-reconfigure locales
 
+rm -rf $PACKAGE
 mkdir $PACKAGE
 mkdir -p $PACKAGE/usr/bin
 mkdir -p $PACKAGE/etc/init.d
@@ -33,5 +34,6 @@ debuild -us -uc
 
 cd ../..
 sudo rm -rf /usr/bin/openport
+killall python
 sudo dpkg -i package/openport-client_$(echo $VERSION)-1_*.deb
 openport
