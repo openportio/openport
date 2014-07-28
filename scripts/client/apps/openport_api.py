@@ -47,6 +47,7 @@ def request_port(public_key, local_port=None, url='http://%s/post' % DEFAULT_SER
     return a tuple with ( server_ip, server_port, message )
     """
 
+    response = None
     try:
         data = urllib.urlencode({
             'public_key': public_key,
@@ -60,10 +61,16 @@ def request_port(public_key, local_port=None, url='http://%s/post' % DEFAULT_SER
         response = urllib2.urlopen(req).read()
         dict = json.loads(response)
         return dict
+    except urllib2.HTTPError, detail:
+        logger.debug('error: got response: %s' % response)
+        logger.error("An error has occurred while communicating the the openport servers. %s" % detail)
+        if detail.getcode() == 500:
+            logger.error(detail.read())
+        raise
     except Exception, detail:
         logger.debug('error: got response: %s' % response)
-        print "An error has occurred while communicating the the openport servers. ", detail, detail.read()
-        raise detail
+        logger.error("An error has occurred while communicating the the openport servers. %s" % detail)
+        raise
 
 
 def request_open_port(local_port, restart_session_token='', request_server_port=-1, error_callback=None,
