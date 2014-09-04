@@ -19,6 +19,9 @@ from services import osinteraction
 class SiteInteractionTest(unittest.TestCase):
 
     def setUp(self):
+
+        self.server = "test.openport.be"
+        #self.server = "localhost:8000"
         if os.path.exists('/usr/bin/phantomjs'):
             self.browser = webdriver.PhantomJS('/usr/bin/phantomjs')
         else:
@@ -34,45 +37,58 @@ class SiteInteractionTest(unittest.TestCase):
         self.browser.quit()
 
     def test_site_is_online(self):
-        self.browser.get('http://test.openport.be/')
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
-        self.assertTrue('OpenPort' in self.browser.title)
+        self.browser.get('http://%s/' % self.server)
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+        self.assertTrue('Openport' in self.browser.title)
 
     def login_to_site(self):
-        self.browser.get('http://test.openport.be/user/login')
+        self.browser.get('http://%s/user/login' % self.server)
         elem = self.browser.find_element_by_name("username")
         elem.send_keys("jandebleser+test@gmail.com")
         elem2 = self.browser.find_element_by_name("password")
         elem2.send_keys("test")
         elem.send_keys(Keys.RETURN)
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
 
 
     def test_login_to_site(self):
         self.login_to_site()
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
-        self.assertTrue('Welcome, Subscriber' in self.browser.page_source)
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+        self.browser.get('http://%s/user' % self.server)
+        self.assertTrue('Welcome, Jan' in self.browser.page_source)
 
     def remove_all_keys_from_account(self):
         while True:
-            self.browser.get('http://test.openport.be/user/keys')
+            self.browser.get('http://%s/user/keys' % self.server)
+            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
             try:
-                elem = self.browser.find_element_by_partial_link_text("Edit")
+                elem = self.browser.find_element_by_css_selector('button[data-title="Edit Key"]')
                 elem.click()
             except NoSuchElementException:
                 break
             js_confirm = 'window.confirm = function(){return true;}'
             self.browser.execute_script(js_confirm)
-            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
 
-            elem = self.browser.find_element_by_partial_link_text("Remove")
-            elem.click()
+            found = False
+            i = 1
+            while i < 30:
+                sleep(1)
+                try:
+                    self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s-2.png' % inspect.stack()[0][3]))
+                    elem = self.browser.find_element_by_css_selector('button[data-action="delete-key"]')
+                    found = True
+                    elem.click()
+                    break
+                except NoSuchElementException:
+                    i += 1
+            if not found:
+                self.fail("remove button not found. Form not loaded? Checkout %s" % '%s-2.png' % inspect.stack()[0][3])
 
     def register_key(self, key_binding_token):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
         print run_command_with_timeout(['env/bin/python', 'apps/openport_app.py', '--register-key',
-                                        key_binding_token, '--server', 'test.openport.be'], 10)
+                                        key_binding_token, '--server', '%s' % self.server], 10)
 
     def test_add_key_to_account(self):
         self.login_to_site()
@@ -85,16 +101,17 @@ class SiteInteractionTest(unittest.TestCase):
         sleep(2)
         try:
             self.browser.get('http://test.openport.be/user/keys')
-            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
-            elems = self.browser.find_elements_by_partial_link_text("Edit")
-            self.assertEqual(1, len(elems), 'more than 1 key found')
+            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+            elems = self.browser.find_elements_by_css_selector('button[data-title="Edit Key"]')
+
+            self.assertEqual(1, len(elems), 'more than 1 key found: %s' % len(elems))
         except NoSuchElementException:
             self.fail('key not added to account')
         #todo: what if key is linked to different account? -> test
 
     def get_key_binding_token(self):
-        self.browser.get('http://test.openport.be/user/keys')
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', '%s.png' % inspect.stack()[0][3]))
+        self.browser.get('http://%s/user/keys')
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
         try:
             code_elem = self.browser.find_elements_by_xpath("//*[contains(text(), '--register-key')]")[0]
         except IndexError:
@@ -104,7 +121,7 @@ class SiteInteractionTest(unittest.TestCase):
     def test_kill_session(self):
         """ Start a session. Check that it exists on the server. Kill it. Make sure is doesn't restart."""
 
-        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
+        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'tmp_openport.db')
         try:
             os.remove(db_file)
         except OSError:
@@ -136,7 +153,7 @@ class SiteInteractionTest(unittest.TestCase):
 
     def test_restart_killed_session(self):
 
-        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
+        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'tmp_openport.db')
         try:
             os.remove(db_file)
         except OSError:
@@ -178,7 +195,7 @@ class SiteInteractionTest(unittest.TestCase):
     def start_session(self, local_port, db_file=None):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = ['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port, '--start-manager',
-                   'False', '--server', 'test.openport.be', '--verbose', '--manager-port', '-1']
+                   'False', '--server', '%s' % self.server, '--verbose', '--manager-port', '-1']
         if db_file:
             command.extend(['--manager-database', db_file])
         p = subprocess.Popen(command,
@@ -187,17 +204,18 @@ class SiteInteractionTest(unittest.TestCase):
         return p
 
     def session_exists_on_site(self, server_port):
-        self.browser.get('http://test.openport.be/user/sessions')
+        self.browser.get('http://%s/user/sessions' % self.server)
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
         code_elements = self.browser.find_elements_by_xpath("//*[contains(text(), ':%s')]" % server_port)
         return len(code_elements) == 1
 
     def kill_session(self, server_port):
-        self.browser.get('http://test.openport.be/user/sessions')
+        self.browser.get('http://%s/user/sessions' % self.server)
         try:
             js_confirm = 'window.confirm = function(){return true;}'
             self.browser.execute_script(js_confirm)
             #elem = self.browser.find_element_by_partial_link_text(":%s" % server_port)
-            elem = self.browser.find_element_by_xpath("//td[contains(., ':%s')]/following-sibling::td[1]/a" % server_port)
+            elem = self.browser.find_element_by_xpath("//td[contains(., ':%s')]/following-sibling::td[1]/button" % server_port)
             elem.click()
         except NoSuchElementException:
             self.fail("session not found")
