@@ -99,6 +99,21 @@ class OpenportApp(object):
         self.os_interaction.spawn_daemon(command)
         logger.debug("manager started")
 
+    def check_manager_is_running(self, manager_port):
+        url = 'http://127.0.0.1:%s/ping' % manager_port
+        logger.debug('sending get request ' + url)
+        try:
+            req = urllib2.Request(url)
+            response = urllib2.urlopen(req, timeout=5).read()
+            print logger.debug('check_manager_is_running response: %s' % response)
+            if response.strip() != 'pong':
+                return False
+            else:
+                self.manager_app_started = True
+                return True
+        except Exception:
+            return False
+
     def inform_manager_app_new(self, share, manager_port, start_manager=True):
         url = 'http://127.0.0.1:%s/newShare' % manager_port
         logger.debug('sending get request ' + url)
@@ -120,8 +135,15 @@ class OpenportApp(object):
                     logger.error('error detail: ' + detail.read())
             else:
                 self.start_manager_application()
-                sleep(5)
-                self.inform_manager_app_new(share, manager_port, start_manager=False)
+                i = 0
+                manager_is_running = False
+                while i < 30 and not manager_is_running:
+                    sleep(1)
+                    manager_is_running = self.check_manager_is_running(manager_port)
+                if not manager_is_running:
+                    logger.error('Could not start manager... Continuing...')
+                else:
+                    self.inform_manager_app_new(share, manager_port, start_manager=False)
 
 
     def inform_manager_app_error(self, share, manager_port):
