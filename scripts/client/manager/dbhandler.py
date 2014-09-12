@@ -38,7 +38,7 @@ class DBTask(object):
 class DBCommandTask(DBTask):
 
     def execute(self, cursor, connection):
-        logger.debug('running command: %s' % self.command)
+        logger.debug('running command: %s %s' % (self.command, self.args))
         try:
             cursor.execute(self.command, self.args)
             connection.commit()
@@ -46,6 +46,7 @@ class DBCommandTask(DBTask):
             self.exception = e
         finally:
             self.ready = True
+            logger.debug('done running command %s %s' % (self.command, self.args))
 
 
 class DBQueryTask(DBTask):
@@ -54,7 +55,7 @@ class DBQueryTask(DBTask):
         self.result = None
 
     def execute(self, cursor, connection):
-        logger.debug('running query: %s' % self.command)
+        logger.debug('running query: %s %s' % (self.command, self.args))
         try:
             cursor.execute(self.command, self.args)
             self.result = cursor.fetchall()
@@ -62,6 +63,7 @@ class DBQueryTask(DBTask):
             self.exception = e
         finally:
             self.ready = True
+            logger.debug('done running query %s %s' % (self.command, self.args))
 
 
 class DBHandler(object):

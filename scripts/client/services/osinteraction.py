@@ -283,7 +283,7 @@ class LinuxOsInteraction(OsInteraction):
                 # parent process, return and keep running
                 return
         except OSError, e:
-            self.logger.error("fork #1 failed: %d (%s)" % (e.errno, e.strerror) )
+            self.logger.error("fork #1 failed: %d (%s)" % (e.errno, e.strerror))
             sys.exit(1)
 
         os.setsid()
@@ -298,6 +298,9 @@ class LinuxOsInteraction(OsInteraction):
             self.logger.error("fork #2 failed: %d (%s)" % (e.errno, e.strerror) )
             sys.exit(1)
 
+        # It may seem that this launches 2 applications when using pyinstaller. Don't worry, the first one is the
+        # bootloader, the second one the actual application.
+        # http://www.pyinstaller.org/export/d3398dd79b68901ae1edd761f3fe0f4ff19cfb1a/project/doc/Manual.html?format=raw#how-one-file-mode-works
         self.run_command_and_print_output_continuously(command)
 
         # all done
