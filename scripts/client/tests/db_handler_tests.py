@@ -11,6 +11,7 @@ from manager import dbhandler
 
 class DBHandlerTests(unittest.TestCase):
     def setUp(self):
+        dbhandler.TIMEOUT = 3
         self.test_db = os.path.join(os.path.dirname(__file__), 'testfiles', 'db_test.db')
         self.dbhandler = dbhandler.DBHandler(self.test_db)
         self.dbhandler.init_db()
@@ -33,6 +34,22 @@ class DBHandlerTests(unittest.TestCase):
         share2 = self.dbhandler.get_share(share.id)
 
         self.assertEquals(2022, share2.local_port)
+
+
+    def test_concurrency(self):
+        dbhandler2 = dbhandler.DBHandler(self.test_db)
+
+        share = Share()
+        share.local_port = 2224
+       # share.key_id = 14
+       # share.local_port = 2022
+       # share.id = -1
+
+        saved_share = self.dbhandler.add_share(share)
+        retrieved_share = dbhandler2.get_share(saved_share.id)
+
+        self.assertEqual(retrieved_share.local_port, share.local_port)
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

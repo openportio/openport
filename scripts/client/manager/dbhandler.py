@@ -20,10 +20,11 @@ class TimeOutException(BaseException):
 
 
 class DBTask(object):
-    def __init__(self, command, args=[]):
+    def __init__(self, command, args=None):
         self.ready = False
         self.command = command
-        self.args = args
+        self.args = args if args is not None else []
+        self.exception = None
 
     def block(self, timeout=None):
         time = 0
@@ -37,20 +38,30 @@ class DBTask(object):
 class DBCommandTask(DBTask):
 
     def execute(self, cursor, connection):
-        cursor.execute(self.command, self.args)
-        connection.commit()
-        self.ready = True
+        logger.debug('running command: %s' % self.command)
+        try:
+            cursor.execute(self.command, self.args)
+            connection.commit()
+        except Exception, e:
+            self.exception = e
+        finally:
+            self.ready = True
 
 
 class DBQueryTask(DBTask):
-    def __init__(self, query, args=[]):
+    def __init__(self, query, args=None):
         super(DBQueryTask, self).__init__(query, args)
         self.result = None
 
     def execute(self, cursor, connection):
-        cursor.execute(self.command, self.args)
-        self.result = cursor.fetchall()
-        self.ready = True
+        logger.debug('running query: %s' % self.command)
+        try:
+            cursor.execute(self.command, self.args)
+            self.result = cursor.fetchall()
+        except Exception, e:
+            self.exception = e
+        finally:
+            self.ready = True
 
 
 class DBHandler(object):
@@ -75,12 +86,13 @@ class DBHandler(object):
                     self.task_queue.task_done()
                 except Empty:
                     pass
-            self.connection.close()
         except Exception, e:
             tb = traceback.format_exc()
-            logger.debug('%s\n%s'%(e, tb))
+            logger.debug('%s\n%s' % (e, tb))
             self.queue_exception = e
-            raise e
+        finally:
+            self.connection.close()
+
 
     def startQueueThread(self):
         import threading
@@ -88,19 +100,23 @@ class DBHandler(object):
         t.setDaemon(True)
         t.start()
 
-    def executeCommand(self, command, args=[]):
+    def executeCommand(self, command, args=None):
         if self.queue_exception:
             raise self.queue_exception
         task = DBCommandTask(command, args)
         self.task_queue.put(task, block=True)
         task.block(TIMEOUT)
+        if task.exception:
+            raise task.exception
 
-    def executeQuery(self, query, args=[]):
+    def executeQuery(self, query, args=None):
         if self.queue_exception:
             raise self.queue_exception
         task = DBQueryTask(query, args)
         self.task_queue.put(task, block=True)
         task.block(TIMEOUT)
+        if task.exception:
+            raise task.exception
         return task.result
 
     def init_db(self):
