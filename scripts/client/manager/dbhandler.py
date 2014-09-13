@@ -12,7 +12,7 @@ from services import osinteraction
 
 logger = get_logger('dbhandler')
 
-TIMEOUT = 10
+TIMEOUT = 30
 
 
 class TimeOutException(BaseException):
@@ -27,11 +27,11 @@ class DBTask(object):
         self.exception = None
 
     def block(self, timeout=None):
-        time = 0
+        time_runner = 0
         while not self.ready:
-            if timeout is not None and time > timeout:
-                raise TimeOutException()
-            time += 0.01
+            if timeout is not None and time_runner > timeout:
+                raise TimeOutException('query: %s %s time: %s timeout: %s' % (self.command, self.args, time_runner, timeout))
+            time_runner += 0.01
             sleep(0.01)
 
 
@@ -41,6 +41,7 @@ class DBCommandTask(DBTask):
         logger.debug('running command: %s %s' % (self.command, self.args))
         try:
             cursor.execute(self.command, self.args)
+            logger.debug('committing!')
             connection.commit()
         except Exception, e:
             self.exception = e
@@ -71,6 +72,7 @@ class DBHandler(object):
     def __init__(self, db_location):
         self.os_interaction = osinteraction.getInstance()
         self.db_location = db_location
+        logger.debug('db location: %s' % db_location)
 
         self.task_queue = Queue()
         self.stopped = False
@@ -78,8 +80,8 @@ class DBHandler(object):
         self.queue_exception = None
 
     def checkQueue(self):
+        self.connection = sqlite.connect(self.db_location, timeout=1)
         try:
-            self.connection = sqlite.connect(self.db_location)
             self.cursor = self.connection.cursor()
             while not self.stopped:
                 try:
@@ -89,8 +91,11 @@ class DBHandler(object):
                 except Empty:
                     pass
         except Exception, e:
-            tb = traceback.format_exc()
-            logger.debug('%s\n%s' % (e, tb))
+            if traceback:
+                tb = traceback.format_exc()
+                logger.debug('%s\n%s' % (e, tb))
+            else:
+                logger.debug(e)
             self.queue_exception = e
         finally:
             self.connection.close()
