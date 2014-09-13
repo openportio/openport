@@ -41,14 +41,39 @@ class DBHandlerTests(unittest.TestCase):
 
         share = Share()
         share.local_port = 2224
-       # share.key_id = 14
-       # share.local_port = 2022
-       # share.id = -1
-
         saved_share = self.dbhandler.add_share(share)
         retrieved_share = dbhandler2.get_share(saved_share.id)
 
         self.assertEqual(retrieved_share.local_port, share.local_port)
+
+    def test_concurrency_2(self):
+        dbhandler2 = dbhandler.DBHandler(self.test_db)
+
+        share = Share()
+        share.local_port = 2224
+        saved_share = self.dbhandler.add_share(share)
+        retrieved_share = dbhandler2.get_share(saved_share.id)
+
+        self.assertEqual(retrieved_share.local_port, share.local_port)
+
+
+        share2 = Share()
+        share2.local_port = 5000
+        saved_share2 = dbhandler2.add_share(share2)
+        retrieved_share2 = self.dbhandler.get_share(saved_share2.id)
+
+        self.assertEqual(retrieved_share2.local_port, share2.local_port)
+
+    def test_stress_test(self):
+        share = Share()
+        dbhandler2 = dbhandler.DBHandler(self.test_db)
+
+
+        for i in range(1000):
+            share.local_port = i
+            saved_share = self.dbhandler.add_share(share)
+            retrieved_share = dbhandler2.get_share(saved_share.id)
+            self.assertEqual(retrieved_share.local_port, share.local_port)
 
 
 if __name__ == '__main__':

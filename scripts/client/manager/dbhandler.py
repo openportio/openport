@@ -78,8 +78,8 @@ class DBHandler(object):
         self.queue_exception = None
 
     def checkQueue(self):
+        self.connection = sqlite.connect(self.db_location)
         try:
-            self.connection = sqlite.connect(self.db_location)
             self.cursor = self.connection.cursor()
             while not self.stopped:
                 try:
