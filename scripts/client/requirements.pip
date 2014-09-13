@@ -11,6 +11,8 @@ argparse
 bottle
 cherrypy
 pyinstaller
+sqlalchemy
+alembic
 
 # For the error 'no module named wsgiserver2':
 # cd scripts/client/env/lib/python2.7/site-packages/cherrypy/wsgiserver
