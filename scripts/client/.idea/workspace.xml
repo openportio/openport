@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
     <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Waiting a longer time for the manager to start + checking that it is running">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/db_handler_tests.py" afterPath="$PROJECT_DIR$/tests/db_handler_tests.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/dbhandler.py" afterPath="$PROJECT_DIR$/manager/dbhandler.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_app.py" afterPath="$PROJECT_DIR$/apps/openport_app.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -35,10 +37,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="openport_app.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="openport_app.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="107" column="82" selection-start="4286" selection-end="4286" vertical-scroll-proportion="0.45757577" vertical-offset="1334" max-vertical-offset="4980">
+            <state line="314" column="0" selection-start="13664" selection-end="13664" vertical-scroll-proportion="-26.076923" vertical-offset="3912" max-vertical-offset="4995">
               <folding />
             </state>
           </provider>
@@ -47,7 +49,7 @@
       <file leaf-file-name="server.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/manager/server.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="92" column="13" selection-start="2380" selection-end="2384" vertical-scroll-proportion="-5.0" vertical-offset="1010" max-vertical-offset="1935">
+            <state line="126" column="16" selection-start="3167" selection-end="3179" vertical-scroll-proportion="-5.0384617" vertical-offset="1519" max-vertical-offset="1935">
               <folding />
             </state>
           </provider>
@@ -71,15 +73,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="create_exes.sh" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/create_exes.sh">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="0" selection-start="10" selection-end="84" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="butts.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tryouts/butts.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -89,10 +82,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="openport.startup" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/openport.startup">
+      <file leaf-file-name="integration_tests.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tests/integration_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="71" column="63" selection-start="2164" selection-end="2164" vertical-scroll-proportion="0.0" vertical-offset="828" max-vertical-offset="2430">
+            <state line="12" column="40" selection-start="310" selection-end="360" vertical-scroll-proportion="0.0" vertical-offset="1290" max-vertical-offset="4155">
               <folding />
             </state>
           </provider>
@@ -107,10 +100,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dbhandler.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="dbhandler.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="8" selection-start="615" selection-end="615" vertical-scroll-proportion="4.0384617" vertical-offset="480" max-vertical-offset="3315">
+            <state line="82" column="43" selection-start="2274" selection-end="2274" vertical-scroll-proportion="0.33333334" vertical-offset="1075" max-vertical-offset="3315">
               <folding />
             </state>
           </provider>
@@ -119,7 +112,7 @@
       <file leaf-file-name="db_handler_tests.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/db_handler_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="13" selection-start="217" selection-end="217" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="840">
+            <state line="79" column="33" selection-start="2298" selection-end="2298" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1215">
               <folding />
             </state>
           </provider>
@@ -182,13 +175,13 @@
         <option value="$PROJECT_DIR$/docs/fix phantomjs problem.sh" />
         <option value="$PROJECT_DIR$/apps/openport_api.py" />
         <option value="$PROJECT_DIR$/tests/site_interaction_tests.py" />
-        <option value="$PROJECT_DIR$/tests/db_handler_tests.py" />
         <option value="$PROJECT_DIR$/services/logger_service.py" />
         <option value="$PROJECT_DIR$/manager/openportmanager.py" />
         <option value="$PROJECT_DIR$/services/osinteraction.py" />
         <option value="$PROJECT_DIR$/tryouts/butts.py" />
-        <option value="$PROJECT_DIR$/manager/dbhandler.py" />
         <option value="$PROJECT_DIR$/apps/openport_app.py" />
+        <option value="$PROJECT_DIR$/tests/db_handler_tests.py" />
+        <option value="$PROJECT_DIR$/manager/dbhandler.py" />
       </list>
     </option>
   </component>
@@ -547,7 +540,7 @@
       <recent name="C:\Users\Jan\Projects\openthegate\scripts\client\apps" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittest AppTests.test_restart_manager_on_different_port">
+  <component name="RunManager" selected="Python tests.Unittest DBHandlerTests.test_stress_test">
     <configuration default="false" name="Unittests in app_tests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -564,31 +557,6 @@
       <option name="METHOD_NAME" value="" />
       <option name="FOLDER_NAME" value="" />
       <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PUREUNITTEST" value="true" />
-      <option name="PARAMS" value="" />
-      <option name="USE_PARAM" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Unittest DBHandlerTests.test_concurrency" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="client" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/db_handler_tests.py" />
-      <option name="CLASS_NAME" value="DBHandlerTests" />
-      <option name="METHOD_NAME" value="test_concurrency" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_METHOD" />
       <option name="PATTERN" value="" />
       <option name="USE_PATTERN" value="false" />
       <option name="PUREUNITTEST" value="true" />
@@ -623,31 +591,6 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
-    <configuration default="false" name="Unittests in DBHandlerTests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="client" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/db_handler_tests.py" />
-      <option name="CLASS_NAME" value="DBHandlerTests" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_CLASS" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <option name="PUREUNITTEST" value="true" />
-      <option name="PARAMS" value="" />
-      <option name="USE_PARAM" value="false" />
-      <RunnerSettings RunnerId="PythonRunner" />
-      <ConfigurationWrapper RunnerId="PythonRunner" />
-      <method />
-    </configuration>
     <configuration default="false" name="Unittest AppTests.test_restart_manager_on_different_port" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -662,6 +605,56 @@
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/app_tests.py" />
       <option name="CLASS_NAME" value="AppTests" />
       <option name="METHOD_NAME" value="test_restart_manager_on_different_port" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_METHOD" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Unittest DBHandlerTests.test_concurrency_2" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="client" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/db_handler_tests.py" />
+      <option name="CLASS_NAME" value="DBHandlerTests" />
+      <option name="METHOD_NAME" value="test_concurrency_2" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_METHOD" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <RunnerSettings RunnerId="PythonRunner" />
+      <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Unittest DBHandlerTests.test_stress_test" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="client" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/db_handler_tests.py" />
+      <option name="CLASS_NAME" value="DBHandlerTests" />
+      <option name="METHOD_NAME" value="test_stress_test" />
       <option name="FOLDER_NAME" value="" />
       <option name="TEST_TYPE" value="TEST_METHOD" />
       <option name="PATTERN" value="" />
@@ -1100,18 +1093,18 @@
       <item index="11" class="java.lang.String" itemvalue="Python tests.Unittests in integrationtests" />
       <item index="12" class="java.lang.String" itemvalue="Python tests.Unnamed" />
       <item index="13" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
-      <item index="14" class="java.lang.String" itemvalue="Python tests.Unittest DBHandlerTests.test_concurrency" />
-      <item index="15" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager_spawning" />
-      <item index="16" class="java.lang.String" itemvalue="Python tests.Unittests in DBHandlerTests" />
-      <item index="17" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_restart_manager_on_different_port" />
+      <item index="14" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager_spawning" />
+      <item index="15" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_restart_manager_on_different_port" />
+      <item index="16" class="java.lang.String" itemvalue="Python tests.Unittest DBHandlerTests.test_concurrency_2" />
+      <item index="17" class="java.lang.String" itemvalue="Python tests.Unittest DBHandlerTests.test_stress_test" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_restart_manager_on_different_port" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager_spawning" />
-        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests in DBHandlerTests" />
-        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittest DBHandlerTests.test_concurrency" />
+        <item index="0" class="java.lang.String" itemvalue="Python tests.Unittest DBHandlerTests.test_stress_test" />
+        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittest DBHandlerTests.test_concurrency_2" />
+        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_restart_manager_on_different_port" />
+        <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
+        <item index="4" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager_spawning" />
       </list>
     </recent_temporary>
   </component>
@@ -1396,7 +1389,11 @@
       <created>1410544935866</created>
       <updated>1410544935866</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="Waiting a longer time for the manager to start + checking that it is running">
+      <created>1410546929754</created>
+      <updated>1410546929755</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1568,11 +1565,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/subprocess.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="1140" column="0" selection-start="40796" selection-end="40796" vertical-scroll-proportion="0.0" vertical-offset="16982" max-vertical-offset="20175" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/hudson.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state line="10" column="0" selection-start="511" selection-end="511" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="240" />
@@ -1750,13 +1742,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/integration_tests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="236" column="30" selection-start="8080" selection-end="8080" vertical-scroll-proportion="0.0" vertical-offset="3045" max-vertical-offset="4155">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/services/logger_service.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="8" column="63" selection-start="177" selection-end="177" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="795">
@@ -1792,23 +1777,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/db_handler_tests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="13" selection-start="217" selection-end="217" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="840">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/posix.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="697" column="4" selection-start="16143" selection-end="16143" vertical-scroll-proportion="0.3325792" vertical-offset="10308" max-vertical-offset="21600">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="223" column="0" selection-start="9730" selection-end="9730" vertical-scroll-proportion="0.0" vertical-offset="2805" max-vertical-offset="3975">
           <folding />
         </state>
       </provider>
@@ -1841,20 +1812,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="8" selection-start="615" selection-end="615" vertical-scroll-proportion="4.0384617" vertical-offset="480" max-vertical-offset="3315">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/manager/server.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="92" column="13" selection-start="2380" selection-end="2384" vertical-scroll-proportion="-5.0" vertical-offset="1010" max-vertical-offset="1935">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tests/app_tests.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="500" column="21" selection-start="20428" selection-end="20428" vertical-scroll-proportion="-1.9230769" vertical-offset="7315" max-vertical-offset="9150">
@@ -1862,9 +1819,51 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/manager/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="126" column="16" selection-start="3167" selection-end="3179" vertical-scroll-proportion="-5.0384617" vertical-offset="1519" max-vertical-offset="1935">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="223" column="0" selection-start="9730" selection-end="9730" vertical-scroll-proportion="0.0" vertical-offset="2805" max-vertical-offset="3975">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="107" column="82" selection-start="4286" selection-end="4286" vertical-scroll-proportion="0.45757577" vertical-offset="1334" max-vertical-offset="4980">
+        <state line="314" column="0" selection-start="13664" selection-end="13664" vertical-scroll-proportion="-26.076923" vertical-offset="3912" max-vertical-offset="4995">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/db_handler_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="79" column="33" selection-start="2298" selection-end="2298" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1215">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/integration_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="12" column="40" selection-start="310" selection-end="360" vertical-scroll-proportion="0.0" vertical-offset="1290" max-vertical-offset="4155">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/threading.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="698" column="8" selection-start="24016" selection-end="24016" vertical-scroll-proportion="0.66853935" vertical-offset="10232" max-vertical-offset="14655">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="82" column="43" selection-start="2274" selection-end="2274" vertical-scroll-proportion="0.33333334" vertical-offset="1075" max-vertical-offset="3315">
           <folding />
         </state>
       </provider>

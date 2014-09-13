@@ -278,6 +278,8 @@ class OpenportApp(object):
             if self.args.manager_port > 0:
                 self.inform_manager_app_new(session, self.args.manager_port, start_manager=self.args.start_manager)
 
+            self.save_share(session)
+
             session.error_observers.append(self.error_callback)
             session.success_observers.append(self.success_callback)
             session.stop_observers.append(self.stop_callback)
@@ -310,7 +312,6 @@ class OpenportApp(object):
 
     def success_callback(self, session):
         logger.debug('success_callback')
-        self.save_share(session)
         if self.args.manager_port > 0 and self.manager_app_started:
             self.inform_manager_app_success(session, self.args.manager_port)
 
