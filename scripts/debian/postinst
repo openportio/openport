@@ -1,2 +1,1 @@
-update-rc.d openport-manager defaults
-/etc/init.d/openport-manager start
+/etc/init.d/openport start

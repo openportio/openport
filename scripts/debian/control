@@ -9,4 +9,3 @@ Package: openport
 Architecture: any
 Depends: 
 Description: Opens a port from your machine to the outside world.
- The port is forwarded to the openport servers and is accessible from anywhere in the world.
