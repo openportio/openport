@@ -1,11 +1,8 @@
-import cgi
-import urlparse
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import signal
 import threading
 import sys
 
-from bottle import route, run, request
+from bottle import route, run, request, error
 
 
 from manager import dbhandler
@@ -114,12 +111,21 @@ def active_count():
     logger.debug('/active_count')
     return str(len(shares))
 
+@route('/error', method='GET')
+def erorsdfs():
+    raise Exception('The short error message.')
+
+
+@error(500)
+def custom500(httpError):
+    logger.error(httpError.exception)
+    return 'An error has occured: %s' % httpError.exception
 
 def start_server(onNewShareFunc=None):
     global onNewShare
     onNewShare = onNewShareFunc
     try:
-        run(host='127.0.0.1', port=globals.manager_port, server='cherrypy')
+        run(host='127.0.0.1', port=globals.manager_port, server='cherrypy', debug=True)
     except KeyboardInterrupt:
         pass
 
