@@ -36,6 +36,9 @@ debuild -us -uc
 
 cd ../..
 sudo rm -rf /usr/bin/openport
-killall python
+sudo rm -f /etc/init.d/openport
+sudo rm -f /etc/init.d/openport-manager
+
+sudo killall python
 sudo dpkg -i package/openport_$(echo $VERSION)-1_*.deb
 openport -h
