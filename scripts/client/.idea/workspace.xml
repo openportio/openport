@@ -7,8 +7,6 @@
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
     <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Changed the database engine to sqlalchemy (app is not working, but I want to check the problem on the RPI)">
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/tests/session_tests.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/apps/openport_app.py" afterPath="$PROJECT_DIR$/apps/openport_app.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/manager/server.py" afterPath="$PROJECT_DIR$/manager/server.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="client.iws" />
@@ -1463,7 +1461,11 @@
       <created>1410775756986</created>
       <updated>1410775756986</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="Better error logging and handling in the bottle server.">
+      <created>1410775791174</created>
+      <updated>1410775791174</updated>
+    </task>
+    <option name="localTasksCounter" value="72" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1526,7 +1528,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="Fixing nonblockread test" />
     <MESSAGE value="More testfixing" />
     <MESSAGE value="Fixed failing test" />
     <MESSAGE value="Should fix timing issue in DBHandler" />
@@ -1551,7 +1552,8 @@
     <MESSAGE value="Trying to fix the database problem on the RPI" />
     <MESSAGE value="Changed the database engine to sqlalchemy (app is not working, but I want to check the problem on the RPI)" />
     <MESSAGE value="Starting an SQLAlchemy session for every database call.&#10;&#10;" />
-    <option name="LAST_COMMIT_MESSAGE" value="Starting an SQLAlchemy session for every database call.&#10;&#10;" />
+    <MESSAGE value="Better error logging and handling in the bottle server." />
+    <option name="LAST_COMMIT_MESSAGE" value="Better error logging and handling in the bottle server." />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="true" />
   </component>
   <component name="XDebuggerManager">
