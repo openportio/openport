@@ -17,6 +17,7 @@ class Share(Session):
         super(Share, self).from_dict(dict)
         self.filePath = dict['filePath']
         self.token = dict['token']
+        return self
 
     def get_link(self):
         return 'http://%s:%s?t=%s' % (self.server, self.server_port, self.token)
