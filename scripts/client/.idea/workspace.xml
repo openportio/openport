@@ -6,7 +6,9 @@
   <component name="ChangeListManager">
     <list id="effd0fec-329c-43fb-b943-4bbc030ea053" name="Do not commit" comment="" />
     <list default="true" id="65871582-01d9-427a-a1b2-48f1bf0b25f7" name="Do commit" comment="Changed the database engine to sqlalchemy (app is not working, but I want to check the problem on the RPI)">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../createdeb.sh" afterPath="$PROJECT_DIR$/../createdeb.sh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/apply_migrations.sh" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/create_migrations.sh" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/client.iml" afterPath="$PROJECT_DIR$/.idea/client.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="client.iws" />
@@ -35,10 +37,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="openport_app.py" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="openport_app.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="97" column="54" selection-start="3837" selection-end="3837" vertical-scroll-proportion="-0.19169329" vertical-offset="1455" max-vertical-offset="4995">
+            <state line="296" column="0" selection-start="13139" selection-end="13139" vertical-scroll-proportion="0.0" vertical-offset="4440" max-vertical-offset="5115">
               <folding />
             </state>
           </provider>
@@ -47,7 +49,7 @@
       <file leaf-file-name="server.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/manager/server.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="17" selection-start="603" selection-end="603" vertical-scroll-proportion="0.0" vertical-offset="390" max-vertical-offset="2265">
+            <state line="29" column="17" selection-start="663" selection-end="663" vertical-scroll-proportion="0.0" vertical-offset="435" max-vertical-offset="2265">
               <folding />
             </state>
           </provider>
@@ -56,7 +58,16 @@
       <file leaf-file-name="app_tests.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests/app_tests.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="152" column="0" selection-start="5409" selection-end="5409" vertical-scroll-proportion="0.0" vertical-offset="2280" max-vertical-offset="9285">
+            <state line="154" column="0" selection-start="5471" selection-end="5471" vertical-scroll-proportion="0.0" vertical-offset="2310" max-vertical-offset="9285">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="1f5354d0e38f_.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/alembic/versions/1f5354d0e38f_.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="18" column="39" selection-start="455" selection-end="455" vertical-scroll-proportion="0.0" vertical-offset="270" max-vertical-offset="1260">
               <folding />
             </state>
           </provider>
@@ -65,7 +76,7 @@
       <file leaf-file-name="share.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/common/share.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="30" selection-start="515" selection-end="515" vertical-scroll-proportion="0.0" vertical-offset="255" max-vertical-offset="435">
+            <state line="16" column="30" selection-start="472" selection-end="472" vertical-scroll-proportion="0.0" vertical-offset="9" max-vertical-offset="435">
               <folding />
             </state>
           </provider>
@@ -74,7 +85,7 @@
       <file leaf-file-name="session.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/common/session.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="63" column="35" selection-start="2047" selection-end="2047" vertical-scroll-proportion="0.0" vertical-offset="945" max-vertical-offset="1380">
+            <state line="57" column="35" selection-start="1857" selection-end="1857" vertical-scroll-proportion="0.0" vertical-offset="725" max-vertical-offset="1380">
               <folding />
             </state>
           </provider>
@@ -83,7 +94,7 @@
       <file leaf-file-name="openportmanager.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="224" column="0" selection-start="9761" selection-end="9761" vertical-scroll-proportion="0.0" vertical-offset="3360" max-vertical-offset="4140">
+            <state line="223" column="0" selection-start="9730" selection-end="9730" vertical-scroll-proportion="0.0" vertical-offset="3345" max-vertical-offset="4140">
               <folding />
             </state>
           </provider>
@@ -92,16 +103,25 @@
       <file leaf-file-name="dbhandler.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="35" column="0" selection-start="1060" selection-end="1060" vertical-scroll-proportion="0.0" vertical-offset="525" max-vertical-offset="2280">
+            <state line="68" column="37" selection-start="2372" selection-end="2372" vertical-scroll-proportion="0.0" vertical-offset="1020" max-vertical-offset="2280">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="db_handler_tests.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tests/db_handler_tests.py">
+      <file leaf-file-name="apply_migrations.sh" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/apply_migrations.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="162" column="62" selection-start="5389" selection-end="5389" vertical-scroll-proportion="0.0" vertical-offset="2430" max-vertical-offset="2535">
+            <state line="1" column="28" selection-start="10" selection-end="39" vertical-scroll-proportion="0.0" vertical-offset="15" max-vertical-offset="120">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="create_migrations.sh" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/create_migrations.sh">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="2" column="0" selection-start="50" selection-end="50" vertical-scroll-proportion="0.045385778" vertical-offset="0" max-vertical-offset="661">
               <folding />
             </state>
           </provider>
@@ -123,14 +143,42 @@
       </map>
     </option>
   </component>
-  <component name="GitLogSettings">
-    <option name="myDateState">
-      <MyDateState />
-    </option>
-  </component>
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
+        <option value="$PROJECT_DIR$/fabfile.py" />
+        <option value="$PROJECT_DIR$/tray/globals.py" />
+        <option value="$PROJECT_DIR$/tray/server.py" />
+        <option value="$PROJECT_DIR$/tests/osinteractiontests.py" />
+        <option value="$PROJECT_DIR$/tray/openporttray.py" />
+        <option value="$PROJECT_DIR$/apps/keyhandling.py" />
+        <option value="$PROJECT_DIR$/tests/liveIntegrationTests.py" />
+        <option value="$PROJECT_DIR$/tests/integrationtests.py" />
+        <option value="$PROJECT_DIR$/gui/openportgui.py" />
+        <option value="$PROJECT_DIR$/manager.sh" />
+        <option value="$PROJECT_DIR$/install.sh" />
+        <option value="$PROJECT_DIR$/openport-manager" />
+        <option value="$PROJECT_DIR$/apps/openportit.py" />
+        <option value="$PROJECT_DIR$/openport.py" />
+        <option value="$PROJECT_DIR$/py2exe_win.py" />
+        <option value="$PROJECT_DIR$/tests/__main__.py" />
+        <option value="$PROJECT_DIR$/services/utils.py" />
+        <option value="$PROJECT_DIR$/tests/db_handler2_tests.py" />
+        <option value="$PROJECT_DIR$/openport.sh" />
+        <option value="$PROJECT_DIR$/hudson.sh" />
+        <option value="$PROJECT_DIR$/install_tests.sh" />
+        <option value="$PROJECT_DIR$/common/tee.py" />
+        <option value="$PROJECT_DIR$/create_exes.sh" />
+        <option value="$PROJECT_DIR$/tests/test_utils.py" />
+        <option value="$PROJECT_DIR$/tests/live_integration_tests.py" />
+        <option value="$PROJECT_DIR$/apps/portforwarding.py" />
+        <option value="$PROJECT_DIR$/tests/os_interaction_tests.py" />
+        <option value="$PROJECT_DIR$/manager/globals.py" />
+        <option value="$PROJECT_DIR$/apps/openport.py" />
+        <option value="$PROJECT_DIR$/nsis/clean.nsi" />
+        <option value="$PROJECT_DIR$/nsis/license.txt" />
+        <option value="$PROJECT_DIR$/services/key_registration_service.py" />
+        <option value="$PROJECT_DIR$/tests/integration_tests.py" />
         <option value="$PROJECT_DIR$/docs/fix phantomjs problem.sh" />
         <option value="$PROJECT_DIR$/apps/openport_api.py" />
         <option value="$PROJECT_DIR$/tests/site_interaction_tests.py" />
@@ -147,14 +195,15 @@
         <option value="$PROJECT_DIR$/tests/session_tests.py" />
         <option value="$PROJECT_DIR$/common/session.py" />
         <option value="$PROJECT_DIR$/tests/app_tests.py" />
+        <option value="$PROJECT_DIR$/apply_migrations.sh" />
+        <option value="$PROJECT_DIR$/create_migrations.sh" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="64" />
-    <option name="y" value="-4" />
-    <option name="width" value="1377" />
-    <option name="height" value="780" />
+    <option name="y" value="22" />
+    <option name="width" value="1440" />
+    <option name="height" value="804" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -189,14 +238,16 @@
               <option name="myItemId" value="client" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
-          </PATH>
-          <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
+              <option name="myItemId" value="&lt; Python 2.6.8 virtualenv at ~/swprojects/openport-client/scripts/client/env &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="site-packages" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -206,11 +257,129 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6.8 virtualenv at ~/swprojects/openport-client/scripts/client/env &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="site-packages" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="tryouts" />
+              <option name="myItemId" value="selenium" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6.8 virtualenv at ~/swprojects/openport-client/scripts/client/env &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="site-packages" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="selenium" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webdriver" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6.8 virtualenv at ~/swprojects/openport-client/scripts/client/env &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="site-packages" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="selenium" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webdriver" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="remote" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6.8 virtualenv at ~/swprojects/openport-client/scripts/client/env &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6.8 virtualenv at ~/swprojects/openport-client/scripts/client/env &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="python2.6" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="client" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 2.6.8 virtualenv at ~/swprojects/openport-client/scripts/client/env &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="python2.6" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="logging" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -221,66 +390,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="services" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="manager" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="common" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="client" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="apps" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -290,34 +399,34 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="146" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="147" />
     <property name="options.splitter.main.proportions" value="0.3" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="146" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
-    <property name="recentsLimit" value="5" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
-    <property name="last_opened_file_path" value="/Volumes/test.openport.be/home/openport/openport" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="151" />
-    <property name="LayoutCode.rearrangeEntriesPython" value="false" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="945" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="945" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="151" />
-    <property name="GoToClass.includeJavaFiles" value="false" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="147" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder2" value="2" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder3" value="3" />
-    <property name="FullScreen" value="false" />
-    <property name="options.splitter.details.proportions" value="0.2" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder1" value="1" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
     <property name="options.lastSelected" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
-    <property name="SearchEverywhereHistory" value="" />
+    <property name="recentsLimit" value="5" />
     <property name="restartRequiresConfirmation" value="true" />
+    <property name="last_opened_file_path" value="/Volumes/test.openport.be/home/openport/openport" />
+    <property name="GoToClass.includeJavaFiles" value="false" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="FullScreen" value="false" />
+    <property name="SearchEverywhereHistory" value="" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="145" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="146" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="150" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="935" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder3" value="3" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="145" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="146" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder1" value="1" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="150" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="935" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
+    <property name="LayoutCode.rearrangeEntriesPython" value="false" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -455,6 +564,17 @@
       <option name="USE_PARAM" value="false" />
       <RunnerSettings RunnerId="PythonRunner" />
       <ConfigurationWrapper RunnerId="PythonRunner" />
+      <method />
+    </configuration>
+    <configuration default="true" type="BashConfigurationType" factoryName="Bash">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="INTERPRETER_PATH" value="/bin/bash" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <module name="client" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="py.test">
@@ -880,25 +1000,25 @@
       <method />
     </configuration>
     <list size="19">
-      <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
-      <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in db_handler_tests" />
-      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager" />
-      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_start_share" />
-      <item index="4" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager_spawning" />
-      <item index="5" class="java.lang.String" itemvalue="Python.openportit" />
-      <item index="6" class="java.lang.String" itemvalue="Python.tray - no gui" />
-      <item index="7" class="java.lang.String" itemvalue="Python.openport_app --verbose" />
-      <item index="8" class="java.lang.String" itemvalue="Python.Unnamed" />
-      <item index="9" class="java.lang.String" itemvalue="Python.openportit big file" />
-      <item index="10" class="java.lang.String" itemvalue="Python.manager" />
-      <item index="11" class="java.lang.String" itemvalue="Python.openport_app no-gui" />
-      <item index="12" class="java.lang.String" itemvalue="Python.openport_app register-key local" />
-      <item index="13" class="java.lang.String" itemvalue="Python.openport_app register-key test." />
-      <item index="14" class="java.lang.String" itemvalue="Python.openport_app" />
-      <item index="15" class="java.lang.String" itemvalue="Python.openport_app --verbose --http-forward" />
-      <item index="16" class="java.lang.String" itemvalue="Python tests.Unittests in IntegrationTest.testMultiThread" />
-      <item index="17" class="java.lang.String" itemvalue="Python tests.Unittests in integrationtests" />
-      <item index="18" class="java.lang.String" itemvalue="Python tests.Unnamed" />
+      <item index="0" class="java.lang.String" itemvalue="Python.openportit" />
+      <item index="1" class="java.lang.String" itemvalue="Python.tray - no gui" />
+      <item index="2" class="java.lang.String" itemvalue="Python.openport_app --verbose" />
+      <item index="3" class="java.lang.String" itemvalue="Python.Unnamed" />
+      <item index="4" class="java.lang.String" itemvalue="Python.openportit big file" />
+      <item index="5" class="java.lang.String" itemvalue="Python.manager" />
+      <item index="6" class="java.lang.String" itemvalue="Python.openport_app no-gui" />
+      <item index="7" class="java.lang.String" itemvalue="Python.openport_app register-key local" />
+      <item index="8" class="java.lang.String" itemvalue="Python.openport_app register-key test." />
+      <item index="9" class="java.lang.String" itemvalue="Python.openport_app" />
+      <item index="10" class="java.lang.String" itemvalue="Python.openport_app --verbose --http-forward" />
+      <item index="11" class="java.lang.String" itemvalue="Python tests.Unittests in IntegrationTest.testMultiThread" />
+      <item index="12" class="java.lang.String" itemvalue="Python tests.Unittests in integrationtests" />
+      <item index="13" class="java.lang.String" itemvalue="Python tests.Unnamed" />
+      <item index="14" class="java.lang.String" itemvalue="Python tests.Unittests in app_tests" />
+      <item index="15" class="java.lang.String" itemvalue="Python tests.Unittests in db_handler_tests" />
+      <item index="16" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager" />
+      <item index="17" class="java.lang.String" itemvalue="Python tests.Unittest IntegrationTest.test_start_share" />
+      <item index="18" class="java.lang.String" itemvalue="Python tests.Unittest AppTests.test_manager_spawning" />
     </list>
     <recent_temporary>
       <list size="5">
@@ -1231,29 +1351,29 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="64" y="-4" width="1377" height="780" extended-state="6" />
-    <editor active="true" />
+    <frame x="0" y="22" width="1440" height="804" extended-state="6" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.1218716" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32876712" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.5764331" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21185185" sideWeight="0.63649637" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21212122" sideWeight="0.63649637" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.31661892" sideWeight="0.49468085" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24622357" sideWeight="0.57165605" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.5565069" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4165536" sideWeight="0.71458775" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32808024" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3277311" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32930514" sideWeight="0.6433121" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32930514" sideWeight="0.6433121" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29369628" sideWeight="0.28541225" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295129" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -1313,37 +1433,37 @@
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/manager/openportmanager.py</url>
-          <line>121</line>
+          <line>120</line>
           <option name="timeStamp" value="89" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/manager/server.py</url>
-          <line>87</line>
+          <line>90</line>
           <option name="timeStamp" value="98" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/manager/server.py</url>
-          <line>82</line>
+          <line>85</line>
           <option name="timeStamp" value="99" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/tests/app_tests.py</url>
-          <line>476</line>
+          <line>469</line>
           <option name="timeStamp" value="107" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/tests/app_tests.py</url>
-          <line>572</line>
+          <line>565</line>
           <option name="timeStamp" value="108" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/tests/integration_tests.py</url>
-          <line>228</line>
+          <line>222</line>
           <option name="timeStamp" value="112" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/tests/app_tests.py</url>
-          <line>513</line>
+          <line>506</line>
           <option name="timeStamp" value="126" />
         </line-breakpoint>
         <line-breakpoint type="python-line">
@@ -1353,27 +1473,32 @@
         </line-breakpoint>
         <line-breakpoint type="python-line">
           <url>file://$PROJECT_DIR$/tests/integration_tests.py</url>
-          <line>93</line>
+          <line>95</line>
           <option name="timeStamp" value="138" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/tests/app_tests.py</url>
-          <line>217</line>
+          <line>221</line>
           <option name="timeStamp" value="146" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/tests/site_interaction_tests.py</url>
-          <line>95</line>
+          <line>151</line>
+          <option name="timeStamp" value="149" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/site_interaction_tests.py</url>
+          <line>73</line>
           <option name="timeStamp" value="156" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/manager/server.py</url>
-          <line>128</line>
+          <line>120</line>
           <option name="timeStamp" value="157" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/apps/openport_app.py</url>
-          <line>333</line>
+          <line>296</line>
           <option name="timeStamp" value="158" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
@@ -1389,6 +1514,123 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/create_migrations.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="0" selection-start="50" selection-end="50" vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="120">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/install_tests.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="131" selection-start="279" selection-end="562" vertical-scroll-proportion="-1.9444444" vertical-offset="0" max-vertical-offset="195" />
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/errno.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="100" column="13" selection-start="1551" selection-end="1551" vertical-scroll-proportion="-2.4615386" vertical-offset="1436" max-vertical-offset="3990" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/openport.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="31" selection-start="119" selection-end="119" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="180" />
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/__builtin__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="206" column="4" selection-start="6924" selection-end="6924" vertical-scroll-proportion="0.3318182" vertical-offset="2944" max-vertical-offset="73575" />
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/sys.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="198" column="46" selection-start="7604" selection-end="7604" vertical-scroll-proportion="0.7189696" vertical-offset="2663" max-vertical-offset="6885" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build/openport_app/logdict2.6.8.final.0-1.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1016" column="313" selection-start="222440" selection-end="222440" vertical-scroll-proportion="0.0" vertical-offset="15098" max-vertical-offset="15675" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manager.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="0" selection-start="100" selection-end="100" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="195" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/env/lib/python2.6/site-packages/argparse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1701" column="8" selection-start="60505" selection-end="60505" vertical-scroll-proportion="0.331565" vertical-offset="25300" max-vertical-offset="35430" />
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/exceptions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="175" column="8" selection-start="5561" selection-end="5561" vertical-scroll-proportion="0.460452" vertical-offset="2462" max-vertical-offset="11625" />
+      </provider>
+    </entry>
+    <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/unittest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="349" column="0" selection-start="12326" selection-end="12326" vertical-scroll-proportion="0.0" vertical-offset="5056" max-vertical-offset="13155" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/live_integration_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="16" column="76" selection-start="429" selection-end="429" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="285" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/portforwarding.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="87" column="78" selection-start="3565" selection-end="3565" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2670" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/os_interaction_tests.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="90" column="16" selection-start="4698" selection-end="4698" vertical-scroll-proportion="0.0" vertical-offset="1172" max-vertical-offset="1560" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manager/globals.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="50" selection-start="213" selection-end="213" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="540" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/openport.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="0" selection-start="126" selection-end="126" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1695" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nsis/clean.nsi">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="48" column="36" selection-start="1399" selection-end="1399" vertical-scroll-proportion="0.0" vertical-offset="574" max-vertical-offset="1245" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nsis/license.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="1352" selection-start="1483" selection-end="1483" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="450" />
+      </provider>
+    </entry>
+    <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/logging/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1024" column="13" selection-start="36756" selection-end="36756" vertical-scroll-proportion="0.37867078" vertical-offset="15115" max-vertical-offset="23100" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nosetests.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="504" column="1831" selection-start="186668" selection-end="186668" vertical-scroll-proportion="1.2289855" vertical-offset="7136" max-vertical-offset="7770" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/docs/fix phantomjs problem.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="29" selection-start="202" selection-end="202" vertical-scroll-proportion="0.0" vertical-offset="150" max-vertical-offset="510" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/tee.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="0" selection-start="169" selection-end="169" vertical-scroll-proportion="0.0" vertical-offset="105" max-vertical-offset="855" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/openport_api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="61" column="35" selection-start="2166" selection-end="2166" vertical-scroll-proportion="0.0" vertical-offset="915" max-vertical-offset="2535" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/tests/test_utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="53" column="0" selection-start="1491" selection-end="1624" vertical-scroll-proportion="0.0" vertical-offset="484" max-vertical-offset="3780">
@@ -1401,6 +1643,16 @@
         <state line="40" column="0" selection-start="1250" selection-end="1250" vertical-scroll-proportion="0.0" vertical-offset="403" max-vertical-offset="660" />
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/tests/testfiles/tmp/git">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="355" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/env/lib/python2.6/site-packages/selenium/webdriver/remote/errorhandler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="163" column="0" selection-start="7401" selection-end="7401" vertical-scroll-proportion="0.0" vertical-offset="1980" max-vertical-offset="2340" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/tests/site_interaction_tests.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="165" column="0" selection-start="6886" selection-end="6886" vertical-scroll-proportion="0.0" vertical-offset="2115" max-vertical-offset="3300">
@@ -1408,14 +1660,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/env/lib/python2.6/UserDict.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="77" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2775" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/services/logger_service.py">
       <provider selected="true" editor-type-id="text-editor">
         <state line="8" column="63" selection-start="177" selection-end="177" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="795" />
       </provider>
     </entry>
+    <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/Queue.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="155" column="17" selection-start="5974" selection-end="5979" vertical-scroll-proportion="0.0" vertical-offset="2087" max-vertical-offset="3720" />
+      </provider>
+    </entry>
+    <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/urllib2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1193" column="39" selection-start="42764" selection-end="42764" vertical-scroll-proportion="0.0" vertical-offset="17402" max-vertical-offset="21270" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test-reports/TEST-AppTests-20140704161707.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="54" column="88" selection-start="5567" selection-end="5567" vertical-scroll-proportion="0.24257426" vertical-offset="712" max-vertical-offset="37290" />
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm30/python_stubs/1497704574/posix.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="697" column="4" selection-start="16143" selection-end="16143" vertical-scroll-proportion="0.3325792" vertical-offset="10308" max-vertical-offset="21600" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/create_exes.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state line="1" column="0" selection-start="10" selection-end="84" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="270" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tryouts/butts.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="18" selection-start="61" selection-end="61" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="150" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/services/osinteraction.py">
@@ -1430,6 +1712,11 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/threading.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="698" column="8" selection-start="24016" selection-end="24016" vertical-scroll-proportion="0.66853935" vertical-offset="10232" max-vertical-offset="14655" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/requirements.pip">
       <provider selected="true" editor-type-id="text-editor">
         <state line="14" column="7" selection-start="163" selection-end="163" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="375" />
@@ -1437,56 +1724,75 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/manager/openportmanager.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="224" column="0" selection-start="9761" selection-end="9761" vertical-scroll-proportion="0.0" vertical-offset="3360" max-vertical-offset="4140">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="0" selection-start="1060" selection-end="1060" vertical-scroll-proportion="0.0" vertical-offset="525" max-vertical-offset="2280">
+        <state line="223" column="0" selection-start="9730" selection-end="9730" vertical-scroll-proportion="0.0" vertical-offset="2805" max-vertical-offset="3975">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/db_handler_tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="162" column="62" selection-start="5389" selection-end="5389" vertical-scroll-proportion="0.0" vertical-offset="2430" max-vertical-offset="2535">
+        <state line="55" column="62" selection-start="590" selection-end="1932" vertical-scroll-proportion="0.0" vertical-offset="825" max-vertical-offset="2535" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="296" column="0" selection-start="13139" selection-end="13139" vertical-scroll-proportion="0.0" vertical-offset="4440" max-vertical-offset="5115">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/manager/server.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="26" column="17" selection-start="603" selection-end="603" vertical-scroll-proportion="0.0" vertical-offset="390" max-vertical-offset="2265">
+        <state line="29" column="17" selection-start="663" selection-end="663" vertical-scroll-proportion="0.0" vertical-offset="294" max-vertical-offset="2265">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/common/share.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="30" selection-start="515" selection-end="515" vertical-scroll-proportion="0.0" vertical-offset="255" max-vertical-offset="435">
+        <state line="16" column="30" selection-start="472" selection-end="472" vertical-scroll-proportion="0.0" vertical-offset="9" max-vertical-offset="435">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/common/session.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="63" column="35" selection-start="2047" selection-end="2047" vertical-scroll-proportion="0.0" vertical-offset="945" max-vertical-offset="1380">
+        <state line="57" column="35" selection-start="1857" selection-end="1857" vertical-scroll-proportion="0.0" vertical-offset="725" max-vertical-offset="1380">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tests/app_tests.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="152" column="0" selection-start="5409" selection-end="5409" vertical-scroll-proportion="0.0" vertical-offset="2280" max-vertical-offset="9150">
+        <state line="154" column="0" selection-start="5471" selection-end="5471" vertical-scroll-proportion="0.0" vertical-offset="2310" max-vertical-offset="9150">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/apps/openport_app.py">
+    <entry file="file://$PROJECT_DIR$/alembic/versions/1f5354d0e38f_.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="97" column="54" selection-start="3837" selection-end="3837" vertical-scroll-proportion="-0.19169329" vertical-offset="1455" max-vertical-offset="4995">
+        <state line="18" column="39" selection-start="455" selection-end="455" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1185">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/manager/dbhandler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="68" column="37" selection-start="2372" selection-end="2372" vertical-scroll-proportion="0.0" vertical-offset="580" max-vertical-offset="2160">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/apply_migrations.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1" column="28" selection-start="10" selection-end="39" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="120">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/create_migrations.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="0" selection-start="50" selection-end="50" vertical-scroll-proportion="0.045385778" vertical-offset="0" max-vertical-offset="661">
           <folding />
         </state>
       </provider>
