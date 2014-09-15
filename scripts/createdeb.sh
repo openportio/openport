@@ -6,11 +6,13 @@ APPLICATION=openport
 PACKAGE=openport-$VERSION
 TARBALL=openport_$VERSION.orig.tar.gz
 
-# sudo apt-get --yes install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder python-dev python-pip python-virtualenv libsqlite3-dev
+sudo apt-get --yes install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder python-dev python-pip python-virtualenv libsqlite3-dev
 
 # if you have errors from locale: sudo dpkg-reconfigure locales
 
 sudo dpkg --remove $APPLICATION || echo "$APPLICATION not installed"
+# If the uninstall keeps giving errors:
+# rm -rf /var/lib/dpkg/info/$APPLICATION.*
 
 rm -rf $PACKAGE
 mkdir $PACKAGE
