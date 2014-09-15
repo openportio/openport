@@ -38,11 +38,11 @@ class DBHandler(object):
 
     def __init__(self, db_location):
         self.engine = create_engine('sqlite:///%s' % db_location, echo=True)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
-
-        self.os_interaction = osinteraction.getInstance()
         self.db_location = db_location
+
+    def _get_session(self):
+        Session = sessionmaker(bind=self.engine)
+        return Session()
 
     def init_db(self):
         Base.metadata.create_all(self.engine)
@@ -62,17 +62,18 @@ class DBHandler(object):
         openport_session.http_forward = share.http_forward
         openport_session.http_forward_address = share.http_forward_address
 
-        for previous_session in self.session.query(OpenportSession).filter_by(local_port=share.local_port):
+        session = self._get_session()
+        for previous_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
             previous_session.active = False
 
-        self.session.add(openport_session)
-        self.session.commit()
+        session.add(openport_session)
+        session.commit()
 
         share.id = openport_session.id
         return self.get_share(openport_session.id)
 
     def get_share(self, id):
-        openport_session = self.session.query(OpenportSession).filter_by(id=id).one()
+        openport_session = self._get_session().query(OpenportSession).filter_by(id=id).one()
         return self.convert_session_from_db(openport_session)
 
     def convert_session_from_db(self, openport_session):
@@ -99,18 +100,19 @@ class DBHandler(object):
         return share
 
     def get_shares(self):
-        openport_sessions = self.session.query(OpenportSession).filter_by(active=True)
+        openport_sessions = self._get_session().query(OpenportSession).filter_by(active=True)
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
     def get_share_by_local_port(self, local_port):
-        openport_sessions = self.session.query(OpenportSession).filter_by(active=True, local_port=local_port)
+        openport_sessions = self._get_session().query(OpenportSession).filter_by(active=True, local_port=local_port)
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
 
     def stop_share(self, share):
-        openport_session = self.session.query(OpenportSession).filter_by(id=share.id)
+        session = self._get_session()
+        openport_session = session.query(OpenportSession).filter_by(id=share.id)
         openport_session.active = False
-        self.session.commit()
+        session.commit()
 
 instance = None
 

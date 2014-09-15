@@ -46,6 +46,12 @@ class Session(object):
             'http_forward_address': self.http_forward_address,
         }
 
+    @staticmethod
+    def str_to_bool(string):
+        s = '%s' % string
+        return s.lower() in ['true', 't', '1', 'yes']
+
+
     def from_dict(self, dict):
 
         try:
@@ -58,13 +64,13 @@ class Session(object):
             self.pid = int(dict['pid'])
         except ValueError, e:
             self.pid = dict['pid']
-        self.active = dict['active']
+        self.active = Session.str_to_bool(dict['active'])
         self.account_id = dict['account_id']
         self.key_id = dict['key_id']
         self.local_port = dict['local_port']
         self.server_session_token = dict['server_session_token']
         self.restart_command = pickle.loads(dict['restart_command'])
-        self.http_forward = dict['http_forward']
+        self.http_forward = Session.str_to_bool(dict['http_forward'])
         self.http_forward_address = dict['http_forward_address']
 
     def notify_success(self):
