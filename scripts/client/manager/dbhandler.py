@@ -1,193 +1,118 @@
-from Queue import Queue, Empty
-from time import sleep
 import pickle
-import traceback
-try:
-    from pysqlite2 import dbapi2 as sqlite
-except ImportError:
-    import sqlite3 as sqlite
 from common.session import Session
 from services.logger_service import get_logger
 from services import osinteraction
 
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.orm import sessionmaker
+
 logger = get_logger('dbhandler')
 
-TIMEOUT = 30
+Base = declarative_base()
 
+class OpenportSession(Base):
+    __tablename__ = 'sessions'
 
-class TimeOutException(BaseException):
-    pass
+    id = Column(Integer, primary_key=True)
+    server = Column(String(50))
+    remote_port = Column(Integer)
+    session_token = Column(String(50))
+    local_port = Column(Integer)
+    pid = Column(Integer)
+    active = Column(Boolean)
+    restart_command = Column(String(200))
 
+    account_id = Column(Integer)
+    key_id = Column(Integer)
+    http_forward = Column(Boolean)
+    http_forward_address = Column(String(50))
 
-class DBTask(object):
-    def __init__(self, command, args=None):
-        self.ready = False
-        self.command = command
-        self.args = args if args is not None else []
-        self.exception = None
-
-    def block(self, timeout=None):
-        time_runner = 0
-        while not self.ready:
-            if timeout is not None and time_runner > timeout:
-                raise TimeOutException('query: %s %s time: %s timeout: %s' % (self.command, self.args, time_runner, timeout))
-            time_runner += 0.01
-            sleep(0.01)
-
-
-class DBCommandTask(DBTask):
-
-    def execute(self, cursor, connection):
-        logger.debug('running command: %s %s' % (self.command, self.args))
-        try:
-            cursor.execute(self.command, self.args)
-            logger.debug('committing!')
-            connection.commit()
-        except Exception, e:
-            self.exception = e
-        finally:
-            self.ready = True
-            logger.debug('done running command %s %s' % (self.command, self.args))
-
-
-class DBQueryTask(DBTask):
-    def __init__(self, query, args=None):
-        super(DBQueryTask, self).__init__(query, args)
-        self.result = None
-
-    def execute(self, cursor, connection):
-        logger.debug('running query: %s %s' % (self.command, self.args))
-        try:
-            cursor.execute(self.command, self.args)
-            self.result = cursor.fetchall()
-        except Exception, e:
-            self.exception = e
-        finally:
-            self.ready = True
-            logger.debug('done running query %s %s' % (self.command, self.args))
+    def __repr__(self):
+       return "<Session(local_port='%s', remote_port='%s', session_token='%s')>" % (
+                            self.local_port, self.server_port, self.session_token)
 
 
 class DBHandler(object):
 
     def __init__(self, db_location):
-        self.os_interaction = osinteraction.getInstance()
+        self.engine = create_engine('sqlite:///%s' % db_location, echo=True)
         self.db_location = db_location
-        logger.debug('db location: %s' % db_location)
 
-        self.task_queue = Queue()
-        self.stopped = False
-        self.startQueueThread()
-        self.queue_exception = None
-
-    def checkQueue(self):
-        self.connection = sqlite.connect(self.db_location, timeout=1)
-        try:
-            self.cursor = self.connection.cursor()
-            while not self.stopped:
-                try:
-                    task = self.task_queue.get(block=True, timeout=1)
-                    task.execute(self.cursor, self.connection)
-                    self.task_queue.task_done()
-                except Empty:
-                    pass
-        except Exception, e:
-            if traceback:
-                tb = traceback.format_exc()
-                logger.debug('%s\n%s' % (e, tb))
-            else:
-                logger.debug(e)
-            self.queue_exception = e
-        finally:
-            self.connection.close()
-
-
-    def startQueueThread(self):
-        import threading
-        t = threading.Thread(target=self.checkQueue)
-        t.setDaemon(True)
-        t.start()
-
-    def executeCommand(self, command, args=None):
-        if self.queue_exception:
-            raise self.queue_exception
-        task = DBCommandTask(command, args)
-        self.task_queue.put(task, block=True)
-        task.block(TIMEOUT)
-        if task.exception:
-            raise task.exception
-
-    def executeQuery(self, query, args=None):
-        if self.queue_exception:
-            raise self.queue_exception
-        task = DBQueryTask(query, args)
-        self.task_queue.put(task, block=True)
-        task.block(TIMEOUT)
-        if task.exception:
-            raise task.exception
-        return task.result
+    def _get_session(self):
+        Session = sessionmaker(bind=self.engine)
+        return Session()
 
     def init_db(self):
-        self.executeCommand(
-            '''CREATE TABLE IF NOT EXISTS sessions (
-            id INTEGER PRIMARY KEY,
-            server VARCHAR(50),
-            server_port INTEGER,
-            session_token VARCHAR(50),
-            local_port INTEGER,
-            pid INTEGER,
-            active BOOLEAN,
-            restart_command VARCHAR(200)
-            )
-            ''')
+        Base.metadata.create_all(self.engine)
 
     def add_share(self, share):
-        self.executeCommand('update sessions set active = 0 where local_port = ?', (share.local_port,))
-        pickled_restart_command = pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
+        openport_session = OpenportSession()
 
-        self.executeCommand('insert into sessions (server, server_port, session_token, local_port, pid, active, restart_command) '
-                            'values (?, ?, ?, ?, ?, ?, ?)',
-            (share.server, share.server_port, share.server_session_token, share.local_port, share.pid, 1, pickled_restart_command))
-        share.id = self.cursor.lastrowid
-        return self.get_share(self.cursor.lastrowid)
+        openport_session.server = share.server
+        openport_session.remote_port = share.server_port
+        openport_session.session_token = share.server_session_token
+        openport_session.local_port = share.local_port
+        openport_session.pid = share.pid
+        openport_session.active = share.active
+        openport_session.restart_command = pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
+        openport_session.account_id = share.account_id
+        openport_session.key_id = share.key_id
+        openport_session.http_forward = share.http_forward
+        openport_session.http_forward_address = share.http_forward_address
+
+        session = self._get_session()
+        for previous_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
+            previous_session.active = False
+
+        session.add(openport_session)
+        session.commit()
+
+        share.id = openport_session.id
+        return self.get_share(openport_session.id)
 
     def get_share(self, id):
-        rows = self.executeQuery('select server, server_port, session_token, local_port, pid, active, restart_command, '
-                                 'id from sessions where id = ?', (id,))
-        return self.get_share_from_row(rows[0])
+        openport_session = self._get_session().query(OpenportSession).filter_by(id=id).one()
+        return self.convert_session_from_db(openport_session)
 
-    def get_share_from_row(self, row):
+    def convert_session_from_db(self, openport_session):
         share = Session()
-        share.server = row[0]
-        share.server_port = row[1]
-        share.server_session_token = row[2]
-        share.local_port = row[3]
-        share.pid = row[4]
-        share.active = row[5]
-        share.restart_command = row[6].split()
+        share.id = openport_session.id
+        share.server = openport_session.server
+        share.server_port = openport_session.remote_port
+        share.server_session_token = openport_session.session_token
+        share.local_port = openport_session.local_port
+        share.pid = openport_session.pid
+        share.active = openport_session.active
+        share.account_id = openport_session.account_id
+        share.key_id = openport_session.key_id
+        share.http_forward = openport_session.http_forward
+        share.http_forward_address = openport_session.http_forward_address
+
+        share.restart_command = openport_session.restart_command
         try:
-            share.restart_command = pickle.loads(row[6].encode('ascii','ignore'))
+            share.restart_command = pickle.loads(share.restart_command.encode('ascii', 'ignore'))
             pass
-        except (Exception) as e:
+        except Exception as e:
             pass
 
-        share.id = row[7]
         return share
 
     def get_shares(self):
-        rows = self.executeQuery('select server, server_port, session_token, local_port, pid, active, restart_command, '
-                                 'id from sessions where active = 1')
-        return list(self.get_share_from_row(row) for row in rows)
+        openport_sessions = self._get_session().query(OpenportSession).filter_by(active=True)
+        return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
     def get_share_by_local_port(self, local_port):
-        rows = self.executeQuery('select server, server_port, session_token, local_port, pid, active, restart_command, '
-                                 'id from sessions where active = 1 and local_port=%s' % local_port)
-        return list(self.get_share_from_row(row) for row in rows)
+        openport_sessions = self._get_session().query(OpenportSession).filter_by(active=True, local_port=local_port)
+        return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
+
 
     def stop_share(self, share):
-        self.executeCommand('update sessions set active = 0 where id = ?', (share.id,))
-
-    def stop(self):
-        self.stopped = True
+        session = self._get_session()
+        openport_session = session.query(OpenportSession).filter_by(id=share.id)
+        openport_session.active = False
+        session.commit()
 
 instance = None
 
@@ -210,8 +135,6 @@ def getInstance():
 
 def destroy_instance():
     global instance
-    if instance is not None:
-        instance.stop()
     instance = None
 
 
