@@ -1,3 +1,4 @@
+setuptools
 pycrypto
 ecdsa
 paramiko
@@ -10,7 +11,8 @@ ext_http_server
 argparse
 bottle
 cherrypy
-pyinstaller
+git+https://github.com/pyinstaller/pyinstaller.git@develop
+#pyinstaller
 sqlalchemy
 alembic
 
