@@ -136,7 +136,7 @@ class OpenportApp(object):
             else:
                 self.start_manager_application()
                 i = 0
-                manager_is_running = False
+                manager_is_running = self.check_manager_is_running(manager_port)
                 while i < 30 and not manager_is_running:
                     sleep(1)
                     manager_is_running = self.check_manager_is_running(manager_port)
