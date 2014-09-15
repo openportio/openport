@@ -39,6 +39,7 @@ class DBHandler(object):
     def __init__(self, db_location):
         self.engine = create_engine('sqlite:///%s' % db_location, echo=True)
         self.db_location = db_location
+        logger.debug('db location: %s' % db_location)
 
     def _get_session(self):
         Session = sessionmaker(bind=self.engine)
