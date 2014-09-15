@@ -1,12 +1,12 @@
-Source: openport-client
-Maintainer: Jan De Bleser <jandebleser@gmail.com>
+Source: openport
+Maintainer: Jan De Bleser <info@openport.io>
 Section: misc
 Priority: optional
 Standards-Version: ??
 Build-Depends: 
 
-Package: openport-client
+Package: openport
 Architecture: any
 Depends: 
 Description: Opens a port from your machine to the outside world.
- The port is forwarded to the openport servers and is accessable from anywhere in the world.
+ The port is forwarded to the openport servers and is accessible from anywhere in the world.
