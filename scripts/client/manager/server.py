@@ -2,7 +2,7 @@ import signal
 import threading
 import sys
 
-from bottle import route, run, request, error
+from bottle import route, run, request, error, hook
 
 
 from manager import dbhandler
@@ -120,6 +120,11 @@ def erorsdfs():
 def custom500(httpError):
     logger.error(httpError.exception)
     return 'An error has occured: %s' % httpError.exception
+
+@hook('after_request')
+def close_db_connections():
+    # Double tap? Session should be already closed...
+    dbhandler.getInstance().Session.remove()
 
 def start_server(onNewShareFunc=None):
     global onNewShare

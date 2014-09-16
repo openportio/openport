@@ -252,7 +252,7 @@ class AppTests(unittest.TestCase):
             raise Exception('address not found in output: %s' % output)
         return m.group(1)
 
-    def test_manager_spawning(self):
+    def test_openportapp_start_manager(self):
         manager_port = get_open_port()
         self.manager_port = manager_port
         print 'manager port: ', manager_port

@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import QueuePool
+from sqlalchemy.pool import SingletonThreadPool
 from sqlalchemy.orm import scoped_session
 
 logger = get_logger('dbhandler')
@@ -46,7 +46,7 @@ class OpenportSession(Base):
 class DBHandler(object):
 
     def __init__(self, db_location):
-        self.engine = create_engine('sqlite:///%s' % db_location, poolclass=QueuePool)
+        self.engine = create_engine('sqlite:///%s' % db_location, poolclass=SingletonThreadPool)
         self.db_location = db_location
         self.session_factory = sessionmaker(bind=self.engine)
         logger.debug('db location: %s' % db_location)
@@ -59,6 +59,7 @@ class DBHandler(object):
     def init_db(self):
         logger.debug('init_db')
         Base.metadata.create_all(self.engine)
+        self.Session.remove()
 
     def add_share(self, share):
         logger.debug('add share')
@@ -84,12 +85,14 @@ class DBHandler(object):
         session.commit()
 
         share.id = openport_session.id
+        self.Session.remove()
         return self.get_share(openport_session.id)
 
     def get_share(self, id):
         logger.debug('get_share')
         session = self._get_session()
         openport_session = session.query(OpenportSession).filter_by(id=id).one()
+        self.Session.remove()
         return self.convert_session_from_db(openport_session)
 
 
@@ -123,6 +126,7 @@ class DBHandler(object):
 
         session = self._get_session()
         openport_sessions = session.query(OpenportSession).filter_by(active=True)
+        self.Session.remove()
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
     def get_share_by_local_port(self, local_port):
@@ -131,6 +135,7 @@ class DBHandler(object):
         session = self._get_session()
         openport_sessions = session.query(OpenportSession).filter_by(active=True, local_port=local_port).all()
 
+        self.Session.remove()
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
     def stop_share(self, share):
@@ -139,6 +144,7 @@ class DBHandler(object):
         openport_session = session.query(OpenportSession).filter_by(id=share.id).first()
         openport_session.active = False
         session.commit()
+        self.Session.remove()
 
 instance = None
 

@@ -154,6 +154,21 @@ class DBHandlerTests(unittest.TestCase):
         self.assertNotEqual(None, self.share2)
         self.assertEqual(share.local_port, self.share2.local_port)
 
+    def test_multi_thread_2(self):
+        share = Share(local_port=22)
+        self.dbhandler.add_share(share)
+
+        def get_share():
+            share2 = Share(local_port=23)
+            self.dbhandler.add_share(share2)
+            self.dbhandler.Session.remove()
+        thr = threading.Thread(target=get_share)
+        thr.setDaemon(True)
+        thr.start()
+
+        sleep(2)
+        self.assertEqual(2, len(self.dbhandler.get_shares()))
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
