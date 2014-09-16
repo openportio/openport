@@ -9,10 +9,16 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from common.share import Share
 from manager import dbhandler
 from services.logger_service import set_log_level
+import logging
+import threading
 
 
 class DBHandlerTests(unittest.TestCase):
     def setUp(self):
+        logging.basicConfig()
+
+        logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
+
         dbhandler.TIMEOUT = 3
         self.test_db = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'db_test.db')
         try:
@@ -131,6 +137,23 @@ class DBHandlerTests(unittest.TestCase):
         self.assertEqual(1, share.id)
         self.dbhandler.stop_share(share)
         self.assertEqual(False, self.dbhandler.get_share(share.id).active)
+
+    def test_multi_thread(self):
+        share = Share(local_port=22)
+        self.dbhandler.add_share(share)
+
+        self.share2 = None
+
+        def get_share():
+            self.share2 = self.dbhandler.get_share(share.id)
+        thr = threading.Thread(target=get_share)
+        thr.setDaemon(True)
+        thr.start()
+
+        sleep(0.3)
+        self.assertNotEqual(None, self.share2)
+        self.assertEqual(share.local_port, self.share2.local_port)
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

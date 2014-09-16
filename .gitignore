@@ -7,7 +7,7 @@
 /scripts/client/nsis/OpenPort-It.exe
 /external/twitter-bootstrap-v1.4.0-58-g5217131.zip
 /www/env/*
-/scripts/.idea/*.xml
+/scripts/client/.idea/workspace.xml
 /scripts/client/nsis/*.exe
 sass_stdlib.xml
 /scripts/.idea/*.iml

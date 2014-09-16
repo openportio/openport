@@ -1,4 +1,5 @@
 import pickle
+import logging
 from common.session import Session
 from services.logger_service import get_logger
 from services import osinteraction
@@ -7,8 +8,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import QueuePool
+from sqlalchemy.orm import scoped_session
 
 logger = get_logger('dbhandler')
+
+# Configures the logging for SQLAlchemy
+sqlalchemy_logger = get_logger('sqlalchemy')
+
+for handler in sqlalchemy_logger.handlers:
+    handler.setLevel(logging.WARN)
 
 Base = declarative_base()
 
@@ -37,18 +46,22 @@ class OpenportSession(Base):
 class DBHandler(object):
 
     def __init__(self, db_location):
-        self.engine = create_engine('sqlite:///%s' % db_location, echo=True)
+        self.engine = create_engine('sqlite:///%s' % db_location, poolclass=QueuePool)
         self.db_location = db_location
+        self.session_factory = sessionmaker(bind=self.engine)
         logger.debug('db location: %s' % db_location)
+        self.Session = scoped_session(self.session_factory)
 
     def _get_session(self):
-        Session = sessionmaker(bind=self.engine)
-        return Session()
+        logger.debug('getting session')
+        return self.Session()
 
     def init_db(self):
+        logger.debug('init_db')
         Base.metadata.create_all(self.engine)
 
     def add_share(self, share):
+        logger.debug('add share')
         openport_session = OpenportSession()
 
         openport_session.server = share.server
@@ -74,10 +87,15 @@ class DBHandler(object):
         return self.get_share(openport_session.id)
 
     def get_share(self, id):
-        openport_session = self._get_session().query(OpenportSession).filter_by(id=id).one()
+        logger.debug('get_share')
+        session = self._get_session()
+        openport_session = session.query(OpenportSession).filter_by(id=id).one()
         return self.convert_session_from_db(openport_session)
 
+
     def convert_session_from_db(self, openport_session):
+        logger.debug('convert_session_from_db')
+
         share = Session()
         share.id = openport_session.id
         share.server = openport_session.server
@@ -101,14 +119,22 @@ class DBHandler(object):
         return share
 
     def get_shares(self):
-        openport_sessions = self._get_session().query(OpenportSession).filter_by(active=True)
+        logger.debug('get_shares')
+
+        session = self._get_session()
+        openport_sessions = session.query(OpenportSession).filter_by(active=True)
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
     def get_share_by_local_port(self, local_port):
-        openport_sessions = self._get_session().query(OpenportSession).filter_by(active=True, local_port=local_port).all()
+        logger.debug('get_share_by_local_port')
+
+        session = self._get_session()
+        openport_sessions = session.query(OpenportSession).filter_by(active=True, local_port=local_port).all()
+
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
     def stop_share(self, share):
+        logger.debug('stop_share')
         session = self._get_session()
         openport_session = session.query(OpenportSession).filter_by(id=share.id).first()
         openport_session.active = False
