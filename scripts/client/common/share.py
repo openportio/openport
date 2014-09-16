@@ -1,8 +1,8 @@
 from common.session import Session
 
 class Share(Session):
-    def __init__(self, filePath='', token='', **args):
-        super(Share, self).__init__(args)
+    def __init__(self, filePath='', token='', *args, **kwargs):
+        super(Share, self).__init__(*args, **kwargs)
         self.filePath = filePath
         self.token = token
 

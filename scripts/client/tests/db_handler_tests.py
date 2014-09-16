@@ -14,17 +14,19 @@ from services.logger_service import set_log_level
 class DBHandlerTests(unittest.TestCase):
     def setUp(self):
         dbhandler.TIMEOUT = 3
-        self.test_db = os.path.join(os.path.dirname(__file__), 'testfiles', 'db_test.db')
+        self.test_db = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'db_test.db')
+        try:
+            os.remove(self.test_db)
+        except:
+            pass
         set_log_level(logging.DEBUG)
         self.dbhandler = dbhandler.DBHandler(self.test_db)
         self.dbhandler.init_db()
 
-
     def tearDown(self):
         sleep(1)
-        os.remove(self.test_db)
 
-    def testSaveShare(self):
+    def test_save_share(self):
         share = Share()
         share.account_id = 6
         share.key_id = 14
@@ -100,40 +102,6 @@ class DBHandlerTests(unittest.TestCase):
             errors.append(i)
         self.assertEqual([], errors)
 
-
-    def test_stress_test_2(self):  
-        return
-        share = Share()
-
-
-        errors = []
-        for i in range(100):
-          try:
-            share.local_port = i
-            saved_share = self.dbhandler.add_share(share)
-          except:
-            print 'error on i:%s' % i
-            errors.append(i)
-        self.assertEqual([], errors)
-
-
-        share2 = Share()
-        share2.local_port = 5000
-        saved_share2 = dbhandler2.add_share(share2)
-        retrieved_share2 = self.dbhandler.get_share(saved_share2.id)
-
-        self.assertEqual(retrieved_share2.local_port, share2.local_port)
-
-    def test_stress_test(self):
-        share = Share()
-        dbhandler2 = dbhandler.DBHandler(self.test_db)
-
-        for i in range(1000):
-            share.local_port = i
-            saved_share = self.dbhandler.add_share(share)
-            retrieved_share = dbhandler2.get_share(saved_share.id)
-            self.assertEqual(retrieved_share.local_port, share.local_port)
-
     def test_get_shares(self):
         share1 = Share(active=False)
         share2 = Share(active=True, local_port=123)
@@ -144,18 +112,23 @@ class DBHandlerTests(unittest.TestCase):
         self.assertEqual(1, len(active_shares))
         self.assertEqual(share2.id, active_shares[0].id)
 
-    def get_share_by_local_port(self):
-        share1 = Share(active=False)
+    def test_get_share_by_local_port(self):
+        share1 = Share(active=False, local_port=123)
         share2 = Share(active=True, local_port=123)
+        self.assertEqual(share2.local_port, 123)
+        share3 = Share(active=True, local_port=1111)
         self.dbhandler.add_share(share1)
         self.dbhandler.add_share(share2)
+        self.dbhandler.add_share(share3)
 
-        self.assertEqual(share2, self.dbhandler.get_share_by_local_port(123))
+        shares = self.dbhandler.get_share_by_local_port(123)
+        self.assertEqual(1, len(shares))
+        self.assertEqual(share2.id, shares[0].id)
 
-    def stop_share(self):
-        share = Share(active=True)
+    def test_stop_share(self):
+        share = Share(active=True, local_port=444)
         self.dbhandler.add_share(share)
-
+        self.assertEqual(1, share.id)
         self.dbhandler.stop_share(share)
         self.assertEqual(False, self.dbhandler.get_share(share.id).active)
 

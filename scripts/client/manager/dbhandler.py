@@ -105,13 +105,12 @@ class DBHandler(object):
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
     def get_share_by_local_port(self, local_port):
-        openport_sessions = self._get_session().query(OpenportSession).filter_by(active=True, local_port=local_port)
+        openport_sessions = self._get_session().query(OpenportSession).filter_by(active=True, local_port=local_port).all()
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
-
 
     def stop_share(self, share):
         session = self._get_session()
-        openport_session = session.query(OpenportSession).filter_by(id=share.id)
+        openport_session = session.query(OpenportSession).filter_by(id=share.id).first()
         openport_session.active = False
         session.commit()
 
