@@ -1,20 +1,18 @@
 #!/usr/bin/env python
-import os
 
 import sys
-from apps.keyhandling import get_or_create_public_key, PUBLIC_KEY_FILE, PRIVATE_KEY_FILE
-from apps.portforwarding import PortForwardingService
+from apps.keyhandling import get_or_create_public_key
 from services.logger_service import get_logger
 import urllib
 import urllib2
 import json
+from manager.globals import DEFAULT_SERVER
 
 logger = get_logger('openport_api')
 
 SERVER_SSH_PORT = 22
 FALLBACK_SERVER_SSH_PORT = 443
 SERVER_SSH_USER = 'open'
-from manager.globals import DEFAULT_SERVER
 
 
 class PortForwardResponse():
@@ -102,61 +100,6 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
         logger.error('Did not get requested server port (%s), but got %s' % (request_server_port, response.remote_port))
 
     return response
-
-
-def open_port(session, callback=None, error_callback=None, server=DEFAULT_SERVER):
-
-    from time import sleep
-    automatic_restart = False
-
-    while True:
-        try:
-            response = request_open_port(
-                session.local_port,
-                request_server_port=session.server_port,
-                restart_session_token=session.server_session_token,
-                error_callback=error_callback,
-                stop_callback=session.notify_stop,
-                http_forward=session.http_forward,
-                server=server,
-                automatic_restart=automatic_restart
-            )
-
-            session.server = response.server
-            session.server_port = response.remote_port
-            session.pid = os.getpid()
-            session.account_id = response.account_id
-            session.key_id = response.key_id
-            session.server_session_token = response.session_token
-            session.http_forward_address = response.http_forward_address
-
-            if callback is not None:
-                import threading
-                thr = threading.Thread(target=callback, args=(session,))
-                thr.setDaemon(True)
-                thr.start()
-
-            portForwardingService = PortForwardingService(
-                session.local_port,
-                response.remote_port,
-                response.server,
-                SERVER_SSH_PORT,
-                SERVER_SSH_USER,
-                PUBLIC_KEY_FILE,
-                PRIVATE_KEY_FILE,
-                success_callback=session.notify_success,
-                error_callback=session.notify_error,
-                fallback_server_ssh_port = FALLBACK_SERVER_SSH_PORT,
-                http_forward_address = session.http_forward_address
-            )
-            portForwardingService.start() #hangs
-        except SystemExit as e:
-            raise
-        except Exception as e:
-            logger.error(e)
-            sleep(10)
-        finally:
-            automatic_restart = True
 
 
 

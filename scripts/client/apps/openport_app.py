@@ -17,10 +17,10 @@ from services import osinteraction
 from services.logger_service import get_logger, set_log_level
 from services.osinteraction import is_linux, OsInteraction
 from manager.globals import Globals
-from apps.openport_api import open_port
 from common.session import Session
 from services import key_registration_service
 from manager import openportmanager, dbhandler
+from apps.openport import Openport
 
 from manager.globals import DEFAULT_SERVER
 
@@ -41,6 +41,7 @@ class OpenportApp(object):
         self.globals = Globals()
         self.args = UserDict()
         self.session = None
+        self.openport = Openport()
         if self.os_interaction.is_compiled():
             from common.tee import TeeStdErr, TeeStdOut
             TeeStdOut(self.os_interaction.get_app_data_path('openport_app.out.log'), 'a')
@@ -144,7 +145,6 @@ class OpenportApp(object):
                     logger.error('Could not start manager... Continuing...')
                 else:
                     self.inform_manager_app_new(share, manager_port, start_manager=False)
-
 
     def inform_manager_app_error(self, share, manager_port):
         url = 'http://127.0.0.1:%s/errorShare' % manager_port
@@ -254,16 +254,18 @@ class OpenportApp(object):
 
         self.args = args
 
-    def start(self):
+    def parse_args(self):
         parser = argparse.ArgumentParser()
         self.add_default_arguments(parser)
         self.args = parser.parse_args()
 
+    def start(self):
+
+        key_registration_service.register_key(self.args, self.args.server)
+
         if self.args.manager_database != '':
             dbhandler.db_location = self.args.manager_database
         self.db_handler = dbhandler.getInstance()
-
-        key_registration_service.register_key(self.args, self.args.server)
 
         self.init_app(self.args)
 
@@ -294,6 +296,8 @@ class OpenportApp(object):
                 logger.debug("retrieved db share session token: %s" % db_share[0].server_session_token)
                 session.server_session_token = db_share[0].server_session_token
                 session.server_port = db_share[0].server_port
+            else:
+                logger.debug('No db share session could be found.')
         session.http_forward = self.args.http_forward
 
         #        app.MainLoop()
@@ -303,7 +307,7 @@ class OpenportApp(object):
 
         self.session = session
 
-        open_port(session, callback, show_error, server=self.args.server)
+        self.openport.start_port_forward(session, callback, show_error, server=self.args.server)
 
     def error_callback(self, session):
         logger.debug('error_callback')
@@ -322,6 +326,11 @@ class OpenportApp(object):
         if self.args.manager_port > 0 and self.manager_app_started:
             self.inform_manager_app_stop(session, self.args.manager_port)
 
+    def stop(self):
+        self.openport.stop_port_forward()
+        if self.session:
+            self.session.notify_stop()
+
 
 if __name__ == '__main__':
 
@@ -332,4 +341,5 @@ if __name__ == '__main__':
 
     app = OpenportApp()
 
+    app.parse_args()
     app.start()

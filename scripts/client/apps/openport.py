@@ -1,107 +1,80 @@
-#!/usr/bin/python
-import warnings
-
-warnings.warn("deprecated", DeprecationWarning)
+import os
+from time import sleep
 from manager.globals import DEFAULT_SERVER
 
+from apps import openport_api
+from apps.portforwarding import PortForwardingService
+from apps.keyhandling import PUBLIC_KEY_FILE, PRIVATE_KEY_FILE
+from services.logger_service import get_logger
 
-import os
-from sys import argv
-import subprocess
-import signal
-import time
-import sys
+logger = get_logger('openport')
 
-try:
-    import json
-except ImportError:
-    try:
-        import simplejson as json
-    except ImportError:
-        print 'You need python 2.6 or simplejson to run this application.'
-        sys.exit(1)
-
-def request_port(public_key, local_port=None, url='http://%s/post' % DEFAULT_SERVER, restart_session_token='',
-                 request_server_port=-1, http_forward=False, automatic_restart=False):
-    """
-    Requests a port on the server using the openPort protocol
-    return a tuple with ( server_ip, server_port, message )
-    """
-    import urllib, urllib2
-
-    try:
-        data = urllib.urlencode({
-            'public_key': public_key,
-            'request_port': request_server_port,
-            'restart_session_token': restart_session_token,
-            'http_forward': 'on' if http_forward else '',
-            'automatic_restart': 'on' if automatic_restart else '',
-            'local_port': local_port,
-            })
-        req = urllib2.Request(url, data)
-        response = urllib2.urlopen(req).read()
-        dict = json.loads(response)
-        return dict
-    except Exception, detail:
-        print "An error has occurred while communicating the the openport servers. ", detail, detail.read()
-        raise detail
+SERVER_SSH_PORT = 22
+FALLBACK_SERVER_SSH_PORT = 443
+SERVER_SSH_USER = 'open'
 
 
-def handleSigTERM(signum, frame):
-    """
-    This kills the ssh process when you terminate the application.
-    """
-    global s
-    print 'killing process %s' % s.pid
-    try:
-        os.kill(s.pid, signal.SIGKILL)
-    except OSError:
-        pass
-    exit(3)
+class Openport(object):
 
-def getPublicKey():
-    """
-    Gets content of the public key file.
-    """
-    key_file = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
-    f = open(key_file, 'r')
-    key = f.readline()
-    if key == '':
-        print 'could not read key: %s' % key_file
-        exit(4)
-    return key
+    def __init__(self):
+        self.port_forwarding_service = None
+        self.restart_on_failure = True
 
-def startSession(server_ip, server_port, local_port, message):
-    """
-    This starts a remote ssh session to the given server server.
-    """
+    def start_port_forward(self, session, callback=None, error_callback=None, server=DEFAULT_SERVER):
 
-    command_list = ['ssh', '-R', '*:%s:localhost:%s' % (server_port, local_port), 'open@%s' % server_ip, '-o',
-                    'StrictHostKeyChecking=no', '-o', 'ExitOnForwardFailure=yes', 'while true; do sleep 10; done']
-    s = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
+        self.restart_on_failure = True
+        automatic_restart = False
 
-    time.sleep(2)
+        while self.restart_on_failure:
+            try:
+                response = openport_api.request_open_port(
+                    session.local_port,
+                    request_server_port=session.server_port,
+                    restart_session_token=session.server_session_token,
+                    error_callback=error_callback,
+                    stop_callback=session.notify_stop,
+                    http_forward=session.http_forward,
+                    server=server,
+                    automatic_restart=automatic_restart
+                )
 
-    if s.poll() is not None:
-        print '%s - %s' % (s.stdout.read(), s.stderr.read())
-        exit(7)
+                session.server = response.server
+                session.server_port = response.remote_port
+                session.pid = os.getpid()
+                session.account_id = response.account_id
+                session.key_id = response.key_id
+                session.server_session_token = response.session_token
+                session.http_forward_address = response.http_forward_address
 
-    print u'You are now connected, your port %s can now be accessed on %s:%s\n%s' % (
-        local_port, server_ip, server_port, message)
-    return s
+                if callback is not None:
+                    import threading
+                    thr = threading.Thread(target=callback, args=(session,))
+                    thr.setDaemon(True)
+                    thr.start()
 
+                self.port_forwarding_service = PortForwardingService(
+                    session.local_port,
+                    response.remote_port,
+                    response.server,
+                    SERVER_SSH_PORT,
+                    SERVER_SSH_USER,
+                    PUBLIC_KEY_FILE,
+                    PRIVATE_KEY_FILE,
+                    success_callback=session.notify_success,
+                    error_callback=session.notify_error,
+                    fallback_server_ssh_port=FALLBACK_SERVER_SSH_PORT,
+                    http_forward_address=session.http_forward_address
+                )
+                self.port_forwarding_service.start() #hangs
+            except SystemExit as e:
+                raise
+            except Exception as e:
+                logger.error(e)
+                sleep(10)
+            finally:
+                automatic_restart = True
 
-if __name__ == '__main__':
-    local_port=argv[1]
-    request_server_port = argv[2] if len(argv) >= 4 else -1
-    restart_session_token = argv[3] if len(argv) >= 4 else -1
-    signal.signal(signal.SIGTERM, handleSigTERM)
-    signal.signal(signal.SIGINT, handleSigTERM)
-
-    key = getPublicKey()
-    dict = request_port(key, restart_session_token=restart_session_token, request_server_port=request_server_port)
-    if 'error' in dict:
-        print dict['error']
-        sys.exit(9)
-    s = startSession(dict['server_ip'], dict['server_port'], local_port, dict['message'])
-    s.wait()
+    def stop_port_forward(self):
+        self.restart_on_failure = False
+        if self.port_forwarding_service:
+            self.port_forwarding_service.stop()
