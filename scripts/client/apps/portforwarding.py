@@ -9,13 +9,16 @@ import errno
 
 logger = get_logger(__name__)
 
+
 class PortForwardException(Exception):
     pass
+
 
 class IgnoreUnknownHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     """A Paramiko policy that ignores UnknownHostKeyError for missing keys."""
     def missing_host_key(self, client, hostname, key):
         pass
+
 
 class PortForwardingService:
 
@@ -30,7 +33,8 @@ class PortForwardingService:
                  error_callback=None,
                  success_callback=None,
                  fallback_server_ssh_port=None,
-                 http_forward_address=None):
+                 http_forward_address=None,
+                 start_callback=None):
         self.local_port       = local_port
         self.remote_port      = remote_port
         self.server           = server
@@ -43,7 +47,8 @@ class PortForwardingService:
         self.fallback_server_ssh_port = fallback_server_ssh_port
         self.http_forward_address = http_forward_address
         self.client = paramiko.SSHClient()
-        self.client.set_missing_host_key_policy( IgnoreUnknownHostKeyPolicy() )
+        self.client.set_missing_host_key_policy(IgnoreUnknownHostKeyPolicy())
+        self.start_callback = start_callback
 
     def stop(self):
         self.client.close()
@@ -53,14 +58,12 @@ class PortForwardingService:
         self.client.load_system_host_keys()
 
         logger.debug('Connecting to ssh host %s:%d ...' % (self.server, self.server_ssh_port))
-
- #          paramiko.util.log_to_file('c:/users/jan/paramikofilename.log')
         pk = paramiko.RSAKey(filename=self.private_key_file)
 
         try:
             self.client.connect(self.server, self.server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
         except Exception, e:
-            logger.error( '*** Failed to connect to %s:%d: %r' % (self.server, self.server_ssh_port, e) )
+            logger.error('*** Failed to connect to %s:%d: %r' % (self.server, self.server_ssh_port, e))
             if self.fallback_server_ssh_port is not None:
                 try:
                     self.client.connect(
@@ -80,37 +83,37 @@ class PortForwardingService:
             thr = threading.Thread(target=self._forward_local_port)
             thr.setDaemon(True)
             thr.start()
-            if self.http_forward_address is None or self.http_forward_address == '':
-                logger.info('Now forwarding remote port %s:%d to localhost:%d .\n'
-                            'You can keep track of your shares on https://openport.io/user .'
-                            % (self.server, self.remote_port, self.local_port))
-            else:
-                logger.info('Now forwarding remote address %s to localhost:%d .\n'
-                            'You can keep track of your shares on https://openport.io/user .'
-                            % (self.http_forward_address, self.local_port))
+
+            if self.start_callback:
+                start_callback_thread = threading.Thread(target=self.start_callback)
+                start_callback_thread.setDaemon(True)
+                start_callback_thread.start()
 
             self.keep_alive()
         except KeyboardInterrupt, e:
-            logger.info( 'C-c: Port forwarding stopped.' )
+            self.stop()
+            logger.info('Ctrl-c: Port forwarding stopped.')
 #            sys.exit(0)
 
     def keep_alive(self):
-        errorCount = 0
-        while errorCount < 2:
+        error_count = 0
+        while error_count < 2:
             if self.portForwardingRequestException is not None:
                 if self.error_callback:
                     self.error_callback()
-                raise PortForwardException('port forwarding thread gave an exception...', self.portForwardingRequestException)
+                raise PortForwardException('port forwarding thread gave an exception...',
+                                           self.portForwardingRequestException)
             try:
                 self.client.exec_command('echo ""')
                 if self.success_callback:
                     self.success_callback()
                 time.sleep(10)
+                error_count = 0
             except Exception, ex:
-                errorCount+=1
+                error_count += 1
                 if self.error_callback:
                     self.error_callback()
-                logger.exception( ex )
+                logger.debug(ex)
         raise PortForwardException('keep_alive stopped')
 
     def _forward_local_port(self):

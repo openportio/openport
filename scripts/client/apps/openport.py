@@ -3,7 +3,7 @@ from time import sleep
 from manager.globals import DEFAULT_SERVER
 
 from apps import openport_api
-from apps.portforwarding import PortForwardingService
+from apps.portforwarding import PortForwardingService, PortForwardException
 from apps.keyhandling import PUBLIC_KEY_FILE, PRIVATE_KEY_FILE
 from services.logger_service import get_logger
 
@@ -19,11 +19,16 @@ class Openport(object):
     def __init__(self):
         self.port_forwarding_service = None
         self.restart_on_failure = True
+        self.session = None
+        self.automatic_restart = False
+        self.repeat_message = True
+
 
     def start_port_forward(self, session, callback=None, error_callback=None, server=DEFAULT_SERVER):
 
         self.restart_on_failure = True
-        automatic_restart = False
+        self.automatic_restart = False
+        self.session = session
 
         while self.restart_on_failure:
             try:
@@ -35,8 +40,11 @@ class Openport(object):
                     stop_callback=session.notify_stop,
                     http_forward=session.http_forward,
                     server=server,
-                    automatic_restart=automatic_restart
+                    automatic_restart=self.automatic_restart
                 )
+
+                if session.server_port != response.remote_port:
+                    self.repeat_message = True
 
                 session.server = response.server
                 session.server_port = response.remote_port
@@ -63,16 +71,33 @@ class Openport(object):
                     success_callback=session.notify_success,
                     error_callback=session.notify_error,
                     fallback_server_ssh_port=FALLBACK_SERVER_SSH_PORT,
-                    http_forward_address=session.http_forward_address
+                    http_forward_address=session.http_forward_address,
+                    start_callback=self.show_message
                 )
                 self.port_forwarding_service.start() #hangs
+            except PortForwardException as e:
+                logger.info('The port forwarding has stopped: %s' % e)
             except SystemExit as e:
                 raise
             except Exception as e:
                 logger.error(e)
                 sleep(10)
             finally:
-                automatic_restart = True
+                self.automatic_restart = True
+
+    def show_message(self):
+        if not self.session:
+            logger.error('session is None???')
+        elif not self.automatic_restart or self.repeat_message:
+            if self.session.http_forward_address is None or self.session.http_forward_address == '':
+                logger.info('Now forwarding remote port %s:%d to localhost:%d .\n'
+                            'You can keep track of your shares on https://openport.io/user .'
+                            % (self.session.server, self.session.server_port, self.session.local_port))
+            else:
+                logger.info('Now forwarding remote address %s to localhost:%d .\n'
+                            'You can keep track of your shares on https://openport.io/user .'
+                            % (self.session.http_forward_address, self.session.local_port))
+        self.repeat_message = False
 
     def stop_port_forward(self):
         self.restart_on_failure = False
