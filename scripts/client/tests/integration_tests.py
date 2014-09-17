@@ -18,7 +18,7 @@ import xmlrunner
 print sys.path
 
 from apps.openportit import OpenportItApp
-from apps.openport_api import open_port
+from apps.openport import Openport
 from common.share import Share
 from common.session import Session
 
@@ -175,7 +175,7 @@ class IntegrationTest(unittest.TestCase):
         #self.assertEqual('done', response.strip())
 
         dict = request_port(
-            url='http://%s/post' % self.test_server,
+            url='https://%s/api/v1/request-port' % self.test_server,
             public_key=get_or_create_public_key(),
             restart_session_token=share.server_session_token,
             request_server_port=port
@@ -184,7 +184,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(port, response.remote_port)
 
         dict = request_port(
-            url='http://%s/post' % self.test_server,
+            url='https://%s/api/v1/request-port' % self.test_server,
             public_key=get_or_create_public_key(),
             restart_session_token='not the same token',
             request_server_port=port
@@ -197,14 +197,14 @@ class IntegrationTest(unittest.TestCase):
         private_key, public_key = create_new_key_pair()
 
         dictionary = request_port(
-            url='http://%s/post' % self.test_server,
+            url='https://%s/api/v1/request-port' % self.test_server,
             public_key=public_key
         )
 
         response = PortForwardResponse(dictionary)
 
         dictionary2 = request_port(
-            url='http://%s/post' % self.test_server,
+            url='https://%s/api/v1/request-port' % self.test_server,
             public_key=public_key,
             restart_session_token=response.session_token,
             request_server_port=response.remote_port
@@ -215,7 +215,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(response2.remote_port, response.remote_port)
 
         dictionary3 = request_port(
-            url='http://%s/post' % self.test_server,
+            url='https://%s/api/v1/request-port' % self.test_server,
             public_key=public_key,
             restart_session_token='not the same token',
             request_server_port=response.remote_port
@@ -251,7 +251,8 @@ class IntegrationTest(unittest.TestCase):
         session.http_forward = True
 
         def start_openport():
-            open_port(session, callback, show_error, server=self.test_server)
+            openport = Openport()
+            openport.start_port_forward(session, callback, show_error, server=self.test_server)
 
         thr = threading.Thread(target=start_openport)
         thr.setDaemon(True)

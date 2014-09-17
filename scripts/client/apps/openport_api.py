@@ -38,7 +38,8 @@ class PortForwardResponse():
         self.http_forward_address = dict['http_forward_address']
 
 
-def request_port(public_key, local_port=None, url='http://%s/post' % DEFAULT_SERVER, restart_session_token='',
+def request_port(public_key, local_port=None, url='https://%s/api/v1/request-port' % DEFAULT_SERVER,
+                 restart_session_token='',
                  request_server_port=-1, http_forward=False, automatic_restart=False):
     """
     Requests a port on the server using the openPort protocol
@@ -77,7 +78,7 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
     public_key = get_or_create_public_key()
 
     logger.debug("requesting port forward - remote port: %s, restart session token: %s" % (request_server_port, restart_session_token))
-    url = 'http://%s/post' % server
+    url = 'https://%s/api/v1/request-port' % server
     dict = request_port(local_port=local_port, public_key=public_key, url=url,
                         restart_session_token=restart_session_token,
                         request_server_port=request_server_port, http_forward=http_forward,

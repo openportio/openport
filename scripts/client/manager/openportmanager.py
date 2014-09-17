@@ -109,7 +109,7 @@ class OpenPortManager(object):
                         dict = self.check_account()
                         self.show_account_status(dict)
                     except Exception, detail:
-                        logger.error("An error has occurred while communicating the the openport servers. %s" % detail)
+                        logger.error("An error has occurred while communicating with the openport servers. %s" % detail)
                         pass
 
                     time.sleep(60)
@@ -118,18 +118,19 @@ class OpenPortManager(object):
         t.start()
 
     def check_account(self):
-        url = 'http://%s/api/v1/account/%s/%s' % (self.globals.openport_address, self.globals.account_id, self.globals.key_id)
+        url = 'https://%s/api/v1/account/%s/%s' % (self.globals.openport_address, self.globals.account_id, self.globals.key_id)
         logger.debug('checking account: %s' % url)
         try:
             req = urllib2.Request(url)
             response = urllib2.urlopen(req).read()
-            logger.debug( response )
-            dict = json.loads(response)
-            if 'error' in dict:
-                logger.error( dict['error'] )
-            return dict
+            logger.debug(response)
+            response_dict = json.loads(response)
+            if 'error' in response_dict:
+                logger.error(response_dict['error'])
+            return response_dict
         except Exception, detail:
-            logger.error( "An error has occurred while communicating the the openport servers. %s" % detail )
+            logger.error("An error has occurred while checking the account on the openport "
+                         "servers. %s %s" % (url, detail))
             raise detail
             #sys.exit(9)
 

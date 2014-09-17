@@ -91,11 +91,11 @@ class Openport(object):
         elif not self.automatic_restart or self.repeat_message:
             if self.session.http_forward_address is None or self.session.http_forward_address == '':
                 logger.info('Now forwarding remote port %s:%d to localhost:%d .\n'
-                            'You can keep track of your shares on https://openport.io/user .'
+                            'You can keep track of your shares at https://openport.io/user .'
                             % (self.session.server, self.session.server_port, self.session.local_port))
             else:
                 logger.info('Now forwarding remote address %s to localhost:%d .\n'
-                            'You can keep track of your shares on https://openport.io/user .'
+                            'You can keep track of your shares at https://openport.io/user .'
                             % (self.session.http_forward_address, self.session.local_port))
         self.repeat_message = False
 

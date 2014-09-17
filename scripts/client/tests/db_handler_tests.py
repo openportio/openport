@@ -161,6 +161,8 @@ class DBHandlerTests(unittest.TestCase):
         def get_share():
             share2 = Share(local_port=23)
             self.dbhandler.add_share(share2)
+            # It is super important that the session is closed on the end of the thread, otherwise this will result in
+            # an error when the current thread is trying to close it.
             self.dbhandler.Session.remove()
         thr = threading.Thread(target=get_share)
         thr.setDaemon(True)

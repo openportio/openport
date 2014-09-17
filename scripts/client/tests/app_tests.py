@@ -72,7 +72,7 @@ class AppTests(unittest.TestCase):
                               '--server', 'test.openport.be', '--verbose'],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
-        sleep(5)
+        sleep(10)
         process_output = self.osinteraction.get_all_output(p)
         print 'std_out: ', process_output[0]
         print 'std_err: ', process_output[1]
@@ -125,7 +125,7 @@ class AppTests(unittest.TestCase):
                               '--manager-port', '-1', '--http-forward'],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
-        sleep(5)
+        sleep(10)
         process_output = self.osinteraction.get_all_output(p)
         print 'std_out: ', process_output[0]
         print 'std_err: ', process_output[1]
@@ -354,7 +354,10 @@ class AppTests(unittest.TestCase):
             self.fail()
 
     def test_manager_kills_restarted_openport_processes(self):
+        """ Test to see that the manager kills the jobs it has restarted.
+        """
 
+        # Starting the manager
         manager_port = get_open_port()
         print 'manager port: ', manager_port
         self.manager_port = manager_port
@@ -381,6 +384,8 @@ class AppTests(unittest.TestCase):
 
         self.assertTrue(self.managerIsRunning(manager_port))
 
+        # Starting http server
+
         port = get_open_port()
         print 'local port: ', port
 
@@ -388,13 +393,18 @@ class AppTests(unittest.TestCase):
         s.reply('echo')
         s.runThreaded()
 
+        # Starting openport session
+
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                                   '--verbose', '--server', 'test.openport.be', '--manager-port', str(manager_port),
                                   '--http-forward', '--manager-database', db_file, '--restart-on-reboot'],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
         print "p_app pid:", p_app.pid
-        sleep(5)
+        sleep(10)
+
+        # Checking that everything is still running.
+
         process_output = self.osinteraction.get_all_output(p_manager)
         print lineNumber(), 'p_manager std_out: ', process_output[0]
         print lineNumber(), 'p_manager std_err: ', process_output[1]
@@ -403,7 +413,9 @@ class AppTests(unittest.TestCase):
         print lineNumber(), 'p_app std_out: ', process_output[0]
         print lineNumber(), 'p_app std_err: ', process_output[1]
         remote_host = self.getRemoteAddress(process_output[0])
-        sleep(5)
+        sleep(10)
+
+        # Checking the connection.
 
         cr = SimpleHTTPClient()
         try:
@@ -416,12 +428,17 @@ class AppTests(unittest.TestCase):
             logger.error(tr)
             self.fail('first port forwarding failed')
 
+        # Killing the manager
+
         self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
         sleep(3)
         process_output = self.osinteraction.get_all_output(p_manager)
         print lineNumber(), 'p_manager std_out: ', process_output[0]
         print lineNumber(), 'p_manager std_err: ', process_output[1]
         self.assertFalse(self.managerIsRunning(manager_port))
+
+        # Checking that the connection is down.
+
         try:
             self.assertEqual('echo', cr.get(url, print500=False))
             self.fail('expecting an exception')
@@ -429,7 +446,9 @@ class AppTests(unittest.TestCase):
             pass
         print p_app.communicate()
         self.assertFalse(self.osinteraction.pid_is_running(p_app.pid))
+
         # Restarting manager, should restart port-forwarding app
+
         p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', db_file,
                                       '--verbose', '--manager-port', str(manager_port), '--server', 'test.openport.be',
                                       '--restart-shares'],
@@ -443,6 +462,8 @@ class AppTests(unittest.TestCase):
         self.assertTrue(self.managerIsRunning(manager_port))
         self.assertEqual(1, self.get_share_count_of_manager(manager_port))
 
+        # Checking that http server is still running
+
         local_url = 'http://127.0.0.1:%s' % port
         try:
             self.assertEqual('echo', cr.get(local_url))
@@ -452,8 +473,14 @@ class AppTests(unittest.TestCase):
             logger.error(tr)
             self.fail('calling local port failed')
 
-        print url
+        print "url2: %s" % url
         sleep(15)
+
+        process_output = self.osinteraction.get_all_output(p_manager)
+        print lineNumber(), 'p_manager std_out: ', process_output[0]
+        print lineNumber(), 'p_manager std_err: ', process_output[1]
+        # Checking that the openport session has restarted.
+
         try:
             self.assertEqual('echo', cr.get(url, print500=False))
         except Exception, e:
@@ -463,6 +490,7 @@ class AppTests(unittest.TestCase):
             self.fail('second port forwarding failed')
 
         # Killing the manager should also kill the app
+
         self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
         sleep(1)
 
@@ -471,6 +499,9 @@ class AppTests(unittest.TestCase):
         print lineNumber(), 'p_manager std_err: ', process_output[1]
 
         self.assertFalse(self.managerIsRunning(manager_port))
+
+        # Checking that the openport session has ended.
+
         try:
             self.assertEqual('echo', cr.get(url, print500=False))
             self.fail('expecting an exception')

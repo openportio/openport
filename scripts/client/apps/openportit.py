@@ -6,7 +6,6 @@ from services import crypt_service
 from common.share import Share
 from services.logger_service import get_logger
 from apps.servefile import serve_file_on_port
-from apps.openport_api import open_port
 from time import sleep
 logger = get_logger('openportit')
 
@@ -33,7 +32,8 @@ class OpenportItApp(OpenportApp):
         thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, share.local_port, share.token))
         thr.setDaemon(True)
         thr.start()
-        open_port(share, callback=callback, server=self.args.server)
+
+        self.openport.start_port_forward(share, callback=callback, server=self.args.server)
 
     def start(self):
         logger.debug('client pid:%s' % os.getpid())

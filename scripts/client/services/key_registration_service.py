@@ -20,8 +20,7 @@ def register_key(args, server=DEFAULT_SERVER):
         public_key = get_or_create_public_key()
         token = args.register_key
 
-        #TODO: https
-        url = "http://%s/linkKey" % server
+        url = "https://%s/linkKey" % server
 
         try:
             data = urllib.urlencode({
