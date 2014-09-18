@@ -36,7 +36,9 @@ debuild -us -uc
 
 cd ../..
 sudo rm -rf /usr/bin/openport
-sudo rm -f /etc/init.d/openport
+#if [ -e /etc/init.d/openport ] ; then
+#	sudo rm -f /etc/init.d/openport
+#fi
 sudo rm -f /etc/init.d/openport-manager
 
 sudo killall python
