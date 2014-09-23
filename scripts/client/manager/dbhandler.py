@@ -61,6 +61,9 @@ class DBHandler(object):
         Base.metadata.create_all(self.engine)
         self.Session.remove()
 
+    def close(self):
+        self.engine.dispose()
+
     def add_share(self, share):
         logger.debug('add share')
         openport_session = OpenportSession()

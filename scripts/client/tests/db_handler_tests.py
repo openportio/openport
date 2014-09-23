@@ -21,15 +21,14 @@ class DBHandlerTests(unittest.TestCase):
 
         dbhandler.TIMEOUT = 3
         self.test_db = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'db_test.db')
-        try:
+        if os.path.exists(self.test_db):
             os.remove(self.test_db)
-        except:
-            pass
         set_log_level(logging.DEBUG)
         self.dbhandler = dbhandler.DBHandler(self.test_db)
         self.dbhandler.init_db()
 
     def tearDown(self):
+        self.dbhandler.close()
         sleep(1)
 
     def test_save_share(self):
@@ -74,39 +73,55 @@ class DBHandlerTests(unittest.TestCase):
         share.local_port = 2224
         saved_share = self.dbhandler.add_share(share)
         retrieved_share = dbhandler2.get_share(saved_share.id)
-
-        self.assertEqual(retrieved_share.local_port, share.local_port)
+        try:
+            self.assertEqual(retrieved_share.local_port, share.local_port)
+        finally:
+            dbhandler2.close()
 
     def test_concurrency_2(self):
         dbhandler2 = dbhandler.DBHandler(self.test_db)
+        try:
 
-        share = Share()
-        share.local_port = 2224
-        saved_share = self.dbhandler.add_share(share)
-        retrieved_share = dbhandler2.get_share(saved_share.id)
+            share = Share()
+            share.local_port = 2224
 
-        self.assertEqual(retrieved_share.local_port, share.local_port)
+            share2 = Share()
+            share2.local_port = 2225
+
+            saved_share = self.dbhandler.add_share(share)
+            saved_share2 = dbhandler2.add_share(share2)
+
+            retrieved_share2 = self.dbhandler.get_share_by_local_port(2225)[0]
+            retrieved_share = self.dbhandler.get_share_by_local_port(2224)[0]
+
+            self.assertEqual(retrieved_share.local_port, share.local_port)
+            self.assertEqual(retrieved_share2.local_port, share2.local_port)
+        finally:
+            dbhandler2.close()
 
     def test_stress_test(self):  
         share = Share()
 
         dbhandler2 = dbhandler.DBHandler(self.test_db)
 
-        errors = []
-        for i in range(100):
-          try:
-            share.local_port = i
-            saved_share = self.dbhandler.add_share(share)
-            retrieved_share = dbhandler2.get_share(saved_share.id)
-            self.assertEqual(retrieved_share.local_port, share.local_port)
+        try:
+            errors = []
+            for i in range(100):
+              try:
+                share.local_port = i
+                saved_share = self.dbhandler.add_share(share)
+                retrieved_share = dbhandler2.get_share(saved_share.id)
+                self.assertEqual(retrieved_share.local_port, share.local_port)
 
-            saved_share = dbhandler2.add_share(share)
-            retrieved_share = self.dbhandler.get_share(saved_share.id)
-            self.assertEqual(retrieved_share.local_port, share.local_port)
-          except:
-            print 'error on i:%s' % i
-            errors.append(i)
-        self.assertEqual([], errors)
+                saved_share = dbhandler2.add_share(share)
+                retrieved_share = self.dbhandler.get_share(saved_share.id)
+                self.assertEqual(retrieved_share.local_port, share.local_port)
+              except:
+                print 'error on i:%s' % i
+                errors.append(i)
+            self.assertEqual([], errors)
+        finally:
+            dbhandler2.close()
 
     def test_get_shares(self):
         share1 = Share(active=False)

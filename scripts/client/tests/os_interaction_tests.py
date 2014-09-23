@@ -96,5 +96,22 @@ class OsInteractionTest(unittest.TestCase):
         output = run_command_with_timeout(command, 1)
         self.assertEqual(('hello', False), output)
 
+    def test_pid_is_running(self):
+        command = self.os_interaction.get_python_exec()
+        command.extend(['-c', "print 'hello'"])
+        process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   shell=not is_linux(),
+                                   close_fds=is_linux())
+        process.wait()
+        self.assertFalse(self.os_interaction.pid_is_running(process.pid))
+
+        command = self.os_interaction.get_python_exec()
+        command.extend(['-c', "from time import sleep;sleep(1); print 'hello'"])
+        process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   shell=not is_linux(),
+                                   close_fds=is_linux())
+        self.assertTrue(self.os_interaction.pid_is_running(process.pid))
+
+
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

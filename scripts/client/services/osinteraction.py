@@ -7,6 +7,7 @@ import sys
 from threading import Thread
 from time import sleep
 import signal
+import psutil
 
 try:
     from Queue import Queue, Empty
@@ -310,7 +311,7 @@ class LinuxOsInteraction(OsInteraction):
 class WindowsOsInteraction(OsInteraction):
     def __init__(self, use_logger=True):
         super(WindowsOsInteraction, self).__init__(use_logger)
-        self.APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'OpenportIt')
+        self.APP_DATA_PATH = os.path.join(os.environ['APPDATA'], 'Openport')
 
     def get_detached_process_creation_flag(self):
         return 8
@@ -323,17 +324,11 @@ class WindowsOsInteraction(OsInteraction):
 
     def pid_is_running(self, pid):
         """Check whether pid exists in the current process table."""
-        return False
-        #todo: psutil?
-        #            import wmi
-        #            c = wmi.WMI()
-        #            for process in c.Win32_Process ():
-        #                if pid == process.ProcessId:
-        #                    return True
-        #            return False
+        return psutil.pid_exists(pid)
 
     def kill_pid(self, pid, signal='Ignore'):
         a = self.run_shell_command(['taskkill', '/pid', '%s' % pid, '/f', '/t'])
+        self.logger.debug('kill command output: %s %s' % a)
         return a[0].startswith('SUCCESS')
 
     def is_compiled(self):

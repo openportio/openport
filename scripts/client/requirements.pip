@@ -15,6 +15,7 @@ git+https://github.com/pyinstaller/pyinstaller.git@develop
 #pyinstaller
 sqlalchemy
 alembic
+psutil
 
 # For the error 'no module named wsgiserver2':
 # cd scripts/client/env/lib/python2.7/site-packages/cherrypy/wsgiserver

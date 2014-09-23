@@ -57,7 +57,7 @@ class OpenPortManager(object):
         logger.debug('restarting shares - amount: %s' % len(list(shares)))
         for share in shares:
             if self.os_interaction.pid_is_running(share.pid):
-                logger.debug('share still running: %s' % share.restart_command)
+                logger.debug('share still running. Pid: %s command: %s' % (share.pid, share.restart_command))
                 self.onNewShare(share)
             else:
                 try:
@@ -214,10 +214,10 @@ def start_manager():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--restart-shares', action='store_true', help='Restart all active shares.')
-    parser.add_argument('--verbose', action='store_true', help='Be verbose.')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
     parser.add_argument('--database', '-d', action='store', help='Use the following database file.', default='')
     parser.add_argument('--manager-port', '-p', action='store', type=int,
-                        help='The port the manager communicates on with it''s child processes.', default=8001) #TODO random port??
+                        help='The port the manager communicates on with it''s child processes.', default=8001)  #TODO random port??
     parser.add_argument('--server', '-s', action='store', type=str, default=DEFAULT_SERVER, help=argparse.SUPPRESS)
     parser.add_argument('--list', '-l', action='store_true', help="list shares and exit")
     parser.add_argument('--kill', '-k', action='store', type=int, help="Stop a share", default=0)

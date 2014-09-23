@@ -67,9 +67,12 @@ def request_port(public_key, local_port=None, url='https://%s/api/v1/request-por
             logger.error(detail.read())
         raise
     except Exception, detail:
-        logger.debug('error: got response: %s' % response)
-        logger.error("An error has occurred while communicating the the openport servers. %s" % detail)
-        raise
+        try:
+            logger.debug('error: got response: %s' % response)
+        except:
+            pass
+        print "An error has occurred while communicating the the openport servers. ", detail, detail.read()
+        raise detail
 
 
 def request_open_port(local_port, restart_session_token='', request_server_port=-1, error_callback=None,

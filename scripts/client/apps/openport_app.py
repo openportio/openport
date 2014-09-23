@@ -239,11 +239,11 @@ class OpenportApp(object):
         parser.add_argument('--restart-on-reboot', '-R', action='store_true', help='Restart this share when the manager app is started.')
 
     def init_app(self, args):
-        logger.debug('client pid:%s' % os.getpid())
         if args.verbose:
             from logging import DEBUG
             set_log_level(DEBUG)
-
+        logger.debug('client pid:%s' % os.getpid())
+        logger.debug('sys.argv: %s' % sys.argv)
         if not args.restart_on_reboot:
             args.manager_port = -1
 

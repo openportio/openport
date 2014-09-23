@@ -35,6 +35,7 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill = []
         self.osinteraction = osinteraction.getInstance()
         self.manager_port = -1
+        self.assertFalse(self.managerIsRunning(8001))
 
     def tearDown(self):
         kill_all_processes(self.processes_to_kill)
@@ -321,6 +322,10 @@ class AppTests(unittest.TestCase):
 
         self.kill_manager(manager_port)
         kill_all_processes(self.processes_to_kill)
+        i = 0
+        while self.osinteraction.pid_is_running(p_app.pid) and i < 30:
+            sleep(1)
+        self.assertFalse(self.osinteraction.pid_is_running(p_app.pid), 'could not kill the app.')
 
         new_manager_port = get_open_port()
         print 'new manager port:', new_manager_port
@@ -336,7 +341,7 @@ class AppTests(unittest.TestCase):
         sleep(15)
         process_output = self.osinteraction.get_all_output(p_manager2)
         for out in process_output:
-            print lineNumber(), 'p_manager2: ', out
+            print lineNumber(), 'p_manager2: <<<', out, '>>>'
         self.assertEqual(1, self.get_share_count_of_manager(new_manager_port))
 
         print "http://%s:%s" % (remote_host, remote_port)
