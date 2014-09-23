@@ -34,7 +34,7 @@ class IntegrationTest(unittest.TestCase):
         self.test_server = 'test.openport.be'
 
     def test_start_share(self):
-        path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.png')
+        path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.ico')
         share = self.get_share(path)
         self.start_sharing(share)
         temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath) + get_token(3))
@@ -150,7 +150,7 @@ class IntegrationTest(unittest.TestCase):
             self.fail('number of errors: %s First error: %s' % (len(errors), errors[0]))
 
     def test_same_port(self):
-        path = os.path.join(os.path.dirname(__file__), '../logo-base.png')
+        path = os.path.join(os.path.dirname(__file__), '../logo-base.ico')
         share = self.get_share(path)
         self.success_called_back = False
         def success_callback(share):

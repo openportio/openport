@@ -1,12 +1,9 @@
 ; Includes
 !include "MUI2.nsh"
 
-
-!define APPNAME "OpenPort-It"
+!define APPNAME "Openport"
 !define INSTDIR "$PROGRAMFILES\${APPNAME}"
-!define OPENPORTIT_EXE "openportit.exe"
-!define OPENPORT_EXE "openport_app.exe"
-!define OPENPORT_MANAGER_EXE "openport-manager.exe"
+!define OPENPORT_EXE "openport.exe"
 
 Name "${APPNAME}"
 OutFile "${APPNAME}.exe"
@@ -48,14 +45,17 @@ InstallDir ${INSTDIR}
 !insertmacro MUI_LANGUAGE "English"
 BrandingText "http://www.openport.io/"
 
+
+!include "EnvVarUpdate.nsh"
+
 Section # hidden section
 	setOutPath $INSTDIR
 	file /r ..\dist\*.* 
 	file ..\resources\logo-base.ico
-	file ..\resources\server.pem
+;	file ..\resources\server.pem
 	#messageBox MB_OK "instdir: $INSTDIR"
-	WriteRegStr HKCR "*\shell\${APPNAME}\command" "" "$INSTDIR\${OPENPORTIT_EXE} $\"%1$\""
-	WriteRegStr HKCR "Directory\shell\${APPNAME}\command" "" "$INSTDIR\${OPENPORTIT_EXE} $\"%1$\""
+;	WriteRegStr HKCR "*\shell\${APPNAME}\command" "" "$INSTDIR\${OPENPORT_EXE} $\"%1$\""
+;	WriteRegStr HKCR "Directory\shell\${APPNAME}\command" "" "$INSTDIR\${OPENPORT_EXE} $\"%1$\""
 	writeUninstaller "$INSTDIR\Uninstall.exe"
 	; Write uninstaller to add/remove programs.
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"
@@ -64,15 +64,17 @@ Section # hidden section
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" "$INSTDIR\Uninstall.exe"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "InstallLocation" "$INSTDIR"
 	
-	# Start Menu
-	createShortCut "$SMPROGRAMS\${APPNAME}.lnk" "$INSTDIR\${OPENPORT_MANAGER_EXE}" "" "$INSTDIR\logo-base.ico"
-	
+;	# Start Menu
+;	createShortCut "$SMPROGRAMS\${APPNAME}.lnk" "$INSTDIR\${OPENPORT_MANAGER_EXE}" "" "$INSTDIR\logo-base.ico"
+
+	${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR"
 SectionEnd
 
 Section "Uninstall"
 	Delete $INSTDIR\Uninstall.exe
 	RMDir /r /REBOOTOK $INSTDIR
-	DeleteRegKey HKCR "*\shell\${APPNAME}"
-	DeleteRegKey HKCR "Directory\shell\${APPNAME}"
-	Delete "$SMPROGRAMS\${APPNAME}.lnk"
+	${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" "$INSTDIR"   
+;	DeleteRegKey HKCR "*\shell\${APPNAME}"
+;	DeleteRegKey HKCR "Directory\shell\${APPNAME}"
+;	Delete "$SMPROGRAMS\${APPNAME}.lnk"
 SectionEnd

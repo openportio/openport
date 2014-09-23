@@ -243,7 +243,6 @@ class OpenportApp(object):
             from logging import DEBUG
             set_log_level(DEBUG)
         logger.debug('client pid:%s' % os.getpid())
-        logger.debug('sys.argv: %s' % sys.argv)
         if not args.restart_on_reboot:
             args.manager_port = -1
 
@@ -259,6 +258,7 @@ class OpenportApp(object):
         self.args = parser.parse_args()
 
     def start(self):
+        print 'sys.argv: %s' % sys.argv
 
         key_registration_service.register_key(self.args, self.args.server)
 
