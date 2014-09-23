@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=2.0.1
+VERSION=0.9.0
 
 APPLICATION=openport
 PACKAGE=openport-$VERSION
@@ -18,7 +18,6 @@ rm -rf $PACKAGE
 mkdir $PACKAGE
 mkdir -p $PACKAGE/usr/bin
 cp client/dist/* $PACKAGE/usr/bin/ -r
-cp client/openport.startup debian/openport.init
 tar -czf $TARBALL $PACKAGE
 rm -rf $PACKAGE
 rm -rf package
