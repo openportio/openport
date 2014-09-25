@@ -161,9 +161,9 @@ class IntegrationTest(unittest.TestCase):
         self.start_sharing(share)
 
         i = 0
-        while i < 400 and not self.success_called_back:
+        while i < 100 and not self.success_called_back:
             i += 1
-            sleep(0.01)
+            sleep(0.1)
         print "escaped at ",i
         self.assertTrue(self.success_called_back)
         port = share.server_port
@@ -250,8 +250,8 @@ class IntegrationTest(unittest.TestCase):
         session.server_session_token = None
         session.http_forward = True
 
+        openport = Openport()
         def start_openport():
-            openport = Openport()
             openport.start_port_forward(session, callback, show_error, server=self.test_server)
 
         thr = threading.Thread(target=start_openport)
@@ -272,7 +272,7 @@ class IntegrationTest(unittest.TestCase):
         actual_response = c.get('http://%s' % remote_host)
         self.assertEqual(actual_response, response.strip())
 
-        # todo: kill thread
+        openport.stop_port_forward()
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
