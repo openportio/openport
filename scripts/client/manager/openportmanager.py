@@ -267,5 +267,34 @@ def start_manager():
         sleep(1)
 
 
+class OpenportManagerService(object):
+    def __init__(self, manager_port=8001, server='openport.io'):
+        self.manager = OpenPortManager()
+        Globals().manager_port = manager_port
+        Globals().openport_address = server
+        self.stopped = False
+
+    def start(self, restart_shares=True):
+        self.stopped = False
+
+        start_server_thread(onNewShare=self.manager.onNewShare)
+
+        sleep(1)
+
+        if restart_shares:
+            self.manager.restart_sharing()
+
+      #  def handleSigTERM(signum, frame):
+      #      logger.debug('got a signal %s, frame %s going down' % (signum, frame))
+      #      self.manager.exitApp(None)
+      #  signal.signal(signal.SIGTERM, handleSigTERM)
+      #  signal.signal(signal.SIGINT, handleSigTERM)
+
+        while not self.stopped:
+            sleep(1)
+
+    def stop(self):
+        self.stopped = True
+
 if __name__ == '__main__':
     start_manager()

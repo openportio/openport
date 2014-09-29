@@ -4,9 +4,10 @@
 !define APPNAME "Openport"
 !define INSTDIR "$PROGRAMFILES\${APPNAME}"
 !define OPENPORT_EXE "openport.exe"
+!define version 0.9.0
 
 Name "${APPNAME}"
-OutFile "${APPNAME}.exe"
+OutFile "${APPNAME}_${VERSION}.exe"
 ShowInstDetails show
 LicenseData "license.txt"
 
@@ -52,6 +53,7 @@ Section # hidden section
 	setOutPath $INSTDIR
 	file /r ..\dist\*.* 
 	file ..\resources\logo-base.ico
+	file ..\manager\install_service.bat
 ;	file ..\resources\server.pem
 	#messageBox MB_OK "instdir: $INSTDIR"
 ;	WriteRegStr HKCR "*\shell\${APPNAME}\command" "" "$INSTDIR\${OPENPORT_EXE} $\"%1$\""
