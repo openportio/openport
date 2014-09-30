@@ -11,11 +11,13 @@ ext_http_server
 argparse
 bottle
 cherrypy
+#pyinstaller
 git+https://github.com/pyinstaller/pyinstaller.git@develop
 #pyinstaller
 sqlalchemy
 alembic
 psutil
+#http://sourceforge.net/projects/py2exe/files/latest/download?source=files
 
 # For the error 'no module named wsgiserver2':
 # cd scripts/client/env/lib/python2.7/site-packages/cherrypy/wsgiserver

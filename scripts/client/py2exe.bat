@@ -1,2 +1,2 @@
 cd /d %0\..
-python py2exe_win.py py2exe
+env\Scripts\python py2exe_win.py py2exe
