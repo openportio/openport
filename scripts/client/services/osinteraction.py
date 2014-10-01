@@ -91,7 +91,7 @@ class OsInteraction(object):
         if self.logger:
             self.logger.debug('Running command: %s' % args)
         p = subprocess.Popen(args,
-                             bufsize=0, executable=None, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             bufsize=0, executable=None, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              preexec_fn=None, close_fds=is_linux(), shell=False, cwd=None, env=None,
                              universal_newlines=False, startupinfo=None, creationflags=0)
         return p
@@ -117,7 +117,7 @@ class OsInteraction(object):
         if isinstance(command, list):
             command = ' '.join(['"%s"' % arg for arg in command])
         s = subprocess.Popen(command,
-                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              shell=True,
                              close_fds=is_linux())
         return s.communicate()
@@ -125,7 +125,7 @@ class OsInteraction(object):
     def run_command_and_print_output_continuously(self, command_array):
         creation_flags = self.get_detached_process_creation_flag()
         s = subprocess.Popen(command_array,
-                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              creationflags=creation_flags, shell=False,
                              close_fds=is_linux())
 
