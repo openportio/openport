@@ -258,7 +258,7 @@ class OpenportApp(object):
         self.args = parser.parse_args()
 
     def start(self):
-        print 'sys.argv: %s' % sys.argv
+       # print 'sys.argv: %s' % sys.argv
 
         key_registration_service.register_key(self.args, self.args.server)
 

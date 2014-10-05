@@ -13,7 +13,7 @@ from manager.openportmanager import OpenportManagerService
 
 
 class OpenportManagerWindowsService(win32serviceutil.ServiceFramework):
-    _svc_name_ = "OpenportManagerService"
+    _svc_name_ = "OpenportService"
     _svc_display_name_ = "Openport Service"
     _svc_description_ = "This service restarts the openport shares when the computer starts up."
 
