@@ -12,7 +12,7 @@ import urllib2
 from services.logger_service import get_logger
 from services import osinteraction
 
-logger = get_logger(__file__)
+logger = get_logger(__name__)
 
 
 class TestHTTPServer(object):
@@ -27,6 +27,9 @@ class TestHTTPServer(object):
         thr = threading.Thread(target=self.server.serve_forever, args=())
         thr.setDaemon(True)
         thr.start()
+
+    def stop(self):
+        self.server.server_close()
 
 
 class TestHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -50,7 +53,7 @@ class SimpleHTTPClient(object):
         logger.debug('sending get request ' + url)
         try:
             req = urllib2.Request(url)
-            return urllib2.urlopen(req).read()
+            return urllib2.urlopen(req, timeout=5).read()
         except urllib2.HTTPError, e:
             if print500 and e.getcode() == 500:
                 print e.read()

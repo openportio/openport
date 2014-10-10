@@ -13,6 +13,7 @@ from apps.openport_api import PortForwardResponse, request_port
 from services.logger_service import set_log_level
 from services.crypt_service import get_token
 import logging
+import urllib2
 
 import xmlrunner
 print sys.path
@@ -35,9 +36,12 @@ class IntegrationTest(unittest.TestCase):
 
     def test_start_share(self):
         path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.ico')
+        self.assertTrue(os.path.exists(path), 'file does not exist %s' % path)
         share = self.get_share(path)
         self.start_sharing(share)
-        temp_file = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath) + get_token(3))
+        temp_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
+                                 os.path.basename(share.filePath) + get_token(3))
+
         sleep(5)
         print 'temp file: ' + temp_file
         self.downloadAndCheckFile(share, temp_file)
@@ -80,10 +84,8 @@ class IntegrationTest(unittest.TestCase):
 
     def downloadAndCheckFile(self, share, temp_file):
         print "removing file %s" % temp_file
-        try:
+        if os.path.exists(temp_file):
             os.remove(temp_file)
-        except:
-            pass
         self.assertFalse(os.path.exists(temp_file))
         print "file %s removed" % temp_file
         url = share.get_link()
@@ -103,8 +105,8 @@ class IntegrationTest(unittest.TestCase):
         self.start_sharing(share)
         sleep(3)
 
-        temp_file_path = os.path.join(os.path.dirname(__file__), os.path.basename(share.filePath))
-        number_of_threads = 10
+        temp_file_path = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', os.path.basename(share.filePath))
+        number_of_threads = 8  # Less than 10 for the brute force protection
         errors = []
 
         def download(file_path):
@@ -147,7 +149,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertTrue(seen_multiple_files_at_the_same_time)
 
         if errors:
-            self.fail('number of errors: %s First error: %s' % (len(errors), errors[0]))
+            self.fail('number of errors: %s First error: %s %s' % (len(errors), errors[0], errors))
 
     def test_same_port(self):
         path = os.path.join(os.path.dirname(__file__), '../logo-base.ico')
@@ -234,15 +236,8 @@ class IntegrationTest(unittest.TestCase):
 
         response = 'cha cha cha'
         port = get_open_port()
-        s = TestHTTPServer(port)
-        s.reply(response)
-        s.runThreaded()
 
-        def callback(ignore):
-            print "callback"
-
-        def show_error(error_msg):
-            print "error:" + error_msg
+        s = self.start_http_server(port, response)
 
         session = Session()
         session.local_port = port
@@ -250,13 +245,7 @@ class IntegrationTest(unittest.TestCase):
         session.server_session_token = None
         session.http_forward = True
 
-        openport = Openport()
-        def start_openport():
-            openport.start_port_forward(session, callback, show_error, server=self.test_server)
-
-        thr = threading.Thread(target=start_openport)
-        thr.setDaemon(True)
-        thr.start()
+        openport = self.start_openport_session(session)
 
         sleep(10)
 
@@ -273,6 +262,122 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(actual_response, response.strip())
 
         openport.stop_port_forward()
+
+    def start_http_server(self, port, response):
+        s = TestHTTPServer(port)
+        s.reply(response)
+        s.runThreaded()
+        return s
+
+    def start_openport_session(self, session):
+        openport = Openport()
+
+        def callback(ignore):
+            print "callback"
+
+        def show_error(error_msg):
+            print "error:" + error_msg
+
+        def start_openport():
+            openport.start_port_forward(session, callback, show_error, server=self.test_server)
+
+        thr = threading.Thread(target=start_openport)
+        thr.setDaemon(True)
+        thr.start()
+        return openport
+
+    def test_brute_force_blocked(self):
+
+        port = get_open_port()
+        response = 'cha cha cha'
+
+        server1 = self.start_http_server(port, response)
+
+        session = Session()
+        session.local_port = port
+        session.server_session_token = None
+        #session.http_forward = True
+
+        openport = self.start_openport_session(session)
+
+        sleep(10)
+
+        link = session.get_link()
+        print 'link: %s' % link
+
+        c = SimpleHTTPClient()
+        actual_response = c.get('http://localhost:%s' % port)
+        self.assertEqual(actual_response, response.strip())
+        i = -1
+        try:
+            for i in range(20):
+                print "connection %s" % i
+                actual_response = c.get('http://%s' % link)
+                self.assertEqual(actual_response, response.strip())
+        except (urllib2.HTTPError, urllib2.URLError) as e:
+            print e
+        self.assertTrue(5 < i < 20, 'i should be around 10 but was %s' % i)
+
+        # check download on different port is still ok
+        port2 = get_open_port()
+
+        session2 = Session()
+        session2.local_port = port2
+        session2.server_session_token = None
+
+        response = 'cha cha cha'
+
+        server2 = self.start_http_server(port2, response)
+
+        openport2 = self.start_openport_session(session2)
+        print 'http://%s' % session2.get_link()
+        sleep(10)
+
+
+        actual_response = c.get('http://%s' % session2.get_link())
+        self.assertEqual(actual_response, response.strip())
+
+        server1.stop()
+        server2.stop()
+        openport.stop_port_forward()
+        openport2.stop_port_forward()
+
+    def test_brute_force_blocked__not_for_http_forward(self):
+
+        port = get_open_port()
+
+
+        response = 'cha cha cha'
+
+        s = self.start_http_server(port, response)
+
+        session = Session()
+        session.local_port = port
+        session.server_port = 80
+        session.server_session_token = None
+        session.http_forward = True
+
+        openport = self.start_openport_session(session)
+
+        sleep(10)
+
+        link = session.http_forward_address
+        print 'link: %s' % link
+
+        c = SimpleHTTPClient()
+        actual_response = c.get('http://localhost:%s' % port)
+        self.assertEqual(actual_response, response.strip())
+        i = -1
+        try:
+            for i in range(20):
+                print "connection %s" % i
+                actual_response = c.get('http://%s' % link)
+                self.assertEqual(actual_response, response.strip())
+        except (urllib2.HTTPError, urllib2.URLError) as e:
+            self.fail('url error on connection nr %s' % i)
+
+        openport.stop_port_forward()
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

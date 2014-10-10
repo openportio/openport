@@ -50,6 +50,9 @@ class PortForwardingService:
         self.client.set_missing_host_key_policy(IgnoreUnknownHostKeyPolicy())
         self.start_callback = start_callback
 
+        self.portForwardingRequestException = None
+
+
     def stop(self):
         self.client.close()
 
@@ -69,7 +72,8 @@ class PortForwardingService:
                     self.client.connect(
                         self.server, self.fallback_server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
                 except Exception, e:
-                    logger.error( '*** Failed to fallback connect to %s:%d: %r' % (self.server, self.fallback_server_ssh_port, e) )
+                    logger.error('*** Failed to fallback connect to %s:%d: %r' % (self.server,
+                                                                                  self.fallback_server_ssh_port, e) )
                     if self.error_callback:
                         self.error_callback()
                     return
