@@ -12,9 +12,5 @@
 </array>
 <key>RunAtLoad</key>
 <true/>
-<key>StartInterval</key>
-<integer>1</integer>
-<key>KeepAlive</key>
-<true/>
 </dict>
 </plist>
