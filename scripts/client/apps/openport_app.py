@@ -21,6 +21,7 @@ from common.session import Session
 from services import key_registration_service
 from manager import openportmanager, dbhandler
 from apps.openport import Openport
+from apps import openport_app_version
 
 from manager.globals import DEFAULT_SERVER
 
@@ -227,6 +228,8 @@ class OpenportApp(object):
         group.add_argument('port', nargs='?', type=int, help='The port you want to openport.', default=-1)
         # This is a hack to make the command to start the manager work.
         group.add_argument('manager', nargs='?', type=int, help='Start the manager for openport.', default=-1)
+        group.add_argument('--version', '-V', action='version', help='Print the version number and exit.',
+                           version=openport_app_version.VERSION)
 
         parser.add_argument('--manager-port', type=int, default=8001, help=argparse.SUPPRESS)
         parser.add_argument('--start-manager', type=bool, default=True, help='Start a manager app if none can be found.')

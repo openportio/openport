@@ -190,9 +190,9 @@ class OsInteraction(object):
             t_stdout.start()
 
             q_stderr = Queue()
-            #t_stderr = Thread(target=enqueue_output, args=(process.stderr, q_stderr))
-            #t_stderr.daemon = True # thread dies with the program
-            #t_stderr.start()
+            t_stderr = Thread(target=enqueue_output, args=(process.stderr, q_stderr))
+            t_stderr.daemon = True # thread dies with the program
+            t_stderr.start()
             sleep(0.1)
             self.output_queues[process.pid] = (q_stdout, q_stderr)
 

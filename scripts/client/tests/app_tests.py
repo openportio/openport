@@ -16,6 +16,7 @@ from services import osinteraction
 from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumber, SimpleHTTPClient, TestHTTPServer
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
 from services.logger_service import get_logger, set_log_level
+from apps import openport_app_version
 
 logger = get_logger(__name__)
 
@@ -137,8 +138,11 @@ class AppTests(unittest.TestCase):
         self.check_http_port_forward(remote_host=remote_host, local_port=port)
         p.kill()
 
+    def application_is_alive(self, p):
+        return p.poll() is None
+
     def check_application_is_still_alive(self, p):
-        if p.poll() is not None: # process terminated
+        if not self.application_is_alive(p): # process terminated
             print 'application terminated: ', self.osinteraction.get_all_output(p)
             self.fail('p_app.poll() should be None but was %s' % p.poll())
 
@@ -626,6 +630,22 @@ class AppTests(unittest.TestCase):
         remote_host = self.getRemoteAddress(process_output[0])
 
         self.check_http_port_forward(remote_host, port)
+
+    def test_version(self):
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--version'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        p.wait()
+
+        process_output = p.communicate()
+        for out in process_output:
+            print 'output: ', out
+
+        self.assertFalse(self.application_is_alive(p))
+        self.assertEqual(openport_app_version.VERSION, process_output[1].strip())
+
 
     def test_run_run_command_with_timeout(self):
         self.assertEqual((False, False), run_command_with_timeout(['python', '-c', 'from time import sleep;sleep(1)'], 2))

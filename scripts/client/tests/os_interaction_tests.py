@@ -96,6 +96,13 @@ class OsInteractionTest(unittest.TestCase):
         output = run_command_with_timeout(command, 1)
         self.assertEqual(('hello', False), output)
 
+    def test_get_all_output__stderr(self):
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        command = self.os_interaction.get_python_exec()
+        command.extend(['-c', "import sys; sys.stderr.write('hello_err')"])
+        output = run_command_with_timeout(command, 1)
+        self.assertEqual((False, 'hello_err'), output)
+
     def test_pid_is_running(self):
         command = self.os_interaction.get_python_exec()
         command.extend(['-c', "print 'hello'"])
