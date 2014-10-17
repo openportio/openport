@@ -51,7 +51,8 @@ Page custom pre_service_page leave_service_page
 var dialog
 var hwnd
 var Label
-
+var InstallServiceCheckbox
+var InstallServiceCheckbox_state
 
 Var password
 Var username
@@ -60,12 +61,16 @@ Function pre_service_page
 	nsDialogs::Create 1018
     Pop $dialog
 	
-	${NSD_CreateLabel} 0 0 100% 24u "If you want to install Openport as a service, so your shares restart when you reboot, then enter your password here:"
+	${NSD_CreateLabel} 0 0 100% 24u "If you want to install Openport as a service, so your shares restart when you reboot, then enter your windows password here, and check the checkbox below:"
 	Pop $Label
 
 	${NSD_CreatePassword} 0 40 50% 10% ""
     Pop $hwnd
     SendMessage $hwnd ${EM_SETPASSWORDCHAR} 149 0 # 149 = medium dot
+	
+	${NSD_CreateCheckbox} 0 65 100% 10u "Install Openport as a service"
+	Pop $InstallServiceCheckbox
+	${NSD_Check} $InstallServiceCheckbox
 
 	nsDialogs::Show
 FunctionEnd
@@ -78,7 +83,10 @@ Function leave_service_page
     ${NSD_GetText} $hwnd $0
 	StrCpy $password $0
 	
-	${If} $0 == ""
+	
+	${NSD_GetState} $InstallServiceCheckbox $InstallServiceCheckbox_state
+	
+	${If} $InstallServiceCheckbox_state == 0
         Return
     ${EndIf}
 	
@@ -105,9 +113,22 @@ Function leave_service_page
     ${EndIf}
 	
 	
+	SimpleSC::GrantServiceLogonPrivilege  "$domain\$username"
+	Pop $0
+	${If} $0 != 0
+		MessageBox MB_OK "Error code: $0"
+		Abort
+	${EndIf}
+
+	
+	
 	SimpleSC::StartService "OpenportService" "" 30
 	Pop $0
-    ${If} $0 != 0
+    ${If} $0 != 0	
+		${If} $0 == 1069
+			MessageBox MB_OK "Invalid password."
+			Abort
+		${EndIf}
         MessageBox MB_OK "Could not start the service. Error code: $0"
         Abort
     ${EndIf}
