@@ -17,6 +17,7 @@ from test_utils import SimpleTcpServer, SimpleTcpClient, get_open_port, lineNumb
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
+from manager import openportmanager
 
 logger = get_logger(__name__)
 
@@ -36,7 +37,7 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill = []
         self.osinteraction = osinteraction.getInstance()
         self.manager_port = -1
-        self.assertFalse(self.managerIsRunning(8001))
+        self.assertFalse(openportmanager.manager_is_running(8001))
 
     def tearDown(self):
         kill_all_processes(self.processes_to_kill)
@@ -58,7 +59,7 @@ class AppTests(unittest.TestCase):
         print 'std_out: ', process_output[0]
         print 'std_err: ', process_output[1]
         self.check_application_is_still_alive(p)
-        self.assertFalse(self.managerIsRunning(8001))
+        self.assertFalse(openportmanager.manager_is_running(8001))
 
         remote_host, remote_port = get_remote_host_and_port(process_output[0])
 
@@ -249,6 +250,34 @@ class AppTests(unittest.TestCase):
         c.close()
         s.close()
 
+    def test_manager__start_twice(self):
+        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
+        if os.path.exists(db_file):
+            os.remove(db_file)
+
+        port = get_open_port()
+        print 'localport :', port
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+
+        manager_port = get_open_port()
+        self.manager_port = manager_port
+        print 'manager_port :', manager_port
+
+        p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', db_file,
+                                      '--verbose', '--manager-port', str(manager_port)],
+                                     stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        sleep(3)
+        p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', db_file,
+                                       '--verbose', '--manager-port', str(manager_port)],
+                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_manager2)
+        sleep(2)
+        command_output = self.osinteraction.get_all_output(p_manager2)
+        print command_output
+        self.assertNotEqual(False, command_output[0])
+        self.assertTrue('Manager is already running on port' in command_output[0])
+        self.assertFalse(self.application_is_alive(p_manager2))
+
     def getRemoteAddress(self, output):
         print 'getRemoteAddress - output:%s' % output
         import re
@@ -261,7 +290,7 @@ class AppTests(unittest.TestCase):
         manager_port = get_open_port()
         self.manager_port = manager_port
         print 'manager port: ', manager_port
-        self.assertFalse(self.managerIsRunning(manager_port))
+        self.assertFalse(openportmanager.manager_is_running(manager_port))
 
         db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
         if os.path.exists(db_file):
@@ -282,7 +311,7 @@ class AppTests(unittest.TestCase):
             print lineNumber(), 'p_app: ', out
 
         self.check_application_is_still_alive(p_app)
-        self.assertTrue(self.managerIsRunning(manager_port))
+        self.assertTrue(openportmanager.manager_is_running(manager_port))
 
         remote_host, remote_port = get_remote_host_and_port(process_output[0])
         print lineNumber(), "remote port:", remote_port
@@ -290,16 +319,16 @@ class AppTests(unittest.TestCase):
         os.kill(p_app.pid, KILL_SIGNAL)
         p_app.wait()
         sleep(1)
-        self.assertTrue(self.managerIsRunning(manager_port))
+        self.assertTrue(openportmanager.manager_is_running(manager_port))
         self.kill_manager(manager_port)
         sleep(5)
-        self.assertFalse(self.managerIsRunning(manager_port))
+        self.assertFalse(openportmanager.manager_is_running(manager_port))
 
     def test_restart_manager_on_different_port(self):
         manager_port = get_open_port()
         print 'manager port: ', manager_port
         self.manager_port = manager_port
-        self.assertFalse(self.managerIsRunning(manager_port))
+        self.assertFalse(openportmanager.manager_is_running(manager_port))
         db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport_manager_different_port.db')
         if os.path.exists(db_file):
             os.remove(db_file)
@@ -321,7 +350,7 @@ class AppTests(unittest.TestCase):
         print lineNumber(), "remote port:", remote_port
 
         self.check_application_is_still_alive(p_app)
-        self.assertTrue(self.managerIsRunning(manager_port))
+        self.assertTrue(openportmanager.manager_is_running(manager_port))
         self.assertEqual(1, self.get_share_count_of_manager(manager_port))
 
         self.kill_manager(manager_port)
@@ -370,7 +399,7 @@ class AppTests(unittest.TestCase):
         manager_port = get_open_port()
         print 'manager port: ', manager_port
         self.manager_port = manager_port
-        self.assertFalse(self.managerIsRunning(manager_port))
+        self.assertFalse(openportmanager.manager_is_running(manager_port))
 
         db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
         try:
@@ -391,7 +420,7 @@ class AppTests(unittest.TestCase):
         for out in process_output:
             print lineNumber(), 'p_manager: ', out
 
-        self.assertTrue(self.managerIsRunning(manager_port))
+        self.assertTrue(openportmanager.manager_is_running(manager_port))
 
         # Starting http server
 
@@ -444,7 +473,7 @@ class AppTests(unittest.TestCase):
         process_output = self.osinteraction.get_all_output(p_manager)
         print lineNumber(), 'p_manager std_out: ', process_output[0]
         print lineNumber(), 'p_manager std_err: ', process_output[1]
-        self.assertFalse(self.managerIsRunning(manager_port))
+        self.assertFalse(openportmanager.manager_is_running(manager_port))
 
         # Checking that the connection is down.
 
@@ -468,7 +497,7 @@ class AppTests(unittest.TestCase):
         process_output = self.osinteraction.get_all_output(p_manager)
         print lineNumber(), 'p_manager std_out: ', process_output[0]
         print lineNumber(), 'p_manager std_err: ', process_output[1]
-        self.assertTrue(self.managerIsRunning(manager_port))
+        self.assertTrue(openportmanager.manager_is_running(manager_port))
         self.assertEqual(1, self.get_share_count_of_manager(manager_port))
 
         # Checking that http server is still running
@@ -507,7 +536,7 @@ class AppTests(unittest.TestCase):
         print lineNumber(), 'p_manager std_out: ', process_output[0]
         print lineNumber(), 'p_manager std_err: ', process_output[1]
 
-        self.assertFalse(self.managerIsRunning(manager_port))
+        self.assertFalse(openportmanager.manager_is_running(manager_port))
 
         # Checking that the openport session has ended.
 
@@ -595,20 +624,6 @@ class AppTests(unittest.TestCase):
         except Exception as detail:
             print 'error contacting the manager: %s %s' % (url, detail)
             raise
-
-    def managerIsRunning(self, manager_port):
-        url = 'http://localhost:%s/ping' % manager_port
-        logger.debug('sending get request ' + url)
-        try:
-            req = urllib2.Request(url)
-            response = urllib2.urlopen(req, timeout=5).read()
-            if response.strip() != 'pong':
-                print lineNumber(), response
-                return False
-            else:
-                return True
-        except Exception, detail:
-            return False
 
     def test_openport_app_with_http_forward(self):
         port = get_open_port()

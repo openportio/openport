@@ -250,6 +250,10 @@ def start_manager():
         manager.kill_all()
         sys.exit()
 
+    if manager_is_running(Globals().manager_port):
+        logger.error('Manager is already running on port %s' % Globals().manager_port)
+        sys.exit()
+
     start_server_thread(onNewShare=manager.onNewShare)
 
     sleep(1)
@@ -265,6 +269,21 @@ def start_manager():
 
     while True:
         sleep(1)
+
+
+def manager_is_running(manager_port):
+        url = 'http://localhost:%s/ping' % manager_port
+        logger.debug('sending get request ' + url)
+        try:
+            req = urllib2.Request(url)
+            response = urllib2.urlopen(req, timeout=5).read()
+            if response.strip() != 'pong':
+                logger.debug('got response: %s' % response)
+                return False
+            else:
+                return True
+        except Exception, detail:
+            return False
 
 
 class OpenportManagerService(object):
