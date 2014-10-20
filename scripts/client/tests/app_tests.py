@@ -324,6 +324,32 @@ class AppTests(unittest.TestCase):
         sleep(5)
         self.assertFalse(openportmanager.manager_is_running(manager_port))
 
+    def test_openportapp__cannot_reach_manager(self):
+        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
+        if os.path.exists(db_file):
+            os.remove(db_file)
+
+        port = get_open_port()
+        print 'local port: ', port
+
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+                                  '--verbose', '--server', 'test.openport.be',
+                                  '--manager-port', str(700000),  # port out of reach
+                                  '--manager-database', db_file, '--restart-on-reboot'],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app)
+        sleep(15)
+        process_output = self.osinteraction.get_all_output(p_app)
+        for out in process_output:
+            print lineNumber(), 'p_app: ', out
+
+        self.check_application_is_still_alive(p_app)
+
+        remote_host, remote_port = get_remote_host_and_port(process_output[0])
+        print lineNumber(), "remote port:", remote_port
+
+
     def test_restart_manager_on_different_port(self):
         manager_port = get_open_port()
         print 'manager port: ', manager_port
