@@ -1,6 +1,10 @@
 import os
 import paramiko
 import StringIO
+from services.logger_service import get_logger
+
+log = get_logger(__name__)
+
 
 HOME_DIR = os.path.expanduser('~')
 PRIVATE_KEY_FILE = os.path.join(HOME_DIR, '.ssh', 'id_rsa')
@@ -17,15 +21,18 @@ def get_or_create_public_key():
 def write_new_key(private_key_filename, public_key_filename):
 #	print 'writing keys: %s %s' %( private_key_filename, public_key_filename)
     key = paramiko.RSAKey.generate(1024)
-    if not os.path.exists( os.path.dirname(private_key_filename) ):
-        os.makedirs( os.path.dirname(private_key_filename), 0700)
+    if not os.path.exists(os.path.dirname(private_key_filename)):
+        os.makedirs(os.path.dirname(private_key_filename), 0700)
+
+    log.info('creating private key file: %s' % private_key_filename)
     key.write_private_key_file(private_key_filename)
 
     pk = paramiko.RSAKey(filename=private_key_filename)
-    if not os.path.exists( os.path.dirname(public_key_filename) ):
-        os.makedirs( os.path.dirname(public_key_filename), 0700)
+    if not os.path.exists(os.path.dirname(public_key_filename)):
+        os.makedirs(os.path.dirname(public_key_filename), 0700)
     import getpass
     username = getpass.getuser()
+    log.info('creating public key file: %s' % public_key_filename)
     o = open(public_key_filename ,'w').write("ssh-rsa %s %s \n" % (pk.get_base64(), username))
 
 
