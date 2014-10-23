@@ -13,6 +13,8 @@ sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from UserDict import UserDict
 import argparse
+import threading
+
 from services import osinteraction
 from services.logger_service import get_logger, set_log_level
 from services.osinteraction import is_linux, OsInteraction
@@ -27,12 +29,6 @@ from manager.globals import DEFAULT_SERVER
 
 logger = get_logger('openport_app')
 
-
-def quote_path(path):
-    split = path.split(os.sep)
-    #logger.debug( split )
-    quoted = ['"%s"' % dir if ' ' in dir else dir for dir in split]
-    return os.sep.join(quoted)
 
 class OpenportApp(object):
 
@@ -59,7 +55,7 @@ class OpenportApp(object):
     def handleSigTERM(self, signum, frame):
         logger.debug('got signal %s' % signum)
         if self.manager_app_started and self.session:
-            self.inform_manager_app_stop(self.session, self.args.manager_port)
+            self.inform_manager_app_stop(self.session, self.globals.manager_port)
         sys.exit(3)
 
     def inform_manager_app_stop(self, share, manager_port, start_manager=True):
@@ -82,17 +78,9 @@ class OpenportApp(object):
         #logger.debug('setting cwd to: %s' % os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
         os.chdir(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-        if self.os_interaction.is_compiled():
-            command = []
-            path = quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport.exe'))
-            if not os.path.exists(path):
-                path = quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport'))
-            command.extend([path])
-        else:
-            command = self.os_interaction.get_python_exec()
-            command.extend(['apps/openport_app.py'])
+        command = self.os_interaction.get_openport_exec()
         command.append('manager')
-        command = OsInteraction.set_variable(command, '--manager-port', self.args.manager_port)
+        command = OsInteraction.set_variable(command, '--manager-port', self.globals.manager_port)
         if self.args.manager_database:
             command = OsInteraction.set_variable(command, '--database', self.args.manager_database)
         if self.args.server and not self.args.server == DEFAULT_SERVER:
@@ -107,7 +95,7 @@ class OpenportApp(object):
         try:
             req = urllib2.Request(url)
             response = urllib2.urlopen(req, timeout=5).read()
-            print logger.debug('check_manager_is_running response: %s' % response)
+            logger.debug('check_manager_is_running response: %s' % response)
             if response.strip() != 'pong':
                 return False
             else:
@@ -188,26 +176,22 @@ class OpenportApp(object):
             logger.error('error informing manager of success: %s ' % e)
             if e.getcode() == 500:
                 logger.error('error detail: ' + e.read())
-            sys.exit(1)
         except urllib2.URLError, error:
             logger.exception('Could not communicate with the manager app to inform of a success.')
             tb = traceback.format_exc()
             logger.debug('%s\n%s' % (error, tb))
-            sys.exit(1)
         except Exception, detail:
+            logger.exception('default exception')
             logger.exception(detail)
 
     def save_share(self, share):
         self.db_handler.add_share(share)
 
     def get_restart_command(self, session):
-        if is_linux():
-            command = ['sudo', '-u', getpass.getuser()]
-        else:
-            command = []
-        if sys.argv[0][-3:] == '.py':
-            command.extend(self.os_interaction.get_python_exec())
-        command.extend(sys.argv)
+        command = []
+
+        # Drop the openport part (for security reasons).
+        command.extend(sys.argv[1:])
 
         #if not '--manager-port' in command:
         #    command.extend(['--manager-port', '%s' % manager_port] )
@@ -216,7 +200,7 @@ class OpenportApp(object):
             command = OsInteraction.set_variable(command, '--request-token', session.server_session_token)
         command = OsInteraction.set_variable(command, '--start-manager', False)
         command = OsInteraction.unset_variable(command, '--manager-database')
-        command = OsInteraction.set_variable(command, '--manager-port', self.args.manager_port)
+        command = OsInteraction.set_variable(command, '--manager-port', self.globals.manager_port)
 
         return command
 
@@ -231,7 +215,7 @@ class OpenportApp(object):
         group.add_argument('--version', '-V', action='version', help='Print the version number and exit.',
                            version=openport_app_version.VERSION)
 
-        parser.add_argument('--manager-port', type=int, default=8001, help=argparse.SUPPRESS)
+        parser.add_argument('--manager-port', type=int, default=-1, help=argparse.SUPPRESS)
         parser.add_argument('--start-manager', type=bool, default=True, help='Start a manager app if none can be found.')
         parser.add_argument('--manager-database', type=str, default='', help=argparse.SUPPRESS)
         parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
@@ -240,20 +224,23 @@ class OpenportApp(object):
         parser.add_argument('--http-forward', action='store_true', help='Request an http forward, so you can connect to port 80 on the server.')
         parser.add_argument('--server', default=DEFAULT_SERVER, help=argparse.SUPPRESS)
         parser.add_argument('--restart-on-reboot', '-R', action='store_true', help='Restart this share when the manager app is started.')
+        parser.add_argument('--no-manager', action='store_true', help='Do not contact the manager.')
 
     def init_app(self, args):
         if args.verbose:
             from logging import DEBUG
             set_log_level(DEBUG)
         logger.debug('client pid:%s' % os.getpid())
-        if not args.restart_on_reboot:
-            args.manager_port = -1
 
         self.globals.server = args.server
+        self.globals.manager_port = args.manager_port
+        self.globals.contact_manager = not args.no_manager
         if args.port > 0:
             args.local_port = args.port
 
         self.args = args
+
+        openportmanager.get_and_save_manager_port(manager_port_from_command_line=args.manager_port,  exit_on_fail=False)
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
@@ -279,8 +266,13 @@ class OpenportApp(object):
             self.first_time = False
 
             session.restart_command = self.get_restart_command(session)
-            if self.args.manager_port > 0:
-                self.inform_manager_app_new(session, self.args.manager_port, start_manager=self.args.start_manager)
+
+            if self.globals.contact_manager:
+                inform_manager_app_new_thread = threading.Thread(target=self.inform_manager_app_new,
+                                                                 args=(session, self.globals.manager_port,),
+                                                                 kwargs={'start_manager': self.args.start_manager})
+                inform_manager_app_new_thread.setDaemon(True)
+                inform_manager_app_new_thread.start()
 
             self.save_share(session)
 
@@ -313,20 +305,20 @@ class OpenportApp(object):
 
     def error_callback(self, session):
         logger.debug('error_callback')
-        if self.args.manager_port > 0 and self.manager_app_started:
-            self.inform_manager_app_error(session, self.args.manager_port)
+        if self.globals.contact_manager and self.manager_app_started:
+            self.inform_manager_app_error(session, self.globals.manager_port)
 
     def success_callback(self, session):
         logger.debug('success_callback')
-        if self.args.manager_port > 0 and self.manager_app_started:
-            self.inform_manager_app_success(session, self.args.manager_port)
+        if self.globals.contact_manager and self.manager_app_started:
+            self.inform_manager_app_success(session, self.globals.manager_port)
 
     def stop_callback(self, session):
         logger.debug('stop_callback')
         session.active = False
         self.save_share(session)
-        if self.args.manager_port > 0 and self.manager_app_started:
-            self.inform_manager_app_stop(session, self.args.manager_port)
+        if self.globals.contact_manager and self.manager_app_started:
+            self.inform_manager_app_stop(session, self.globals.manager_port)
 
     def stop(self):
         self.openport.stop_port_forward()

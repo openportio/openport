@@ -49,22 +49,6 @@ class OsInteraction(object):
         return result
 
     @staticmethod
-    def strip_sudo_command(command):
-        if command[0] != 'sudo':
-            return command
-        result = command[1:]
-        while result[0][0] == '-':
-            result = OsInteraction.unset_variable(result, result[0])
-        return result
-
-    @staticmethod
-    def get_sudo_user_from_command(command):
-        if command[0] != 'sudo':
-            return command
-
-        return OsInteraction.get_variable(command, '-u')
-
-    @staticmethod
     def get_variable(command, variable):
         try:
             location = command.index(variable)
@@ -77,13 +61,18 @@ class OsInteraction(object):
 
 
     def start_openport_process(self, share, manager_port=8001):
+
+        if not 'openport' in share.restart_command[0]:
+            command = self.get_openport_exec()
+        else:
+            command = []
+
 #        print share.restart_command
-        command = share.restart_command
+        command.extend(share.restart_command)
 
         assert isinstance(command, list)
         command = OsInteraction.set_variable(command, "--manager-port", manager_port)
-        if OsInteraction.get_sudo_user_from_command(command) == getpass.getuser():
-            command = OsInteraction.strip_sudo_command(command)
+        share.restart_command = command
 
         return self.start_process(command)
 
@@ -215,6 +204,33 @@ class OsInteraction(object):
 
         return read_queue(q_stdout), read_queue(q_stderr)
 
+    def get_open_port(self):
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(("", 0))
+        s.listen(1)
+        port = s.getsockname()[1]
+        s.close()
+        return port
+
+    def quote_path(self, path):
+        split = path.split(os.sep)
+        #logger.debug( split )
+        quoted = ['"%s"' % dir if ' ' in dir else dir for dir in split]
+        return os.sep.join(quoted)
+
+    def get_openport_exec(self):
+        if self.is_compiled():
+            command = []
+            path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport.exe'))
+            if not os.path.exists(path):
+                path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport'))
+            command.extend([path])
+        else:
+            command = self.get_python_exec()
+            command.extend(['apps/openport_app.py'])
+        return command
+
 class LinuxOsInteraction(OsInteraction):
 
     def __init__(self, use_logger=True):
@@ -307,6 +323,9 @@ class LinuxOsInteraction(OsInteraction):
         # all done
         os._exit(os.EX_OK)
 
+    def user_is_root(self):
+        return os.geteuid() == 0
+
 
 class WindowsOsInteraction(OsInteraction):
     def __init__(self, use_logger=True):
@@ -352,6 +371,10 @@ class WindowsOsInteraction(OsInteraction):
         t = Thread(target=foo)
         t.setDaemon(True)
         t.start()
+
+    def user_is_root(self):
+        return False
+
 
 def is_linux():
     return platform.system() != 'Windows'

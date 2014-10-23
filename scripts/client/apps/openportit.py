@@ -9,16 +9,6 @@ from apps.servefile import serve_file_on_port
 from time import sleep
 logger = get_logger('openportit')
 
-def get_open_port():
-    import socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", 0))
-    s.listen(1)
-    port = s.getsockname()[1]
-    s.close()
-    return port
-
-
 class OpenportItApp(OpenportApp):
 
     def __init__(self):
@@ -28,7 +18,7 @@ class OpenportItApp(OpenportApp):
         import threading
 
         if share.local_port == -1:
-            share.local_port = get_open_port()
+            share.local_port = self.os_interaction.get_open_port()
         thr = threading.Thread(target=serve_file_on_port, args=(share.filePath, share.local_port, share.token))
         thr.setDaemon(True)
         thr.start()

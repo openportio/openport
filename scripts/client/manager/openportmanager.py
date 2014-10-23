@@ -10,7 +10,7 @@ from time import sleep
 
 import os
 import argparse
-
+from urllib2 import URLError, HTTPError
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from manager import dbhandler
@@ -21,6 +21,8 @@ from services.logger_service import get_logger, set_log_level
 from common.share import Share
 from common.session import Session
 from manager.globals import DEFAULT_SERVER
+from services.osinteraction import is_linux
+import ConfigParser
 
 logger = get_logger('OpenPortManager')
 
@@ -32,13 +34,15 @@ class OpenPortManager(object):
         self.dbhandler = dbhandler.getInstance()
         self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
-        self.start_account_checking()
+
         if self.os_interaction.is_compiled():
             from common.tee import TeeStdErr, TeeStdOut
             TeeStdOut(self.os_interaction.get_app_data_path('openportmanager.out.log'), 'a')
             TeeStdErr(self.os_interaction.get_app_data_path('openportmanager.error.log'), 'a')
 
-    def exitApp(self,event):
+        self.start_account_checking()
+
+    def exitApp(self, event):
         for pid in self.share_processes:
             try:
                 logger.info("trying to kill pid %s" % (pid,))
@@ -77,6 +81,18 @@ class OpenPortManager(object):
                 except Exception, e:
                     tb = traceback.format_exc()
                     logger.error('Error: <<<' + tb + ' >>>')
+        users_file = '/etc/openport/users.conf'
+        if is_linux() and self.os_interaction.user_is_root() and os.path.exists(users_file):
+            with open(users_file, 'r') as f:
+                lines = f.readlines()
+                for line in lines:
+                    if line.strip()[0] == '#':
+                        continue
+                    username = line.strip().split()[0]
+
+                    command = ['sudo', '-u', username, 'openport', 'manager', '--restart-shares']
+                    self.os_interaction.spawn_daemon(command)
+
 
     def stop_sharing(self,share):
         logger.info("stopping %s" % share.id)
@@ -140,11 +156,6 @@ class OpenPortManager(object):
     def startOpenportItProcess (self, path):
         share = Share()
         share.filePath = path
-        app_dir = self.os_interaction.get_application_dir()
-        if self.os_interaction.is_compiled():
-            share.restart_command = [os.path.join(app_dir, 'openportit.exe'), path]
-        else:
-            share.restart_command = ['python', os.path.join(app_dir, 'apps/openportit.py'), path]
 
         p = self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False,
                                                    manager_port=Globals().manager_port)
@@ -152,14 +163,7 @@ class OpenPortManager(object):
 
     def startOpenportProcess (self, port):
         session = Session()
-        app_dir = self.os_interaction.get_application_dir()
-        if self.os_interaction.is_compiled():
-            path = os.path.join(app_dir, 'openport.exe')
-            if not os.path.exists(path):
-                path = os.path.join(app_dir, 'openport')
-            session.restart_command = [path, '--local-port', '%s' % port]
-        else:
-            session.restart_command = ['python', os.path.join(app_dir,'apps/openport_app.py'), '--local-port', '%s' % port]
+        session.restart_command = ['--local-port', '%s' % port]
         logger.debug(session.restart_command)
 
         p = self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False,
@@ -217,8 +221,10 @@ def start_manager():
     parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
     parser.add_argument('--database', '-d', action='store', help='Use the following database file.', default='')
     parser.add_argument('--manager-port', '-p', action='store', type=int,
-                        help='The port the manager communicates on with it''s child processes.', default=8001)  #TODO random port??
+                        help='The port the manager communicates on with it''s child processes.', default=-1,
+                        choices=xrange(-1, 65535))
     parser.add_argument('--server', '-s', action='store', type=str, default=DEFAULT_SERVER, help=argparse.SUPPRESS)
+    parser.add_argument('--config-file', action='store', type=str, default='', help=argparse.SUPPRESS)
     parser.add_argument('--list', '-l', action='store_true', help="list shares and exit")
     parser.add_argument('--kill', '-k', action='store', type=int, help="Stop a share", default=0)
     parser.add_argument('--kill-all', '-K', action='store_true', help="Stop all shares")
@@ -231,12 +237,17 @@ def start_manager():
         set_log_level(DEBUG)
         logger.debug('You are seeing debug output.')
 
+    Globals().manager_port = args.manager_port
+    Globals().openport_address = args.server
+
+    if args.config_file:
+        Globals().config = args.config_file
+
+    get_and_save_manager_port(args.manager_port)
+
     manager = OpenPortManager()
 
     logger.debug('db location: ' + dbhandler.db_location)
-
-    Globals().manager_port = args.manager_port
-    Globals().openport_address = args.server
 
     if args.list:
         manager.print_shares()
@@ -248,10 +259,6 @@ def start_manager():
 
     if args.kill_all:
         manager.kill_all()
-        sys.exit()
-
-    if manager_is_running(Globals().manager_port):
-        logger.error('Manager is already running on port %s' % Globals().manager_port)
         sys.exit()
 
     start_server_thread(onNewShare=manager.onNewShare)
@@ -272,22 +279,79 @@ def start_manager():
 
 
 def manager_is_running(manager_port):
-        url = 'http://localhost:%s/ping' % manager_port
-        logger.debug('sending get request ' + url)
+    url = 'http://localhost:%s/ping' % manager_port
+    logger.debug('sending get request ' + url)
+    try:
+        req = urllib2.Request(url)
+        response = urllib2.urlopen(req, timeout=5).read()
+        if response.strip() != 'pong':
+            logger.debug('got response: %s' % response)
+            raise Exception('Another application is running on port %s' % manager_port)
+        else:
+            return True
+    except HTTPError:
+        raise Exception('Another application is running on port %s' % manager_port)
+    except URLError, detail:
+        return False
+    except Exception, detail:
+        raise Exception('Another application is running on port %s' % manager_port)
+
+
+def get_and_save_random_manager_port():
+    config = ConfigParser.ConfigParser()
+    manager_port = osinteraction.getInstance().get_open_port()
+   # manager_port = 22
+    Globals().manager_port = manager_port
+    if not config.has_section('manager'):
+        config.add_section('manager')
+    config.set('manager', 'port', manager_port)
+    with open(Globals().config, 'w') as f:
+        config.write(f)
+    return manager_port
+
+
+def get_and_save_manager_port(manager_port_from_command_line=-1, exit_on_fail=True):
+    original_port = Globals().manager_port
+
+    if manager_port_from_command_line > 0:
+        original_port = manager_port_from_command_line
+    else:
+        # Read port from file (if file, section and entry exist)
+        config = ConfigParser.ConfigParser()
+        config_file_location = Globals().config
         try:
-            req = urllib2.Request(url)
-            response = urllib2.urlopen(req, timeout=5).read()
-            if response.strip() != 'pong':
-                logger.debug('got response: %s' % response)
-                return False
+            config.read(config_file_location)
+            Globals().manager_port = config.getint('manager', 'port')
+            original_port = Globals().manager_port
+        except:
+            manager_port = get_and_save_random_manager_port()
+            logger.info("Manager port not found in config file. Starting manager on port %s." % manager_port)
+            return manager_port
+
+    try:
+        running = manager_is_running(original_port)
+    except:  # An other app is running on that port
+        manager_port = get_and_save_random_manager_port()
+        if original_port != -1:
+            logger.info("Port %s is taken by another application. Manager is now running on port %s." %
+                        (original_port, manager_port))
+        return manager_port
+    else:
+        if running:
+            if exit_on_fail:
+                logger.info('Manager is already running on port %s. Exiting.' % Globals().manager_port)
+                sys.exit(1)
             else:
-                return True
-        except Exception, detail:
-            return False
+                return original_port
+        else:
+            Globals().manager_port = original_port
+            return Globals().manager_port
+
+
 
 
 class OpenportManagerService(object):
-    def __init__(self, manager_port=8001, server='openport.io'):
+    def __init__(self, manager_port=-1, server='openport.io'):
         self.manager = OpenPortManager()
         Globals().manager_port = manager_port
         Globals().openport_address = server
@@ -296,6 +360,7 @@ class OpenportManagerService(object):
     def start(self, restart_shares=True):
         self.stopped = False
 
+        get_and_save_manager_port()
         start_server_thread(onNewShare=self.manager.onNewShare)
 
         sleep(1)

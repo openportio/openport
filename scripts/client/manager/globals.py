@@ -1,5 +1,7 @@
+import os
 
 DEFAULT_SERVER = 'www.openport.io'
+
 
 class Globals():
 
@@ -8,7 +10,9 @@ class Globals():
             self.account_id = -1
             self.key_id = -1
             self.openport_address = DEFAULT_SERVER
-            self.manager_port = 8001
+            self.manager_port = -1
+            self.config = os.path.expanduser('~/.openport/openport.cfg')
+            self.contact_manager = True
 
     # storage for the instance reference
     __instance = None

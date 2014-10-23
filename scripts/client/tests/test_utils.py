@@ -131,16 +131,6 @@ class SimpleTcpClient(object):
         self.sock.close()
 
 
-def get_open_port():
-    import socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("", 0))
-    s.listen(1)
-    port = s.getsockname()[1]
-    s.close()
-    return port
-
-
 def lineNumber():
     """Returns the current line number in our program."""
     return inspect.currentframe().f_back.f_lineno
@@ -158,7 +148,7 @@ if __name__ == '__main__':
 #    print 'you entered ', var
 #    print 'server replied', c.send(var)
 
-    port = get_open_port()
+    port = osinteraction.getInstance().get_open_port()
     s = TestHTTPServer(port)
     s.reply('hooray')
     s.runThreaded()
@@ -245,11 +235,27 @@ def run_command_with_timeout_return_process(args, timeout_s):
     return c.run(timeout_s)
 
 
-def get_remote_host_and_port(output):
-    m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', output)
-    if m is None:
-        raise Exception('remote host and port not found in output: %s' % output)
-    return m.group(1), int(m.group(2))
+def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix=''):
+    i = 0
+    while i < timeout:
+        i += 1
+        all_output = osinteraction.get_all_output(p)
+        if all_output[0]:
+            print '%s - stdout -  %s' % (output_prefix, all_output[0])
+        if all_output[1]:
+            print '%s - stderr - %s' % (output_prefix, all_output[1])
+        if not all_output[0]:
+            sleep(1)
+            continue
+        m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', all_output[0])
+        if m is None:
+            sleep(1)
+            continue
+        else:
+            sleep(3)
+            return m.group(1), int(m.group(2))
+    raise Exception('remote host and port not found in output')
+
 
 
 def kill_all_processes(processes_to_kill):

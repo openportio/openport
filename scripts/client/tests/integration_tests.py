@@ -12,6 +12,7 @@ from apps.keyhandling import get_or_create_public_key, create_new_key_pair
 from apps.openport_api import PortForwardResponse, request_port
 from services.logger_service import set_log_level
 from services.crypt_service import get_token
+from services import osinteraction
 import logging
 import urllib2
 
@@ -23,7 +24,7 @@ from apps.openport import Openport
 from common.share import Share
 from common.session import Session
 
-from test_utils import get_open_port, SimpleHTTPClient, TestHTTPServer
+from test_utils import SimpleHTTPClient, TestHTTPServer
 
 TOKEN = 'tokentest'
 
@@ -33,6 +34,7 @@ class IntegrationTest(unittest.TestCase):
     def setUp(self):
         set_log_level(logging.DEBUG)
         self.test_server = 'test.openport.be'
+        self.osinteraction = osinteraction.getInstance()
 
     def test_start_share(self):
         path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.ico')
@@ -235,7 +237,7 @@ class IntegrationTest(unittest.TestCase):
     def test_http_forward(self):
 
         response = 'cha cha cha'
-        port = get_open_port()
+        port = self.osinteraction.get_open_port()
 
         s = self.start_http_server(port, response)
 
@@ -288,7 +290,7 @@ class IntegrationTest(unittest.TestCase):
 
     def test_brute_force_blocked(self):
 
-        port = get_open_port()
+        port = self.osinteraction.get_open_port()
         response = 'cha cha cha'
 
         server1 = self.start_http_server(port, response)
@@ -319,7 +321,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertTrue(5 < i < 20, 'i should be around 10 but was %s' % i)
 
         # check download on different port is still ok
-        port2 = get_open_port()
+        port2 = self.osinteraction.get_open_port()
 
         session2 = Session()
         session2.local_port = port2
@@ -344,7 +346,7 @@ class IntegrationTest(unittest.TestCase):
 
     def test_brute_force_blocked__not_for_http_forward(self):
 
-        port = get_open_port()
+        port = self.osinteraction.get_open_port()
 
 
         response = 'cha cha cha'
