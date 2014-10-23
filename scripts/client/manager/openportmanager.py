@@ -90,7 +90,8 @@ class OpenPortManager(object):
                         continue
                     username = line.strip().split()[0]
 
-                    command = ['sudo', '-u', username, 'openport', 'manager', '--restart-shares']
+                    command = ['sudo', '-u', username, '-H', 'openport', 'manager', '--restart-shares']
+                    logger.debug('restart command: %s' % command)
                     self.os_interaction.spawn_daemon(command)
 
 
@@ -243,8 +244,6 @@ def start_manager():
     if args.config_file:
         Globals().config = args.config_file
 
-    get_and_save_manager_port(args.manager_port)
-
     manager = OpenPortManager()
 
     logger.debug('db location: ' + dbhandler.db_location)
@@ -261,6 +260,7 @@ def start_manager():
         manager.kill_all()
         sys.exit()
 
+    get_and_save_manager_port(args.manager_port)
     start_server_thread(onNewShare=manager.onNewShare)
 
     sleep(1)
