@@ -219,8 +219,7 @@ def start_manager():
     parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
     parser.add_argument('--database', '-d', action='store', help='Use the following database file.', default='')
     parser.add_argument('--manager-port', '-p', action='store', type=int,
-                        help='The port the manager communicates on with it''s child processes.', default=-1,
-                        choices=xrange(-1, 65535))
+                        help='The port the manager communicates on with it''s child processes.', default=-1)
     parser.add_argument('--server', '-s', action='store', type=str, default=DEFAULT_SERVER, help=argparse.SUPPRESS)
     parser.add_argument('--config-file', action='store', type=str, default='', help=argparse.SUPPRESS)
     parser.add_argument('--list', '-l', action='store_true', help="list shares and exit")
@@ -234,6 +233,10 @@ def start_manager():
         from logging import DEBUG
         set_log_level(DEBUG)
         logger.debug('You are seeing debug output.')
+
+    if args.manager_port not in xrange(-1, 65535):
+        logger.error('--manager-port not in valid range [-1, 65535]')
+        sys.exit(1)
 
     Globals().manager_port = args.manager_port
     Globals().openport_address = args.server
