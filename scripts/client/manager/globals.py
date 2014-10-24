@@ -13,6 +13,7 @@ class Globals():
             self.manager_port = -1
             self.config = os.path.expanduser('~/.openport/openport.cfg')
             self.contact_manager = True
+            self.verbose = False
 
     # storage for the instance reference
     __instance = None

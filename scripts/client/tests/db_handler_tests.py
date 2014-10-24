@@ -186,6 +186,21 @@ class DBHandlerTests(unittest.TestCase):
         sleep(2)
         self.assertEqual(2, len(self.dbhandler.get_shares()))
 
+    def test_double_add_share(self):
+        share = Share(active=True, local_port=444)
+        self.dbhandler.add_share(share)
+
+        share2 = Share(active=True, local_port=444)
+        self.dbhandler.add_share(share2)
+
+        self.assertEqual(1, len(self.dbhandler.get_shares()))
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
