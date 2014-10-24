@@ -257,6 +257,26 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix=''):
     raise Exception('remote host and port not found in output')
 
 
+def wait_for_success_callback(p_manager, osinteraction, timeout=30, output_prefix=''):
+    i = 0
+    while i < timeout:
+        i += 1
+        all_output = osinteraction.get_all_output(p_manager)
+        if all_output[0]:
+            print '%s - stdout -  %s' % (output_prefix, all_output[0])
+        if all_output[1]:
+            print '%s - stderr - %s' % (output_prefix, all_output[1])
+        if not all_output[0]:
+            sleep(1)
+            continue
+        if '/successShare' in all_output[0]:
+            return
+        else:
+            sleep(1)
+    raise Exception('success_callback not found (timeout expired)')
+
+
+
 
 def kill_all_processes(processes_to_kill):
     for p in processes_to_kill:

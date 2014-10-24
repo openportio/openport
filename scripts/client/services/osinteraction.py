@@ -231,6 +231,11 @@ class OsInteraction(object):
             command.extend(['apps/openport_app.py'])
         return command
 
+    def pid_is_openport_process(self, pid):
+        process = filter(lambda p: p.pid == pid, psutil.process_iter())
+        for i in process:
+            return 'openport' in i.name() or 'python' in i.name()  # Is not 100% but best effort. (for mac)
+
 class LinuxOsInteraction(OsInteraction):
 
     def __init__(self, use_logger=True):

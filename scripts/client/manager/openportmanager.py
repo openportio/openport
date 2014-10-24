@@ -60,7 +60,7 @@ class OpenPortManager(object):
         shares = self.dbhandler.get_shares()
         logger.debug('restarting shares - amount: %s' % len(list(shares)))
         for share in shares:
-            if self.os_interaction.pid_is_running(share.pid):
+            if self.os_interaction.pid_is_openport_process(share.pid):
                 logger.debug('share still running. Pid: %s command: %s' % (share.pid, share.restart_command))
                 self.onNewShare(share)
             else:
@@ -180,33 +180,30 @@ class OpenPortManager(object):
                #"pid: %s - " % share.pid + \
         return "localport: %s - " % share.local_port + \
                "remote port: %s - " % share.server_port + \
-               "running: %s" % self.os_interaction.pid_is_running(share.pid)
+               "running: %s" % self.os_interaction.pid_is_openport_process(share.pid)
 
     def kill(self, local_port):
         shares = self.dbhandler.get_share_by_local_port(local_port)
         if len(shares) > 0:
             share = shares[0]
-            if self.os_interaction.pid_is_running(share.pid):
-                logger.debug('pid is running, will kill it: %s' % share.pid)
-                self.os_interaction.kill_pid(share.pid)
-                if share.pid in self.share_processes:
-                    logger.debug('pid found in share_processes')
-                    if self.share_processes[share.pid] is not None:
-                        logger.debug('output from child process: ' + str(self.os_interaction.non_block_read(self.share_processes[share.pid])))
-            self.dbhandler.stop_share(share)
+            self.kill_share(share)
         self.print_shares()
+
+    def kill_share(self, share):
+        if self.os_interaction.pid_is_openport_process(share.pid):
+            logger.debug('pid is running, will kill it: %s' % share.pid)
+            self.os_interaction.kill_pid(share.pid)
+            if share.pid in self.share_processes:
+                logger.debug('pid found in share_processes')
+                if self.share_processes[share.pid] is not None:
+                    logger.debug('output from child process: ' + str(
+                        self.os_interaction.non_block_read(self.share_processes[share.pid])))
+        self.dbhandler.stop_share(share)
 
     def kill_all(self):
         shares = self.dbhandler.get_shares()
         for share in shares:
-            if self.os_interaction.pid_is_running(share.pid):
-                logger.debug('pid is running, will kill it: %s' % share.pid)
-                self.os_interaction.kill_pid(share.pid)
-                if share.pid in self.share_processes:
-                    logger.debug('pid found in share_processes')
-                    if self.share_processes[share.pid] is not None:
-                        logger.debug('output from child process: ' + str(self.os_interaction.non_block_read(self.share_processes[share.pid])))
-            self.dbhandler.stop_share(share)
+            self.kill_share(share)
 
 
 def utc_epoch_to_local_datetime(utc_epoch):

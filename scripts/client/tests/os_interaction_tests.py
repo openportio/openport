@@ -114,6 +114,19 @@ class OsInteractionTest(unittest.TestCase):
                                    close_fds=is_linux())
         self.assertTrue(self.os_interaction.pid_is_running(process.pid))
 
+    def test_pid_is_openport_process(self):
+        port = self.os_interaction.get_open_port()
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        python_exe = self.os_interaction.get_python_exec()
+        p = subprocess.Popen(python_exe + ['apps/openport_app.py', '--local-port', '%s' % port,
+                             '--start-manager', 'False', '--server', 'test.openport.be', '--verbose',
+                             '--no-manager', '--no-manager'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        try:
+            self.assertTrue(self.os_interaction.pid_is_openport_process(p.pid))
+        finally:
+            p.kill()
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

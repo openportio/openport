@@ -14,7 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from services import osinteraction
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer
-from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
+from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_success_callback
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
 from manager import openportmanager
@@ -200,14 +200,15 @@ class AppTests(unittest.TestCase):
                                        '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
                                       stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
+        sleep(3)
         i = 0
         while i < 15 and self.get_share_count_of_manager(manager_port) != 1:
             sleep(1)
             i += 1
-        for out in self.osinteraction.get_all_output(p_manager2):
-            print lineNumber(), 'p_manager2: ', out
         self.check_application_is_still_alive(p_manager2)
         self.assertEqual(1, self.get_share_count_of_manager(manager_port))
+
+        wait_for_success_callback(p_manager2, self.osinteraction)
 
         c = SimpleTcpClient(remote_host, remote_port)
         cl = SimpleTcpClient('127.0.0.1', port)
