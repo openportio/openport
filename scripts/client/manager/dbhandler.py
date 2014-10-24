@@ -62,6 +62,7 @@ class DBHandler(object):
         self.Session.remove()
 
     def close(self):
+        logger.debug('closing')
         self.engine.dispose()
 
     def add_share(self, share):
