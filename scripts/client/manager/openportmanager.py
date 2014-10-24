@@ -179,9 +179,13 @@ class OpenPortManager(object):
 
     def get_share_line(self, share):
                #"pid: %s - " % share.pid + \
-        return "localport: %s - " % share.local_port + \
-               "remote port: %s - " % share.server_port + \
-               "running: %s" % self.os_interaction.pid_is_openport_process(share.pid)
+        share_line = "localport: %s - " % share.local_port + \
+                     "remote port: %s - " % share.server_port + \
+                     "running: %s" % self.os_interaction.pid_is_openport_process(share.pid)
+        if Globals().verbose:
+            share_line += ' - pid: %s' % share.pid + \
+                          ' - id: %s' % share.id
+        return share_line
 
     def kill(self, local_port):
         shares = self.dbhandler.get_share_by_local_port(local_port)
@@ -234,6 +238,7 @@ def start_manager():
         from logging import DEBUG
         set_log_level(DEBUG)
         logger.debug('You are seeing debug output.')
+        Globals().verbose = True
 
     Globals().manager_port = args.manager_port
     Globals().openport_address = args.server
