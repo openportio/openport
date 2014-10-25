@@ -77,6 +77,46 @@ class AppTests(unittest.TestCase):
         self.check_tcp_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
         p.kill()
 
+    def test_openport_app__do_not_restart(self):
+
+        port = self.osinteraction.get_open_port()
+        s = SimpleTcpServer(port)
+        s.runThreaded()
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--server', TEST_SERVER, '--verbose', '--no-manager', '--database', self.db_file],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        remote_host, remote_port = get_remote_host_and_port(p, self.osinteraction)
+        self.check_application_is_still_alive(p)
+
+        self.assertEqual(1, self.get_nr_of_shares_in_db_file(self.db_file))
+        self.assertFalse(openportmanager.manager_is_running(8001))
+
+        c = SimpleTcpClient(remote_host, remote_port)
+        request = 'hello'
+        response = c.send(request)
+        self.assertEqual(request, response.strip())
+
+        os.kill(p.pid, KILL_SIGNAL)
+        p.wait()
+
+        manager_port = self.osinteraction.get_open_port()
+        p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
+                                       '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
+                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_manager2)
+        sleep(3)
+        print_all_output(p_manager2, self.osinteraction, 'p_manager2')
+        self.assertFalse(self.application_is_alive(p_manager2))
+        try:
+            response = c.send(request)
+        except:
+            response = ''
+        self.assertNotEqual(request, response.strip())
+        c.close()
+        s.close()
+
     def test_openport_app_same_port(self):
         port = self.osinteraction.get_open_port()
 

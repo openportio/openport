@@ -133,6 +133,18 @@ class DBHandlerTests(unittest.TestCase):
         self.assertEqual(1, len(active_shares))
         self.assertEqual(share2.id, active_shares[0].id)
 
+    def test_get_shares_to_restart(self):
+        share1 = Share(active=False)
+        share2 = Share(active=True, local_port=123, restart_command=['sleep', '5'])
+        share3 = Share(active=True, local_port=124, restart_command='')
+        self.dbhandler.add_share(share1)
+        self.dbhandler.add_share(share2)
+        self.dbhandler.add_share(share3)
+
+        active_shares = self.dbhandler.get_shares_to_restart()
+        self.assertEqual(1, len(active_shares))
+        self.assertEqual(share2.id, active_shares[0].id)
+
     def test_get_share_by_local_port(self):
         share1 = Share(active=False, local_port=123)
         share2 = Share(active=True, local_port=123)

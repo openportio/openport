@@ -189,6 +189,8 @@ class OpenportApp(object):
 
     def get_restart_command(self, session):
         command = []
+        if not self.args.restart_on_reboot:
+            return ''
 
         # Drop the openport part (for security reasons).
         command.extend(sys.argv[1:])

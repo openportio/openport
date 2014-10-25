@@ -133,6 +133,15 @@ class DBHandler(object):
         self.Session.remove()
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
+    def get_shares_to_restart(self):
+        logger.debug('get_shares')
+
+        session = self._get_session()
+        openport_sessions = session.query(OpenportSession).filter_by(active=True)
+        self.Session.remove()
+        return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions
+                    if self.convert_session_from_db(openport_session).restart_command)
+
     def get_share_by_local_port(self, local_port):
         logger.debug('get_share_by_local_port')
 

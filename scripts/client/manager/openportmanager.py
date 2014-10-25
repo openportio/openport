@@ -57,7 +57,7 @@ class OpenPortManager(object):
         sys.exit()
 
     def restart_sharing(self):
-        shares = self.dbhandler.get_shares()
+        shares = self.dbhandler.get_shares_to_restart()
         logger.debug('restarting shares - amount: %s' % len(list(shares)))
         shutdown = True
         for share in shares:
@@ -186,7 +186,8 @@ class OpenPortManager(object):
                #"pid: %s - " % share.pid + \
         share_line = "localport: %s - " % share.local_port + \
                      "remote port: %s - " % share.server_port + \
-                     "running: %s" % self.os_interaction.pid_is_openport_process(share.pid)
+                     "running: %s" % self.os_interaction.pid_is_openport_process(share.pid) + \
+                     "active: %s" % share.active
         if Globals().verbose:
             share_line += ' - pid: %s' % share.pid + \
                           ' - id: %s' % share.id
