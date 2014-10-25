@@ -81,8 +81,8 @@ class OpenportApp(object):
         command = self.os_interaction.get_openport_exec()
         command.append('manager')
         command = OsInteraction.set_variable(command, '--manager-port', self.globals.manager_port)
-        if self.args.manager_database:
-            command = OsInteraction.set_variable(command, '--database', self.args.manager_database)
+        if self.args.database:
+            command = OsInteraction.set_variable(command, '--database', self.args.database)
         if self.args.server and not self.args.server == DEFAULT_SERVER:
             command = OsInteraction.set_variable(command, '--server', self.args.server)
         logger.debug('starting manager: %s' % command)
@@ -199,7 +199,6 @@ class OpenportApp(object):
         if session.server_session_token != '':
             command = OsInteraction.set_variable(command, '--request-token', session.server_session_token)
         command = OsInteraction.set_variable(command, '--start-manager', False)
-        command = OsInteraction.unset_variable(command, '--manager-database')
         command = OsInteraction.set_variable(command, '--manager-port', self.globals.manager_port)
 
         return command
@@ -217,7 +216,7 @@ class OpenportApp(object):
 
         parser.add_argument('--manager-port', type=int, default=-1, help=argparse.SUPPRESS)
         parser.add_argument('--start-manager', type=bool, default=True, help='Start a manager app if none can be found.')
-        parser.add_argument('--manager-database', type=str, default='', help=argparse.SUPPRESS)
+        parser.add_argument('--database', type=str, default='', help=argparse.SUPPRESS)
         parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
         parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
@@ -252,8 +251,8 @@ class OpenportApp(object):
 
         key_registration_service.register_key(self.args, self.args.server)
 
-        if self.args.manager_database != '':
-            dbhandler.db_location = self.args.manager_database
+        if self.args.database != '':
+            dbhandler.db_location = self.args.database
         self.db_handler = dbhandler.getInstance()
 
         self.init_app(self.args)

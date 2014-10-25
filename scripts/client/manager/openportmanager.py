@@ -94,15 +94,14 @@ class OpenPortManager(object):
                     logger.debug('restart command: %s' % command)
                     self.os_interaction.spawn_daemon(command)
 
-
-    def stop_sharing(self,share):
+    def stop_sharing(self, share):
         logger.info("stopping %s" % share.id)
         self.os_interaction.kill_pid(share.pid)
         self.dbhandler.stop_share(share)
 
     def onNewShare(self, share):
-        logger.info( "adding share %s" % share.id )
-        logger.debug( share.restart_command)
+        logger.info("adding share %s" % share.local_port)
+        logger.debug(share.restart_command)
         share.success_observers.append(self.onShareSuccess)
         share.error_observers.append(self.onShareError)
         share.stop_observers.append(self.stop_sharing)

@@ -42,7 +42,7 @@ class OpenportAppTests(unittest.TestCase):
 
         app.args.manager_port = 8001
         app.args.start_manager = True
-        app.args.manager_database = self.test_db
+        app.args.database = self.test_db
         app.args.request_port = -1
         app.args.request_token = ''
         app.args.verbose = True

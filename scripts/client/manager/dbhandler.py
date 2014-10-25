@@ -146,8 +146,9 @@ class DBHandler(object):
         logger.debug('stop_share')
         session = self._get_session()
         openport_session = session.query(OpenportSession).filter_by(id=share.id).first()
-        openport_session.active = False
-        session.commit()
+        if openport_session:
+            openport_session.active = False
+            session.commit()
         self.Session.remove()
 
 instance = None

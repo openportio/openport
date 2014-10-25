@@ -33,7 +33,7 @@ def new_share(name='newShare'):
     globals.key_id = share.key_id
 #                    logger.debug( 'path: <%s>' % share.filePath )
 
-    save_request(share)
+   # save_request(share)
     if onNewShare:
         onNewShare(share)
     global shares
@@ -135,9 +135,9 @@ def start_server(onNewShareFunc=None):
         pass
 
 
-def save_request(share):
-    db_handler = dbhandler.getInstance()
-    return db_handler.add_share(share)
+#def save_request(share):
+#    db_handler = dbhandler.getInstance()
+#    return db_handler.add_share(share)
 
 
 def start_server_thread(onNewShare=None):
