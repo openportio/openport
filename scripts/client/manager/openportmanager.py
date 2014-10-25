@@ -59,11 +59,13 @@ class OpenPortManager(object):
     def restart_sharing(self):
         shares = self.dbhandler.get_shares()
         logger.debug('restarting shares - amount: %s' % len(list(shares)))
+        shutdown = True
         for share in shares:
             if self.os_interaction.pid_is_openport_process(share.pid):
                 logger.debug('share still running. Pid: %s command: %s' % (share.pid, share.restart_command))
                 self.onNewShare(share)
             else:
+                shutdown = False
                 try:
                     logger.debug('restarting share: %s' % share.restart_command)
                     p = self.os_interaction.start_openport_process(share, manager_port=Globals().manager_port)
@@ -93,6 +95,10 @@ class OpenPortManager(object):
                     command = ['sudo', '-u', username, '-H', 'openport', 'manager', '--restart-shares']
                     logger.debug('restart command: %s' % command)
                     self.os_interaction.spawn_daemon(command)
+
+        if shutdown:
+            logger.info('Started no shares, shutting down.')
+            sys.exit(0)
 
     def stop_sharing(self, share):
         logger.info("stopping %s" % share.id)

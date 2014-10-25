@@ -44,6 +44,9 @@ class AppTests(unittest.TestCase):
         if os.path.exists(self.db_file):
             os.remove(self.db_file)
 
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+
+
     def tearDown(self):
         kill_all_processes(self.processes_to_kill)
         if self.manager_port > 0:
@@ -59,8 +62,6 @@ class AppTests(unittest.TestCase):
 
     def test_openport_app(self):
         port = self.osinteraction.get_open_port()
-
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                               '--server', TEST_SERVER, '--verbose', '--no-manager', '--database', self.db_file],
@@ -78,8 +79,6 @@ class AppTests(unittest.TestCase):
 
     def test_openport_app_same_port(self):
         port = self.osinteraction.get_open_port()
-
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                               '--server', TEST_SERVER, '--verbose', '--no-manager', '--database', self.db_file],
@@ -122,8 +121,6 @@ class AppTests(unittest.TestCase):
     def test_openport_app_http_forward(self):
         port = self.osinteraction.get_open_port()
 
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                               '--start-manager', 'False', '--server', TEST_SERVER, '--verbose',
                               '--no-manager', '--http-forward', '--database', self.db_file],
@@ -152,14 +149,12 @@ class AppTests(unittest.TestCase):
         s = SimpleTcpServer(port)
         s.runThreaded()
 
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
         manager_port = self.osinteraction.get_open_port()
         self.manager_port = manager_port
         print 'manager_port :', manager_port
 
         p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-                                      '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
+                                      '--verbose', '--manager-port', str(manager_port)],
                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         sleep(3)
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
@@ -243,10 +238,22 @@ class AppTests(unittest.TestCase):
         c.close()
         s.close()
 
+    def test_manager__stop_if_no_shares(self):
+        manager_port = self.osinteraction.get_open_port()
+        self.manager_port = manager_port
+        print 'manager_port :', manager_port
+
+        p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
+                                      '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
+                                     stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        sleep(3)
+        print_all_output(p_manager, self.osinteraction)
+        self.assertFalse(self.application_is_alive(p_manager))
+
     def test_manager__start_twice(self):
         port = self.osinteraction.get_open_port()
         print 'localport :', port
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+
 
         manager_port = self.osinteraction.get_open_port()
         self.manager_port = manager_port
@@ -278,8 +285,6 @@ class AppTests(unittest.TestCase):
             config.write(f)
 
     def test_manager__other_tcp_app_on_port(self):
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
         manager_port = self.osinteraction.get_open_port()
         self.manager_port = manager_port
         s = SimpleTcpServer(manager_port)
@@ -302,8 +307,6 @@ class AppTests(unittest.TestCase):
         s.close()
 
     def test_manager__other_tcp_app_on_port__pass_by_argument(self):
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
         manager_port = self.osinteraction.get_open_port()
         self.manager_port = manager_port
         s = SimpleTcpServer(manager_port)
@@ -325,8 +328,6 @@ class AppTests(unittest.TestCase):
         s.close()
 
     def test_manager__other_http_app_on_port(self):
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
         manager_port = self.osinteraction.get_open_port()
         self.manager_port = manager_port
         s = TestHTTPServer(manager_port)
@@ -367,7 +368,6 @@ class AppTests(unittest.TestCase):
         port = self.osinteraction.get_open_port()
         print 'local port: ', port
 
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER, '--manager-port', str(manager_port),
                                   '--database', self.db_file, '--restart-on-reboot'],
@@ -393,7 +393,6 @@ class AppTests(unittest.TestCase):
         port = self.osinteraction.get_open_port()
         print 'local port: ', port
 
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER,
                                   '--manager-port', str(700000),  # port out of reach
@@ -414,7 +413,6 @@ class AppTests(unittest.TestCase):
         port = self.osinteraction.get_open_port()
         print 'local port: ', port
 
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER, '--manager-port', str(manager_port),
                                   '--database', self.db_file, '--restart-on-reboot'],
@@ -478,16 +476,12 @@ class AppTests(unittest.TestCase):
         self.manager_port = manager_port
         self.assertFalse(openportmanager.manager_is_running(manager_port))
 
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
         p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-                                      '--verbose', '--manager-port', str(manager_port), '--server', TEST_SERVER,
-                                      '--restart-shares'],
+                                      '--verbose', '--manager-port', str(manager_port), '--server', TEST_SERVER],
                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager)
 
         sleep(1)
-
         print_all_output(p_manager, self.osinteraction, 'p_manager')
 
         self.assertTrue(openportmanager.manager_is_running(manager_port))
@@ -691,8 +685,6 @@ class AppTests(unittest.TestCase):
     def test_openport_app_with_http_forward(self):
         port = self.osinteraction.get_open_port()
 
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
                               '--start-manager', 'False', '--http-forward', '--server', TEST_SERVER,
                               '--no-manager', '--database', self.db_file],
@@ -708,8 +700,6 @@ class AppTests(unittest.TestCase):
         self.check_http_port_forward(remote_host, port)
 
     def test_version(self):
-        os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--version'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
