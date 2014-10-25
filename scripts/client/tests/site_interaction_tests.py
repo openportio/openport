@@ -146,7 +146,7 @@ class SiteInteractionTest(unittest.TestCase):
         print "process output stdout: ", process_output[0]
         print "process output stderr: ", process_output[1]
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
-        self.assertEquals(9, p.poll())
+        self.assertTrue(p.poll() in (9, -9), 'poll output was %s' % p.poll())
 
     def test_restart_killed_session(self):
 
@@ -173,8 +173,7 @@ class SiteInteractionTest(unittest.TestCase):
         process_output = self.os_interaction.get_all_output(p)
         print "process output: ", process_output
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
-        self.assertEquals(9, p.poll())
-
+        self.assertTrue(p.poll() in (9, -9), 'poll output was %s' % p.poll())
 
         p = self.start_session(8888, db_file=db_file)
         remote_host, server_port = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
@@ -188,7 +187,7 @@ class SiteInteractionTest(unittest.TestCase):
         command = ['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port, '--start-manager',
                    'False', '--server', '%s' % self.server, '--verbose', '--manager-port', '-1']
         if db_file:
-            command.extend(['--manager-database', db_file])
+            command.extend(['--database', db_file])
         p = subprocess.Popen(command,
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)

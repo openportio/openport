@@ -187,7 +187,7 @@ class OpenPortManager(object):
         share_line = "localport: %s - " % share.local_port + \
                      "remote port: %s - " % share.server_port + \
                      "running: %s" % self.os_interaction.pid_is_openport_process(share.pid) + \
-                     "active: %s" % share.active
+                     "restart on reboot: %s" % bool(share.restart_command)
         if Globals().verbose:
             share_line += ' - pid: %s' % share.pid + \
                           ' - id: %s' % share.id
