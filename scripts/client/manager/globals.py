@@ -11,6 +11,7 @@ class Globals():
             self.key_id = -1
             self.openport_address = DEFAULT_SERVER
             self.manager_port = -1
+            self.manager_port_from_config_file = False
             self.config = os.path.expanduser('~/.openport/openport.cfg')
             self.contact_manager = True
             self.verbose = False

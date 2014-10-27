@@ -49,6 +49,15 @@ class OsInteraction(object):
         return result
 
     @staticmethod
+    def strip_sudo_command(command):
+        if command[0] != 'sudo':
+            return command
+        result = command[1:]
+        while result[0][0] == '-':
+            result = OsInteraction.unset_variable(result, result[0])
+        return result
+
+    @staticmethod
     def get_variable(command, variable):
         try:
             location = command.index(variable)
@@ -59,20 +68,19 @@ class OsInteraction(object):
         else:
             return None
 
+    def start_openport_process(self, share):
+        if not share.restart_command:
+            self.logger.debug('no restart command for share with local port %s' % share.local_port)
+            return
 
-    def start_openport_process(self, share, manager_port=8001):
+        restart_command = self.strip_sudo_command(share.restart_command)
 
-        if not 'openport' in share.restart_command[0]:
-            command = self.get_openport_exec()
-        else:
-            command = []
+        if 'openport' in share.restart_command[0]:
+            restart_command = restart_command[1:]
+        command = self.get_openport_exec()
 
 #        print share.restart_command
-        command.extend(share.restart_command)
-
-        assert isinstance(command, list)
-        command = OsInteraction.set_variable(command, "--manager-port", manager_port)
-        share.restart_command = command
+        command.extend(restart_command)
 
         return self.start_process(command)
 
@@ -235,6 +243,8 @@ class OsInteraction(object):
         process = filter(lambda p: p.pid == pid, psutil.process_iter())
         for i in process:
             return 'openport' in i.name() or 'python' in i.name()  # Is not 100% but best effort. (for mac)
+        return False
+
 
 class LinuxOsInteraction(OsInteraction):
 

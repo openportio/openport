@@ -80,7 +80,8 @@ class OpenportApp(object):
 
         command = self.os_interaction.get_openport_exec()
         command.append('manager')
-        command = OsInteraction.set_variable(command, '--manager-port', self.globals.manager_port)
+        if not self.globals.manager_port_from_config_file:
+            command = OsInteraction.set_variable(command, '--manager-port', self.globals.manager_port)
         if self.args.database:
             command = OsInteraction.set_variable(command, '--database', self.args.database)
         if self.args.server and not self.args.server == DEFAULT_SERVER:

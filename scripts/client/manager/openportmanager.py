@@ -20,6 +20,7 @@ from manager.globals import Globals
 from services.logger_service import get_logger, set_log_level
 from common.share import Share
 from common.session import Session
+from common.config_file_handler import ConfigFileHandler
 from manager.globals import DEFAULT_SERVER
 from services.osinteraction import is_linux
 import ConfigParser
@@ -56,6 +57,14 @@ class OpenPortManager(object):
                 logger.error(tb)
         sys.exit()
 
+    def set_manager_port(self, share):
+        command = share.restart_command
+        if Globals().manager_port_from_config_file:
+            command = self.os_interaction.unset_variable(command, '--manager-port')
+        else:
+            command = self.os_interaction.set_variable(command, '--manager-port', Globals().manager_port)
+        share.restart_command = command
+
     def restart_sharing(self):
         shares = self.dbhandler.get_shares_to_restart()
         logger.debug('restarting shares - amount: %s' % len(list(shares)))
@@ -68,7 +77,9 @@ class OpenPortManager(object):
                 shutdown = False
                 try:
                     logger.debug('restarting share: %s' % share.restart_command)
-                    p = self.os_interaction.start_openport_process(share, manager_port=Globals().manager_port)
+                    self.set_manager_port(share)
+
+                    p = self.os_interaction.start_openport_process(share)
                     self.os_interaction.print_output_continuously_threaded(p)
                     sleep(1)
                     if p.poll() is not None:
@@ -88,7 +99,7 @@ class OpenPortManager(object):
             with open(users_file, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
-                    if line.strip()[0] == '#':
+                    if not line.strip() or line.strip()[0] == '#':
                         continue
                     username = line.strip().split()[0]
 
@@ -162,18 +173,18 @@ class OpenPortManager(object):
     def startOpenportItProcess (self, path):
         share = Share()
         share.filePath = path
-
+        raise Exception('todo')
         p = self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False,
                                                    manager_port=Globals().manager_port)
         self.share_processes[p.pid] = p
 
     def startOpenportProcess (self, port):
         session = Session()
-        session.restart_command = ['--local-port', '%s' % port]
+        session.restart_command = ['%s' % port]
+        self.set_manager_port(session)
         logger.debug(session.restart_command)
 
-        p = self.os_interaction.start_openport_process(session, hide_message=False, no_clipboard=False,
-                                                   manager_port=Globals().manager_port)
+        p = self.os_interaction.start_openport_process(session)
         self.share_processes[p.pid] = p
 
     def print_shares(self):
@@ -186,7 +197,7 @@ class OpenPortManager(object):
                #"pid: %s - " % share.pid + \
         share_line = "localport: %s - " % share.local_port + \
                      "remote port: %s - " % share.server_port + \
-                     "running: %s" % self.os_interaction.pid_is_openport_process(share.pid) + \
+                     "running: %s - " % self.os_interaction.pid_is_openport_process(share.pid) + \
                      "restart on reboot: %s" % bool(share.restart_command)
         if Globals().verbose:
             share_line += ' - pid: %s' % share.pid + \
@@ -309,15 +320,12 @@ def manager_is_running(manager_port):
 
 
 def get_and_save_random_manager_port():
-    config = ConfigParser.ConfigParser()
+    config = ConfigFileHandler(Globals().config)
     manager_port = osinteraction.getInstance().get_open_port()
    # manager_port = 22
     Globals().manager_port = manager_port
-    if not config.has_section('manager'):
-        config.add_section('manager')
     config.set('manager', 'port', manager_port)
-    with open(Globals().config, 'w') as f:
-        config.write(f)
+    Globals().manager_port_from_config_file = True
     return manager_port
 
 
@@ -328,11 +336,10 @@ def get_and_save_manager_port(manager_port_from_command_line=-1, exit_on_fail=Tr
         original_port = manager_port_from_command_line
     else:
         # Read port from file (if file, section and entry exist)
-        config = ConfigParser.ConfigParser()
-        config_file_location = Globals().config
+        config = ConfigFileHandler(Globals().config)
         try:
-            config.read(config_file_location)
-            Globals().manager_port = config.getint('manager', 'port')
+            config.get_int('manager', 'port')
+            Globals().manager_port = Globals().manager_port_from_config_file = True
             original_port = Globals().manager_port
         except:
             manager_port = get_and_save_random_manager_port()
