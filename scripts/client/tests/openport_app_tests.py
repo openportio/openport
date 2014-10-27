@@ -49,6 +49,7 @@ class OpenportAppTests(unittest.TestCase):
         app.args.http_forward = False
         app.args.server = 'testserver.jdb'
         app.args.restart_on_reboot = False
+        app.args.no_manager = False
 
 
 
