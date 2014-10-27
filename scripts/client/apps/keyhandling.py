@@ -7,6 +7,12 @@ log = get_logger(__name__)
 
 
 HOME_DIR = os.path.expanduser('~')
+
+if len(HOME_DIR) < 3:
+    log.debug('ERROR!!! saving keys to / : <<<%s>>>' % HOME_DIR)
+    log.debug('os.environ:')
+    log.debug(os.environ)
+
 PRIVATE_KEY_FILE = os.path.join(HOME_DIR, '.ssh', 'id_rsa')
 PUBLIC_KEY_FILE =  os.path.join(HOME_DIR, '.ssh', 'id_rsa.pub')
 
