@@ -75,7 +75,7 @@ class OsInteraction(object):
 
         restart_command = self.strip_sudo_command(share.restart_command)
 
-        if 'openport' in share.restart_command[0]:
+        if 'openport' in restart_command[0]:
             restart_command = restart_command[1:]
         command = self.get_openport_exec()
 

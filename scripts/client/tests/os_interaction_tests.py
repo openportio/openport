@@ -12,6 +12,8 @@ import subprocess
 from time import sleep
 from services.logger_service import set_log_level
 from test_utils import run_command_with_timeout, run_command_with_timeout_return_process
+from common.share import Share
+from mock import Mock, call
 
 
 class OsInteractionTest(unittest.TestCase):
@@ -127,6 +129,23 @@ class OsInteractionTest(unittest.TestCase):
         finally:
             p.kill()
 
+    def test_start_openport_process(self):
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+
+        command = ['sudo', '-u', 'pi', '/usr/bin/openport', '2025', '--restart-on-reboot', '--request-port', '31261',
+                   '--request-token', 'WkSXfYyksNy4vN2h', '--start-manager', 'False']
+        share = Share()
+        share.restart_command = command
+
+        method = self.os_interaction.start_process
+        self.os_interaction.start_process = Mock(return_value='')
+        try:
+            self.os_interaction.start_openport_process(share)
+            self.os_interaction.start_process.assert_has_calls(
+                [call(['env/bin/python', 'apps/openport_app.py', '2025', '--restart-on-reboot', '--request-port',
+                       '31261', '--request-token', 'WkSXfYyksNy4vN2h', '--start-manager', 'False'])])
+        finally:
+            self.os_interaction.start_process = method
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

@@ -338,8 +338,8 @@ def get_and_save_manager_port(manager_port_from_command_line=-1, exit_on_fail=Tr
         # Read port from file (if file, section and entry exist)
         config = ConfigFileHandler(Globals().config)
         try:
-            config.get_int('manager', 'port')
-            Globals().manager_port = Globals().manager_port_from_config_file = True
+            Globals().manager_port = config.get_int('manager', 'port')
+            Globals().manager_port_from_config_file = True
             original_port = Globals().manager_port
         except:
             manager_port = get_and_save_random_manager_port()
