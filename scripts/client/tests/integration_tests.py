@@ -40,7 +40,7 @@ class IntegrationTest(unittest.TestCase):
         path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.ico')
         self.assertTrue(os.path.exists(path), 'file does not exist %s' % path)
         share = self.get_share(path)
-        self.start_sharing(share)
+        self.start_openportit_session(share)
         temp_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
                                  os.path.basename(share.filePath) + get_token(3))
 
@@ -52,36 +52,6 @@ class IntegrationTest(unittest.TestCase):
         share = Share()
         share.filePath = path
         share.token = TOKEN
-        return share
-
-    def start_sharing(self, share):
-        self.called_back = False
-        def callback(share):
-
-            print share.as_dict()
-            self.assertEquals(self.test_server, share.server)
-            self.assertTrue(share.server_port >= 2000, 'expection serverport >= 2000 but was %s' % share.server_port)
-           # self.assertTrue(share.server_port<= 51000)
-
-            self.assertTrue(share.account_id > 0, 'share.account_id was %s' % share.account_id)
-            self.assertTrue(share.key_id > 0, 'share.key_id was %s' % share.key_id)
-
-            print 'called back, thanks :)'
-            self.called_back = True
-
-        def start_openport_it():
-            app = OpenportItApp()
-            app.args.server = self.test_server
-            app.open_port_file(share, callback=callback)
-        thr = threading.Thread(target=start_openport_it)
-        thr.setDaemon(True)
-        thr.start()
-
-        i = 0
-        while i < 10 and not self.called_back:
-            i += 1
-            sleep(1)
-        self.assertTrue(self.called_back, 'I was not called back in the given time')
         return share
 
     def downloadAndCheckFile(self, share, temp_file):
@@ -104,7 +74,7 @@ class IntegrationTest(unittest.TestCase):
     def test_multi_thread(self):
         path = os.path.join(os.path.dirname(__file__), 'testfiles/WALL_DANGER_SOFTWARE.jpg')
         share = self.get_share(path)
-        self.start_sharing(share)
+        self.start_openportit_session(share)
         sleep(3)
 
         temp_file_path = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', os.path.basename(share.filePath))
@@ -162,7 +132,7 @@ class IntegrationTest(unittest.TestCase):
             print 'port forwarding success is called'
         share.success_observers.append(success_callback)
 
-        self.start_sharing(share)
+        self.start_openportit_session(share)
 
         i = 0
         while i < 100 and not self.success_called_back:
@@ -249,13 +219,16 @@ class IntegrationTest(unittest.TestCase):
 
         openport = self.start_openport_session(session)
 
-        sleep(10)
+        i=0
+        while i < 20 and not session.http_forward_address:
+            i += 1
+            sleep(1)
 
 #        remote_port = session.server_port
 #        self.assertEqual(80, remote_port)
         remote_host = session.http_forward_address
         print 'remote host:' + remote_host
-        self.assertTrue('.u.%s' % self.test_server in remote_host)
+        self.assertTrue('.u.%s' % self.test_server in remote_host, 'expect .u. in remote_host: %s' % remote_host)
 
         c = SimpleHTTPClient()
         actual_response = c.get('http://localhost:%s' % port)
@@ -274,8 +247,27 @@ class IntegrationTest(unittest.TestCase):
     def start_openport_session(self, session):
         openport = Openport()
 
-        def callback(ignore):
-            print "callback"
+        self.called_back_success = False
+        self.called_back_error = False
+
+        def callback(session1):
+            print session1.as_dict()
+            self.assertEquals(self.test_server, session1.server)
+            self.assertTrue(session1.server_port >= 2000, 'expected server_port >= 2000 but was %s' % session1.server_port)
+           # self.assertTrue(share.server_port<= 51000)
+
+            self.assertTrue(session1.account_id > 0, 'share.account_id was %s' % session1.account_id)
+            self.assertTrue(session1.key_id > 0, 'share.key_id was %s' % session1.key_id)
+            print 'called back, thanks :)'
+
+        def session_success_callback(session1):
+            self.called_back_success = True
+
+        def session_error_callback(session1):
+            self.called_back_error = True
+
+        session.success_observers.append(session_success_callback)
+        session.error_observers.append(session_error_callback)
 
         def show_error(error_msg):
             print "error:" + error_msg
@@ -286,7 +278,56 @@ class IntegrationTest(unittest.TestCase):
         thr = threading.Thread(target=start_openport)
         thr.setDaemon(True)
         thr.start()
+        i = 0
+        while i < 30 and not self.called_back_success:
+            if self.called_back_error:
+                self.fail('error call back!')
+            sleep(1)
+            i += 1
+        self.assertTrue(self.called_back_success, 'not called back in time')
+        print 'called back after %s seconds' % i
         return openport
+
+    def start_openportit_session(self, share):
+        self.called_back_success = False
+        self.called_back_error = False
+
+        def callback(session1):
+            print session1.as_dict()
+            self.assertEquals(self.test_server, session1.server)
+            self.assertTrue(session1.server_port >= 2000, 'expected server_port >= 2000 but was %s' % session1.server_port)
+           # self.assertTrue(share.server_port<= 51000)
+
+            self.assertTrue(session1.account_id > 0, 'share.account_id was %s' % session1.account_id)
+            self.assertTrue(session1.key_id > 0, 'share.key_id was %s' % session1.key_id)
+            print 'called back, thanks :)'
+
+        def session_success_callback(session1):
+            self.called_back_success = True
+
+        def session_error_callback(session1):
+            self.called_back_error = True
+
+        share.success_observers.append(session_success_callback)
+        share.error_observers.append(session_error_callback)
+
+        def start_openport_it():
+            app = OpenportItApp()
+            app.args.server = self.test_server
+            app.open_port_file(share, callback=callback)
+        thr = threading.Thread(target=start_openport_it)
+        thr.setDaemon(True)
+        thr.start()
+
+        i = 0
+        while i < 30 and not self.called_back_success:
+            if self.called_back_error:
+                self.fail('error call back!')
+            sleep(1)
+            i += 1
+        self.assertTrue(self.called_back_success, 'not called back in time')
+        print 'called back after %s seconds' % i
+        return share
 
     def test_brute_force_blocked(self):
 
@@ -306,6 +347,7 @@ class IntegrationTest(unittest.TestCase):
 
         link = session.get_link()
         print 'link: %s' % link
+        self.assertTrue(session.server_port > 1000)
 
         c = SimpleHTTPClient()
         actual_response = c.get('http://localhost:%s' % port)

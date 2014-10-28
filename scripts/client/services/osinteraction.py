@@ -298,7 +298,7 @@ class LinuxOsInteraction(OsInteraction):
         return True
 
     def is_compiled(self):
-        return sys.argv[0] != 'python' and sys.argv[0][-3:] != '.py'
+        return sys.argv[0] != 'python' and sys.argv[0][-3:] != '.py' and not 'nosetests' in sys.argv[0]
 
     def get_python_exec(self):
         if os.path.exists('env/bin/python'):

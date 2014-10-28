@@ -23,7 +23,7 @@ from manager import openportmanager
 
 logger = get_logger(__name__)
 
-TEST_SERVER = 'openport.io'
+TEST_SERVER = 'test.openport.be'
 
 if osinteraction.is_linux():
     PYTHON_EXE = 'env/bin/python'
