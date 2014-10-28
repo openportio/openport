@@ -68,7 +68,7 @@ def error_share():
         logger.error('unknown key: %s in shares %s' % (form_data['local_port'], shares))
         return 'unknown'
     else:
-        shares[form_data['local_port']].notify_error()
+        shares[form_data['local_port']].notify_error(None)
         return 'ok'
 
 

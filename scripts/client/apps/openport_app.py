@@ -305,7 +305,7 @@ class OpenportApp(object):
 
         self.openport.start_port_forward(session, callback, show_error, server=self.args.server)
 
-    def error_callback(self, session):
+    def error_callback(self, session, exception):
         logger.debug('error_callback')
         if self.globals.contact_manager and self.manager_app_started:
             self.inform_manager_app_error(session, self.globals.manager_port)

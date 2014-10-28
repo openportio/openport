@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from apps.keyhandling import get_or_create_public_key, create_new_key_pair
 from apps.openport_api import PortForwardResponse, request_port
-from services.logger_service import set_log_level
+from services.logger_service import set_log_level, get_logger
 from services.crypt_service import get_token
 from services import osinteraction
 import logging
@@ -28,6 +28,7 @@ from test_utils import SimpleHTTPClient, TestHTTPServer
 
 TOKEN = 'tokentest'
 
+logger = get_logger(__name__)
 
 class IntegrationTest(unittest.TestCase):
 
@@ -36,11 +37,15 @@ class IntegrationTest(unittest.TestCase):
         self.test_server = 'test.openport.be'
         self.osinteraction = osinteraction.getInstance()
 
+    def tearDown(self):
+        if hasattr(self, 'app'):
+            self.app.stop()
+
     def test_start_share(self):
         path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.ico')
         self.assertTrue(os.path.exists(path), 'file does not exist %s' % path)
         share = self.get_share(path)
-        self.start_openportit_session(share)
+        self.app = self.start_openportit_session(share)
         temp_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
                                  os.path.basename(share.filePath) + get_token(3))
 
@@ -74,7 +79,7 @@ class IntegrationTest(unittest.TestCase):
     def test_multi_thread(self):
         path = os.path.join(os.path.dirname(__file__), 'testfiles/WALL_DANGER_SOFTWARE.jpg')
         share = self.get_share(path)
-        self.start_openportit_session(share)
+        self.app = self.start_openportit_session(share)
         sleep(3)
 
         temp_file_path = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', os.path.basename(share.filePath))
@@ -132,7 +137,7 @@ class IntegrationTest(unittest.TestCase):
             print 'port forwarding success is called'
         share.success_observers.append(success_callback)
 
-        self.start_openportit_session(share)
+        self.app = self.start_openportit_session(share)
 
         i = 0
         while i < 100 and not self.success_called_back:
@@ -168,8 +173,10 @@ class IntegrationTest(unittest.TestCase):
 
     def test_same_port_new_key(self):
 
+        logger.debug('getting key pair')
         private_key, public_key = create_new_key_pair()
 
+        logger.debug('requesting port')
         dictionary = request_port(
             url='https://%s/api/v1/request-port' % self.test_server,
             public_key=public_key
@@ -177,6 +184,7 @@ class IntegrationTest(unittest.TestCase):
 
         response = PortForwardResponse(dictionary)
 
+        logger.debug('requesting port')
         dictionary2 = request_port(
             url='https://%s/api/v1/request-port' % self.test_server,
             public_key=public_key,
@@ -188,6 +196,7 @@ class IntegrationTest(unittest.TestCase):
 
         self.assertEqual(response2.remote_port, response.remote_port)
 
+        logger.debug('requesting port')
         dictionary3 = request_port(
             url='https://%s/api/v1/request-port' % self.test_server,
             public_key=public_key,
@@ -196,12 +205,12 @@ class IntegrationTest(unittest.TestCase):
         )
         response3 = PortForwardResponse(dictionary3)
         self.assertNotEqual(response3.remote_port, response.remote_port)
-
+        logger.debug('test done')
 
     def exceptionTest(self):
         try:
             raise ValueError
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
             print "huray!"
 
     def test_http_forward(self):
@@ -217,7 +226,7 @@ class IntegrationTest(unittest.TestCase):
         session.server_session_token = None
         session.http_forward = True
 
-        openport = self.start_openport_session(session)
+        self.app = self.start_openport_session(session)
 
         i=0
         while i < 20 and not session.http_forward_address:
@@ -235,8 +244,6 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(actual_response, response.strip())
         actual_response = c.get('http://%s' % remote_host)
         self.assertEqual(actual_response, response.strip())
-
-        openport.stop_port_forward()
 
     def start_http_server(self, port, response):
         s = TestHTTPServer(port)
@@ -263,8 +270,9 @@ class IntegrationTest(unittest.TestCase):
         def session_success_callback(session1):
             self.called_back_success = True
 
-        def session_error_callback(session1):
+        def session_error_callback(session1, exception):
             self.called_back_error = True
+            raise exception
 
         session.success_observers.append(session_success_callback)
         session.error_observers.append(session_error_callback)
@@ -305,15 +313,17 @@ class IntegrationTest(unittest.TestCase):
         def session_success_callback(session1):
             self.called_back_success = True
 
-        def session_error_callback(session1):
+        def session_error_callback(session1, exception):
             self.called_back_error = True
+            raise exception
 
         share.success_observers.append(session_success_callback)
         share.error_observers.append(session_error_callback)
 
+        app = OpenportItApp()
+        app.args.server = self.test_server
+
         def start_openport_it():
-            app = OpenportItApp()
-            app.args.server = self.test_server
             app.open_port_file(share, callback=callback)
         thr = threading.Thread(target=start_openport_it)
         thr.setDaemon(True)
@@ -327,7 +337,7 @@ class IntegrationTest(unittest.TestCase):
             i += 1
         self.assertTrue(self.called_back_success, 'not called back in time')
         print 'called back after %s seconds' % i
-        return share
+        return app
 
     def test_brute_force_blocked(self):
 
@@ -341,7 +351,7 @@ class IntegrationTest(unittest.TestCase):
         session.server_session_token = None
         #session.http_forward = True
 
-        openport = self.start_openport_session(session)
+        self.app = self.start_openport_session(session)
 
         sleep(10)
 
@@ -383,7 +393,6 @@ class IntegrationTest(unittest.TestCase):
 
         server1.stop()
         server2.stop()
-        openport.stop_port_forward()
         openport2.stop_port_forward()
 
     def test_brute_force_blocked__not_for_http_forward(self):
@@ -401,7 +410,7 @@ class IntegrationTest(unittest.TestCase):
         session.server_session_token = None
         session.http_forward = True
 
-        openport = self.start_openport_session(session)
+        self.app = self.start_openport_session(session)
 
         sleep(10)
 
@@ -419,8 +428,6 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEqual(actual_response, response.strip())
         except (urllib2.HTTPError, urllib2.URLError) as e:
             self.fail('url error on connection nr %s' % i)
-
-        openport.stop_port_forward()
 
 
 if __name__ == '__main__':

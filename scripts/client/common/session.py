@@ -77,9 +77,9 @@ class Session(object):
         for observer in self.success_observers:
             observer(self)
 
-    def notify_error(self):
+    def notify_error(self, exception):
         for observer in self.error_observers:
-            observer(self)
+            observer(self, exception)
 
     def notify_stop(self):
         for observer in self.stop_observers:

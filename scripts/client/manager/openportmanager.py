@@ -125,7 +125,7 @@ class OpenPortManager(object):
 
         self.share_processes[share.pid] = None
 
-    def onShareError(self, share):
+    def onShareError(self, share, exception):
         pass
 
     def onShareSuccess(self, share):

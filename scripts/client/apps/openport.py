@@ -103,3 +103,6 @@ class Openport(object):
         self.restart_on_failure = False
         if self.port_forwarding_service:
             self.port_forwarding_service.stop()
+
+    def stop(self):
+        self.stop_port_forward()

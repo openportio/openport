@@ -108,7 +108,9 @@ class PortForwardingService:
                 raise PortForwardException('port forwarding thread gave an exception...',
                                            self.portForwardingRequestException)
             try:
+                # logger.debug('sending keep_alive')
                 self.client.exec_command('echo ""')
+                # logger.debug('keep_alive sent')
                 if self.success_callback:
                     self.success_callback()
                 time.sleep(10)
