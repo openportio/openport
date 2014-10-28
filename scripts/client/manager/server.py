@@ -130,7 +130,8 @@ def start_server(onNewShareFunc=None):
     global onNewShare
     onNewShare = onNewShareFunc
     try:
-        run(host='127.0.0.1', port=globals.manager_port, server='cherrypy', debug=True)
+        logger.info('Starting the manager on port %s' % globals.manager_port)
+        run(host='127.0.0.1', port=globals.manager_port, server='cherrypy', debug=True, quiet=True)
     except KeyboardInterrupt:
         pass
 
