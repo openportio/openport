@@ -75,11 +75,11 @@ class PortForwardingService:
                     logger.error('*** Failed to fallback connect to %s:%d: %r' % (self.server,
                                                                                   self.fallback_server_ssh_port, e) )
                     if self.error_callback:
-                        self.error_callback()
+                        self.error_callback(e)
                     return
             else:
                 if self.error_callback:
-                    self.error_callback()
+                    self.error_callback(e)
                 return
 
         try:
@@ -104,13 +104,13 @@ class PortForwardingService:
         while error_count < 2:
             if self.portForwardingRequestException is not None:
                 if self.error_callback:
-                    self.error_callback()
+                    self.error_callback(self.portForwardingRequestException)
                 raise PortForwardException('port forwarding thread gave an exception...',
                                            self.portForwardingRequestException)
             try:
-                # logger.debug('sending keep_alive')
+                logger.debug('sending keep_alive')
                 self.client.exec_command('echo ""')
-                # logger.debug('keep_alive sent')
+                logger.debug('keep_alive sent')
                 if self.success_callback:
                     self.success_callback()
                 time.sleep(10)
@@ -118,7 +118,7 @@ class PortForwardingService:
             except Exception, ex:
                 error_count += 1
                 if self.error_callback:
-                    self.error_callback()
+                    self.error_callback(ex)
                 logger.debug(ex)
         raise PortForwardException('keep_alive stopped')
 
