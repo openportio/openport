@@ -58,6 +58,7 @@ class SiteInteractionTest(unittest.TestCase):
         self.assertTrue('Welcome, Jan' in self.browser.page_source)
 
     def remove_all_keys_from_account(self):
+        sleep(5)
         while True:
             self.browser.get('http://%s/user/keys' % self.server)
             self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
