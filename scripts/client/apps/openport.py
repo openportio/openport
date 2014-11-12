@@ -22,7 +22,7 @@ class Openport(object):
         self.session = None
         self.automatic_restart = False
         self.repeat_message = True
-
+        self.last_response = None
 
     def start_port_forward(self, session, callback=None, error_callback=None, server=DEFAULT_SERVER):
 
@@ -42,6 +42,7 @@ class Openport(object):
                     server=server,
                     automatic_restart=self.automatic_restart
                 )
+                self.last_response = response
 
                 if session.server_port != response.remote_port:
                     self.repeat_message = True
@@ -91,12 +92,14 @@ class Openport(object):
         elif not self.automatic_restart or self.repeat_message:
             if self.session.http_forward_address is None or self.session.http_forward_address == '':
                 logger.info('Now forwarding remote port %s:%d to localhost:%d .\n'
-                            'You can keep track of your shares at https://openport.io/user .'
-                            % (self.session.server, self.session.server_port, self.session.local_port))
+                            'You can keep track of your shares at https://openport.io/user .\n%s'
+                            % (self.session.server, self.session.server_port, self.session.local_port,
+                               self.last_response.message))
             else:
                 logger.info('Now forwarding remote address %s to localhost:%d .\n'
-                            'You can keep track of your shares at https://openport.io/user .'
-                            % (self.session.http_forward_address, self.session.local_port))
+                            'You can keep track of your shares at https://openport.io/user .\n%s'
+                            % (self.session.http_forward_address, self.session.local_port,
+                               self.last_response.message))
         self.repeat_message = False
 
     def stop_port_forward(self):
