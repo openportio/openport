@@ -54,6 +54,7 @@ class Openport(object):
                 session.key_id = response.key_id
                 session.server_session_token = response.session_token
                 session.http_forward_address = response.http_forward_address
+                session.open_port_for_ip_link = response.open_port_for_ip_link
 
                 if callback is not None:
                     import threading

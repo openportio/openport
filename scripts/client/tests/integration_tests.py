@@ -9,6 +9,7 @@ import urllib
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from apps.keyhandling import get_or_create_public_key, create_new_key_pair
+from apps import keyhandling
 from apps.openport_api import PortForwardResponse, request_port
 from services.logger_service import set_log_level, get_logger
 from services.crypt_service import get_token
@@ -207,6 +208,45 @@ class IntegrationTest(unittest.TestCase):
         self.assertNotEqual(response3.remote_port, response.remote_port)
         logger.debug('test done')
 
+    def test_new_key(self):
+        try:
+            keyhandling.PRIVATE_KEY_FILE = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'id_rsa_tmp')
+            keyhandling.PUBLIC_KEY_FILE = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'id_rsa_tmp.pub')
+
+            logger.debug('getting key pair')
+            private_key, public_key = create_new_key_pair()
+            with open(keyhandling.PRIVATE_KEY_FILE, 'w') as f:
+                f.write(private_key)
+            with open(keyhandling.PUBLIC_KEY_FILE, 'w') as f:
+                f.write(public_key)
+
+            path = os.path.join(os.path.dirname(__file__), '../resources/logo-base.ico')
+            self.assertTrue(os.path.exists(path), 'file does not exist %s' % path)
+            share = self.get_share(path)
+            self.app = self.start_openportit_session(share)
+            self.assertTrue(share.open_port_for_ip_link)
+            temp_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
+                                     os.path.basename(share.filePath) + get_token(3))
+
+            try:
+                urllib.urlretrieve(share.get_link(), temp_file)
+                self.fail('the download should have failed.')
+            except self.failureException, e:
+                raise e
+            except Exception, e:
+                print e
+
+            req = urllib2.Request(share.open_port_for_ip_link)
+            response = urllib2.urlopen(req).read()
+            print response
+            self.assertTrue('is now opened' in response)
+
+            sleep(5)
+            print 'temp file: ' + temp_file
+            self.downloadAndCheckFile(share, temp_file)
+        finally:
+            keyhandling.reset_key_locations()
+
     def exceptionTest(self):
         try:
             raise ValueError
@@ -297,6 +337,8 @@ class IntegrationTest(unittest.TestCase):
         return openport
 
     def start_openportit_session(self, share):
+        keyhandling
+
         self.called_back_success = False
         self.called_back_error = False
 

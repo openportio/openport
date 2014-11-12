@@ -5,16 +5,22 @@ from services.logger_service import get_logger
 
 log = get_logger(__name__)
 
+PRIVATE_KEY_FILE = ''
+PUBLIC_KEY_FILE = ''
 
-HOME_DIR = os.path.expanduser('~')
 
-if len(HOME_DIR) < 3:
-    log.debug('ERROR!!! saving keys to / : <<<%s>>>' % HOME_DIR)
-    log.debug('os.environ:')
-    log.debug(os.environ)
+def reset_key_locations():
+    home_dir = os.path.expanduser('~')
 
-PRIVATE_KEY_FILE = os.path.join(HOME_DIR, '.ssh', 'id_rsa')
-PUBLIC_KEY_FILE =  os.path.join(HOME_DIR, '.ssh', 'id_rsa.pub')
+    if len(home_dir) < 3:
+        log.debug('ERROR!!! saving keys to / : <<<%s>>>' % home_dir)
+        log.debug('os.environ:')
+        log.debug(os.environ)
+    global PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
+    PRIVATE_KEY_FILE = os.path.join(home_dir, '.ssh', 'id_rsa')
+    PUBLIC_KEY_FILE = os.path.join(home_dir, '.ssh', 'id_rsa.pub')
+
+reset_key_locations()
 
 
 def get_or_create_public_key():

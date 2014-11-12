@@ -16,16 +16,8 @@ SERVER_SSH_USER = 'open'
 
 
 class PortForwardResponse():
-    def __init__(self, server='', remote_port=-1, message='', account_id=-1, key_id=-1, local_port=-1, session_token='', http_forward_address=None):
-        self.server = server
-        self.remote_port = remote_port
-        self.message = message
-        self.account_id = account_id
-        self.key_id = key_id
-        self.session_token = session_token
-        self.http_forward_address = http_forward_address
 
-    def __init__(self,dict):
+    def __init__(self, dict):
         self.from_dict(dict)
 
     def from_dict(self, dict):
@@ -36,6 +28,11 @@ class PortForwardResponse():
         self.key_id = dict['key_id']
         self.session_token = dict['session_token']
         self.http_forward_address = dict['http_forward_address']
+
+        self.session_max_bytes = dict.get('session_max_bytes')
+        self.open_port_for_ip_link = dict.get('open_port_for_ip_link')
+        self.session_id = dict.get('session_id')
+        self.session_end_time = dict.get('session_end_time')
 
 
 def request_port(public_key, local_port=None, url='https://%s/api/v1/request-port' % DEFAULT_SERVER,
@@ -93,9 +90,8 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
         if dict['error'] == 'Session killed':
             if stop_callback:
                 stop_callback()
-            logger.debug("session killed, killing app!!!")
+            logger.info("Session is killed, stopping app!!!")
             sys.exit(9)
-        sys.exit(8)
     logger.debug(dict)
 
     response = PortForwardResponse(dict)

@@ -128,7 +128,7 @@ class OsInteraction(object):
 
         return self.print_output_continuously(s)
 
-    def print_output_continuously(self, s):
+    def print_output_continuously(self, s, prefix=''):
         def append_output(initial, extra):
             if not initial:
                 return extra if extra and len(extra) > 0 else False
@@ -142,9 +142,9 @@ class OsInteraction(object):
         while True:
             output = self.get_all_output(s)
             if output[0]:
-                self.logger.debug('silent command stdout: <<<<%s>>>>' % output[0])
+                self.logger.debug('silent command stdout: %s<<<<%s>>>>' % (prefix, output[0]))
             if output[1]:
-                self.logger.debug('silent command stderr: <<<<%s>>>>' % output[1])
+                self.logger.debug('silent command stderr: %s<<<<%s>>>>' % (prefix, output[1]))
 
             all_output[0] = append_output(all_output[0], output[0])
             all_output[1] = append_output(all_output[1], output[1])
@@ -153,16 +153,16 @@ class OsInteraction(object):
             sleep(1)
         output = s.communicate()
         if output[0]:
-            self.logger.debug('silent command stdout: %s' % output[0])
+            self.logger.debug('silent command stdout: %s<<<%s>>>' % (prefix, output[0]))
         if output[1]:
-            self.logger.debug('silent command stderr: %s' % output[1])
+            self.logger.debug('silent command stderr: %s<<<%s>>>' % (prefix, output[1]))
         all_output[0] = append_output(all_output[0], output[0])
         all_output[1] = append_output(all_output[1], output[1])
-        self.logger.debug('application stopped: <<%s>>' % all_output)
+        self.logger.debug('application stopped: %s<<%s>>' % (prefix, all_output))
         return all_output
 
-    def print_output_continuously_threaded(self, s):
-        t_stdout = Thread(target=self.print_output_continuously, args=(s,))
+    def print_output_continuously_threaded(self, s, prefix=''):
+        t_stdout = Thread(target=self.print_output_continuously, args=(s,prefix))
         t_stdout.daemon = True
         t_stdout.start()
 

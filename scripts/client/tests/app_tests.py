@@ -243,7 +243,7 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_manager2)
         sleep(3)
         i = 0
-        while i < 15 and self.get_share_count_of_manager(manager_port) != 1:
+        while i < 15 and self.get_share_count_of_manager(manager_port) < 1:
             sleep(1)
             i += 1
         self.check_application_is_still_alive(p_manager2)

@@ -80,7 +80,7 @@ class OpenPortManager(object):
                     self.set_manager_port(share)
 
                     p = self.os_interaction.start_openport_process(share)
-                    self.os_interaction.print_output_continuously_threaded(p)
+                    self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
                     sleep(1)
                     if p.poll() is not None:
                         logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
@@ -88,7 +88,6 @@ class OpenPortManager(object):
                     else:
                         logger.debug('started app with pid %s : %s' % (p.pid, share.restart_command))
                         sleep(1)
-                        logger.debug('app output: stdout: %s stderr: %s' % self.os_interaction.non_block_read(p))
 
                     self.share_processes[p.pid] = p
                 except Exception, e:

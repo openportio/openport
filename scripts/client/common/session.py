@@ -4,7 +4,7 @@ import pickle
 class Session(object):
     def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=1, account_id=-1,
                  key_id=-1, local_port=-1, server_session_token='', restart_command='', http_forward=False,
-                 http_forward_address=''):
+                 http_forward_address='', open_port_for_ip_link=''):
         #todo: why is this ever a dict?
         if type(_id) == dict:
             self.id = -1
@@ -21,6 +21,7 @@ class Session(object):
         self.restart_command = restart_command
         self.http_forward = http_forward
         self.http_forward_address = http_forward_address
+        self.open_port_for_ip_link = open_port_for_ip_link
 
         self.success_observers = []
         self.error_observers = []
@@ -44,6 +45,7 @@ class Session(object):
             'restart_command' : pickle.dumps(self.restart_command),
             'http_forward': self.http_forward,
             'http_forward_address': self.http_forward_address,
+            'open_port_for_ip_link': self.open_port_for_ip_link,
         }
 
     @staticmethod
