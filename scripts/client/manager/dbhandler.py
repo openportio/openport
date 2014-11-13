@@ -46,6 +46,7 @@ class OpenportSession(Base):
 class DBHandler(object):
 
     def __init__(self, db_location):
+        logger.debug('db location: %s' % db_location)
         self.engine = create_engine('sqlite:///%s' % db_location, poolclass=SingletonThreadPool)
         self.db_location = db_location
         self.session_factory = sessionmaker(bind=self.engine)

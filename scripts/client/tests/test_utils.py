@@ -112,6 +112,7 @@ class SimpleTcpClient(object):
         try:
             self.sock.connect((host, port))
         except socket.error, msg:
+            sys.stderr.write("[ERROR] %s\n" % msg)
             sys.stderr.write("[ERROR] %s\n" % msg[1])
 #            sys.exit(2)
 
@@ -255,6 +256,17 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix=''):
             sleep(3)
             return m.group(1), int(m.group(2))
     raise Exception('remote host and port not found in output')
+
+
+def wait_for_response(function, args=[], kwargs={}, timeout=30):
+    i = 0
+    while i < timeout:
+        output = function(*args, **kwargs)
+        if output:
+            return output
+        sleep(1)
+        i += 1
+    raise Exception('function did not response in time')
 
 
 def print_all_output(app, osinteraction, output_prefix=''):

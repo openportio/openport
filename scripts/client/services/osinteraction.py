@@ -73,6 +73,7 @@ class OsInteraction(object):
             self.logger.debug('no restart command for share with local port %s' % share.local_port)
             return
 
+        # Legacy...
         restart_command = self.strip_sudo_command(share.restart_command)
 
         if 'openport' in restart_command[0]:

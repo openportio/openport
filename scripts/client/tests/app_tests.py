@@ -40,7 +40,7 @@ class AppTests(unittest.TestCase):
         self.osinteraction = osinteraction.getInstance()
         self.manager_port = -1
         #        self.assertFalse(openportmanager.manager_is_running(8001))
-        self.db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp_openport.db')
+        self.db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'tmp_openport.db')
         if os.path.exists(self.db_file):
             os.remove(self.db_file)
 
