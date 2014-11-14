@@ -10,3 +10,4 @@ env/bin/pip install -r requirements.pip
 env/bin/pip install -r test-requirements.pip
 env/bin/nosetests --nocapture --with-xunit tests/*_tests.py || echo there was an error: $?
 ./create_exes.sh
+ps -ef | grep python | grep openport | grep -v grep | awk '{print $2}' | xargs -r kill
