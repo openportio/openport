@@ -14,4 +14,5 @@ class LiveIntegrationTest(IntegrationTest):
         self.test_server='openport.io'
 
 if __name__ == '__main__':
-    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
+    suite = unittest.TestLoader().loadTestsFromTestCase(LiveIntegrationTest)
+    xmlrunner.XMLTestRunner(output='test-reports').run(suite)
