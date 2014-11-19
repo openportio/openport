@@ -471,6 +471,7 @@ class AppTests(unittest.TestCase):
         click_open_for_ip_link(link)
 
         self.check_application_is_still_alive(p_app)
+        sleep(3)
         self.assertTrue(openportmanager.manager_is_running(manager_port))
         self.assertEqual(1, self.get_share_count_of_manager(manager_port))
 

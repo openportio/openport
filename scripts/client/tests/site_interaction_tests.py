@@ -135,7 +135,7 @@ class SiteInteractionTest(unittest.TestCase):
 
         p = self.start_session(8888, db_file=db_file)
 
-        remote_host, server_port = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
+        remote_host, server_port, link = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
         print 'server port: %s' % server_port
 
         self.assertTrue(self.session_exists_on_site(server_port))
@@ -163,7 +163,7 @@ class SiteInteractionTest(unittest.TestCase):
         self.register_key(key_binding_token)
 
         p = self.start_session(8888, db_file=db_file)
-        remote_host, server_port = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
+        remote_host, server_port, link = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
         print 'server port: %s' % server_port
 
         self.assertTrue(self.session_exists_on_site(server_port))
@@ -177,7 +177,7 @@ class SiteInteractionTest(unittest.TestCase):
         self.assertTrue(p.poll() in (9, -9), 'poll output was %s' % p.poll())
 
         p = self.start_session(8888, db_file=db_file)
-        remote_host, server_port = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
+        remote_host, server_port, link = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
         print 'server port: %s' % server_port
 
         self.assertTrue(self.session_exists_on_site(server_port), 'session was not allowed back on the server.')
