@@ -102,13 +102,11 @@ class PortForwardingService:
 #            sys.exit(0)
 
     def keep_alive(self):
-        error_count = 0
-        while error_count < 2 and not self.stopped:
+        while not self.stopped:
             if self.portForwardingRequestException is not None:
                 if self.error_callback:
                     self.error_callback(self.portForwardingRequestException)
-                raise PortForwardException('port forwarding thread gave an exception...',
-                                           self.portForwardingRequestException)
+                logger.exception(self.portForwardingRequestException)
             try:
                 logger.debug('sending keep_alive')
                 self.client.exec_command('echo ""')
@@ -116,9 +114,7 @@ class PortForwardingService:
                 if self.success_callback:
                     self.success_callback()
                 time.sleep(10)
-                error_count = 0
             except Exception, ex:
-                error_count += 1
                 if self.error_callback:
                     self.error_callback(ex)
                 logger.debug(ex)
