@@ -31,6 +31,7 @@ TOKEN = 'tokentest'
 
 logger = get_logger(__name__)
 
+
 class IntegrationTest(unittest.TestCase):
 
     def setUp(self):
@@ -47,6 +48,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertTrue(os.path.exists(path), 'file does not exist %s' % path)
         share = self.get_share(path)
         self.app = self.start_openportit_session(share)
+        self.click_open_for_ip_link(share)
         temp_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
                                  os.path.basename(share.filePath) + get_token(3))
 
@@ -77,57 +79,58 @@ class IntegrationTest(unittest.TestCase):
         self.assertTrue(filecmp.cmp(share.filePath, temp_file), 'the file compare did not succeed')
         os.remove(temp_file)
 
-    def test_multi_thread(self):
-        path = os.path.join(os.path.dirname(__file__), 'testfiles/WALL_DANGER_SOFTWARE.jpg')
-        share = self.get_share(path)
-        self.app = self.start_openportit_session(share)
-        sleep(3)
-
-        temp_file_path = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', os.path.basename(share.filePath))
-        number_of_threads = 8  # Less than 10 for the brute force protection
-        errors = []
-
-        def download(file_path):
-            try:
-                self.downloadAndCheckFile(share, file_path)
-                print "download successful: %s" % file_path
-            except Exception, e:
-                errors.append(e)
-
-        threads = []
-        for i in range(number_of_threads):
-            threads.append(threading.Thread(target=download, args=['%s%s' % (temp_file_path, i)]))
-            threads[-1].setDaemon(True)
-            threads[-1].start()
-
-        seen_multiple_files_at_the_same_time = False
-
-        for j in range(6000):
-            seen_one_file = False
-            for i in range(number_of_threads):
-                if os.path.exists('%s%s' % (temp_file_path, i)) and seen_one_file:
-                    seen_multiple_files_at_the_same_time = True
-                    break
-                elif os.path.exists('%s%s' % (temp_file_path, i)):
-                    seen_one_file = True
-                    print 'seen one file from thread %s' % i
-            if seen_multiple_files_at_the_same_time:
-                break
-
-            some_threads_are_still_running = False
-            for thread in threads:
-                if thread.isAlive():
-                    some_threads_are_still_running = True
-                    break
-            if not some_threads_are_still_running:
-                print "all threads stopped"
-                break
-            sleep(0.01)
-
-        self.assertTrue(seen_multiple_files_at_the_same_time)
-
-        if errors:
-            self.fail('number of errors: %s First error: %s %s' % (len(errors), errors[0], errors))
+#    @unittest.skip("openport it not released")
+#    def test_multi_thread(self):
+#        path = os.path.join(os.path.dirname(__file__), 'testfiles/WALL_DANGER_SOFTWARE.jpg')
+#        share = self.get_share(path)
+#        self.app = self.start_openportit_session(share)
+#        sleep(3)
+#
+#        temp_file_path = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', os.path.basename(share.filePath))
+#        number_of_threads = 8  # Less than 10 for the brute force protection
+#        errors = []
+#
+#        def download(file_path):
+#            try:
+#                self.downloadAndCheckFile(share, file_path)
+#                print "download successful: %s" % file_path
+#            except Exception, e:
+#                errors.append(e)
+#
+#        threads = []
+#        for i in range(number_of_threads):
+#            threads.append(threading.Thread(target=download, args=['%s%s' % (temp_file_path, i)]))
+#            threads[-1].setDaemon(True)
+#            threads[-1].start()
+#
+#        seen_multiple_files_at_the_same_time = False
+#
+#        for j in range(6000):
+#            seen_one_file = False
+#            for i in range(number_of_threads):
+#                if os.path.exists('%s%s' % (temp_file_path, i)) and seen_one_file:
+#                    seen_multiple_files_at_the_same_time = True
+#                    break
+#                elif os.path.exists('%s%s' % (temp_file_path, i)):
+#                    seen_one_file = True
+#                    print 'seen one file from thread %s' % i
+#            if seen_multiple_files_at_the_same_time:
+#                break
+#
+#            some_threads_are_still_running = False
+#            for thread in threads:
+#                if thread.isAlive():
+#                    some_threads_are_still_running = True
+#                    break
+#            if not some_threads_are_still_running:
+#                print "all threads stopped"
+#                break
+#            sleep(0.01)
+#
+#        self.assertTrue(seen_multiple_files_at_the_same_time)
+#
+#        if errors:
+#            self.fail('number of errors: %s First error: %s %s' % (len(errors), errors[0], errors))
 
     def test_same_port(self):
         path = os.path.join(os.path.dirname(__file__), '../logo-base.ico')
@@ -185,6 +188,7 @@ class IntegrationTest(unittest.TestCase):
 
         response = PortForwardResponse(dictionary)
 
+        self.assertNotEqual(None, response.open_port_for_ip_link)
         logger.debug('requesting port')
         dictionary2 = request_port(
             url='https://%s/api/v1/request-port' % self.test_server,
@@ -236,10 +240,7 @@ class IntegrationTest(unittest.TestCase):
             except Exception, e:
                 print e
 
-            req = urllib2.Request(share.open_port_for_ip_link)
-            response = urllib2.urlopen(req).read()
-            print response
-            self.assertTrue('is now opened' in response)
+            self.click_open_for_ip_link(share)
 
             sleep(5)
             print 'temp file: ' + temp_file
@@ -327,7 +328,7 @@ class IntegrationTest(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
         i = 0
-        while i < 30 and not self.called_back_success:
+        while i < 30 and (not self.called_back_success or session.server_port < 0):
             if self.called_back_error:
                 self.fail('error call back!')
             sleep(1)
@@ -337,8 +338,6 @@ class IntegrationTest(unittest.TestCase):
         return openport
 
     def start_openportit_session(self, share):
-        keyhandling
-
         self.called_back_success = False
         self.called_back_error = False
 
@@ -381,12 +380,19 @@ class IntegrationTest(unittest.TestCase):
         print 'called back after %s seconds' % i
         return app
 
+    def click_open_for_ip_link(self, session):
+        if session.open_port_for_ip_link:
+            logger.info('clicking link %s' % session.open_port_for_ip_link)
+            req = urllib2.Request(session.open_port_for_ip_link)
+            response = urllib2.urlopen(req, timeout=10).read()
+            self.assertTrue('is now open' in response, response)
+
     def test_brute_force_blocked(self):
 
         port = self.osinteraction.get_open_port()
-        response = 'cha cha cha'
+        expected_response = 'cha cha cha'
 
-        server1 = self.start_http_server(port, response)
+        server1 = self.start_http_server(port, expected_response)
 
         session = Session()
         session.local_port = port
@@ -395,7 +401,7 @@ class IntegrationTest(unittest.TestCase):
 
         self.app = self.start_openport_session(session)
 
-        sleep(10)
+        self.click_open_for_ip_link(session)
 
         link = session.get_link()
         print 'link: %s' % link
@@ -403,13 +409,13 @@ class IntegrationTest(unittest.TestCase):
 
         c = SimpleHTTPClient()
         actual_response = c.get('http://localhost:%s' % port)
-        self.assertEqual(actual_response, response.strip())
+        self.assertEqual(actual_response, expected_response.strip())
         i = -1
         try:
             for i in range(20):
                 print "connection %s" % i
                 actual_response = c.get('http://%s' % link)
-                self.assertEqual(actual_response, response.strip())
+                self.assertEqual(actual_response, expected_response.strip())
         except (urllib2.HTTPError, urllib2.URLError) as e:
             print e
         self.assertTrue(5 < i < 20, 'i should be around 10 but was %s' % i)
@@ -421,17 +427,15 @@ class IntegrationTest(unittest.TestCase):
         session2.local_port = port2
         session2.server_session_token = None
 
-        response = 'cha cha cha'
-
-        server2 = self.start_http_server(port2, response)
+        server2 = self.start_http_server(port2, expected_response)
 
         openport2 = self.start_openport_session(session2)
+        sleep(3)
         print 'http://%s' % session2.get_link()
-        sleep(10)
 
-
+        self.click_open_for_ip_link(session2)
         actual_response = c.get('http://%s' % session2.get_link())
-        self.assertEqual(actual_response, response.strip())
+        self.assertEqual(actual_response, expected_response.strip())
 
         server1.stop()
         server2.stop()
@@ -440,7 +444,6 @@ class IntegrationTest(unittest.TestCase):
     def test_brute_force_blocked__not_for_http_forward(self):
 
         port = self.osinteraction.get_open_port()
-
 
         response = 'cha cha cha'
 
@@ -453,8 +456,7 @@ class IntegrationTest(unittest.TestCase):
         session.http_forward = True
 
         self.app = self.start_openport_session(session)
-
-        sleep(10)
+        self.click_open_for_ip_link(session)
 
         link = session.http_forward_address
         print 'link: %s' % link
