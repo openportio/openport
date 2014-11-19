@@ -25,7 +25,7 @@ from apps.openport import Openport
 from common.share import Share
 from common.session import Session
 
-from test_utils import SimpleHTTPClient, TestHTTPServer
+from test_utils import SimpleHTTPClient, TestHTTPServer, click_open_for_ip_link
 
 TOKEN = 'tokentest'
 
@@ -48,7 +48,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertTrue(os.path.exists(path), 'file does not exist %s' % path)
         share = self.get_share(path)
         self.app = self.start_openportit_session(share)
-        self.click_open_for_ip_link(share)
+        click_open_for_ip_link(share.open_port_for_ip_link)
         temp_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
                                  os.path.basename(share.filePath) + get_token(3))
 
@@ -240,7 +240,7 @@ class IntegrationTest(unittest.TestCase):
             except Exception, e:
                 print e
 
-            self.click_open_for_ip_link(share)
+            click_open_for_ip_link(share.open_port_for_ip_link)
 
             sleep(5)
             print 'temp file: ' + temp_file
@@ -380,13 +380,6 @@ class IntegrationTest(unittest.TestCase):
         print 'called back after %s seconds' % i
         return app
 
-    def click_open_for_ip_link(self, session):
-        if session.open_port_for_ip_link:
-            logger.info('clicking link %s' % session.open_port_for_ip_link)
-            req = urllib2.Request(session.open_port_for_ip_link)
-            response = urllib2.urlopen(req, timeout=10).read()
-            self.assertTrue('is now open' in response, response)
-
     def test_brute_force_blocked(self):
 
         port = self.osinteraction.get_open_port()
@@ -401,7 +394,7 @@ class IntegrationTest(unittest.TestCase):
 
         self.app = self.start_openport_session(session)
 
-        self.click_open_for_ip_link(session)
+        click_open_for_ip_link(session.open_port_for_ip_link)
 
         link = session.get_link()
         print 'link: %s' % link
@@ -433,7 +426,7 @@ class IntegrationTest(unittest.TestCase):
         sleep(3)
         print 'http://%s' % session2.get_link()
 
-        self.click_open_for_ip_link(session2)
+        click_open_for_ip_link(session2.open_port_for_ip_link)
         actual_response = c.get('http://%s' % session2.get_link())
         self.assertEqual(actual_response, expected_response.strip())
 
@@ -456,7 +449,7 @@ class IntegrationTest(unittest.TestCase):
         session.http_forward = True
 
         self.app = self.start_openport_session(session)
-        self.click_open_for_ip_link(session)
+        click_open_for_ip_link(session.open_port_for_ip_link)
 
         link = session.http_forward_address
         print 'link: %s' % link

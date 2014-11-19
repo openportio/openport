@@ -16,7 +16,7 @@ from services import osinteraction
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_success_callback
-from test_utils import print_all_output
+from test_utils import print_all_output, click_open_for_ip_link
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
 from manager import openportmanager
@@ -67,8 +67,9 @@ class AppTests(unittest.TestCase):
                               '--server', TEST_SERVER, '--verbose', '--no-manager', '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
-        remote_host, remote_port = get_remote_host_and_port(p, self.osinteraction)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
         self.check_application_is_still_alive(p)
+        click_open_for_ip_link(link)
 
         self.assertEqual(1, self.get_nr_of_shares_in_db_file(self.db_file))
 
@@ -87,8 +88,9 @@ class AppTests(unittest.TestCase):
                               '--server', TEST_SERVER, '--verbose', '--no-manager', '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
-        remote_host, remote_port = get_remote_host_and_port(p, self.osinteraction)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
         self.check_application_is_still_alive(p)
+        click_open_for_ip_link(link)
 
         self.assertEqual(1, self.get_nr_of_shares_in_db_file(self.db_file))
 #        self.assertFalse(openportmanager.manager_is_running(8001))
@@ -125,8 +127,9 @@ class AppTests(unittest.TestCase):
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
 
-        remote_host, remote_port = get_remote_host_and_port(p, self.osinteraction)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
         self.check_application_is_still_alive(p)
+        click_open_for_ip_link(link)
 
         s = SimpleTcpServer(port)
         s.runThreaded()
@@ -144,10 +147,11 @@ class AppTests(unittest.TestCase):
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
 
-        new_remote_host, new_remote_port = get_remote_host_and_port(p, self.osinteraction)
+        new_remote_host, new_remote_port, link = get_remote_host_and_port(p, self.osinteraction)
         self.check_application_is_still_alive(p)
 
         self.assertEqual(remote_port, new_remote_port)
+        click_open_for_ip_link(link)
 
         c = SimpleTcpClient(new_remote_host, new_remote_port)
         request = 'hello'
@@ -204,8 +208,9 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_manager)
         self.processes_to_kill.append(p_app)
 
-        remote_host, remote_port = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
+        remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
         print lineNumber(), "remote port:", remote_port
+        click_open_for_ip_link(link)
 
         print_all_output(p_manager, self.osinteraction, 'manager')
 
@@ -414,8 +419,9 @@ class AppTests(unittest.TestCase):
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
 
-        remote_host, remote_port = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
+        remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
         print lineNumber(), "remote port:", remote_port
+        click_open_for_ip_link(link)
 
         self.check_application_is_still_alive(p_app)
 
@@ -440,7 +446,8 @@ class AppTests(unittest.TestCase):
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
 
-        remote_host, remote_port = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
+        remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
+        click_open_for_ip_link(link)
         self.check_application_is_still_alive(p_app)
         print lineNumber(), "remote port:", remote_port
 
@@ -459,8 +466,9 @@ class AppTests(unittest.TestCase):
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
 
-        remote_host, remote_port = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
+        remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
         print lineNumber(), "remote port:", remote_port
+        click_open_for_ip_link(link)
 
         self.check_application_is_still_alive(p_app)
         self.assertTrue(openportmanager.manager_is_running(manager_port))

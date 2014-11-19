@@ -111,9 +111,13 @@ class SimpleTcpClient(object):
 
         try:
             self.sock.connect((host, port))
+
+        except socket.timeout as e:
+            sys.stderr.write("[timeout] %s\n" % e)
         except socket.error, msg:
             sys.stderr.write("[ERROR] %s\n" % msg)
-            sys.stderr.write("[ERROR] %s\n" % msg[1])
+            if len(msg) > 0:
+                sys.stderr.write("[ERROR] %s\n" % msg[1])
 #            sys.exit(2)
 
 
@@ -254,11 +258,15 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix=''):
             continue
         else:
             sleep(3)
-            return m.group(1), int(m.group(2))
+            host, port = m.group(1), int(m.group(2))
+            m = re.search(r'to first go here: ([a-zA-Z0-9\:/\.]+) .', all_output[0])
+            link = m.group(1) if m is not None else None
+            return host, port, link
+
     raise Exception('remote host and port not found in output')
 
 
-def wait_for_response(function, args=[], kwargs={}, timeout=30):
+def wait_for_response(function, args=[], kwargs={}, timeout=30, throw=True):
     i = 0
     while i < timeout:
         output = function(*args, **kwargs)
@@ -266,7 +274,8 @@ def wait_for_response(function, args=[], kwargs={}, timeout=30):
             return output
         sleep(1)
         i += 1
-    raise Exception('function did not response in time')
+    if throw:
+        raise Exception('function did not response in time')
 
 
 def print_all_output(app, osinteraction, output_prefix=''):
@@ -300,3 +309,11 @@ def kill_all_processes(processes_to_kill):
             p.wait()
         except Exception as e:
             pass
+
+
+def click_open_for_ip_link(link):
+    if link:
+        logger.info('clicking link %s' % link)
+        req = urllib2.Request(link)
+        response = urllib2.urlopen(req, timeout=10).read()
+        assert 'is now open' in response
