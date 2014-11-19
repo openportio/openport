@@ -7,6 +7,7 @@ import urllib
 import urllib2
 import json
 from manager.globals import DEFAULT_SERVER
+from apps.openport_app_version import VERSION
 
 logger = get_logger('openport_api')
 
@@ -52,6 +53,7 @@ def request_port(public_key, local_port=None, url='https://%s/api/v1/request-por
             'http_forward': 'on' if http_forward else '',
             'automatic_restart': 'on' if automatic_restart else '',
             'local_port': local_port if local_port else '',
+            'client_version': VERSION,
             })
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req).read()
