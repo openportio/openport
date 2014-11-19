@@ -51,9 +51,10 @@ class PortForwardingService:
         self.start_callback = start_callback
 
         self.portForwardingRequestException = None
-
+        self.stopped = False
 
     def stop(self):
+        self.stopped = True
         self.client.close()
 
     def start(self):
@@ -65,6 +66,7 @@ class PortForwardingService:
 
         try:
             self.client.connect(self.server, self.server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
+            self.stopped = False
         except Exception, e:
             logger.error('*** Failed to connect to %s:%d: %r' % (self.server, self.server_ssh_port, e))
             if self.fallback_server_ssh_port is not None:
@@ -101,7 +103,7 @@ class PortForwardingService:
 
     def keep_alive(self):
         error_count = 0
-        while error_count < 2:
+        while error_count < 2 and not self.stopped:
             if self.portForwardingRequestException is not None:
                 if self.error_callback:
                     self.error_callback(self.portForwardingRequestException)
@@ -120,7 +122,8 @@ class PortForwardingService:
                 if self.error_callback:
                     self.error_callback(ex)
                 logger.debug(ex)
-        raise PortForwardException('keep_alive stopped')
+        if not self.stopped:
+            raise PortForwardException('keep_alive stopped')
 
     def _forward_local_port(self):
         try:
