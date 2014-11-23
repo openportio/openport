@@ -107,19 +107,13 @@ class PortForwardingService:
                 if self.error_callback:
                     self.error_callback(self.portForwardingRequestException)
                 logger.exception(self.portForwardingRequestException)
-            try:
-                logger.debug('sending keep_alive')
-                self.client.exec_command('echo ""')
-                logger.debug('keep_alive sent')
-                if self.success_callback:
-                    self.success_callback()
-                time.sleep(10)
-            except Exception, ex:
-                if self.error_callback:
-                    self.error_callback(ex)
-                logger.debug(ex)
-        if not self.stopped:
-            raise PortForwardException('keep_alive stopped')
+
+            logger.debug('sending keep_alive')
+            self.client.exec_command('echo ""', timeout=30)
+            logger.debug('keep_alive sent')
+            if self.success_callback:
+                self.success_callback()
+            time.sleep(10)
 
     def _forward_local_port(self):
         try:
