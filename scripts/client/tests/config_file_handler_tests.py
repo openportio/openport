@@ -17,6 +17,7 @@ from common.config_file_handler import ConfigFileHandler
 class ConfigFileHandlerTests(unittest.TestCase):
 
     def setUp(self):
+        print self._testMethodName
         self.config_location = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'config.conf')
         if os.path.exists(self.config_location):
             os.remove(self.config_location)

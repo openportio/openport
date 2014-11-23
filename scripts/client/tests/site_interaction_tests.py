@@ -19,6 +19,7 @@ from services import osinteraction
 class SiteInteractionTest(unittest.TestCase):
 
     def setUp(self):
+        print self._testMethodName
 
         self.server = "test.openport.be"
         #self.server = "localhost:8000"

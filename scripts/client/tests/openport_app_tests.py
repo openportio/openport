@@ -20,6 +20,7 @@ from manager import dbhandler
 class OpenportAppTests(unittest.TestCase):
 
     def setUp(self):
+        print self._testMethodName
         self.os_interaction = getInstance()
         set_log_level(logging.DEBUG)
         self.app = OpenportApp()

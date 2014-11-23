@@ -19,6 +19,7 @@ from mock import Mock, call
 class OsInteractionTest(unittest.TestCase):
 
     def setUp(self):
+        print self._testMethodName
         self.os_interaction = getInstance()
         set_log_level(logging.DEBUG)
 

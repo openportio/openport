@@ -15,6 +15,7 @@ import threading
 
 class DBHandlerTests(unittest.TestCase):
     def setUp(self):
+        print self._testMethodName
         logging.basicConfig()
 
         logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)

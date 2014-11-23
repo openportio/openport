@@ -5,6 +5,9 @@ from common.share import Share
 
 class SessionTests(unittest.TestCase):
 
+    def setUp(self):
+        print self._testMethodName
+
     def test_as_dict(self):
         share = Share()
         share.account_id = 6

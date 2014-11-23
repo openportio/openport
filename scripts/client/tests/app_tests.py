@@ -35,6 +35,7 @@ else:
 
 class AppTests(unittest.TestCase):
     def setUp(self):
+        print self._testMethodName
         set_log_level(logging.DEBUG)
         self.processes_to_kill = []
         self.osinteraction = osinteraction.getInstance()

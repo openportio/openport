@@ -10,6 +10,7 @@ from integration_tests import IntegrationTest
 class LiveIntegrationTest(IntegrationTest):
 
     def setUp(self):
+        print self._testMethodName
         IntegrationTest.setUp(self)
         self.test_server='openport.io'
 

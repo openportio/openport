@@ -35,6 +35,7 @@ logger = get_logger(__name__)
 class IntegrationTest(unittest.TestCase):
 
     def setUp(self):
+        print self._testMethodName
         set_log_level(logging.DEBUG)
         self.test_server = 'test.openport.be'
         self.osinteraction = osinteraction.getInstance()
