@@ -44,6 +44,7 @@ class OpenPortManager(object):
         self.start_account_checking()
 
     def exitApp(self, event):
+        logger.debug('exiting, killing all sub processes: %s' % len(self.share_processes))
         for pid in self.share_processes:
             try:
                 logger.info("trying to kill pid %s" % (pid,))

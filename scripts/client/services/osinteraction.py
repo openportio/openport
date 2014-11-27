@@ -361,10 +361,11 @@ class WindowsOsInteraction(OsInteraction):
         """Check whether pid exists in the current process table."""
         return psutil.pid_exists(pid)
 
-    def kill_pid(self, pid, signal='Ignore'):
-        a = self.run_shell_command(['taskkill', '/pid', '%s' % pid, '/f', '/t'])
-        self.logger.debug('kill command output: %s %s' % a)
-        return a[0].startswith('SUCCESS')
+    def kill_pid(self, pid, signal=signal.CTRL_C_EVENT):
+        return os.kill(pid, signal)
+        #a = self.run_shell_command(['taskkill', '/pid', '%s' % pid, '/f', '/t'])
+        #self.logger.debug('kill command output: %s %s' % a)
+        #return a[0].startswith('SUCCESS')
 
     def is_compiled(self):
         return sys.argv[0][-3:] == 'exe'

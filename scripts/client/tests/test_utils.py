@@ -200,7 +200,22 @@ def run_command_with_timeout(args, timeout_s):
     return c.run(timeout_s)
 
 
+def run_method_with_timeout(function, timeout_s, args=[], kwargs={}, raise_exception=True):
+    return_value = None
 
+    def method1():
+        global return_value
+        return_value = function(*args, **kwargs)
+
+    thread = threading.Thread(target=method1)
+    thread.daemon = True
+    thread.start()
+
+    thread.join(timeout_s)
+    if thread.is_alive():
+        if raise_exception:
+            raise Exception('Timeout!')
+    return return_value
 
 def run_command_with_timeout_return_process(args, timeout_s):
 
@@ -238,7 +253,6 @@ def run_command_with_timeout_return_process(args, timeout_s):
 
     c = Command(args)
     return c.run(timeout_s)
-
 
 def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix=''):
     i = 0

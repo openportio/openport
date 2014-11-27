@@ -16,7 +16,7 @@ from services import osinteraction
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_success_callback
-from test_utils import print_all_output, click_open_for_ip_link
+from test_utils import print_all_output, click_open_for_ip_link, run_method_with_timeout
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
 from manager import openportmanager
@@ -247,17 +247,19 @@ class AppTests(unittest.TestCase):
                                        '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
                                       stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
-        sleep(3)
-        i = 0
-        while i < 15 and self.get_share_count_of_manager(manager_port) < 1:
-            sleep(1)
-            i += 1
+        sleep(15)
+     #   i = 0
+     #   while i < 15 and self.get_share_count_of_manager(manager_port) < 1:
+     #       sleep(1)
+     #       i += 1
+
         self.check_application_is_still_alive(p_manager2)
         print_all_output(p_manager2, self.osinteraction, 'p_manager2')
 
+        wait_for_success_callback(p_manager2, self.osinteraction)
+
         self.assertEqual(1, self.get_share_count_of_manager(manager_port))
 
-        wait_for_success_callback(p_manager2, self.osinteraction)
 
         c = SimpleTcpClient(remote_host, remote_port)
         cl = SimpleTcpClient('127.0.0.1', port)
@@ -593,7 +595,9 @@ class AppTests(unittest.TestCase):
             self.fail('expecting an exception')
         except:
             pass
-        print p_app.communicate()
+
+#        run_method_with_timeout(p_app.communicate, 2, raise_exception=False)
+
         self.assertFalse(self.osinteraction.pid_is_running(p_app.pid))
 
         # Restarting manager, should restart port-forwarding app
