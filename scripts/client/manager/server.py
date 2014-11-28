@@ -99,7 +99,8 @@ def exit_manager():
         def shutdown():
             sleep(1)
             logger.debug('shutting down due to exit call')
-            os.kill(os.getpid(), signal.SIGINT)
+            import thread
+            thread.interrupt_main()
         t = threading.Thread(target=shutdown)
         t.setDaemon(True)
         t.start()

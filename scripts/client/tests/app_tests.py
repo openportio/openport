@@ -43,15 +43,18 @@ class AppTests(unittest.TestCase):
         #        self.assertFalse(openportmanager.manager_is_running(8001))
         self.db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'tmp_openport.db')
         if os.path.exists(self.db_file):
-            os.remove(self.db_file)
-
+            try:
+                os.remove(self.db_file)
+            except:
+                sleep(3)
+                os.remove(self.db_file)
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
 
     def tearDown(self):
-        kill_all_processes(self.processes_to_kill)
         if self.manager_port > 0:
             self.kill_manager(self.manager_port)
+        kill_all_processes(self.processes_to_kill)
 
     def get_nr_of_shares_in_db_file(self, db_file):
         p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--list',
@@ -109,7 +112,10 @@ class AppTests(unittest.TestCase):
                                        '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
                                       stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
-        sleep(3)
+        i = 0
+        while i < 10 and self.application_is_alive(p_manager2):
+            sleep(1)
+            i += 1
         print_all_output(p_manager2, self.osinteraction, 'p_manager2')
         self.assertFalse(self.application_is_alive(p_manager2))
         try:
@@ -224,12 +230,19 @@ class AppTests(unittest.TestCase):
         self.assertEqual(request, response.strip())
         c.close()
         #     s.close()
-        os.kill(p_app.pid, KILL_SIGNAL)
+        if osinteraction.is_linux():
+            os.kill(p_app.pid, KILL_SIGNAL)
+        else:
+            self.kill_manager(manager_port)
         self.assertNotEqual(p_app.wait(), None)
         while self.osinteraction.pid_is_running(p_app.pid):
             print "waiting for pid to be killed: %s" % p_app.pid
             sleep(1)
-        os.kill(p_manager.pid, signal.SIGINT)
+        if osinteraction.is_linux():
+            os.kill(p_manager.pid, signal.SIGINT)
+        else:
+            self.kill_manager(manager_port)
+
         print 'waiting for manager to be killed'
         p_manager.wait()
 
@@ -276,7 +289,10 @@ class AppTests(unittest.TestCase):
             self.fail('remote share has not been restarted')
         self.assertEqual(request, response.strip(), 'getting response through proxy failed')
 
-        os.kill(p_manager2.pid, signal.SIGINT)
+        if osinteraction.is_linux():
+            os.kill(p_manager2.pid, signal.SIGINT)
+        else:
+            self.kill_manager(manager_port)
         p_manager2.wait()
         print_all_output(p_manager2, self.osinteraction, 'p_manager2')
 
@@ -294,7 +310,7 @@ class AppTests(unittest.TestCase):
         p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
                                       '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        sleep(3)
+        sleep(5)
         print_all_output(p_manager, self.osinteraction)
         self.assertFalse(self.application_is_alive(p_manager))
 
@@ -514,7 +530,7 @@ class AppTests(unittest.TestCase):
         if failed:
             raise e
 
-        os.kill(p_manager2.pid, signal.SIGINT)
+        self.kill_manager(new_manager_port)
         sleep(5)
         print_all_output(p_manager2, self.osinteraction, 'p_manager2 - killed')
 
@@ -582,7 +598,8 @@ class AppTests(unittest.TestCase):
 
         # Killing the manager
 
-        self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
+        #self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
+        self.kill_manager(manager_port)
         sleep(3)
         print_all_output(p_manager, self.osinteraction, 'p_manager')
 
@@ -593,6 +610,8 @@ class AppTests(unittest.TestCase):
         try:
             self.assertEqual('echo', cr.get(url, print500=False))
             self.fail('expecting an exception')
+        except AssertionError:
+            raise
         except:
             pass
 
@@ -642,8 +661,12 @@ class AppTests(unittest.TestCase):
 
         # Killing the manager should also kill the app
 
-        self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
-        sleep(1)
+        if osinteraction.is_linux():
+            self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
+        else:
+            self.kill_manager(manager_port)
+
+        sleep(3)
 
         print_all_output(p_manager, self.osinteraction, 'p_manager')
 
@@ -735,6 +758,26 @@ class AppTests(unittest.TestCase):
         except Exception as detail:
             print 'error contacting the manager: %s %s' % (url, detail)
             raise
+
+    def test_kill_openport_app(self):
+        port = self.osinteraction.get_open_port()
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
+                      '--start-manager', 'False', '--http-forward', '--server', TEST_SERVER,
+                      '--no-manager', '--database', self.db_file],
+                     stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        sleep(2)
+        self.osinteraction.kill_pid(p.pid)
+        sleep(5)
+        output = self.osinteraction.get_all_output(p)
+        print output[0]
+        print output[1]
+        # Sadly, this does not work on windows...
+        if osinteraction.is_linux():
+            self.assertTrue('got signal ' in output[0])
+        self.assertNotEqual(None, p.poll())
+
 
     def test_openport_app_with_http_forward(self):
         port = self.osinteraction.get_open_port()

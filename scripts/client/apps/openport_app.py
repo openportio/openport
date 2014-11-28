@@ -44,7 +44,12 @@ class OpenportApp(object):
             TeeStdOut(self.os_interaction.get_app_data_path('openport_app.out.log'), 'a')
             TeeStdErr(self.os_interaction.get_app_data_path('openport_app.error.log'), 'a')
         try:
-            signal.signal(signal.SIGINT, self.handleSigTERM)
+            if osinteraction.is_linux():
+                signal.signal(signal.SIGINT, self.handleSigTERM)
+                signal.signal(signal.CTRL_C_EVENT, self.handleSigTERM)
+            else:
+                # To be honest, I don't think this does anything...
+                self.os_interaction.handle_signals(self.handleSigTERM)
         except ValueError:
             pass
             # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
@@ -52,7 +57,7 @@ class OpenportApp(object):
 
         self.db_handler = None
 
-    def handleSigTERM(self, signum, frame):
+    def handleSigTERM(self, signum, frame=-1):
         logger.debug('got signal %s' % signum)
         if self.manager_app_started and self.session:
             self.inform_manager_app_stop(self.session, self.globals.manager_port)

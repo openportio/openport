@@ -361,11 +361,38 @@ class WindowsOsInteraction(OsInteraction):
         """Check whether pid exists in the current process table."""
         return psutil.pid_exists(pid)
 
-    def kill_pid(self, pid, signal=signal.CTRL_C_EVENT):
-        return os.kill(pid, signal)
-        #a = self.run_shell_command(['taskkill', '/pid', '%s' % pid, '/f', '/t'])
+    def kill_pid(self, pid, signal=-1):
+        # First try killing it nicely, sending Ctrl-Break. This only works if both processes are part of the same console.
+        # http://msdn.microsoft.com/en-us/library/windows/desktop/ms682541(v=vs.85).aspx
+        import ctypes
+        if ctypes.windll.kernel32.GenerateConsoleCtrlEvent(1, pid):  # 0 => Ctrl-C, 1 -> Ctrl-Break
+            #return True
+            pass
+
+        # If that didn't work, kill it with fire.
+        sleep(1)
+        return os.kill(pid, 9)
+        #
+        # a = self.run_shell_command(['taskkill', '/pid', '%s' % pid, '/f', '/t'])
         #self.logger.debug('kill command output: %s %s' % a)
         #return a[0].startswith('SUCCESS')
+
+    def handle_signals(self, handler):
+        from ctypes import WINFUNCTYPE, windll
+        from ctypes.wintypes import BOOL, DWORD
+
+        kernel32 = windll.LoadLibrary('kernel32')
+        PHANDLER_ROUTINE = WINFUNCTYPE(BOOL, DWORD)
+        SetConsoleCtrlHandler = kernel32.SetConsoleCtrlHandler
+        SetConsoleCtrlHandler.argtypes = (PHANDLER_ROUTINE, BOOL)
+        SetConsoleCtrlHandler.restype = BOOL
+
+        @PHANDLER_ROUTINE
+        def console_handler(ctrl_type):
+            handler(ctrl_type)
+
+        if not SetConsoleCtrlHandler(console_handler, True):
+            raise RuntimeError('SetConsoleCtrlHandler failed.')
 
     def is_compiled(self):
         return sys.argv[0][-3:] == 'exe'

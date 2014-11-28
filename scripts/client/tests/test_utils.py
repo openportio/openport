@@ -319,7 +319,7 @@ def wait_for_success_callback(p_manager, osinteraction, timeout=30, output_prefi
 def kill_all_processes(processes_to_kill):
     for p in processes_to_kill:
         try:
-            os.kill(p.pid, signal.SIGKILL)
+            osinteraction.getInstance().kill_pid(p.pid)
             p.wait()
         except Exception as e:
             pass

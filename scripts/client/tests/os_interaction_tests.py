@@ -11,7 +11,7 @@ from services.osinteraction import OsInteraction, getInstance, is_linux
 import subprocess
 from time import sleep
 from services.logger_service import set_log_level
-from test_utils import run_command_with_timeout, run_command_with_timeout_return_process
+from test_utils import run_command_with_timeout, run_command_with_timeout_return_process, run_method_with_timeout
 from common.share import Share
 from mock import Mock, call
 
@@ -147,6 +147,24 @@ class OsInteractionTest(unittest.TestCase):
                        '31261', '--request-token', 'WkSXfYyksNy4vN2h', '--start-manager', 'False'])])
         finally:
             self.os_interaction.start_process = method
+
+    def test_kill_pid(self):
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        python_exe = self.os_interaction.get_python_exec()
+        p = subprocess.Popen(python_exe + ['tryouts/signal_test.py'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        sleep(1)
+
+        self.os_interaction.kill_pid(p.pid)
+
+        run_method_with_timeout(p.wait, 2)
+
+        self.assertNotEqual(None, p.poll())
+        output = self.os_interaction.get_all_output(p)
+        print output[0]
+        print output[1]
+        if is_linux():
+            self.assertTrue('got signal' in output[0])
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

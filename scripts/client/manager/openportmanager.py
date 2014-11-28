@@ -293,8 +293,11 @@ def start_manager():
     def handleSigTERM(signum, frame):
         logger.debug('got a signal %s, frame %s going down' % (signum, frame))
         manager.exitApp(None)
-    signal.signal(signal.SIGTERM, handleSigTERM)
-    signal.signal(signal.SIGINT, handleSigTERM)
+    if osinteraction.is_linux():
+        signal.signal(signal.SIGTERM, handleSigTERM)
+        signal.signal(signal.SIGINT, handleSigTERM)
+    else:
+        osinteraction.getInstance().handle_signals(handleSigTERM)
 
     while True:
         sleep(1)
