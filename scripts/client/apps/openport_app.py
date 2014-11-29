@@ -46,7 +46,7 @@ class OpenportApp(object):
         try:
             if osinteraction.is_linux():
                 signal.signal(signal.SIGINT, self.handleSigTERM)
-                signal.signal(signal.CTRL_C_EVENT, self.handleSigTERM)
+                signal.signal(signal.SIGTERM, self.handleSigTERM)
             else:
                 # To be honest, I don't think this does anything...
                 self.os_interaction.handle_signals(self.handleSigTERM)

@@ -113,7 +113,7 @@ class OpenPortManager(object):
 
     def stop_sharing(self, share):
         logger.info("stopping %s" % share.id)
-        self.os_interaction.kill_pid(share.pid)
+        self.os_interaction.kill_pid(share.pid, signal.SIGTERM)
         self.dbhandler.stop_share(share)
 
     def onNewShare(self, share):

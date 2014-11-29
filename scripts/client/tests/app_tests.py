@@ -598,8 +598,10 @@ class AppTests(unittest.TestCase):
 
         # Killing the manager
 
-        #self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
-        self.kill_manager(manager_port)
+        if osinteraction.is_linux():
+            self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
+        else:
+            self.kill_manager(manager_port)
         sleep(3)
         print_all_output(p_manager, self.osinteraction, 'p_manager')
 
@@ -615,7 +617,8 @@ class AppTests(unittest.TestCase):
         except:
             pass
 
-#        run_method_with_timeout(p_app.communicate, 2, raise_exception=False)
+        if osinteraction.is_linux():
+            run_method_with_timeout(p_app.communicate, 2, raise_exception=False)
 
         self.assertFalse(self.osinteraction.pid_is_running(p_app.pid))
 
@@ -639,24 +642,18 @@ class AppTests(unittest.TestCase):
         try:
             self.assertEqual('echo', cr.get(local_url))
         except Exception, e:
-            tr = traceback.format_exc()
-            logger.error(e)
-            logger.error(tr)
+            logger.exception(e)
             self.fail('calling local port failed')
 
         print "url2: %s" % url
-        sleep(15)
-
-        print_all_output(p_manager, self.osinteraction, 'p_manager')
+        wait_for_success_callback(p_manager, self.osinteraction, output_prefix='p_manager')
 
         # Checking that the openport session has restarted.
 
         try:
             self.assertEqual('echo', cr.get(url, print500=False))
         except Exception, e:
-            tr = traceback.format_exc()
-            logger.error(e)
-            logger.error(tr)
+            logger.exception(e)
             self.fail('second port forwarding failed')
 
         # Killing the manager should also kill the app
@@ -768,7 +765,7 @@ class AppTests(unittest.TestCase):
                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         sleep(2)
-        self.osinteraction.kill_pid(p.pid)
+        self.osinteraction.kill_pid(p.pid, signal.SIGTERM)
         sleep(5)
         output = self.osinteraction.get_all_output(p)
         print output[0]
