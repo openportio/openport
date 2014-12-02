@@ -27,6 +27,8 @@ import ConfigParser
 
 logger = get_logger('OpenPortManager')
 
+manager_instance = None
+
 
 class OpenPortManager(object):
 
@@ -56,7 +58,8 @@ class OpenPortManager(object):
                 tb = traceback.format_exc()
                 logger.error(e)
                 logger.error(tb)
-        sys.exit()
+        os._exit(3)
+        #sys.exit()
 
     def set_manager_port(self, share):
         command = share.restart_command
@@ -227,6 +230,12 @@ class OpenPortManager(object):
         for share in shares:
             self.kill_share(share)
 
+def get_manager_instance():
+    global manager_instance
+    if manager_instance is None:
+        manager_instance = OpenPortManager()
+    return manager_instance
+
 
 def utc_epoch_to_local_datetime(utc_epoch):
     return datetime.datetime(*time.localtime(utc_epoch)[0:6])
@@ -266,7 +275,7 @@ def start_manager():
     if args.config_file:
         Globals().config = args.config_file
 
-    manager = OpenPortManager()
+    manager = get_manager_instance()
 
     logger.debug('db location: ' + dbhandler.db_location)
 
@@ -373,7 +382,7 @@ def get_and_save_manager_port(manager_port_from_command_line=-1, exit_on_fail=Tr
 
 class OpenportManagerService(object):
     def __init__(self, manager_port=-1, server='openport.io'):
-        self.manager = OpenPortManager()
+        self.manager = get_manager_instance()
         Globals().manager_port = manager_port
         Globals().openport_address = server
         self.stopped = False

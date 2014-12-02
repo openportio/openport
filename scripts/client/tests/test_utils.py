@@ -322,7 +322,7 @@ def kill_all_processes(processes_to_kill):
             osinteraction.getInstance().kill_pid(p.pid)
             p.wait()
         except Exception as e:
-            pass
+            logger.exception(e)
 
 
 def click_open_for_ip_link(link):

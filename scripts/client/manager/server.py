@@ -99,8 +99,8 @@ def exit_manager():
         def shutdown():
             sleep(1)
             logger.debug('shutting down due to exit call')
-            import thread
-            thread.interrupt_main()
+            from openportmanager import get_manager_instance
+            get_manager_instance().exitApp('server_exit')
         t = threading.Thread(target=shutdown)
         t.setDaemon(True)
         t.start()
