@@ -60,7 +60,7 @@ class AppTests(unittest.TestCase):
         p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--list',
                                       '--database', db_file],
                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        p_manager.wait()
+        run_method_with_timeout(p_manager.wait, 10)
         process_output = print_all_output(p_manager, self.osinteraction, 'list')
         return len(process_output[0].split('\n')) if process_output[0] else 0
 
@@ -105,7 +105,7 @@ class AppTests(unittest.TestCase):
         self.assertEqual(request, response.strip())
 
         os.kill(p.pid, KILL_SIGNAL)
-        p.wait()
+        run_method_with_timeout(p.wait, 10)
 
         manager_port = self.osinteraction.get_open_port()
         p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
@@ -234,7 +234,7 @@ class AppTests(unittest.TestCase):
             os.kill(p_app.pid, KILL_SIGNAL)
         else:
             self.kill_manager(manager_port)
-        self.assertNotEqual(p_app.wait(), None)
+        run_method_with_timeout(p_app.wait, 10)
         while self.osinteraction.pid_is_running(p_app.pid):
             print "waiting for pid to be killed: %s" % p_app.pid
             sleep(1)
@@ -244,7 +244,7 @@ class AppTests(unittest.TestCase):
             self.kill_manager(manager_port)
 
         print 'waiting for manager to be killed'
-        p_manager.wait()
+        run_method_with_timeout(p_manager.wait, 10)
 
         print_all_output(p_manager, self.osinteraction, 'p_manager')
         print_all_output(p_app, self.osinteraction, 'p_app')
@@ -293,7 +293,7 @@ class AppTests(unittest.TestCase):
             os.kill(p_manager2.pid, signal.SIGINT)
         else:
             self.kill_manager(manager_port)
-        p_manager2.wait()
+        run_method_with_timeout(p_manager2.wait, 10)
         print_all_output(p_manager2, self.osinteraction, 'p_manager2')
 
         response = c.send(request)
@@ -447,7 +447,7 @@ class AppTests(unittest.TestCase):
         self.assertTrue(openportmanager.manager_is_running(manager_port))
 
         os.kill(p_app.pid, KILL_SIGNAL)
-        p_app.wait()
+        run_method_with_timeout(p_app.wait, 10)
         sleep(1)
         self.assertTrue(openportmanager.manager_is_running(manager_port))
         self.kill_manager(manager_port)
@@ -741,6 +741,8 @@ class AppTests(unittest.TestCase):
             response = urllib2.urlopen(req, timeout=1).read()
             if response.strip() != 'ok':
                 print lineNumber(), response
+            else:
+                print 'manager killed'
         except Exception, detail:
             print detail
 
@@ -797,7 +799,7 @@ class AppTests(unittest.TestCase):
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--version'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
-        p.wait()
+        run_method_with_timeout(p.wait, 10)
 
         process_output = p.communicate()
         for out in process_output:
