@@ -148,15 +148,9 @@ class IntegrationTest(unittest.TestCase):
         while i < 100 and not self.success_called_back:
             i += 1
             sleep(0.1)
-        print "escaped at ",i
+        print "escaped at ", i
         self.assertTrue(self.success_called_back)
         port = share.server_port
-
-        # apparently, the request is not needed, but hey, lets keep it.
-        #url = 'http://%s/debug/linkSessionsToPids?key=batterycupspoon' % self.test_server
-        #req = urllib2.Request(url)
-        #response = urllib2.urlopen(req).read()
-        #self.assertEqual('done', response.strip())
 
         dict = request_port(
             url='https://%s/api/v1/request-port' % self.test_server,

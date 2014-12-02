@@ -207,8 +207,10 @@ class SiteInteractionTest(unittest.TestCase):
             js_confirm = 'window.confirm = function(){return true;}'
             self.browser.execute_script(js_confirm)
             #elem = self.browser.find_element_by_partial_link_text(":%s" % server_port)
-            elem = self.browser.find_element_by_xpath("//td[contains(., ':%s')]/following-sibling::td[1]/button" % server_port)
+            elem = self.browser.find_element_by_xpath("//td[contains(., ':%s')]/following-sibling::td[1]/button[2]" % server_port)
             elem.click()
+            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+
         except NoSuchElementException:
             self.fail("session not found")
 

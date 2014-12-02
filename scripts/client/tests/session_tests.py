@@ -1,5 +1,9 @@
 __author__ = 'jan'
 import unittest
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from common.share import Share
 
 
