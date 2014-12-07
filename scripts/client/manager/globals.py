@@ -16,6 +16,8 @@ class Globals():
             self.contact_manager = True
             self.verbose = False
 
+            self.app = None
+
     # storage for the instance reference
     __instance = None
 

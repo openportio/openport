@@ -370,7 +370,7 @@ def get_and_save_manager_port(manager_port_from_command_line=-1, exit_on_fail=Tr
         if running:
             if exit_on_fail:
                 logger.info('Manager is already running on port %s. Exiting.' % Globals().manager_port)
-                sys.exit(1)
+                os._exit(1)
             else:
                 return original_port
         else:

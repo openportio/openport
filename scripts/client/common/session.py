@@ -4,7 +4,7 @@ import pickle
 class Session(object):
     def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=1, account_id=-1,
                  key_id=-1, local_port=-1, server_session_token='', restart_command='', http_forward=False,
-                 http_forward_address='', open_port_for_ip_link=''):
+                 http_forward_address='', open_port_for_ip_link='', app_port=-1):
         #todo: why is this ever a dict?
         if type(_id) == dict:
             self.id = -1
@@ -22,6 +22,7 @@ class Session(object):
         self.http_forward = http_forward
         self.http_forward_address = http_forward_address
         self.open_port_for_ip_link = open_port_for_ip_link
+        self.app_port = app_port
 
         self.success_observers = []
         self.error_observers = []
@@ -46,6 +47,7 @@ class Session(object):
             'http_forward': self.http_forward,
             'http_forward_address': self.http_forward_address,
             'open_port_for_ip_link': self.open_port_for_ip_link,
+            'app_port': self.app_port
         }
 
     @staticmethod
@@ -69,11 +71,12 @@ class Session(object):
         self.active = Session.str_to_bool(dict['active'])
         self.account_id = dict['account_id']
         self.key_id = dict['key_id']
-        self.local_port = dict['local_port']
+        self.local_port = int(dict.get('local_port', -1))
         self.server_session_token = dict['server_session_token']
         self.restart_command = pickle.loads(dict['restart_command'])
         self.http_forward = Session.str_to_bool(dict['http_forward'])
         self.http_forward_address = dict['http_forward_address']
+        self.app_port = dict['app_port']
 
     def notify_success(self):
         for observer in self.success_observers:

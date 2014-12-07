@@ -38,6 +38,8 @@ class OpenportSession(Base):
     http_forward = Column(Boolean)
     http_forward_address = Column(String(50))
 
+    app_port = Column(Integer)
+
     def __repr__(self):
        return "<Session(local_port='%s', remote_port='%s', session_token='%s')>" % (
                             self.local_port, self.server_port, self.session_token)
@@ -45,9 +47,16 @@ class OpenportSession(Base):
 
 class DBHandler(object):
 
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(DBHandler, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
     def __init__(self, db_location):
         logger.debug('db location: %s' % db_location)
-        self.engine = create_engine('sqlite:///%s' % db_location, poolclass=SingletonThreadPool)
+        self.engine = create_engine('sqlite:///%s' % db_location)
         self.db_location = db_location
         self.session_factory = sessionmaker(bind=self.engine)
         logger.debug('db location: %s' % db_location)
@@ -81,6 +90,7 @@ class DBHandler(object):
         openport_session.key_id = share.key_id
         openport_session.http_forward = share.http_forward
         openport_session.http_forward_address = share.http_forward_address
+        openport_session.app_port = share.app_port
 
         session = self._get_session()
         for previous_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
@@ -116,6 +126,7 @@ class DBHandler(object):
         share.key_id = openport_session.key_id
         share.http_forward = openport_session.http_forward
         share.http_forward_address = openport_session.http_forward_address
+        share.app_port = openport_session.app_port
 
         share.restart_command = openport_session.restart_command
         try:
@@ -131,8 +142,9 @@ class DBHandler(object):
 
         session = self._get_session()
         openport_sessions = session.query(OpenportSession).filter_by(active=True)
+        l = list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
         self.Session.remove()
-        return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
+        return l
 
     def get_shares_to_restart(self):
         logger.debug('get_shares')

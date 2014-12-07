@@ -61,7 +61,7 @@ class OpenportApp(object):
         logger.debug('got signal %s' % signum)
         if self.manager_app_started and self.session:
             self.inform_manager_app_stop(self.session, self.globals.manager_port)
-        sys.exit(3)
+        os._exit(3)
 
     def inform_manager_app_stop(self, share, manager_port, start_manager=True):
         logger.debug('Informing manager we\'re stopping.')
@@ -308,30 +308,31 @@ class OpenportApp(object):
 
         self.session = session
 
+        from app_tcp_server import start_server_thread
+        start_server_thread()
         self.openport.start_port_forward(session, callback, show_error, server=self.args.server)
 
     def error_callback(self, session, exception):
         logger.debug('error_callback')
-        if self.globals.contact_manager and self.manager_app_started:
-            self.inform_manager_app_error(session, self.globals.manager_port)
+        #if self.globals.contact_manager and self.manager_app_started:
+        #    self.inform_manager_app_error(session, self.globals.manager_port)
 
     def success_callback(self, session):
         logger.debug('success_callback')
-        if self.globals.contact_manager and self.manager_app_started:
-            self.inform_manager_app_success(session, self.globals.manager_port)
+        #if self.globals.contact_manager and self.manager_app_started:
+        #    self.inform_manager_app_success(session, self.globals.manager_port)
 
     def stop_callback(self, session):
         logger.debug('stop_callback')
         session.active = False
         self.save_share(session)
-        if self.globals.contact_manager and self.manager_app_started:
-            self.inform_manager_app_stop(session, self.globals.manager_port)
+       # if self.globals.contact_manager and self.manager_app_started:
+         #   self.inform_manager_app_stop(session, self.globals.manager_port)
 
     def stop(self):
         self.openport.stop_port_forward()
         if self.session:
             self.session.notify_stop()
-
 
 if __name__ == '__main__':
 
@@ -341,6 +342,7 @@ if __name__ == '__main__':
         sys.exit()
 
     app = OpenportApp()
+    Globals().app = app
 
     app.parse_args()
     app.start()

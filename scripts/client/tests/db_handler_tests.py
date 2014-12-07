@@ -2,8 +2,11 @@ import unittest
 import sys
 import xmlrunner
 import os
-import logging
+import gc
+
 from time import sleep
+from cStringIO import StringIO
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from common.share import Share
@@ -47,6 +50,7 @@ class DBHandlerTests(unittest.TestCase):
         share.restart_command = ['restart', 'command']
         share.http_forward = True
         share.http_forward_address = 'http://jan.u.openport.io'
+        share.app_port = 43122
 
         self.dbhandler.add_share(share)
 
@@ -66,6 +70,7 @@ class DBHandlerTests(unittest.TestCase):
         self.assertEquals(share.restart_command, share2.restart_command)
         self.assertEquals(share.http_forward, share2.http_forward)
         self.assertEquals(share.http_forward_address, share2.http_forward_address)
+        self.assertEquals(share.app_port, share2.app_port)
 
     def test_concurrency(self):
         dbhandler2 = dbhandler.DBHandler(self.test_db)
@@ -123,6 +128,35 @@ class DBHandlerTests(unittest.TestCase):
             self.assertEqual([], errors)
         finally:
             dbhandler2.close()
+
+    def test_stress_test_init_db(self):
+        errors = []
+        def init_db_test():
+            try:
+                dbh = dbhandler.DBHandler(self.test_db)
+                dbh.init_db()
+            except Exception, e:
+                global errors
+                errors.append(e)
+
+        threads = []
+
+        for i in range(1000):
+            t = threading.Thread(target=init_db_test)
+            t.setDaemon(True)
+            t.start()
+            threads.append(t)
+
+        for t in threads:
+            t.join()
+        self.assertEqual([], errors)
+
+
+
+    def test_singleton(self):
+        a = dbhandler.DBHandler(self.test_db)
+        b = dbhandler.DBHandler(self.test_db)
+        self.assertTrue(a == b)
 
     def test_get_shares(self):
         share1 = Share(active=False)
@@ -208,12 +242,27 @@ class DBHandlerTests(unittest.TestCase):
 
         self.assertEqual(1, len(self.dbhandler.get_shares()))
 
+    def test_gc_in_thread(self):
 
+        str1 = StringIO()
+        ch = logging.StreamHandler(str1)
+        logging.getLogger('sqlalchemy').addHandler(ch)
 
+        def do_gc():
+            gc.collect()
 
+        share = Share(active=True, local_port=444)
+        self.dbhandler.add_share(share)
 
+        self.assertEqual(1, len(self.dbhandler.get_shares()))
+        self.assertEqual(share.id, self.dbhandler.get_share(1).id)
 
+        t = threading.Thread(target=do_gc)
+        t.setDaemon(True)
+        t.start()
 
+        t.join()
+        self.assertTrue(not 'ProgrammingError' in str1.getvalue())
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

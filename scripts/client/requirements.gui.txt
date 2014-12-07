@@ -1,0 +1,3 @@
+PIL
+
+# install wx (see docs)

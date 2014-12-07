@@ -1,7 +1,9 @@
 import datetime
-
-from manager import dbhandler
 import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+from manager import dbhandler
 import wx
 from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
@@ -12,11 +14,17 @@ from services.logger_service import get_logger
 from services import qr_service, image_service
 from gui.trayicon import OpenPortItTaskBarIcon
 
+from gui_tcp_server import start_server_thread, app_communicate, register_with_app
+
+from services.logger_service import set_log_level
+import logging
+
 
 logger = get_logger(__name__)
 
 noColor = True
 BYTES_PER_MB = 1024*1024
+
 
 class SharesFrame(wx.Frame):
 
@@ -39,17 +47,18 @@ class SharesFrame(wx.Frame):
 
         self.addTrayIcon()
 
-    def exitApp(self,event):
+    def exitApp(self, event):
         self.tbicon.RemoveIcon()
         self.tbicon.Destroy()
-        self.application.exitApp(event)
+        os._exit(0)
+        #self.application.exitApp(event)
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)
-        self.tbicon.addItem('View shares', self.application.viewShares)
+        self.tbicon.addItem('View shares', self.Show)
         self.tbicon.menu.AppendSeparator()
         self.tbicon.addItem('Exit', self.exitApp)
-        self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.application.viewShares)
+        self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.Show)
 
     def addMenuBar(self):
         menubar = wx.MenuBar()
@@ -62,7 +71,7 @@ class SharesFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.showOpenportDialog, id=102)
         file.AppendSeparator()
         quit = wx.MenuItem(file, 105, '&Quit\tCtrl+Q', 'Quit the Application')
-        self.Bind(wx.EVT_MENU, self.application.exitApp, id=105)
+        self.Bind(wx.EVT_MENU, self.exitApp, id=105)
         file.AppendItem(quit)
         menubar.Append(file, '&File')
 #        menubar.Append(help, '&Help')
@@ -78,7 +87,8 @@ class SharesFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             paths = dlg.GetPaths()
             for path in paths:
-                self.application.startOpenportItProcess(path)
+                #self.application.startOpenportItProcess(path)
+                pass
         dlg.Destroy()
 
     def showOpenportDialog(self, event):
@@ -116,7 +126,8 @@ class SharesFrame(wx.Frame):
 
 
         self.scrolling_window = wx.ScrolledWindow( self )
-        if not noColor:self.scrolling_window.SetBackgroundColour('green')
+        if not noColor:
+            self.scrolling_window.SetBackgroundColour('green')
         self.SetSize((400, 300))
 
         self.Bind(wx.EVT_SIZE, self.OnSize)
@@ -155,13 +166,14 @@ class SharesFrame(wx.Frame):
     def onFocus(self, event):
         self.scrolling_window.SetFocus()
 
-    def add_share(self, share, callbacks={}):
+    def add_share(self, share):
+
         if isinstance(share, Share):
             filename = share.filePath
         else:
-            filename = share.local_port
+            filename = str(share.local_port)
 
-        share_panel = wx.Panel(self.scrolling_window, id=share.id, style=wx.SIMPLE_BORDER)
+        share_panel = wx.Panel(self.scrolling_window, id=2, style=wx.SIMPLE_BORDER)
         self.scrolling_window_sizer.Add(share_panel, 0, wx.EXPAND, 0)
         share_panel_sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -176,7 +188,8 @@ class SharesFrame(wx.Frame):
         button_panel = wx.Panel(top_panel)
         button_panel_sizer = wx.BoxSizer(wx.HORIZONTAL)
         button_panel.SetSizer(button_panel_sizer)
-        if not noColor:button_panel.SetBackgroundColour('red')
+        if not noColor:
+            button_panel.SetBackgroundColour('red')
         top_panel_sizer.Add(button_panel, 0, wx.ALIGN_LEFT, 5)
 
         def copy_link(evt):
@@ -185,11 +198,17 @@ class SharesFrame(wx.Frame):
         copy_link_button.Bind(wx.EVT_BUTTON, copy_link)
         button_panel_sizer.Add(copy_link_button, 0, wx.EXPAND|wx.ALL, 5)
 
-        def stop_sharing(evt):
-            if 'stop' in callbacks:
-                callbacks['stop'](share)
+        def send_stop_share(evt):
+            logger.info("stopping %s" % share.id)
+            s = dbhandler.getInstance().get_share_by_local_port(share.local_port)
+            # Todo: make gray
+            if len(s) > 0:
+                app_communicate(s[0], 'exit')
+            else:
+                self.remove_share(share)
+
         stop_sharing_button = wx.Button(button_panel, -1, label="Stop sharing")
-        stop_sharing_button.Bind(wx.EVT_BUTTON, stop_sharing)
+        stop_sharing_button.Bind(wx.EVT_BUTTON, send_stop_share)
         button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND|wx.ALL, 5)
 
         def show_qr_evt(evt):
@@ -214,7 +233,7 @@ class SharesFrame(wx.Frame):
         self.share_panels[share.local_port] = share_panel
         self.scrolling_window.Layout()
         #self.frame_sizer.Fit(self)
-        #self.Layout()
+        self.Layout()
 
     def show_qr(self, title, data):
         pil_img = qr_service.get_qr_image(data)
@@ -224,29 +243,41 @@ class SharesFrame(wx.Frame):
         qr_frame.Show(True)
 
     def notify_error(self, share):
-        share_panel = self.share_panels[share.local_port]
-        share_panel.SetBackgroundColour((240,0,0))
-        share_panel.Refresh()
-        logger.error('error in share')
+        logger.debug('notify_error')
+        if share.local_port in self.share_panels:
+            share_panel = self.share_panels[share.local_port]
+            share_panel.SetBackgroundColour((240, 0, 0))
+            share_panel.Refresh()
+        else:
+            logger.debug('share not found while notify error')
 
     def notify_success(self, share):
-        share_panel = self.share_panels[share.local_port]
-        share_panel.SetBackgroundColour(wx.NullColour)
-        share_panel.Refresh()
+        logger.debug('notify_success')
+        if share.local_port in self.share_panels:
+            share_panel = self.share_panels[share.local_port]
+            share_panel.SetBackgroundColour(wx.NullColour)
+            share_panel.Refresh()
+        else:
+            logger.debug('share not found while notify success')
 
     def remove_share(self, share):
-        share_panel = self.share_panels[share.local_port]
-        self.scrolling_window.RemoveChild(share_panel)
-        self.scrolling_window_sizer.Remove(share_panel)
-        share_panel.Destroy()
-        self.share_panels.pop(share.local_port)
-        self.scrolling_window.Layout()
-      #  self.Layout()
+        logger.debug('remove_share %s' % share.local_port)
+        if share.local_port in self.share_panels:
+            share_panel = self.share_panels[share.local_port]
+            self.scrolling_window.RemoveChild(share_panel)
+            self.scrolling_window_sizer.Remove(share_panel)
+            share_panel.Destroy()
+            self.share_panels.pop(share.local_port)
+            self.scrolling_window.Layout()
+            self.Layout()
+        else:
+            logger.debug('share not found while removing')
 
 class QrFrame(wx.Frame):
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, -1, title,
-            style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
+        wx.Frame.__init__(self, parent, id)#, title,
+            #style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|
+             #     wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
 
     def add_img(self, wx_img):
         self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -272,32 +303,29 @@ class ImagePanel(wx.Panel):
     def OnPaint(self, evt):
         dc = PaintDC(self)
         if self.image:
-            dc.DrawBitmap(self.image.ConvertToBitmap(), 0,0)
+            dc.DrawBitmap(self.image.ConvertToBitmap(), 0, 0)
 
 if __name__ == '__main__':
-
-    def stop_sharing(share):
-        logger.info( "stopping %s" % share.id )
-        frame.remove_share(share)
-
-    def add_share1(ignore):
-        frame.add_share(share1, callbacks=callbacks)
+    set_log_level(logging.DEBUG)
 
     app = wx.App(False)
-    frame = SharesFrame(None, -1, ' ')
+    frame = SharesFrame(None, -1, ' ', None)
     db_handler = dbhandler.getInstance()
 
     shares = db_handler.get_shares()
-    callbacks = {'stop': add_share1}
-    share1 = shares[0]
+
 
     for share in shares:
-        frame.add_share(share, callbacks=callbacks)
-        callbacks = {'stop': stop_sharing}
+        frame.add_share(share)
+        if not osinteraction.getInstance().pid_is_openport_process(share.pid):
+            frame.notify_error(share)
 
-    #    frame.Show(False)
     frame.Show(True)
+    Globals().app = frame
+
+    start_server_thread()
+
+    for share in shares:
+        register_with_app(share)
+
     app.MainLoop()
-
-    pass
-

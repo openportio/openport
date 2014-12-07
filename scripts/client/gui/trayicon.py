@@ -10,7 +10,7 @@ class OpenPortItTaskBarIcon(wx.TaskBarIcon):
         self.os_interaction = osinteraction.getInstance()
 
         self.icon = wx.Icon(self.os_interaction.get_resource_path('logo-base.ico'), wx.BITMAP_TYPE_ICO)
-        self.SetIcon(self.icon, "OpenPort-It")
+        self.SetIcon(self.icon, "Openport")
         self.CreateMenu()
         self.items = {}
 

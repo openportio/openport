@@ -268,6 +268,10 @@ class LinuxOsInteraction(OsInteraction):
             return False
 
     def copy_to_clipboard(self, text):
+        self.run_shell_command('echo "%s" |pbcopy' % text)
+        self.run_shell_command('echo "%s" |xclip' % text)
+        return
+
         from Tkinter import Tk
         r = Tk()
         r.withdraw()
@@ -275,10 +279,10 @@ class LinuxOsInteraction(OsInteraction):
         r.clipboard_append(text.strip())
         r.destroy()
 
-        r = Tk()
-        result = r.selection_get(selection = "CLIPBOARD")
+        #r = Tk()
+        #result = r.selection_get(selection = "CLIPBOARD")
         #logger.debug('tried to copy %s to clipboard, got %s' % (text, result))
-        r.destroy()
+        #r.destroy()
 
     def pid_is_running(self, pid):
         """Check whether pid exists in the current process table."""
@@ -423,11 +427,6 @@ class WindowsOsInteraction(OsInteraction):
 def is_linux():
     return platform.system() != 'Windows'
 
-def getInstance():
-    if is_linux():
-        return LinuxOsInteraction()
-    else:
-        return WindowsOsInteraction()
 
 def getInstance(use_logger=True):
     if is_linux():
