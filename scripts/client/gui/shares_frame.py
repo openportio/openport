@@ -23,7 +23,7 @@ import logging
 logger = get_logger(__name__)
 
 noColor = True
-BYTES_PER_MB = 1024*1024
+BYTES_PER_MB = 1024 * 1024
 
 COLOR_NO_APP_RUNNING = (204, 204, 204)
 COLOR_APP_ERROR = (255, 52, 0)
@@ -31,13 +31,12 @@ COLOR_OK = wx.NullColour
 
 
 class SharesFrame(wx.Frame):
-
     def onClose(self, evt):
         self.Hide()
 
     def __init__(self, parent, id, title, application):
         wx.Frame.__init__(self, parent, -1, title,
-                          style=wx.DEFAULT_FRAME_STYLE|wx.NO_FULL_REPAINT_ON_RESIZE)
+                          style=wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
         self.application = application
         self.addMenuBar()
         self.rebuild()
@@ -67,7 +66,7 @@ class SharesFrame(wx.Frame):
     def addMenuBar(self):
         menubar = wx.MenuBar()
         file = wx.Menu()
-#        help = wx.Menu()
+        #        help = wx.Menu()
         file.Append(101, '&New share', 'Share a new document')
         self.Bind(wx.EVT_MENU, self.showOpenportItDialog, id=101)
 
@@ -78,7 +77,7 @@ class SharesFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.exitApp, id=105)
         file.AppendItem(quit)
         menubar.Append(file, '&File')
-#        menubar.Append(help, '&Help')
+        #        menubar.Append(help, '&Help')
         self.SetMenuBar(menubar)
 
     def showOpenportItDialog(self, event):
@@ -97,9 +96,9 @@ class SharesFrame(wx.Frame):
 
     def showOpenportDialog(self, event):
         dialog = wx.NumberEntryDialog(self,
-            'Choose a port you want to open',
-            '( 1 - 65535 )',
-            'Openport - Choose a port you want to open', 80, 1, 65535)
+                                      'Choose a port you want to open',
+                                      '( 1 - 65535 )',
+                                      'Openport - Choose a port you want to open', 80, 1, 65535)
         dialog.ShowModal()
 
         if dialog.GetReturnCode() == wx.ID_OK:
@@ -111,38 +110,37 @@ class SharesFrame(wx.Frame):
         self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.account_panel = wx.Panel(self, style=wx.BORDER_NONE)
-        self.frame_sizer.Add(self.account_panel, 0, wx.EXPAND|wx.ALL, 0)
+        self.frame_sizer.Add(self.account_panel, 0, wx.EXPAND | wx.ALL, 0)
         self.account_panel_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.account_amount_text = wx.StaticText(self.account_panel, -1, 'Openport - Easy and secure reverse SSH')
         self.account_amount_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
         self.account_amount_text.SetSize(self.account_amount_text.GetBestSize())
-        self.account_panel_sizer.Add(self.account_amount_text, 0, wx.EXPAND|wx.ALL)
+        self.account_panel_sizer.Add(self.account_amount_text, 0, wx.EXPAND | wx.ALL)
 
         self.account_reset_text = wx.StaticText(self.account_panel, -1, ' ')
         self.account_reset_text.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
         self.account_reset_text.SetSize(self.account_reset_text.GetBestSize())
-        self.account_panel_sizer.Add(self.account_reset_text, 0, wx.EXPAND|wx.ALL)
+        self.account_panel_sizer.Add(self.account_reset_text, 0, wx.EXPAND | wx.ALL)
         self.account_panel.SetSizer(self.account_panel_sizer)
         self.account_panel.SetMinSize((400, 50))
 
         self.account_panel.Layout()
         self.Layout()
 
-
         self.scrolling_window = wx.ScrolledWindow(self)
         if not noColor:
             self.scrolling_window.SetBackgroundColour('green')
         self.SetSize((400, 300))
 
-        self.scrolling_window.SetScrollRate(8,8)
-        self.scrolling_window.EnableScrolling(True,True)
+        self.scrolling_window.SetScrollRate(8, 8)
+        self.scrolling_window.EnableScrolling(True, True)
         self.scrolling_window_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.scroll_panel_sizer = wx.BoxSizer( wx.VERTICAL )
+        self.scroll_panel_sizer = wx.BoxSizer(wx.VERTICAL)
         self.scrolling_window_sizer.Add(self.scroll_panel_sizer, 1, wx.EXPAND)
         self.scrolling_window.SetSizer(self.scrolling_window_sizer)
 
-        self.frame_sizer.Add(self.scrolling_window, 1, wx.EXPAND|wx.ALL)
+        self.frame_sizer.Add(self.scrolling_window, 1, wx.EXPAND | wx.ALL)
 
         self.scrolling_window.SetFocus()
         self.Bind(wx.EVT_SET_FOCUS, self.onFocus)
@@ -151,12 +149,13 @@ class SharesFrame(wx.Frame):
         self.SetSizer(self.frame_sizer)
         self.Layout()
 
-    def update_account( self,
-        bytes_this_month = -1,
-        next_counter_reset_time = datetime.datetime.now(),
-        max_bytes = -1,
-        ):
-        self.account_amount_text.SetLabel( '%sMB / %sMB used' %(bytes_this_month/BYTES_PER_MB, max_bytes / BYTES_PER_MB ))
+    def update_account(self,
+                       bytes_this_month=-1,
+                       next_counter_reset_time=datetime.datetime.now(),
+                       max_bytes=-1,
+    ):
+        self.account_amount_text.SetLabel(
+            '%sMB / %sMB used' % (bytes_this_month / BYTES_PER_MB, max_bytes / BYTES_PER_MB ))
         self.account_reset_text.SetLabel('Counters will be reset on %s' % next_counter_reset_time)
 
     def onFocus(self, event):
@@ -182,12 +181,12 @@ class SharesFrame(wx.Frame):
         filename_text = wx.StaticText(text_panel, -1, os.path.basename(filename))
         filename_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
         filename_text.SetSize(filename_text.GetBestSize())
-        text_panel_sizer.Add(filename_text, 1, wx.EXPAND|wx.ALL)
+        text_panel_sizer.Add(filename_text, 1, wx.EXPAND | wx.ALL)
 
         link_text = wx.StaticText(text_panel, -1, share.get_link())
         link_text.SetFont(wx.Font(9, wx.SWISS, wx.NORMAL, wx.BOLD))
         link_text.SetSize(link_text.GetBestSize())
-        text_panel_sizer.Add(link_text, 1, wx.EXPAND|wx.ALL)
+        text_panel_sizer.Add(link_text, 1, wx.EXPAND | wx.ALL)
 
         text_panel.SetSizer(text_panel_sizer)
         top_panel_sizer.Add(text_panel, 1, wx.EXPAND)
@@ -201,13 +200,14 @@ class SharesFrame(wx.Frame):
 
         def copy_link(evt):
             self.os_interaction.copy_to_clipboard(share.get_link())
+
         copy_link_button = wx.Button(button_panel, -1, label="Copy link")
         copy_link_button.Bind(wx.EVT_BUTTON, copy_link)
-        button_panel_sizer.Add(copy_link_button, 0, wx.EXPAND|wx.ALL)
+        button_panel_sizer.Add(copy_link_button, 0, wx.EXPAND | wx.ALL)
 
         def send_stop_share(evt):
-#            self.add_share(share)
-           # return
+            # self.add_share(share)
+            # return
             logger.info("stopping %s" % share.id)
             s = dbhandler.getInstance().get_share_by_local_port(share.local_port)
             if len(s) > 0 and s[0].app_port and osinteraction.getInstance().pid_is_openport_process(s[0].pid):
@@ -219,7 +219,7 @@ class SharesFrame(wx.Frame):
 
         stop_sharing_button = wx.Button(button_panel, -1, label="Stop sharing")
         stop_sharing_button.Bind(wx.EVT_BUTTON, send_stop_share)
-        button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND|wx.ALL)
+        button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND | wx.ALL)
 
         def show_qr_evt(evt):
             if isinstance(share, Share):
@@ -227,16 +227,17 @@ class SharesFrame(wx.Frame):
             else:
                 title = share.local_port
             self.show_qr(title, share.get_link())
+
         qr_button = wx.Button(button_panel, -1, label="Show QR")
         qr_button.Bind(wx.EVT_BUTTON, show_qr_evt)
-        button_panel_sizer.Add(qr_button, 0, wx.EXPAND|wx.ALL)
+        button_panel_sizer.Add(qr_button, 0, wx.EXPAND | wx.ALL)
 
         top_panel.SetSizer(top_panel_sizer)
         share_panel_sizer.Add(top_panel, 0, wx.EXPAND)
 
         dir_text = wx.StaticText(share_panel, -1, os.path.dirname(filename))
         dir_text.SetSize(dir_text.GetBestSize())
-        share_panel_sizer.Add(dir_text, 0, wx.EXPAND|wx.ALL)
+        share_panel_sizer.Add(dir_text, 0, wx.EXPAND | wx.ALL)
 
         share_panel.SetSizer(share_panel_sizer)
         self.share_panels[share.local_port] = share_panel
@@ -295,18 +296,18 @@ class SharesFrame(wx.Frame):
 
 class QrFrame(wx.Frame):
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id)#, title,
-            #style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|
-             #     wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
+        wx.Frame.__init__(self, parent, id)  #, title,
+        #style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|
+        #     wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
 
     def add_img(self, wx_img):
         self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.img_panel = ImagePanel(self, -1)
         self.img_panel.display(wx_img)
-        self.frame_sizer.Add(self.img_panel, 0, wx.EXPAND|wx.ALL, 0)
+        self.frame_sizer.Add(self.img_panel, 0, wx.EXPAND | wx.ALL, 0)
         self.img_panel.Layout()
-        self.SetSize((470,480))
+        self.SetSize((470, 480))
         self.Layout()
 
 
@@ -324,6 +325,7 @@ class ImagePanel(wx.Panel):
         dc = PaintDC(self)
         if self.image:
             dc.DrawBitmap(self.image.ConvertToBitmap(), 0, 0)
+
 
 if __name__ == '__main__':
     set_log_level(logging.DEBUG)
