@@ -117,12 +117,12 @@ class SharesFrame(wx.Frame):
         self.account_amount_text = wx.StaticText(self.account_panel, -1, 'Openport - Easy and secure reverse SSH')
         self.account_amount_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
         self.account_amount_text.SetSize(self.account_amount_text.GetBestSize())
-        self.account_panel_sizer.Add(self.account_amount_text, 0, wx.EXPAND|wx.ALL,5)
+        self.account_panel_sizer.Add(self.account_amount_text, 0, wx.EXPAND|wx.ALL)
 
         self.account_reset_text = wx.StaticText(self.account_panel, -1, ' ')
         self.account_reset_text.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
         self.account_reset_text.SetSize(self.account_reset_text.GetBestSize())
-        self.account_panel_sizer.Add(self.account_reset_text, 0, wx.EXPAND|wx.ALL, 5)
+        self.account_panel_sizer.Add(self.account_reset_text, 0, wx.EXPAND|wx.ALL)
         self.account_panel.SetSizer(self.account_panel_sizer)
         self.account_panel.SetMinSize((400, 50))
 
@@ -182,12 +182,12 @@ class SharesFrame(wx.Frame):
         filename_text = wx.StaticText(text_panel, -1, os.path.basename(filename))
         filename_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
         filename_text.SetSize(filename_text.GetBestSize())
-        text_panel_sizer.Add(filename_text, 1, wx.EXPAND|wx.ALL, 5)
+        text_panel_sizer.Add(filename_text, 1, wx.EXPAND|wx.ALL)
 
         link_text = wx.StaticText(text_panel, -1, share.get_link())
         link_text.SetFont(wx.Font(9, wx.SWISS, wx.NORMAL, wx.BOLD))
         link_text.SetSize(link_text.GetBestSize())
-        text_panel_sizer.Add(link_text, 1, wx.EXPAND|wx.ALL, 5)
+        text_panel_sizer.Add(link_text, 1, wx.EXPAND|wx.ALL)
 
         text_panel.SetSizer(text_panel_sizer)
         top_panel_sizer.Add(text_panel, 1, wx.EXPAND)
@@ -219,7 +219,7 @@ class SharesFrame(wx.Frame):
 
         stop_sharing_button = wx.Button(button_panel, -1, label="Stop sharing")
         stop_sharing_button.Bind(wx.EVT_BUTTON, send_stop_share)
-        button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND|wx.ALL, 5)
+        button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND|wx.ALL)
 
         def show_qr_evt(evt):
             if isinstance(share, Share):
@@ -229,14 +229,14 @@ class SharesFrame(wx.Frame):
             self.show_qr(title, share.get_link())
         qr_button = wx.Button(button_panel, -1, label="Show QR")
         qr_button.Bind(wx.EVT_BUTTON, show_qr_evt)
-        button_panel_sizer.Add(qr_button, 0, wx.EXPAND|wx.ALL, 5)
+        button_panel_sizer.Add(qr_button, 0, wx.EXPAND|wx.ALL)
 
         top_panel.SetSizer(top_panel_sizer)
-        share_panel_sizer.Add(top_panel, 0, wx.EXPAND, 5)
+        share_panel_sizer.Add(top_panel, 0, wx.EXPAND)
 
         dir_text = wx.StaticText(share_panel, -1, os.path.dirname(filename))
         dir_text.SetSize(dir_text.GetBestSize())
-        share_panel_sizer.Add(dir_text, 0, wx.EXPAND|wx.ALL, 5)
+        share_panel_sizer.Add(dir_text, 0, wx.EXPAND|wx.ALL)
 
         share_panel.SetSizer(share_panel_sizer)
         self.share_panels[share.local_port] = share_panel
@@ -286,6 +286,8 @@ class SharesFrame(wx.Frame):
             self.scrolling_window_sizer.Remove(share_panel)
             share_panel.Destroy()
             self.share_panels.pop(share.local_port)
+            self.scrolling_window.Layout()
+            self.scrolling_window.Refresh()
             self.Layout()
         else:
             logger.debug('share not found while removing')
