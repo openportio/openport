@@ -1,18 +1,24 @@
 import datetime
 import os
 import sys
+from time import sleep
+import threading
+import wx
+from wx.lib import intctrl
+from wx._core import EVT_PAINT
+from wx._gdi import PaintDC
+
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from manager import dbhandler
-import wx
-from wx._core import EVT_PAINT
-from wx._gdi import PaintDC
 from common.share import Share
 from services import osinteraction
 from manager.globals import Globals
 from services.logger_service import get_logger
 from services import qr_service, image_service
 from gui.trayicon import OpenPortItTaskBarIcon
+from services.app_service import start_openport_process_from_session
+from common.session import Session
 
 from gui_tcp_server import start_server_thread, app_communicate, register_with_app
 
@@ -44,8 +50,8 @@ class SharesFrame(wx.Frame):
         self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
 
-        iconFile = self.os_interaction.get_resource_path('logo-base.ico')
-        icon = wx.Icon(iconFile, wx.BITMAP_TYPE_ICO)
+        iconFile = self.os_interaction.get_resource_path('resources/icon.icns')
+        icon = wx.Icon(iconFile, wx.BITMAP_TYPE_ICON)
         self.SetIcon(icon)
 
         self.addTrayIcon()
@@ -67,11 +73,11 @@ class SharesFrame(wx.Frame):
         menubar = wx.MenuBar()
         file = wx.Menu()
         #        help = wx.Menu()
-        file.Append(101, '&New share', 'Share a new document')
-        self.Bind(wx.EVT_MENU, self.showOpenportItDialog, id=101)
+        #file.Append(101, '&New share', 'Share a new document')
+        #self.Bind(wx.EVT_MENU, self.showOpenportItDialog, id=101)
 
-        file.Append(102, '&Open Port', 'Open a new port')
-        self.Bind(wx.EVT_MENU, self.showOpenportDialog, id=102)
+        file.Append(102, '&Open Port\tCtrl+O', 'Open a new port')
+        self.Bind(wx.EVT_MENU, self.show_openport_dialog, id=102)
         file.AppendSeparator()
         quit = wx.MenuItem(file, 105, '&Quit\tCtrl+Q', 'Quit the Application')
         self.Bind(wx.EVT_MENU, self.exitApp, id=105)
@@ -80,30 +86,44 @@ class SharesFrame(wx.Frame):
         #        menubar.Append(help, '&Help')
         self.SetMenuBar(menubar)
 
-    def showOpenportItDialog(self, event):
-        dlg = wx.FileDialog(
-            self, message="Choose a file to share",
-            defaultFile="",
-            wildcard="*",
-            style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR
-        )
-        if dlg.ShowModal() == wx.ID_OK:
-            paths = dlg.GetPaths()
-            for path in paths:
-                #self.application.startOpenportItProcess(path)
-                pass
-        dlg.Destroy()
+    def init_shortcuts(self):
+        id_event_open = wx.NewId()
+        self.Bind(wx.EVT_MENU, self.show_openport_dialog, id=id_event_open)
 
-    def showOpenportDialog(self, event):
-        dialog = wx.NumberEntryDialog(self,
-                                      'Choose a port you want to open',
-                                      '( 1 - 65535 )',
-                                      'Openport - Choose a port you want to open', 80, 1, 65535)
+        id_event_quit = wx.NewId()
+        self.Bind(wx.EVT_MENU, self.exitApp, id=id_event_quit)
+
+        accelerator_tbl = wx.AcceleratorTable([
+            (wx.ACCEL_CTRL,  ord('O'), id_event_open),
+            (wx.ACCEL_CTRL,  ord('Q'), id_event_quit),
+        ])
+        self.SetAcceleratorTable(accelerator_tbl)
+
+
+
+    #def showOpenportItDialog(self, event):
+    #    dlg = wx.FileDialog(
+    #        self, message="Choose a file to share",
+    #        defaultFile="",
+    #        wildcard="*",
+    #        style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR
+    #    )
+    #    if dlg.ShowModal() == wx.ID_OK:
+    #        paths = dlg.GetPaths()
+    #        for path in paths:
+    #            #self.application.startOpenportItProcess(path)
+    #            pass
+    #    dlg.Destroy()
+
+    def show_openport_dialog(self, event):
+        dialog = StartOpenportDialog(self)
         dialog.ShowModal()
 
         if dialog.GetReturnCode() == wx.ID_OK:
-            self.application.startOpenportProcess(dialog.GetValue())
-
+            session = Session()
+            session.local_port = dialog.port_input.GetValue()
+            session.http_forward = dialog.http_forward_checkbox.GetValue()
+            start_openport_process_from_session(session)
 
     def rebuild(self):
         self.share_panels = {}
@@ -148,6 +168,7 @@ class SharesFrame(wx.Frame):
         self.scrolling_window.Layout()
         self.SetSizer(self.frame_sizer)
         self.Layout()
+        self.init_shortcuts()
 
     def update_account(self,
                        bytes_this_month=-1,
@@ -162,6 +183,8 @@ class SharesFrame(wx.Frame):
         self.scrolling_window.SetFocus()
 
     def add_share(self, share):
+        if share.id in self.share_panels:
+            return
 
         if isinstance(share, Share):
             filename = share.filePath
@@ -205,17 +228,32 @@ class SharesFrame(wx.Frame):
         copy_link_button.Bind(wx.EVT_BUTTON, copy_link)
         button_panel_sizer.Add(copy_link_button, 0, wx.EXPAND | wx.ALL)
 
+        if share.open_port_for_ip_link:
+            def copy_open_port_for_ip_link(evt):
+                self.os_interaction.copy_to_clipboard(share.open_port_for_ip_link)
+
+            copy_open_port_for_ip_link_button = wx.Button(button_panel, -1, label="Copy open-for-ip link")
+            copy_open_port_for_ip_link_button.Bind(wx.EVT_BUTTON, copy_open_port_for_ip_link)
+            button_panel_sizer.Add(copy_open_port_for_ip_link_button, 0, wx.EXPAND | wx.ALL)
+
+
         def send_stop_share(evt):
             # self.add_share(share)
             # return
             logger.info("stopping %s" % share.id)
-            s = dbhandler.getInstance().get_share_by_local_port(share.local_port)
-            if len(s) > 0 and s[0].app_port and osinteraction.getInstance().pid_is_openport_process(s[0].pid):
-                self.notify_app_down(s[0])
-                app_communicate(s[0], 'exit')
-            else:
-                self.remove_share(share)
+            s = dbhandler.getInstance().get_share(share.id)
+            if s and s.app_management_port:
+                self.notify_app_down(s)
+                app_communicate(s, 'exit')
+
+            def remove_killed_share():
+                while osinteraction.getInstance().pid_is_openport_process(s.pid):
+                    sleep(1)
+                wx.CallAfter(self.remove_share, share)
                 dbhandler.getInstance().stop_share(share)
+            t = threading.Thread(target=remove_killed_share)
+            t.setDaemon(True)
+            t.start()
 
         stop_sharing_button = wx.Button(button_panel, -1, label="Stop sharing")
         stop_sharing_button.Bind(wx.EVT_BUTTON, send_stop_share)
@@ -240,7 +278,7 @@ class SharesFrame(wx.Frame):
         share_panel_sizer.Add(dir_text, 0, wx.EXPAND | wx.ALL)
 
         share_panel.SetSizer(share_panel_sizer)
-        self.share_panels[share.local_port] = share_panel
+        self.share_panels[share.id] = share_panel
 
         share_panel.GetParent().Layout()
         self.frame_sizer.Layout()
@@ -254,42 +292,44 @@ class SharesFrame(wx.Frame):
 
     def notify_error(self, share):
         logger.debug('notify_error')
-        if share.local_port in self.share_panels:
-            share_panel = self.share_panels[share.local_port]
-            share_panel.SetBackgroundColour(COLOR_APP_ERROR)
-            share_panel.Refresh()
+        if share.id in self.share_panels:
+            share_panel = self.share_panels[share.id]
+            wx.CallAfter(share_panel.SetBackgroundColour, COLOR_APP_ERROR)
+            wx.CallAfter(share_panel.Refresh)
         else:
             logger.debug('share not found while notify error')
 
     def notify_app_down(self, share):
         logger.debug('notify_error')
-        if share.local_port in self.share_panels:
-            share_panel = self.share_panels[share.local_port]
-            share_panel.SetBackgroundColour(COLOR_NO_APP_RUNNING)
-            share_panel.Refresh()
+        if share.id in self.share_panels:
+            share_panel = self.share_panels[share.id]
+            wx.CallAfter(share_panel.SetBackgroundColour, COLOR_NO_APP_RUNNING)
+            wx.CallAfter(share_panel.Refresh)
         else:
             logger.debug('share not found while notify error')
 
     def notify_success(self, share):
         logger.debug('notify_success')
-        if share.local_port in self.share_panels:
-            share_panel = self.share_panels[share.local_port]
-            share_panel.SetBackgroundColour(COLOR_OK)
-            share_panel.Refresh()
+        if share.id in self.share_panels:
+            share_panel = self.share_panels[share.id]
+            wx.CallAfter(share_panel.SetBackgroundColour, COLOR_OK)
+            wx.CallAfter(share_panel.Refresh)
         else:
             logger.debug('share not found while notify success')
 
     def remove_share(self, share):
         logger.debug('remove_share %s' % share.local_port)
-        if share.local_port in self.share_panels:
-            share_panel = self.share_panels[share.local_port]
-            self.scrolling_window.RemoveChild(share_panel)
-            self.scrolling_window_sizer.Remove(share_panel)
-            share_panel.Destroy()
-            self.share_panels.pop(share.local_port)
-            self.scrolling_window.Layout()
-            self.scrolling_window.Refresh()
-            self.Layout()
+        if share.id in self.share_panels:
+            def do_it():
+                share_panel = self.share_panels[share.id]
+                self.scrolling_window.RemoveChild(share_panel)
+                self.scrolling_window_sizer.Remove(share_panel)
+                share_panel.Destroy()
+                self.share_panels.pop(share.id)
+                self.scrolling_window.Layout()
+                self.scrolling_window.Refresh()
+                self.Layout()
+            wx.CallAfter(do_it)
         else:
             logger.debug('share not found while removing')
 
@@ -325,6 +365,58 @@ class ImagePanel(wx.Panel):
         dc = PaintDC(self)
         if self.image:
             dc.DrawBitmap(self.image.ConvertToBitmap(), 0, 0)
+
+
+class StartOpenportDialog(wx.Dialog):
+
+    def __init__(self, *args, **kw):
+        super(StartOpenportDialog, self).__init__(*args, **kw)
+
+        self.init_UI()
+        self.SetSize((250, 130))
+        self.SetTitle('Open a port')
+
+    def init_UI(self):
+
+        pnl = wx.Panel(self)
+        pnl_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox1.Add(wx.StaticText(pnl, label='Port'))
+        self.port_input = intctrl.IntCtrl(pnl, min=1, max=2 ** 16, value=8080)
+        hbox1.Add(self.port_input)
+        pnl_sizer.Add(hbox1)
+
+        self.http_forward_checkbox = wx.CheckBox(pnl, label='HTTP Forward')
+        pnl_sizer.Add(self.http_forward_checkbox)
+
+        pnl.SetSizer(pnl_sizer)
+
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        okButton = wx.Button(self, label='Start')
+        closeButton = wx.Button(self, label='Cancel')
+        hbox2.Add(okButton)
+        hbox2.Add(closeButton, flag=wx.LEFT, border=5)
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        vbox.Add(pnl, proportion=1,
+            flag=wx.ALL|wx.EXPAND, border=5)
+        vbox.Add(hbox2,
+            flag=wx.ALIGN_CENTER|wx.TOP | wx.BOTTOM, border=10)
+
+        self.SetSizer(vbox)
+
+        okButton.Bind(wx.EVT_BUTTON, self.on_ok)
+        closeButton.Bind(wx.EVT_BUTTON, self.OnClose)
+
+    def OnClose(self, e):
+        self.Destroy()
+        self.EndModal(wx.ID_CANCEL)
+
+
+    def on_ok(self, e):
+        self.Destroy()
+        self.EndModal(wx.ID_OK)
 
 
 if __name__ == '__main__':

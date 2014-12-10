@@ -2,28 +2,19 @@ import threading
 import sys
 import urllib
 import urllib2
-
 from bottle import route, run, request, error, hook
 
 from manager import dbhandler
 from manager.globals import Globals
 from services.logger_service import get_logger
 from time import sleep
-from services.osinteraction import getInstance
 from manager.openportmanager import get_and_save_manager_port
-from common.share import Share
-from common.session import Session
-import wx
 
 logger = get_logger('server')
 
-onNewShare = None
-globals = Globals()
-port = -1
-
 
 def app_communicate(share, path, data=None):
-    url = 'http://127.0.0.1:%s/%s' % (share.app_port, path)
+    url = 'http://127.0.0.1:%s/%s' % (share.app_management_port, path)
     logger.debug('sending get request ' + url)
     try:
         if data:
@@ -40,25 +31,26 @@ def app_communicate(share, path, data=None):
 
 
 def register_with_app(share):
-    if share.app_port:
-        app_communicate(share, 'register', {'port': port})
+    if share.app_management_port:
+        app_communicate(share, 'register', {'port': Globals().manager_port})
+
 
 @route('/newShare', method='POST')
 def new_share(name='newShare'):
     form_data = request.forms
     logger.debug('/newShare ' + str(dict(form_data.iteritems())))
 
-    if form_data['type'] == 'Share':
-        share = Share()
-    else:
-        share = Session()
-    share.from_dict(form_data)
+    id = int(form_data['id'])
+    share = dbhandler.getInstance().get_share(id)
+    if not share:
+        return 'share not in db'
 
-    globals.account_id = share.account_id
-    globals.key_id = share.key_id
+    Globals().account_id = share.account_id
+    Globals().key_id = share.key_id
 
     Globals().app.add_share(share)
     return 'ok'
+
 
 @route('/successShare', method='POST')
 def success_share(name='success_share'):
@@ -67,9 +59,12 @@ def success_share(name='success_share'):
 
     id = int(form_data['id'])
     share = dbhandler.getInstance().get_share(id)
-    wx.CallAfter(Globals().app.notify_success, share)
+    if not share:
+        return 'share not in db'
+    Globals().app.notify_success(share)
 
     return 'ok'
+
 
 @route('/errorShare', method='POST')
 def error_share(name='error_share'):
@@ -78,9 +73,12 @@ def error_share(name='error_share'):
 
     id = int(form_data['id'])
     share = dbhandler.getInstance().get_share(id)
-    wx.CallAfter(Globals().app.notify_error, share)
+    if not share:
+        return 'share not in db'
+    Globals().app.notify_error(share)
 
     return 'ok'
+
 
 @route('/stopShare', method='POST')
 def stop_share(name='stop_share'):
@@ -89,10 +87,12 @@ def stop_share(name='stop_share'):
 
     id = int(form_data['id'])
     share = dbhandler.getInstance().get_share(id)
+    if not share:
+        return 'share not in db'
 
-    wx.CallAfter(Globals().app.remove_share, share)
-
+    Globals().app.remove_share(share)
     return 'ok'
+
 
 @route('/ping', method='GET')
 def ping():
@@ -123,6 +123,7 @@ def custom500(httpError):
     logger.error(httpError.exception)
     return 'An error has occurred: %s' % httpError.exception
 
+
 @hook('after_request')
 def close_db_connections():
     # Double tap? Session should be already closed...
@@ -130,14 +131,13 @@ def close_db_connections():
 
 
 def start_server():
-    global port
-
-    port = get_and_save_manager_port()
+    get_and_save_manager_port()
     try:
-        logger.info('Starting the manager on port %s' % port)
-        run(host='127.0.0.1', port=port, server='cherrypy', debug=True, quiet=True)
+        logger.info('Starting the manager on port %s' % Globals().manager_port)
+        run(host='127.0.0.1', port=Globals().manager_port, server='cherrypy', debug=True, quiet=True)
     except KeyboardInterrupt:
         pass
+
 
 def start_server_thread():
     t = threading.Thread(target=start_server)

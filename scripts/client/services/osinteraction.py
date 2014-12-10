@@ -94,13 +94,17 @@ class OsInteraction(object):
                              universal_newlines=False, startupinfo=None, creationflags=0)
         return p
 
-
     def get_resource_path(self, path):
-        dir = os.path.dirname( os.path.dirname( os.path.realpath( __file__ ) ) )
+        dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         if dir[-3:] == 'zip':
             dir = os.path.dirname(dir)
         else:
-            dir = os.path.join(dir, 'resources')
+            dir = os.path.join(dir)
+
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        if hasattr(sys, '_MEIPASS'):
+            dir = sys._MEIPASS
+
         return os.path.join(dir, path)
 
     def get_app_data_path(self, filename=''):

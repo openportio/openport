@@ -1,6 +1,6 @@
 #!/bin/sh
 env/bin/pyinstaller apps/openport_app.py --clean --onefile --name openport
-
+env/bin/pyinstaller --clean openport_gui.spec
 
 
 #If the exe fails with "cannot import _counter":

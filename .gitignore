@@ -28,7 +28,6 @@ sass_stdlib.xml
 scripts/mac/iceberg/Openport/build/Openport-0.9.0.pkg
 .idea
 scripts/client/nosetests.xml
-scripts/client/openport_app.spec
 scripts/client/openportmanager.spec
 scripts/client/test-reports
 ghostdriver.log
