@@ -13,7 +13,6 @@ from services.osinteraction import getInstance
 logger = get_logger('server')
 
 globals = Globals()
-listeners = []
 
 @route('/register', method='POST')
 def new_share(name='register'):
@@ -21,7 +20,7 @@ def new_share(name='register'):
     logger.debug('/register ' + str(dict(form_data.iteritems())))
 
     port = int(form_data['port'])
-    listeners.append(port)
+    Globals().tcp_listeners.append(port)
     return 'ok'
 
 @route('/ping', method='GET')
@@ -46,18 +45,25 @@ def exit_manager():
 
 
 def inform_listeners(share, path):
-    for port in listeners:
-        logger.debug('Informing success to %s.' % port)
-        url = 'http://127.0.0.1:%s/%s' % (port, path)
-        logger.debug('sending get request ' + url)
-        try:
-            data = urllib.urlencode({'id': share.id})
-            req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req, timeout=1).read()
-            if response.strip() != 'ok':
-                logger.error(response)
-        except Exception, detail:
-            logger.error("An error has occurred while informing the manager: %s" % detail)
+    def inform():
+        for port in Globals().tcp_listeners:
+            logger.debug('Informing success to %s.' % port)
+            url = 'http://127.0.0.1:%s/%s' % (port, path)
+            logger.debug('sending get request ' + url)
+            try:
+                data = urllib.urlencode({'id': share.id})
+                req = urllib2.Request(url, data)
+                response = urllib2.urlopen(req, timeout=1).read()
+                if response.strip() != 'ok':
+                    logger.error(response)
+            except Exception, detail:
+                logger.error("An error has occurred while informing the manager: %s" % detail)
+    t = threading.Thread(target=inform)
+    t.setDaemon(True)
+    t.start()
+
+def inform_start(share):
+    inform_listeners(share, 'newShare')
 
 
 def inform_success(share):
@@ -66,6 +72,7 @@ def inform_success(share):
 
 def inform_failure(share):
     inform_listeners(share, 'errorShare')
+
 
 def inform_stop(share):
     inform_listeners(share, 'stopShare')
@@ -89,9 +96,10 @@ def start_server():
     port = getInstance().get_open_port()
 
     session = Globals().app.session
-    session.app_port = port
+    session.app_management_port = port
 
     try:
+        session.start_observers.append(inform_start)
         session.success_observers.append(inform_success)
         session.error_observers.append(inform_failure)
         session.stop_observers.append(inform_stop)

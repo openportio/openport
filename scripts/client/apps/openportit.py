@@ -23,7 +23,7 @@ class OpenportItApp(OpenportApp):
         thr.setDaemon(True)
         thr.start()
 
-        self.openport.start_port_forward(share, callback=callback, server=self.args.server)
+        self.openport.start_port_forward(share, server=self.args.server)
 
     def start(self):
         logger.debug('client pid:%s' % os.getpid())

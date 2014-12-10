@@ -317,7 +317,7 @@ class IntegrationTest(unittest.TestCase):
             print "error:" + error_msg
 
         def start_openport():
-            openport.start_port_forward(session, callback, show_error, server=self.test_server)
+            openport.start_port_forward(session, server=self.test_server)
 
         thr = threading.Thread(target=start_openport)
         thr.setDaemon(True)

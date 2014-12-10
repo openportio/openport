@@ -63,8 +63,6 @@ class OpenportAppTests(unittest.TestCase):
         this_test.raise_exception = False
 
         this_test.received_session = None
-        this_test.received_success_callback = None
-        this_test.received_error_callback = None
         this_test.received_server = None
 
         this_test.returning_token = 'first token'
@@ -76,10 +74,8 @@ class OpenportAppTests(unittest.TestCase):
         def extra_function(session):
             pass
 
-        def fake_start_port_forward(session, callback=None, error_callback=None, server=None):
+        def fake_start_port_forward(session, server=None):
             this_test.received_session = session
-            this_test.received_success_callback = callback
-            this_test.received_error_callback = error_callback
             this_test.received_server = server
 
             this_test.received_token = session.server_session_token
@@ -91,6 +87,7 @@ class OpenportAppTests(unittest.TestCase):
             session.server = 'testserver123.jdb'
 
             extra_function(session)
+            session.notify_start()
 
             while not this_test.stop_port_forward:
                 sleep(1)
@@ -107,14 +104,12 @@ class OpenportAppTests(unittest.TestCase):
         thr.start()
 
         sleep(0.5)
+       # sleep(60)
         self.assertEqual(this_test.received_server, 'testserver.jdb')
 
         self.assertEqual(self.app.session.server_port, 1111)
         self.assertEqual(this_test.received_server_port, -1)
         self.assertEqual(this_test.received_token, '')
-
-        # Fake response with a session token
-        this_test.received_success_callback(this_test.received_session)
 
         # Stopping the app will make the share inactive.
         #self.app.stop()
@@ -148,10 +143,6 @@ class OpenportAppTests(unittest.TestCase):
         self.assertEqual(1111, this_test.received_server_port)
         self.assertEqual('second token', this_test.received_session.server_session_token)
         self.assertEqual(2222, this_test.received_session.server_port)
-
-        # Fake response with a session token
-        this_test.received_success_callback(this_test.received_session)
-
 
         # Stopping the app will make the share inactive.
         #self.app.stop()

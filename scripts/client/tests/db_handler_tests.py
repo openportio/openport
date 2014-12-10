@@ -50,7 +50,8 @@ class DBHandlerTests(unittest.TestCase):
         share.restart_command = ['restart', 'command']
         share.http_forward = True
         share.http_forward_address = 'http://jan.u.openport.io'
-        share.app_port = 43122
+        share.app_management_port = 43122
+        share.open_port_for_ip_link = 'http//openport.io/l/1234/zerazer'
 
         self.dbhandler.add_share(share)
 
@@ -70,7 +71,8 @@ class DBHandlerTests(unittest.TestCase):
         self.assertEquals(share.restart_command, share2.restart_command)
         self.assertEquals(share.http_forward, share2.http_forward)
         self.assertEquals(share.http_forward_address, share2.http_forward_address)
-        self.assertEquals(share.app_port, share2.app_port)
+        self.assertEquals(share.app_management_port, share2.app_management_port)
+        self.assertEquals(share.open_port_for_ip_link, share2.open_port_for_ip_link)
 
     def test_concurrency(self):
         dbhandler2 = dbhandler.DBHandler(self.test_db)
@@ -232,6 +234,9 @@ class DBHandlerTests(unittest.TestCase):
 
         sleep(2)
         self.assertEqual(2, len(self.dbhandler.get_shares()))
+
+    def test_get_share__not_found(self):
+        self.assertEqual(None, self.dbhandler.get_share(-1))
 
     def test_double_add_share(self):
         share = Share(active=True, local_port=444)

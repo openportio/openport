@@ -1,3 +1,4 @@
+
 import signal
 import threading
 import sys
@@ -18,6 +19,7 @@ onNewShare = None
 globals = Globals()
 shares = {}
 
+raise Exception()
 @route('/newShare', method='POST')
 def new_share(name='newShare'):
     form_data = request.forms

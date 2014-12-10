@@ -15,6 +15,7 @@ class Globals():
             self.config = os.path.expanduser('~/.openport/openport.cfg')
             self.contact_manager = True
             self.verbose = False
+            self.tcp_listeners = set()
 
             self.app = None
 

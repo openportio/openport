@@ -120,7 +120,6 @@ class SimpleTcpClient(object):
                 sys.stderr.write("[ERROR] %s\n" % msg[1])
 #            sys.exit(2)
 
-
     def send(self, request):
         self.sock.send('%s\n' % request)
 

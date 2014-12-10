@@ -33,6 +33,7 @@ class PortForwardingService:
                  error_callback=None,
                  success_callback=None,
                  fallback_server_ssh_port=None,
+                 fallback_ssh_server=None,
                  http_forward_address=None,
                  start_callback=None):
         self.local_port       = local_port
@@ -45,6 +46,7 @@ class PortForwardingService:
         self.error_callback   = error_callback
         self.success_callback = success_callback
         self.fallback_server_ssh_port = fallback_server_ssh_port
+        self.fallback_ssh_server = fallback_ssh_server,
         self.http_forward_address = http_forward_address
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(IgnoreUnknownHostKeyPolicy())
@@ -72,7 +74,8 @@ class PortForwardingService:
             if self.fallback_server_ssh_port is not None:
                 try:
                     self.client.connect(
-                        self.server, self.fallback_server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
+                        self.fallback_ssh_server, self.fallback_server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
+                    self.stopped = False
                 except Exception, e:
                     logger.error('*** Failed to fallback connect to %s:%d: %r' % (self.server,
                                                                                   self.fallback_server_ssh_port, e) )

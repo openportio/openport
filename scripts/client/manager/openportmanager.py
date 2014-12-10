@@ -10,20 +10,17 @@ from time import sleep
 
 import os
 import argparse
-from urllib2 import URLError, HTTPError
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from manager import dbhandler
-from manager.server import start_server_thread
+#from manager.server import start_server_thread
 from services import osinteraction
 from manager.globals import Globals
 from services.logger_service import get_logger, set_log_level
 from common.share import Share
-from common.session import Session
-from common.config_file_handler import ConfigFileHandler
 from manager.globals import DEFAULT_SERVER
 from services.osinteraction import is_linux
-import ConfigParser
+from services.config_service import get_and_save_manager_port
 
 logger = get_logger('OpenPortManager')
 
@@ -60,14 +57,6 @@ class OpenPortManager(object):
                 logger.error(tb)
         os._exit(3)
         #sys.exit()
-
-    def set_manager_port(self, share):
-        command = share.restart_command
-        if Globals().manager_port_from_config_file:
-            command = self.os_interaction.unset_variable(command, '--manager-port')
-        else:
-            command = self.os_interaction.set_variable(command, '--manager-port', Globals().manager_port)
-        share.restart_command = command
 
     def restart_sharing(self):
         shares = self.dbhandler.get_shares_to_restart()
@@ -181,15 +170,6 @@ class OpenPortManager(object):
                                                    manager_port=Globals().manager_port)
         self.share_processes[p.pid] = p
 
-    def startOpenportProcess (self, port):
-        session = Session()
-        session.restart_command = ['%s' % port]
-        self.set_manager_port(session)
-        logger.debug(session.restart_command)
-
-        p = self.os_interaction.start_openport_process(session)
-        self.share_processes[p.pid] = p
-
     def print_shares(self):
         shares = self.dbhandler.get_shares()
         logger.debug('listing shares - amount: %s' % len(list(shares)))
@@ -292,7 +272,7 @@ def start_manager():
         sys.exit()
 
     get_and_save_manager_port(args.manager_port)
-    start_server_thread(onNewShare=manager.onNewShare)
+  #  start_server_thread(onNewShare=manager.onNewShare)
 
     sleep(1)
 
@@ -312,70 +292,8 @@ def start_manager():
         sleep(1)
 
 
-def manager_is_running(manager_port):
-    url = 'http://localhost:%s/ping' % manager_port
-    logger.debug('sending get request ' + url)
-    try:
-        req = urllib2.Request(url)
-        response = urllib2.urlopen(req, timeout=5).read()
-        if response.strip() != 'pong':
-            logger.debug('got response: %s' % response)
-            raise Exception('Another application is running on port %s' % manager_port)
-        else:
-            return True
-    except HTTPError:
-        raise Exception('Another application is running on port %s' % manager_port)
-    except URLError, detail:
-        return False
-    except Exception, detail:
-        raise Exception('Another application is running on port %s' % manager_port)
 
 
-def get_and_save_random_manager_port():
-    config = ConfigFileHandler(Globals().config)
-    manager_port = osinteraction.getInstance().get_open_port()
-   # manager_port = 22
-    Globals().manager_port = manager_port
-    config.set('manager', 'port', manager_port)
-    Globals().manager_port_from_config_file = True
-    return manager_port
-
-
-def get_and_save_manager_port(manager_port_from_command_line=-1, exit_on_fail=True):
-    original_port = Globals().manager_port
-
-    if manager_port_from_command_line > 0:
-        original_port = manager_port_from_command_line
-    else:
-        # Read port from file (if file, section and entry exist)
-        config = ConfigFileHandler(Globals().config)
-        try:
-            Globals().manager_port = config.get_int('manager', 'port')
-            Globals().manager_port_from_config_file = True
-            original_port = Globals().manager_port
-        except:
-            manager_port = get_and_save_random_manager_port()
-            logger.info("Manager port not found in config file. Starting manager on port %s." % manager_port)
-            return manager_port
-
-    try:
-        running = manager_is_running(original_port)
-    except:  # An other app is running on that port
-        manager_port = get_and_save_random_manager_port()
-        if original_port != -1:
-            logger.info("Port %s is taken by another application. Manager is now running on port %s." %
-                        (original_port, manager_port))
-        return manager_port
-    else:
-        if running:
-            if exit_on_fail:
-                logger.info('Manager is already running on port %s. Exiting.' % Globals().manager_port)
-                os._exit(1)
-            else:
-                return original_port
-        else:
-            Globals().manager_port = original_port
-            return Globals().manager_port
 
 
 
@@ -391,7 +309,7 @@ class OpenportManagerService(object):
         self.stopped = False
 
         get_and_save_manager_port()
-        start_server_thread(onNewShare=self.manager.onNewShare)
+      #  start_server_thread(onNewShare=self.manager.onNewShare)
 
         sleep(1)
 

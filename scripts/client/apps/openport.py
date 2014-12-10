@@ -11,6 +11,7 @@ logger = get_logger('openport')
 
 SERVER_SSH_PORT = 22
 FALLBACK_SERVER_SSH_PORT = 443
+FALLBACK_SSH_SERVER = 's.openport.io'
 SERVER_SSH_USER = 'open'
 
 
@@ -24,7 +25,7 @@ class Openport(object):
         self.repeat_message = True
         self.last_response = None
 
-    def start_port_forward(self, session, callback=None, error_callback=None, server=DEFAULT_SERVER):
+    def start_port_forward(self, session, server=DEFAULT_SERVER):
 
         self.restart_on_failure = True
         self.automatic_restart = False
@@ -36,7 +37,7 @@ class Openport(object):
                     session.local_port,
                     request_server_port=session.server_port,
                     restart_session_token=session.server_session_token,
-                    error_callback=error_callback,
+                    error_callback=session.notify_error,
                     stop_callback=session.notify_stop,
                     http_forward=session.http_forward,
                     server=server,
@@ -56,12 +57,6 @@ class Openport(object):
                 session.http_forward_address = response.http_forward_address
                 session.open_port_for_ip_link = response.open_port_for_ip_link
 
-                if callback is not None:
-                    import threading
-                    thr = threading.Thread(target=callback, args=(session,))
-                    thr.setDaemon(True)
-                    thr.start()
-
                 self.port_forwarding_service = PortForwardingService(
                     session.local_port,
                     response.remote_port,
@@ -73,8 +68,9 @@ class Openport(object):
                     success_callback=session.notify_success,
                     error_callback=session.notify_error,
                     fallback_server_ssh_port=FALLBACK_SERVER_SSH_PORT,
+                    fallback_ssh_server=FALLBACK_SSH_SERVER,
                     http_forward_address=session.http_forward_address,
-                    start_callback=self.show_message
+                    start_callback=self.session_started
                 )
                 self.port_forwarding_service.start() #hangs
             except PortForwardException as e:
@@ -86,6 +82,10 @@ class Openport(object):
                 sleep(10)
             finally:
                 self.automatic_restart = True
+
+    def session_started(self):
+        self.session.notify_start()
+        self.show_message()
 
     def show_message(self):
         if not self.session:
@@ -107,6 +107,8 @@ class Openport(object):
         self.restart_on_failure = False
         if self.port_forwarding_service:
             self.port_forwarding_service.stop()
+        if self.session:
+            self.session.notify_stop()
 
     def stop(self):
         self.stop_port_forward()
