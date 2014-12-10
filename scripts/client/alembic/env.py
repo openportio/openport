@@ -18,7 +18,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from manager import dbhandler
 
-config.set_main_option('sqlalchemy.url', 'sqlite:///%s' % dbhandler.getInstance().db_location)
+config.set_main_option('sqlalchemy.url', 'sqlite:///%s' % dbhandler.getInstance(init_db=False).db_location)
 
 target_metadata = dbhandler.Base.metadata
 # target_metadata = None

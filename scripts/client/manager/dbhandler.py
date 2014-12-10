@@ -8,8 +8,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import SingletonThreadPool
 from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm.exc import NoResultFound
 
 logger = get_logger('dbhandler')
 
@@ -38,7 +38,8 @@ class OpenportSession(Base):
     http_forward = Column(Boolean)
     http_forward_address = Column(String(50))
 
-    app_port = Column(Integer)
+    app_management_port = Column(Integer)
+    open_port_for_ip_link = Column(String(150))
 
     def __repr__(self):
        return "<Session(local_port='%s', remote_port='%s', session_token='%s')>" % (
@@ -90,7 +91,8 @@ class DBHandler(object):
         openport_session.key_id = share.key_id
         openport_session.http_forward = share.http_forward
         openport_session.http_forward_address = share.http_forward_address
-        openport_session.app_port = share.app_port
+        openport_session.app_management_port = share.app_management_port
+        openport_session.open_port_for_ip_link = share.open_port_for_ip_link
 
         session = self._get_session()
         for previous_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
@@ -106,10 +108,13 @@ class DBHandler(object):
     def get_share(self, id):
         logger.debug('get_share')
         session = self._get_session()
-        openport_session = session.query(OpenportSession).filter_by(id=id).one()
-        self.Session.remove()
-        return self.convert_session_from_db(openport_session)
-
+        try:
+            openport_session = session.query(OpenportSession).filter_by(id=id).one()
+            return self.convert_session_from_db(openport_session)
+        except NoResultFound:
+            return None
+        finally:
+            self.Session.remove()
 
     def convert_session_from_db(self, openport_session):
         logger.debug('convert_session_from_db')
@@ -126,7 +131,9 @@ class DBHandler(object):
         share.key_id = openport_session.key_id
         share.http_forward = openport_session.http_forward
         share.http_forward_address = openport_session.http_forward_address
-        share.app_port = openport_session.app_port
+        share.app_management_port = openport_session.app_management_port
+        share.open_port_for_ip_link = openport_session.open_port_for_ip_link
+
 
         share.restart_command = openport_session.restart_command
         try:
@@ -178,7 +185,7 @@ instance = None
 db_location = ''
 
 
-def getInstance():
+def getInstance(init_db=True):
     global db_location
 
     if db_location == '':
@@ -188,7 +195,8 @@ def getInstance():
     global instance
     if instance is None:
         instance = DBHandler(db_location)
-        instance.init_db()
+        if init_db:
+            instance.init_db()
     return instance
 
 
