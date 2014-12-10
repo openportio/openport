@@ -19,7 +19,7 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas + [('resources/icon.icns', 'resources/icon.icns', 'DATA'),
                     ],
-          name=os.path.join('dist', 'openport_gui' + ('.exe' if sys.platform == 'win32' else '')),
+          name=os.path.join('dist', 'Openport_GUI' + ('.exe' if sys.platform == 'win32' else '')),
           debug=False,
           strip=None,
           upx=True,
@@ -29,5 +29,5 @@ exe = EXE(pyz,
 # Build a .app if on OS X
 if sys.platform == 'darwin':
    app = BUNDLE(exe,
-                name='openport_gui.app',
+                name='Openport.app',
                 icon='resources/icon.icns')
