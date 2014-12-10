@@ -36,7 +36,7 @@ class OpenportApp(object):
             TeeStdOut(self.os_interaction.get_app_data_path('openport_app.out.log'), 'a')
             TeeStdErr(self.os_interaction.get_app_data_path('openport_app.error.log'), 'a')
         try:
-            if osinteraction.is_linux():
+            if not osinteraction.is_windows():
                 signal.signal(signal.SIGINT, self.handleSigTERM)
                 signal.signal(signal.SIGTERM, self.handleSigTERM)
             else:

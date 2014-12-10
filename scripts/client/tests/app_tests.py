@@ -25,7 +25,7 @@ logger = get_logger(__name__)
 
 TEST_SERVER = 'test.openport.be'
 
-if osinteraction.is_linux():
+if not osinteraction.is_windows():
     PYTHON_EXE = 'env/bin/python'
     KILL_SIGNAL = signal.SIGKILL
 else:
@@ -230,7 +230,7 @@ class AppTests(unittest.TestCase):
     #     self.assertEqual(request, response.strip())
     #     c.close()
     #     #     s.close()
-    #     if osinteraction.is_linux():
+    #     if not osinteraction.is_windows():
     #         os.kill(p_app.pid, KILL_SIGNAL)
     #     else:
     #         self.kill_manager(manager_port)
@@ -238,7 +238,7 @@ class AppTests(unittest.TestCase):
     #     while self.osinteraction.pid_is_running(p_app.pid):
     #         print "waiting for pid to be killed: %s" % p_app.pid
     #         sleep(1)
-    #     if osinteraction.is_linux():
+    #     if not osinteraction.is_windows():
     #         os.kill(p_manager.pid, signal.SIGINT)
     #     else:
     #         self.kill_manager(manager_port)
@@ -289,7 +289,7 @@ class AppTests(unittest.TestCase):
     #         self.fail('remote share has not been restarted')
     #     self.assertEqual(request, response.strip(), 'getting response through proxy failed')
     #
-    #     if osinteraction.is_linux():
+    #     if not osinteraction.is_windows():
     #         os.kill(p_manager2.pid, signal.SIGINT)
     #     else:
     #         self.kill_manager(manager_port)
@@ -598,7 +598,7 @@ class AppTests(unittest.TestCase):
     #
     #     # Killing the manager
     #
-    #     if osinteraction.is_linux():
+    #     if not osinteraction.is_windows():
     #         self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
     #     else:
     #         self.kill_manager(manager_port)
@@ -617,7 +617,7 @@ class AppTests(unittest.TestCase):
     #     except:
     #         pass
     #
-    #     if osinteraction.is_linux():
+    #     if not osinteraction.is_windows():
     #         run_method_with_timeout(p_app.communicate, 2, raise_exception=False)
     #
     #     self.assertFalse(self.osinteraction.pid_is_running(p_app.pid))
@@ -658,7 +658,7 @@ class AppTests(unittest.TestCase):
     #
     #     # Killing the manager should also kill the app
     #
-    #     if osinteraction.is_linux():
+    #     if not osinteraction.is_windows():
     #         self.osinteraction.kill_pid(p_manager.pid, signal.SIGINT)
     #     else:
     #         self.kill_manager(manager_port)
@@ -773,7 +773,7 @@ class AppTests(unittest.TestCase):
         print output[0]
         print output[1]
         # Sadly, this does not work on windows...
-        if osinteraction.is_linux():
+        if not osinteraction.is_windows():
             self.assertTrue('got signal ' in output[0])
         self.assertNotEqual(None, p.poll())
 

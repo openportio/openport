@@ -90,7 +90,9 @@ class OsInteraction(object):
             self.logger.debug('Running command: %s' % args)
         p = subprocess.Popen(args,
                              bufsize=0, executable=None, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             preexec_fn=None, close_fds=is_linux(), shell=False, cwd=None, env=None,
+                             preexec_fn=None, close_fds=not is_windows(), shell=False,
+                             cwd=self.get_base_path(),
+                             env=None,
                              universal_newlines=False, startupinfo=None, creationflags=0)
         return p
 
@@ -121,7 +123,7 @@ class OsInteraction(object):
         s = subprocess.Popen(command,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              shell=True,
-                             close_fds=is_linux())
+                             close_fds=not is_windows())
         return s.communicate()
 
     def run_command_and_print_output_continuously(self, command_array):
@@ -129,7 +131,7 @@ class OsInteraction(object):
         s = subprocess.Popen(command_array,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              creationflags=creation_flags, shell=False,
-                             close_fds=is_linux())
+                             close_fds=not is_windows())
 
         return self.print_output_continuously(s)
 
@@ -250,6 +252,12 @@ class OsInteraction(object):
             return 'openport' in i.name() or 'python' in i.name()  # Is not 100% but best effort. (for mac)
         return False
 
+    def get_base_path(self):
+        if self.is_compiled():
+            return os.path.dirname(sys.argv[0])
+        else:
+            return os.path.dirname(os.path.dirname(sys.argv[0]))
+
 
 class LinuxOsInteraction(OsInteraction):
 
@@ -310,7 +318,8 @@ class LinuxOsInteraction(OsInteraction):
         return sys.argv[0] != 'python' and sys.argv[0][-3:] != '.py' and not 'nosetests' in sys.argv[0]
 
     def get_python_exec(self):
-        if os.path.exists('env/bin/python'):
+        virtual_env_python = os.path.join(self.get_base_path(), 'env/bin/python')
+        if os.path.exists(virtual_env_python):
             return ['env/bin/python']
         else:
             return ['python']
@@ -407,8 +416,9 @@ class WindowsOsInteraction(OsInteraction):
 
     def get_python_exec(self):
         #self.logger.debug('getting python exec. Cwd: %s' % os.getcwd())
-        if os.path.exists('env/Scripts/python.exe'):
-            return ['env\\Scripts\\python.exe']
+        base_dir = self.get_base_path()
+        if os.path.exists(os.path.join(base_dir, 'env/Scripts/python.exe')):
+            return [os.path.join(base_dir, 'env\\Scripts\\python.exe')]
         else:
             return ['python.exe']
 
@@ -428,12 +438,16 @@ class WindowsOsInteraction(OsInteraction):
         return False
 
 
-def is_linux():
-    return platform.system() != 'Windows'
+def is_windows():
+    return platform.system() == 'Windows'
+
+
+def is_mac():
+    return sys.platform == 'darwin'
 
 
 def getInstance(use_logger=True):
-    if is_linux():
+    if not is_windows():
         return LinuxOsInteraction(use_logger)
     else:
         return WindowsOsInteraction(use_logger)

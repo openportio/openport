@@ -8,8 +8,12 @@ class OpenPortItTaskBarIcon(wx.TaskBarIcon):
         wx.TaskBarIcon.__init__(self)
         self.parentApp = parent
         self.os_interaction = osinteraction.getInstance()
-
-        self.icon = wx.Icon(self.os_interaction.get_resource_path('resources/icon.icns'), wx.BITMAP_TYPE_ICON)
+        if osinteraction.is_mac():
+            icon_file = self.os_interaction.get_resource_path('resources/icon.icns')
+            self.icon = wx.Icon(icon_file, wx.BITMAP_TYPE_ICON)
+        else:
+            icon_file = self.os_interaction.get_resource_path('resources/icon.ico')
+            self.icon = wx.Icon(icon_file, wx.BITMAP_TYPE_ICO)
         self.SetIcon(self.icon, "Openport")
         self.CreateMenu()
         self.items = {}

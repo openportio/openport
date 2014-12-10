@@ -19,7 +19,7 @@ from manager.globals import Globals
 from services.logger_service import get_logger, set_log_level
 from common.share import Share
 from manager.globals import DEFAULT_SERVER
-from services.osinteraction import is_linux
+from services.osinteraction import is_windows
 from services.config_service import get_and_save_manager_port
 
 logger = get_logger('OpenPortManager')
@@ -87,7 +87,7 @@ class OpenPortManager(object):
                     tb = traceback.format_exc()
                     logger.error('Error: <<<' + tb + ' >>>')
         users_file = '/etc/openport/users.conf'
-        if is_linux() and self.os_interaction.user_is_root() and os.path.exists(users_file):
+        if not is_windows() and self.os_interaction.user_is_root() and os.path.exists(users_file):
             with open(users_file, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
@@ -282,7 +282,7 @@ def start_manager():
     def handleSigTERM(signum, frame):
         logger.debug('got a signal %s, frame %s going down' % (signum, frame))
         manager.exitApp(None)
-    if osinteraction.is_linux():
+    if not osinteraction.is_windows():
         signal.signal(signal.SIGTERM, handleSigTERM)
         signal.signal(signal.SIGINT, handleSigTERM)
     else:

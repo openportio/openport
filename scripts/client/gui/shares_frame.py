@@ -50,8 +50,13 @@ class SharesFrame(wx.Frame):
         self.os_interaction = osinteraction.getInstance()
         self.globals = Globals()
 
-        iconFile = self.os_interaction.get_resource_path('resources/icon.icns')
-        icon = wx.Icon(iconFile, wx.BITMAP_TYPE_ICON)
+        if osinteraction.is_mac():
+            icon_file = self.os_interaction.get_resource_path('resources/icon.icns')
+            icon = wx.Icon(icon_file, wx.BITMAP_TYPE_ICON)
+        else:
+            icon_file = self.os_interaction.get_resource_path('resources/icon.ico')
+            icon = wx.Icon(icon_file, wx.BITMAP_TYPE_ICO)
+
         self.SetIcon(icon)
 
         self.addTrayIcon()
@@ -181,6 +186,9 @@ class SharesFrame(wx.Frame):
 
     def onFocus(self, event):
         self.scrolling_window.SetFocus()
+
+    def add_share_after(self, share):
+        wx.CallAfter(self.add_share, share)
 
     def add_share(self, share):
         if share.id in self.share_panels:

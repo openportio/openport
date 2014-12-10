@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
 import xmlrunner
-from services.osinteraction import OsInteraction, getInstance, is_linux
+from services.osinteraction import OsInteraction, getInstance, is_windows
 import subprocess
 from time import sleep
 from services.logger_service import set_log_level
@@ -50,7 +50,7 @@ class OsInteractionTest(unittest.TestCase):
         p = subprocess.Popen(['python', '-c', "from time import sleep;import sys; print 'aaa'; sys.stdout.flush(); "
                                               "sleep(1); print 'bbb'"],
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             bufsize=1, close_fds=is_linux())
+                             bufsize=1, close_fds=not is_windows())
         sleep(0.1)
         self.assertEqual(('aaa', False), self.os_interaction.non_block_read(p))
         sleep(2)
@@ -105,16 +105,16 @@ class OsInteractionTest(unittest.TestCase):
         command = self.os_interaction.get_python_exec()
         command.extend(['-c', "print 'hello'"])
         process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   shell=not is_linux(),
-                                   close_fds=is_linux())
+                                   shell=is_windows(),
+                                   close_fds=not is_windows())
         process.wait()
         self.assertFalse(self.os_interaction.pid_is_running(process.pid))
 
         command = self.os_interaction.get_python_exec()
         command.extend(['-c', "from time import sleep;sleep(1); print 'hello'"])
         process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   shell=not is_linux(),
-                                   close_fds=is_linux())
+                                   shell=is_windows(),
+                                   close_fds=not is_windows())
         self.assertTrue(self.os_interaction.pid_is_running(process.pid))
 
     def test_pid_is_openport_process(self):
@@ -149,7 +149,7 @@ class OsInteractionTest(unittest.TestCase):
             self.os_interaction.start_process = method
 
     def test_kill_pid(self):
-        if is_linux():
+        if not is_windows():
             return
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         python_exe = self.os_interaction.get_python_exec()
@@ -165,7 +165,7 @@ class OsInteractionTest(unittest.TestCase):
         output = self.os_interaction.get_all_output(p)
         print output[0]
         print output[1]
-        if is_linux():
+        if not is_windows():
             self.assertTrue(output[0] and 'got signal' in output[0])
 
 if __name__ == '__main__':

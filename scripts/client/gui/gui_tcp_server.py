@@ -48,7 +48,7 @@ def new_share(name='newShare'):
     Globals().account_id = share.account_id
     Globals().key_id = share.key_id
 
-    Globals().app.add_share(share)
+    Globals().app.add_share_after(share)
     return 'ok'
 
 

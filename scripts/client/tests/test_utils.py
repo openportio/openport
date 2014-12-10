@@ -174,12 +174,12 @@ def run_command_with_timeout(args, timeout_s):
             def target():
                 #print 'Thread started'
                 command = self.cmd
-                if not osinteraction.is_linux():
+                if osinteraction.is_windows():
                     command = ' '.join(['"%s"' % arg for arg in self.cmd])
 
 
                 self.process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                                shell=not osinteraction.is_linux(), close_fds=osinteraction.is_linux())
+                                                shell=osinteraction.is_windows(), close_fds=not osinteraction.is_windows())
                 self.process.wait()
                 #self.process.communicate()
                 #print 'Thread finished'
@@ -225,10 +225,10 @@ def run_command_with_timeout_return_process(args, timeout_s):
 
         def run(self, timeout):
             command = self.cmd
-            if not osinteraction.is_linux():
+            if osinteraction.is_windows():
                 command = ' '.join(['"%s"' % arg for arg in self.cmd])
             self.process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                            shell=not osinteraction.is_linux(), close_fds=osinteraction.is_linux())
+                                            shell=osinteraction.is_windows(), close_fds=not osinteraction.is_windows())
 
             def kill_target():
                 wait_thread.join(timeout)

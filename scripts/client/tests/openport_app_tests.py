@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
 import xmlrunner
-from services.osinteraction import OsInteraction, getInstance, is_linux
+from services.osinteraction import OsInteraction, getInstance, is_windows
 import subprocess
 from time import sleep
 from services.logger_service import set_log_level
