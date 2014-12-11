@@ -23,10 +23,18 @@ def start_openport_process(port):
     start_openport_process_from_session(session)
 
 
-def get_restart_command(session):
+def get_restart_command(session, database='', verbose=False, server=''):
     command = ['%s' % session.local_port]
     if session.http_forward:
         command.append('--http-forward')
+    if session.active:
+        command.append('--restart-on-reboot')
+    if database:
+        command.extend(['--database', database])
+    if verbose:
+        command.append('--verbose')
+    if server:
+        command.extend(['--server', server])
 
     command = set_manager_port(command)
 

@@ -88,6 +88,8 @@ class OsInteraction(object):
     def start_process(self, args):
         if self.logger:
             self.logger.debug('Running command: %s' % args)
+            self.logger.debug('cwd: %s' % os.path.abspath(os.curdir))
+            self.logger.debug('base_path: %s' % self.get_base_path())
         p = subprocess.Popen(args,
                              bufsize=0, executable=None, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              preexec_fn=None, close_fds=not is_windows(), shell=False,
@@ -165,7 +167,8 @@ class OsInteraction(object):
             self.logger.debug('silent command stderr: %s<<<%s>>>' % (prefix, output[1]))
         all_output[0] = append_output(all_output[0], output[0])
         all_output[1] = append_output(all_output[1], output[1])
-        self.logger.debug('application stopped: %s<<%s>>' % (prefix, all_output))
+        self.logger.debug('application stopped: stdout %s<<%s>>' % (prefix, all_output[0]))
+        self.logger.debug('application stopped: stderr %s<<%s>>' % (prefix, all_output[1]))
         return all_output
 
     def print_output_continuously_threaded(self, s, prefix=''):
@@ -256,7 +259,11 @@ class OsInteraction(object):
         if self.is_compiled():
             return os.path.dirname(sys.argv[0])
         else:
-            return os.path.dirname(os.path.dirname(sys.argv[0]))
+            self.logger.debug('sys.argv %s' % sys.argv[0])
+            base_path = os.path.dirname(os.path.dirname(sys.argv[0]))
+            if base_path == '':
+                base_path = '.'
+            return base_path
 
 
 class LinuxOsInteraction(OsInteraction):

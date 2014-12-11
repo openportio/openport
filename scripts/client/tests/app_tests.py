@@ -19,7 +19,8 @@ from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_
 from test_utils import print_all_output, click_open_for_ip_link, run_method_with_timeout
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
-from manager import openportmanager
+from apps.app_tcp_server import send_exit
+from manager import dbhandler
 
 logger = get_logger(__name__)
 
@@ -49,7 +50,8 @@ class AppTests(unittest.TestCase):
                 sleep(3)
                 os.remove(self.db_file)
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
-
+        dbhandler.db_location = self.db_file
+        self.db_handler = dbhandler.getInstance()
 
     def tearDown(self):
         if self.manager_port > 0:
@@ -57,7 +59,7 @@ class AppTests(unittest.TestCase):
         kill_all_processes(self.processes_to_kill)
 
     def get_nr_of_shares_in_db_file(self, db_file):
-        p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--list',
+        p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--list',
                                       '--database', db_file],
                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         run_method_with_timeout(p_manager.wait, 10)
@@ -108,7 +110,7 @@ class AppTests(unittest.TestCase):
         run_method_with_timeout(p.wait, 10)
 
         manager_port = self.osinteraction.get_open_port()
-        p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
+        p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--database', self.db_file,
                                        '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
                                       stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
@@ -173,7 +175,7 @@ class AppTests(unittest.TestCase):
         port = self.osinteraction.get_open_port()
 
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
-                              '--start-manager', 'False', '--server', TEST_SERVER, '--verbose',
+                              '--server', TEST_SERVER, '--verbose',
                               '--http-forward', '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
@@ -194,149 +196,107 @@ class AppTests(unittest.TestCase):
             print 'application terminated: ', self.osinteraction.get_all_output(p)
             self.fail('p_app.poll() should be None but was %s' % p.poll())
 
-    # def test_manager(self):
-    #     port = self.osinteraction.get_open_port()
-    #     print 'localport :', port
-    #     s = SimpleTcpServer(port)
-    #     s.runThreaded()
-    #
-    #     manager_port = self.osinteraction.get_open_port()
-    #     self.manager_port = manager_port
-    #     print 'manager_port :', manager_port
-    #
-    #     p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-    #                                   '--verbose', '--manager-port', str(manager_port)],
-    #                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    #     sleep(3)
-    #     p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
-    #                               '--verbose', '--server', TEST_SERVER, '--manager-port', str(manager_port),
-    #                               '--restart-on-reboot', '--database', self.db_file],
-    #                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    #     self.processes_to_kill.append(p_manager)
-    #     self.processes_to_kill.append(p_app)
-    #
-    #     remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
-    #     print lineNumber(), "remote port:", remote_port
-    #     click_open_for_ip_link(link)
-    #
-    #     print_all_output(p_manager, self.osinteraction, 'manager')
-    #
-    #     self.check_application_is_still_alive(p_manager)
-    #     self.check_application_is_still_alive(p_app)
-    #
-    #     c = SimpleTcpClient(remote_host, remote_port)
-    #     request = 'hello'
-    #     response = c.send(request)
-    #     self.assertEqual(request, response.strip())
-    #     c.close()
-    #     #     s.close()
-    #     if not osinteraction.is_windows():
-    #         os.kill(p_app.pid, KILL_SIGNAL)
-    #     else:
-    #         self.kill_manager(manager_port)
-    #     run_method_with_timeout(p_app.wait, 10)
-    #     while self.osinteraction.pid_is_running(p_app.pid):
-    #         print "waiting for pid to be killed: %s" % p_app.pid
-    #         sleep(1)
-    #     if not osinteraction.is_windows():
-    #         os.kill(p_manager.pid, signal.SIGINT)
-    #     else:
-    #         self.kill_manager(manager_port)
-    #
-    #     print 'waiting for manager to be killed'
-    #     run_method_with_timeout(p_manager.wait, 10)
-    #
-    #     print_all_output(p_manager, self.osinteraction, 'p_manager')
-    #     print_all_output(p_app, self.osinteraction, 'p_app')
-    #
-    #     sleep(5)
-    #
-    #     #      s = SimpleTcpServer(port)
-    #     #      s.runThreaded()
-    #
-    #     self.assertEqual(1, self.get_nr_of_shares_in_db_file(self.db_file))
-    #
-    #     p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-    #                                    '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
-    #                                   stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    #     self.processes_to_kill.append(p_manager2)
-    #     sleep(15)
-    #  #   i = 0
-    #  #   while i < 15 and self.get_share_count_of_manager(manager_port) < 1:
-    #  #       sleep(1)
-    #  #       i += 1
-    #
-    #     self.check_application_is_still_alive(p_manager2)
-    #     print_all_output(p_manager2, self.osinteraction, 'p_manager2')
-    #
-    #     wait_for_success_callback(p_manager2, self.osinteraction)
-    #
-    #     self.assertEqual(1, self.get_share_count_of_manager(manager_port))
-    #
-    #
-    #     c = SimpleTcpClient(remote_host, remote_port)
-    #     cl = SimpleTcpClient('127.0.0.1', port)
-    #     request = 'hello'
-    #     try:
-    #         response = cl.send(request)
-    #     except:
-    #         self.fail('local share has not been restarted')
-    #     self.assertEqual(request, response.strip(), 'getting response locally failed')
-    #
-    #     try:
-    #         response = c.send(request)
-    #     except:
-    #         self.fail('remote share has not been restarted')
-    #     self.assertEqual(request, response.strip(), 'getting response through proxy failed')
-    #
-    #     if not osinteraction.is_windows():
-    #         os.kill(p_manager2.pid, signal.SIGINT)
-    #     else:
-    #         self.kill_manager(manager_port)
-    #     run_method_with_timeout(p_manager2.wait, 10)
-    #     print_all_output(p_manager2, self.osinteraction, 'p_manager2')
-    #
-    #     response = c.send(request)
-    #     self.assertNotEqual(request, response.strip())
-    #
-    #     c.close()
-    #     s.close()
+    def test_manager(self):
+        port = self.osinteraction.get_open_port()
+        print 'localport :', port
+        s = SimpleTcpServer(port)
+        s.runThreaded()
 
-    def test_manager__stop_if_no_shares(self):
+        sleep(3)
+        p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
+                                  '--verbose', '--server', TEST_SERVER,
+                                  '--restart-on-reboot', '--database', self.db_file],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app)
+
+        remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
+        print lineNumber(), "remote port:", remote_port
+        click_open_for_ip_link(link)
+
+        self.check_application_is_still_alive(p_app)
+
+        c = SimpleTcpClient(remote_host, remote_port)
+        request = 'hello'
+        response = c.send(request)
+        self.assertEqual(request, response.strip())
+        c.close()
+
+        share = self.db_handler.get_share_by_local_port(port)[0]
+        send_exit(share, force=True)
+
+        run_method_with_timeout(p_app.wait, 10)
+        self.assertTrue(p_app.poll() is not None)
+
+        print_all_output(p_app, self.osinteraction, 'p_app')
+
+        self.assertEqual(1, self.get_nr_of_shares_in_db_file(self.db_file))
+
+        p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--database', self.db_file,
+                                       '--verbose', '--restart-shares'],
+                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.osinteraction.print_output_continuously_threaded(p_manager2, 'p_manager2')
+        self.processes_to_kill.append(p_manager2)
+        run_method_with_timeout(p_manager2.wait, 5)
+
+        self.assertFalse(self.application_is_alive(p_manager2))
+
+        sleep(30)
+        # todo: replace by /register
+
+        share = self.db_handler.get_share_by_local_port(port)[0]
+        click_open_for_ip_link(share.open_port_for_ip_link)
+
+        c = SimpleTcpClient(remote_host, remote_port)
+        cl = SimpleTcpClient('127.0.0.1', port)
+        request = 'hello'
+        try:
+            response = cl.send(request)
+        except:
+            self.fail('local share has not been restarted')
+        self.assertEqual(request, response.strip(), 'getting response locally failed')
+
+        try:
+            response = c.send(request)
+        except:
+            self.fail('remote share has not been restarted')
+        self.assertEqual(request, response.strip(), 'getting response through proxy failed')
+
+        share = self.db_handler.get_share_by_local_port(port)[0]
+        send_exit(share, force=True)
+        run_method_with_timeout(p_manager2.wait, 10)
+        print_all_output(p_manager2, self.osinteraction, 'p_manager2')
+
+        response = c.send(request)
+        self.assertNotEqual(request, response.strip())
+
+        c.close()
+        s.close()
+
+    def test_openport_app__start_twice(self):
+        port = self.osinteraction.get_open_port()
+        print 'localport :', port
+
         manager_port = self.osinteraction.get_open_port()
         self.manager_port = manager_port
         print 'manager_port :', manager_port
 
-        p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-                                      '--verbose', '--manager-port', str(manager_port), '--restart-shares'],
-                                     stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        sleep(5)
-        print_all_output(p_manager, self.osinteraction)
-        self.assertFalse(self.application_is_alive(p_manager))
+        p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', str(port), '--database', self.db_file,
+                                  '--verbose'],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app)
 
-    # def test_manager__start_twice(self):
-    #     port = self.osinteraction.get_open_port()
-    #     print 'localport :', port
-    #
-    #
-    #     manager_port = self.osinteraction.get_open_port()
-    #     self.manager_port = manager_port
-    #     print 'manager_port :', manager_port
-    #
-    #     p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-    #                                   '--verbose', '--manager-port', str(manager_port)],
-    #                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    #     sleep(3)
-    #     p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-    #                                    '--verbose', '--manager-port', str(manager_port)],
-    #                                   stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    #     self.processes_to_kill.append(p_manager2)
-    #     sleep(2)
-    #     command_output = print_all_output(p_manager2, self.osinteraction, 'p_manager2')
-    #
-    #     self.assertNotEqual(False, command_output[0])
-    #     self.assertTrue('Manager is already running on port' in command_output[0])
-    #     self.assertFalse(self.application_is_alive(p_manager2))
+        sleep(3)
+        p_app2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', str(port), '--database', self.db_file,
+                                   '--verbose'],
+                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app2)
+        sleep(2)
+        command_output = print_all_output(p_app2, self.osinteraction, 'p_app2')
+
+        self.assertNotEqual(False, command_output[0])
+        self.assertTrue('Port forward already running for port %s' % port in command_output[0])
+        self.assertFalse(self.application_is_alive(p_app2))
+        run_method_with_timeout(p_app2.wait, 5)
 
     def write_to_conf_file(self, section, option, value):
         import ConfigParser
@@ -348,71 +308,71 @@ class AppTests(unittest.TestCase):
         with open(config_location, 'w') as f:
             config.write(f)
 
-    def test_manager__other_tcp_app_on_port(self):
-        manager_port = self.osinteraction.get_open_port()
-        self.manager_port = manager_port
-        s = SimpleTcpServer(manager_port)
-        s.runThreaded()
-
-        print 'manager_port :', manager_port
-        self.write_to_conf_file('manager', 'port', manager_port)
-
-        p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-                                       '--verbose'],
-                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.processes_to_kill.append(p_manager2)
-        sleep(2)
-        command_output = print_all_output(p_manager2, self.osinteraction, 'p_manager2')
-
-        self.assertNotEqual(False, command_output[0])
-        self.assertTrue('Manager is now running on port' in command_output[0])
-        self.assertTrue(self.application_is_alive(p_manager2))
-
-        s.close()
-
-    def test_manager__other_tcp_app_on_port__pass_by_argument(self):
-        manager_port = self.osinteraction.get_open_port()
-        self.manager_port = manager_port
-        s = SimpleTcpServer(manager_port)
-        s.runThreaded()
-
-        print 'manager_port :', manager_port
-
-        p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-                                       '--verbose', '--manager-port', str(manager_port)],
-                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.processes_to_kill.append(p_manager2)
-        sleep(2)
-        command_output = print_all_output(p_manager2, self.osinteraction, 'p_manager2')
-
-        self.assertNotEqual(False, command_output[0])
-        self.assertTrue('Manager is now running on port' in command_output[0])
-        self.assertTrue(self.application_is_alive(p_manager2))
-
-        s.close()
-
-    def test_manager__other_http_app_on_port(self):
-        manager_port = self.osinteraction.get_open_port()
-        self.manager_port = manager_port
-        s = TestHTTPServer(manager_port)
-        s.reply('hello')
-        s.runThreaded()
-
-        print 'manager_port :', manager_port
-        self.write_to_conf_file('manager', 'port', manager_port)
-
-        p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
-                                       '--verbose'],
-                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.processes_to_kill.append(p_manager2)
-        sleep(2)
-        command_output = print_all_output(p_manager2, self.osinteraction, 'p_manager2')
-
-        self.assertNotEqual(False, command_output[0])
-        self.assertTrue('Manager is now running on port' in command_output[0])
-        self.assertTrue(self.application_is_alive(p_manager2))
-
-        s.stop()
+  #  def test_manager__other_tcp_app_on_port(self):
+  #      manager_port = self.osinteraction.get_open_port()
+  #      self.manager_port = manager_port
+  #      s = SimpleTcpServer(manager_port)
+  #      s.runThreaded()
+#
+  #      print 'manager_port :', manager_port
+  #      self.write_to_conf_file('manager', 'port', manager_port)
+#
+  #      p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
+  #                                     '--verbose'],
+  #                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  #      self.processes_to_kill.append(p_manager2)
+  #      sleep(2)
+  #      command_output = print_all_output(p_manager2, self.osinteraction, 'p_manager2')
+#
+  #      self.assertNotEqual(False, command_output[0])
+  #      self.assertTrue('Manager is now running on port' in command_output[0])
+  #      self.assertTrue(self.application_is_alive(p_manager2))
+#
+  #      s.close()
+#
+  #  def test_manager__other_tcp_app_on_port__pass_by_argument(self):
+  #      manager_port = self.osinteraction.get_open_port()
+  #      self.manager_port = manager_port
+  #      s = SimpleTcpServer(manager_port)
+  #      s.runThreaded()
+#
+  #      print 'manager_port :', manager_port
+#
+  #      p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
+  #                                     '--verbose', '--manager-port', str(manager_port)],
+  #                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  #      self.processes_to_kill.append(p_manager2)
+  #      sleep(2)
+  #      command_output = print_all_output(p_manager2, self.osinteraction, 'p_manager2')
+#
+  #      self.assertNotEqual(False, command_output[0])
+  #      self.assertTrue('Manager is now running on port' in command_output[0])
+  #      self.assertTrue(self.application_is_alive(p_manager2))
+#
+  #      s.close()
+#
+  #  def test_manager__other_http_app_on_port(self):
+  #      manager_port = self.osinteraction.get_open_port()
+  #      self.manager_port = manager_port
+  #      s = TestHTTPServer(manager_port)
+  #      s.reply('hello')
+  #      s.runThreaded()
+#
+  #      print 'manager_port :', manager_port
+  #      self.write_to_conf_file('manager', 'port', manager_port)
+#
+  #      p_manager2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', 'manager', '--database', self.db_file,
+  #                                     '--verbose'],
+  #                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+  #      self.processes_to_kill.append(p_manager2)
+  #      sleep(2)
+  #      command_output = print_all_output(p_manager2, self.osinteraction, 'p_manager2')
+#
+  #      self.assertNotEqual(False, command_output[0])
+  #      self.assertTrue('Manager is now running on port' in command_output[0])
+  #      self.assertTrue(self.application_is_alive(p_manager2))
+#
+  #      s.stop()
 
     def getRemoteAddress(self, output):
         print 'getRemoteAddress - output:%s' % output
@@ -458,9 +418,9 @@ class AppTests(unittest.TestCase):
         port = self.osinteraction.get_open_port()
         print 'local port: ', port
 
-        p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+        p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER,
-                                  '--manager-port', str(700000),  # port out of reach
+                                  '--listener-port', str(700000),  # port out of reach
                                   '--database', self.db_file, '--restart-on-reboot'],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
@@ -469,6 +429,60 @@ class AppTests(unittest.TestCase):
         click_open_for_ip_link(link)
         self.check_application_is_still_alive(p_app)
         print lineNumber(), "remote port:", remote_port
+
+    def test_kill(self):
+        port = self.osinteraction.get_open_port()
+        print 'local port: ', port
+
+        p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
+                                  '--verbose', '--server', TEST_SERVER,
+                                  '--database', self.db_file],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.osinteraction.print_output_continuously_threaded(p_app, 'p_app')
+        self.processes_to_kill.append(p_app)
+        sleep(3)
+
+        p_kill = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--kill', str(port),
+                                  '--database', self.db_file, '--restart-on-reboot'],
+                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_kill)
+        self.osinteraction.print_output_continuously_threaded(p_kill, 'p_kill')
+        run_method_with_timeout(p_kill.wait, 10)
+        sleep(1)
+        self.assertFalse(p_app.poll() is None)
+
+    def test_kill_all(self):
+        port = self.osinteraction.get_open_port()
+        print 'local port: ', port
+
+        p_app1 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
+                                  '--verbose', '--server', TEST_SERVER,
+                                  '--database', self.db_file],
+                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app1)
+        self.osinteraction.print_output_continuously_threaded(p_app1, 'p_app1')
+
+        port = self.osinteraction.get_open_port()
+        print 'local port: ', port
+
+        p_app2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
+                                  '--verbose', '--server', TEST_SERVER,
+                                  '--database', self.db_file],
+                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app2)
+        self.osinteraction.print_output_continuously_threaded(p_app2, 'p_app2')
+
+        sleep(3)
+        self.assertEqual(2, self.get_nr_of_shares_in_db_file(self.db_file))
+        p_kill = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--kill-all',
+                                  '--database', self.db_file, '--restart-on-reboot'],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.osinteraction.print_output_continuously_threaded(p_kill, 'p_kill')
+        sleep(3)
+        self.processes_to_kill.append(p_kill)
+        run_method_with_timeout(p_kill.wait, 10)
+        self.assertFalse(p_app1.poll() is None)
+        self.assertFalse(p_app2.poll() is None)
 
     # def test_restart_manager_on_different_port(self):
     #     manager_port = self.osinteraction.get_open_port()
@@ -762,7 +776,7 @@ class AppTests(unittest.TestCase):
         port = self.osinteraction.get_open_port()
 
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
-                      '--start-manager', 'False', '--http-forward', '--server', TEST_SERVER,
+                      '--http-forward', '--server', TEST_SERVER,
                       '--database', self.db_file],
                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
@@ -782,7 +796,7 @@ class AppTests(unittest.TestCase):
         port = self.osinteraction.get_open_port()
 
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
-                              '--start-manager', 'False', '--http-forward', '--server', TEST_SERVER,
+                              '--http-forward', '--server', TEST_SERVER,
                               '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)

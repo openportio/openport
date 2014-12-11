@@ -58,50 +58,50 @@ class OpenPortManager(object):
         os._exit(3)
         #sys.exit()
 
-    def restart_sharing(self):
-        shares = self.dbhandler.get_shares_to_restart()
-        logger.debug('restarting shares - amount: %s' % len(list(shares)))
-        shutdown = True
-        for share in shares:
-            if self.os_interaction.pid_is_openport_process(share.pid):
-                logger.debug('share still running. Pid: %s command: %s' % (share.pid, share.restart_command))
-                self.onNewShare(share)
-            else:
-                shutdown = False
-                try:
-                    logger.debug('restarting share: %s' % share.restart_command)
-                    self.set_manager_port(share)
-
-                    p = self.os_interaction.start_openport_process(share)
-                    self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
-                    sleep(1)
-                    if p.poll() is not None:
-                        logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
-                                     self.os_interaction.non_block_read(p))
-                    else:
-                        logger.debug('started app with pid %s : %s' % (p.pid, share.restart_command))
-                        sleep(1)
-
-                    self.share_processes[p.pid] = p
-                except Exception, e:
-                    tb = traceback.format_exc()
-                    logger.error('Error: <<<' + tb + ' >>>')
-        users_file = '/etc/openport/users.conf'
-        if not is_windows() and self.os_interaction.user_is_root() and os.path.exists(users_file):
-            with open(users_file, 'r') as f:
-                lines = f.readlines()
-                for line in lines:
-                    if not line.strip() or line.strip()[0] == '#':
-                        continue
-                    username = line.strip().split()[0]
-
-                    command = ['sudo', '-u', username, '-H', 'openport', 'manager', '--restart-shares']
-                    logger.debug('restart command: %s' % command)
-                    self.os_interaction.spawn_daemon(command)
-
-        if shutdown:
-            logger.info('Started no shares, shutting down.')
-            sys.exit(0)
+    # def restart_sharing(self):
+    #     shares = self.dbhandler.get_shares_to_restart()
+    #     logger.debug('restarting shares - amount: %s' % len(list(shares)))
+    #     shutdown = True
+    #     for share in shares:
+    #         if self.os_interaction.pid_is_openport_process(share.pid):
+    #             logger.debug('share still running. Pid: %s command: %s' % (share.pid, share.restart_command))
+    #             self.onNewShare(share)
+    #         else:
+    #             shutdown = False
+    #             try:
+    #                 logger.debug('restarting share: %s' % share.restart_command)
+    #                 self.set_manager_port(share)
+    #
+    #                 p = self.os_interaction.start_openport_process(share)
+    #                 self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
+    #                 sleep(1)
+    #                 if p.poll() is not None:
+    #                     logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
+    #                                  self.os_interaction.non_block_read(p))
+    #                 else:
+    #                     logger.debug('started app with pid %s : %s' % (p.pid, share.restart_command))
+    #                     sleep(1)
+    #
+    #                 self.share_processes[p.pid] = p
+    #             except Exception, e:
+    #                 tb = traceback.format_exc()
+    #                 logger.error('Error: <<<' + tb + ' >>>')
+    #     users_file = '/etc/openport/users.conf'
+    #     if not is_windows() and self.os_interaction.user_is_root() and os.path.exists(users_file):
+    #         with open(users_file, 'r') as f:
+    #             lines = f.readlines()
+    #             for line in lines:
+    #                 if not line.strip() or line.strip()[0] == '#':
+    #                     continue
+    #                 username = line.strip().split()[0]
+    #
+    #                 command = ['sudo', '-u', username, '-H', 'openport', 'manager', '--restart-shares']
+    #                 logger.debug('restart command: %s' % command)
+    #                 self.os_interaction.spawn_daemon(command)
+    #
+    #     if shutdown:
+    #         logger.info('Started no shares, shutting down.')
+    #         sys.exit(0)
 
     def stop_sharing(self, share):
         logger.info("stopping %s" % share.id)
@@ -170,45 +170,45 @@ class OpenPortManager(object):
                                                    manager_port=Globals().manager_port)
         self.share_processes[p.pid] = p
 
-    def print_shares(self):
-        shares = self.dbhandler.get_shares()
-        logger.debug('listing shares - amount: %s' % len(list(shares)))
-        for share in shares:
-            print self.get_share_line(share)
+    # def print_shares(self):
+    #     shares = self.dbhandler.get_shares()
+    #     logger.debug('listing shares - amount: %s' % len(list(shares)))
+    #     for share in shares:
+    #         print self.get_share_line(share)
+    #
+    # def get_share_line(self, share):
+    #            #"pid: %s - " % share.pid + \
+    #     share_line = "localport: %s - " % share.local_port + \
+    #                  "remote port: %s - " % share.server_port + \
+    #                  "running: %s - " % self.os_interaction.pid_is_openport_process(share.pid) + \
+    #                  "restart on reboot: %s" % bool(share.restart_command)
+    #     if Globals().verbose:
+    #         share_line += ' - pid: %s' % share.pid + \
+    #                       ' - id: %s' % share.id
+    #     return share_line
 
-    def get_share_line(self, share):
-               #"pid: %s - " % share.pid + \
-        share_line = "localport: %s - " % share.local_port + \
-                     "remote port: %s - " % share.server_port + \
-                     "running: %s - " % self.os_interaction.pid_is_openport_process(share.pid) + \
-                     "restart on reboot: %s" % bool(share.restart_command)
-        if Globals().verbose:
-            share_line += ' - pid: %s' % share.pid + \
-                          ' - id: %s' % share.id
-        return share_line
-
-    def kill(self, local_port):
-        shares = self.dbhandler.get_share_by_local_port(local_port)
-        if len(shares) > 0:
-            share = shares[0]
-            self.kill_share(share)
-        self.print_shares()
-
-    def kill_share(self, share):
-        if self.os_interaction.pid_is_openport_process(share.pid):
-            logger.debug('pid is running, will kill it: %s' % share.pid)
-            self.os_interaction.kill_pid(share.pid)
-            if share.pid in self.share_processes:
-                logger.debug('pid found in share_processes')
-                if self.share_processes[share.pid] is not None:
-                    logger.debug('output from child process: ' + str(
-                        self.os_interaction.non_block_read(self.share_processes[share.pid])))
-        self.dbhandler.stop_share(share)
-
-    def kill_all(self):
-        shares = self.dbhandler.get_shares()
-        for share in shares:
-            self.kill_share(share)
+    # def kill(self, local_port):
+    #     shares = self.dbhandler.get_share_by_local_port(local_port)
+    #     if len(shares) > 0:
+    #         share = shares[0]
+    #         self.kill_share(share)
+    #     self.print_shares()
+    #
+    # def kill_share(self, share):
+    #     if self.os_interaction.pid_is_openport_process(share.pid):
+    #         logger.debug('pid is running, will kill it: %s' % share.pid)
+    #         self.os_interaction.kill_pid(share.pid)
+    #         if share.pid in self.share_processes:
+    #             logger.debug('pid found in share_processes')
+    #             if self.share_processes[share.pid] is not None:
+    #                 logger.debug('output from child process: ' + str(
+    #                     self.os_interaction.non_block_read(self.share_processes[share.pid])))
+    #     self.dbhandler.stop_share(share)
+    #
+    # def kill_all(self):
+    #     shares = self.dbhandler.get_shares()
+    #     for share in shares:
+    #         self.kill_share(share)
 
 def get_manager_instance():
     global manager_instance
@@ -249,35 +249,35 @@ def start_manager():
         logger.error('--manager-port not in valid range [-1, 65535]')
         sys.exit(1)
 
-    Globals().manager_port = args.manager_port
-    Globals().openport_address = args.server
-
-    if args.config_file:
-        Globals().config = args.config_file
-
-    manager = get_manager_instance()
-
-    logger.debug('db location: ' + dbhandler.db_location)
-
-    if args.list:
-        manager.print_shares()
-        sys.exit()
-
-    if args.kill:
-        manager.kill(args.kill)
-        sys.exit()
-
-    if args.kill_all:
-        manager.kill_all()
-        sys.exit()
-
-    get_and_save_manager_port(args.manager_port)
-  #  start_server_thread(onNewShare=manager.onNewShare)
-
-    sleep(1)
-
-    if args.restart_shares:
-        manager.restart_sharing()
+  #   Globals().manager_port = args.manager_port
+  #   Globals().openport_address = args.server
+  #
+  #   if args.config_file:
+  #       Globals().config = args.config_file
+  #
+  #   manager = get_manager_instance()
+  #
+  #   logger.debug('db location: ' + dbhandler.db_location)
+  #
+  #   if args.list:
+  #       manager.print_shares()
+  #       sys.exit()
+  #
+  #   if args.kill:
+  #       manager.kill(args.kill)
+  #       sys.exit()
+  #
+  #   if args.kill_all:
+  #       manager.kill_all()
+  #       sys.exit()
+  #
+  #   get_and_save_manager_port(args.manager_port)
+  # #  start_server_thread(onNewShare=manager.onNewShare)
+  #
+  #   sleep(1)
+  #
+  #   if args.restart_shares:
+  #       manager.restart_sharing()
 
     def handleSigTERM(signum, frame):
         logger.debug('got a signal %s, frame %s going down' % (signum, frame))

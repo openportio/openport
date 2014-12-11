@@ -10,6 +10,7 @@ from manager.globals import Globals
 from services.logger_service import get_logger
 from time import sleep
 from services.osinteraction import getInstance
+import os
 logger = get_logger('server')
 
 globals = Globals()
@@ -28,14 +29,17 @@ def ping():
     return 'pong'
 
 
-@route('/exit', method='GET', )
+@route('/exit', method='POST', )
 def exit_manager():
     logger.debug('/exit')
     if request.remote_addr == '127.0.0.1':
+        force = request.forms['force']
+
         def shutdown():
             sleep(1)
-            logger.debug('shutting down due to exit call')
-            Globals().app.session.notify_stop()
+            logger.debug('shutting down due to exit call. Force: %s' % force)
+            if force:
+                os._exit(5)
             import signal
             Globals().app.handleSigTERM(signal.SIGINT)
         t = threading.Thread(target=shutdown)
@@ -76,6 +80,38 @@ def inform_failure(share):
 
 def inform_stop(share):
     inform_listeners(share, 'stopShare')
+
+
+def send_exit(share, force=False):
+    port = share.app_management_port
+    logger.debug('Sending exit to %s.' % port)
+    url = 'http://127.0.0.1:%s/exit' % (port,)
+    logger.debug('sending get request ' + url)
+    try:
+        data = urllib.urlencode({'id': share.id, 'force': force})
+        req = urllib2.Request(url, data)
+        response = urllib2.urlopen(req, timeout=1).read()
+        if response.strip() != 'ok':
+            logger.error(response)
+    except Exception, detail:
+        logger.error("An error has occurred while killing the app: %s" % detail)
+
+
+def send_ping(share):
+    port = share.app_management_port
+    logger.debug('Sending exit to %s.' % port)
+    url = 'http://127.0.0.1:%s/ping' % (port,)
+    logger.debug('sending get request ' + url)
+    try:
+        req = urllib2.Request(url)
+        response = urllib2.urlopen(req, timeout=1).read()
+        if response.strip() != 'pong':
+            logger.error(response)
+            return False
+        return True
+    except Exception, detail:
+        logger.error("An error has occurred while pinging the app: %s" % detail)
+
 
 @route('/error', method='GET')
 def error_():

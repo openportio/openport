@@ -252,7 +252,7 @@ class SharesFrame(wx.Frame):
             s = dbhandler.getInstance().get_share(share.id)
             if s and s.app_management_port:
                 self.notify_app_down(s)
-                app_communicate(s, 'exit')
+                app_communicate(s, 'exit', {'id': share.id})
 
             def remove_killed_share():
                 while osinteraction.getInstance().pid_is_openport_process(s.pid):

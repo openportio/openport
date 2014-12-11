@@ -116,7 +116,7 @@ class SimpleTcpClient(object):
             sys.stderr.write("[timeout] %s\n" % e)
         except socket.error, msg:
             sys.stderr.write("[ERROR] %s\n" % msg)
-            if len(msg) > 0:
+            if hasattr(msg, 'len') and len(msg) > 0:
                 sys.stderr.write("[ERROR] %s\n" % msg[1])
 #            sys.exit(2)
 
@@ -318,7 +318,8 @@ def wait_for_success_callback(p_manager, osinteraction, timeout=30, output_prefi
 def kill_all_processes(processes_to_kill):
     for p in processes_to_kill:
         try:
-            osinteraction.getInstance().kill_pid(p.pid)
+            if p.poll() is None:
+                osinteraction.getInstance().kill_pid(p.pid)
             p.wait()
         except Exception as e:
             logger.exception(e)
