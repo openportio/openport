@@ -445,13 +445,13 @@ class AppTests(unittest.TestCase):
         sleep(3)
 
         p_kill = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--kill', str(port),
-                                  '--database', self.db_file, '--restart-on-reboot'],
+                                  '--database', self.db_file, '--verbose'],
                                   stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_kill)
         self.osinteraction.print_output_continuously_threaded(p_kill, 'p_kill')
         run_method_with_timeout(p_kill.wait, 10)
-        sleep(1)
-        self.assertFalse(p_app.poll() is None)
+        run_method_with_timeout(p_app.wait, 5)
+        self.assertFalse(self.application_is_alive(p_app))
 
     def test_kill_all(self):
         port = self.osinteraction.get_open_port()
@@ -792,7 +792,6 @@ class AppTests(unittest.TestCase):
         if not osinteraction.is_windows():
             self.assertTrue('got signal ' in output[0])
         self.assertNotEqual(None, p.poll())
-
 
     def test_openport_app_with_http_forward(self):
         port = self.osinteraction.get_open_port()
