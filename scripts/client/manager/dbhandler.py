@@ -188,15 +188,15 @@ db_location = ''
 def getInstance(init_db=True):
     global db_location
 
+    os_interaction = osinteraction.getInstance()
     if db_location == '':
-        os_interaction = osinteraction.getInstance()
         db_location = os_interaction.get_app_data_path('openport.db')
 
     global instance
     if instance is None:
         instance = DBHandler(db_location)
         if init_db:
-            instance.init_db()
+            os_interaction.run_function_with_lock(instance.init_db, '%s.lock' % db_location)
     return instance
 
 

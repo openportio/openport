@@ -8,6 +8,8 @@ from threading import Thread
 from time import sleep
 import signal
 import psutil
+from lockfile import NotMyLock, LockTimeout
+from lockfile.mkdirlockfile import MkdirLockFile
 
 try:
     from Queue import Queue, Empty
@@ -264,6 +266,34 @@ class OsInteraction(object):
             if base_path == '':
                 base_path = '.'
             return base_path
+
+    def run_function_with_lock(self, function, lock_file, timeout=30, args=[], kwargs={}):
+        self.logger.debug('starting function with lock: %s' % lock_file)
+        lock = MkdirLockFile(lock_file)
+        try:
+            while not lock.i_am_locking():
+                try:
+                    lock.acquire(timeout=timeout)
+                except (LockTimeout, NotMyLock) as e:
+                    self.logger.debug('breaking lock')
+                    lock.break_lock()
+                    lock.acquire()
+                    self.logger.exception(e)
+
+            self.logger.debug('lock acquired: starting function')
+            return function(*args, **kwargs)
+        finally:
+            self.logger.debug('function done, releasing lock')
+
+            if lock.is_locked():
+                try:
+                    lock.release()
+                except NotMyLock:
+                    try:
+                        os.remove(lock_file)
+                    except Exception as e:
+                        self.logger.exception(e)
+            self.logger.debug('lock released')
 
 
 class LinuxOsInteraction(OsInteraction):

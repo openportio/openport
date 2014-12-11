@@ -17,6 +17,7 @@ git+https://github.com/pyinstaller/pyinstaller.git@develop
 sqlalchemy
 alembic
 psutil
+lockfile
 #http://sourceforge.net/projects/py2exe/files/latest/download?source=files
 
 # For the error 'no module named wsgiserver2':

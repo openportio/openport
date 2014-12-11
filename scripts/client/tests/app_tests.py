@@ -131,7 +131,7 @@ class AppTests(unittest.TestCase):
     def test_openport_app_same_port(self):
         port = self.osinteraction.get_open_port()
 
-        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
                               '--server', TEST_SERVER, '--verbose', '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
@@ -149,9 +149,11 @@ class AppTests(unittest.TestCase):
         self.assertEqual(request, response.strip())
         c.close()
 
-        p.kill()
+        share = self.db_handler.get_share_by_local_port(port)[0]
+        send_exit(share)
+        run_method_with_timeout(p.wait, 10)
 
-        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
                               '--server', TEST_SERVER, '--verbose', '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
@@ -462,17 +464,17 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_app1)
         self.osinteraction.print_output_continuously_threaded(p_app1, 'p_app1')
 
-        port = self.osinteraction.get_open_port()
-        print 'local port: ', port
+        port2 = self.osinteraction.get_open_port()
+        print 'local port2: ', port2
+        self.assertNotEqual(port, port2)
 
-        p_app2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
+        p_app2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port2,
                                   '--verbose', '--server', TEST_SERVER,
                                   '--database', self.db_file],
                                   stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app2)
-        self.osinteraction.print_output_continuously_threaded(p_app2, 'p_app2')
-
-        sleep(3)
+        get_remote_host_and_port(p_app2, self.osinteraction)
+        sleep(1)
         self.assertEqual(2, self.get_nr_of_shares_in_db_file(self.db_file))
         p_kill = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--kill-all',
                                   '--database', self.db_file, '--restart-on-reboot'],
