@@ -6,7 +6,7 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Start Openport clients
-# Description:       Starts all the openport clients still known by the manager.
+# Description:       Restarts all shares for the users in /etc/openport/users.txt
 ### END INIT INFO
 
 # Author: Jan De Bleser <jan@dangersoftware.be>
@@ -15,11 +15,11 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="The openport manager service"
+DESC="The openport restart service"
 NAME=openport
 DAEMON=/usr/bin/openport
 DAEMONNAME=openport
-DAEMON_ARGS="manager --restart-shares"
+DAEMON_ARGS="--restart-shares"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
