@@ -61,6 +61,13 @@ class SharesFrame(wx.Frame):
 
         self.addTrayIcon()
 
+    def showFrame(self, event):
+        print "show frame"
+        self.Show(True)
+        self.Raise()
+        self.Iconize(False)
+        self.SetFocus()
+
     def exitApp(self, event):
         self.tbicon.RemoveIcon()
         self.tbicon.Destroy()
@@ -69,10 +76,10 @@ class SharesFrame(wx.Frame):
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)
-        self.tbicon.addItem('View shares', self.Show)
-        self.tbicon.menu.AppendSeparator()
+        self.tbicon.addItem('View shares', self.showFrame)
+        self.tbicon.addItem('---', None)
         self.tbicon.addItem('Exit', self.exitApp)
-        self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.Show)
+        self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.showFrame)
 
     def addMenuBar(self):
         menubar = wx.MenuBar()
