@@ -211,10 +211,6 @@ class OpenportApp(object):
             self.restart_sharing()
             sys.exit()
 
-
-        get_and_save_manager_port(self.args.listener_port)
-      #  start_server_thread(onNewShare=manager.onNewShare)
-
         session = Session()
         session.local_port = int(self.args.local_port)
         session.server_port = self.args.request_port

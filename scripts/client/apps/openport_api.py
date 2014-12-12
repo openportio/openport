@@ -11,10 +11,6 @@ from apps.openport_app_version import VERSION
 
 logger = get_logger('openport_api')
 
-SERVER_SSH_PORT = 22
-FALLBACK_SERVER_SSH_PORT = 443
-SERVER_SSH_USER = 'open'
-
 
 class PortForwardResponse():
 

@@ -65,12 +65,12 @@ class Openport(object):
                     SERVER_SSH_USER,
                     PUBLIC_KEY_FILE,
                     PRIVATE_KEY_FILE,
-                    success_callback=session.notify_success,
+                    success_callback=self.session_success,
                     error_callback=session.notify_error,
                     fallback_server_ssh_port=FALLBACK_SERVER_SSH_PORT,
                     fallback_ssh_server=FALLBACK_SSH_SERVER,
                     http_forward_address=session.http_forward_address,
-                    start_callback=self.session_started
+                    start_callback=session.notify_start,
                 )
                 self.port_forwarding_service.start() #hangs
             except PortForwardException as e:
@@ -83,8 +83,8 @@ class Openport(object):
             finally:
                 self.automatic_restart = True
 
-    def session_started(self):
-        self.session.notify_start()
+    def session_success(self):
+        self.session.notify_success()
         self.show_message()
 
     def show_message(self):
