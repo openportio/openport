@@ -34,7 +34,7 @@ def register_key(args, server=DEFAULT_SERVER):
             print "key successfully registered"
 
         except Exception, detail:
-            print "An error has occurred while communicating the the openport servers. ", detail
+            print "An error has occurred while communicating with the openport servers. ", detail
             if hasattr(detail, 'read'):
                 print detail.read()
             raise detail
