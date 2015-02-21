@@ -7,7 +7,6 @@
 <key>ProgramArguments</key>
 <array>
 <string>/usr/bin/openport</string>
-<string>manager</string>
 <string>--restart-shares</string>
 </array>
 <key>RunAtLoad</key>
