@@ -35,7 +35,8 @@ class PortForwardingService:
                  fallback_server_ssh_port=None,
                  fallback_ssh_server=None,
                  http_forward_address=None,
-                 start_callback=None):
+                 start_callback=None,
+                 forward_tunnel=False):
         self.local_port       = local_port
         self.remote_port      = remote_port
         self.server           = server
@@ -51,6 +52,7 @@ class PortForwardingService:
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(IgnoreUnknownHostKeyPolicy())
         self.start_callback = start_callback
+        self.forward_tunnel = forward_tunnel
 
         self.portForwardingRequestException = None
         self.stopped = False
@@ -89,7 +91,11 @@ class PortForwardingService:
 
         try:
             self.portForwardingRequestException = None
-            thr = threading.Thread(target=self._forward_local_port)
+
+            if self.forward_tunnel:
+                thr = threading.Thread(target=self._forward_remote_port)
+            else:
+                thr = threading.Thread(target=self._forward_local_port)
             thr.setDaemon(True)
             thr.start()
 
@@ -134,6 +140,9 @@ class PortForwardingService:
         except Exception as e:
             self.portForwardingRequestException = e
 
+    def _forward_remote_port(self):
+        create_forward_tunnel(self.local_port, 'localhost', self.remote_port, self.client.get_transport())
+
     def _port_forward_handler(self, chan):
         """
         A handler to handle the incomming traffic.
@@ -175,3 +184,72 @@ class PortForwardingService:
         logger.debug('Tunnel closed from %r' % (chan.origin_addr,))
 
 
+
+import socket
+import select
+try:
+    import SocketServer
+except ImportError:
+    import socketserver as SocketServer
+
+import paramiko
+
+SSH_PORT = 22
+DEFAULT_PORT = 4000
+
+g_verbose = True
+
+
+class ForwardServer (SocketServer.ThreadingTCPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+
+class Handler (SocketServer.BaseRequestHandler):
+
+    def handle(self):
+        try:
+            chan = self.ssh_transport.open_channel('direct-tcpip',
+                                                   (self.chain_host, self.chain_port),
+                                                    self.request.getpeername())
+        except Exception as e:
+            logger.debug('Incoming request to %s:%d failed: %s' % (self.chain_host,
+                                                              self.chain_port,
+                                                              repr(e)))
+            chan = None
+        if chan is None:
+            logger.error('Incoming request to %s:%d was rejected by the SSH server.' %
+                    (self.chain_host, self.chain_port))
+            return
+
+        logger.debug('Connected!  Tunnel open %r -> %r -> %r' % (self.request.getpeername(),
+                                                            chan.getpeername(), (self.chain_host, self.chain_port)))
+        while True:
+            r, w, x = select.select([self.request, chan], [], [])
+            if self.request in r:
+                data = self.request.recv(1024)
+                if len(data) == 0:
+                    break
+                chan.send(data)
+            if chan in r:
+                data = chan.recv(1024)
+                if len(data) == 0:
+                    break
+                self.request.send(data)
+
+        peername = self.request.getpeername()
+
+        chan.close()
+        self.request.close()
+        logger.debug('Tunnel closed from %r' % (peername,))
+
+
+def create_forward_tunnel(local_port, remote_host, remote_port, transport):
+    # this is a little convoluted, but lets me configure things for the Handler
+    # object.  (SocketServer doesn't give Handlers any way to access the outer
+    # server normally.)
+    class SubHander (Handler):
+        chain_host = remote_host
+        chain_port = remote_port
+        ssh_transport = transport
+    ForwardServer(('', local_port), SubHander).serve_forever()

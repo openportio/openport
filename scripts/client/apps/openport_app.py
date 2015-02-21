@@ -27,9 +27,10 @@ from time import sleep
 class OpenportApp(object):
 
     def __init__(self):
+        Globals.Instance().app = self
         self.manager_app_started = False
         self.os_interaction = osinteraction.getInstance()
-        self.globals = Globals()
+        self.globals = Globals.Instance()
         self.args = UserDict()
         self.session = None
         self.openport = Openport()
@@ -50,7 +51,6 @@ class OpenportApp(object):
             #signal.signal(signal.SIGTERM, self.handleSigTERM)
 
         self.db_handler = None
-        Globals().app = self
 
     def handleSigTERM(self, signum, frame=-1):
         logger.debug('got signal %s' % signum)
@@ -84,6 +84,9 @@ class OpenportApp(object):
         parser.add_argument('--server', default=DEFAULT_SERVER, help=argparse.SUPPRESS)
         parser.add_argument('--restart-on-reboot', '-R', action='store_true', help='Restart this share when the manager app is started.')
         parser.add_argument('--config-file', action='store', type=str, default='', help=argparse.SUPPRESS)
+        parser.add_argument('--forward-tunnel', action='store_true', help='Forward connections from your local port to the server port.')
+        parser.add_argument('--remote-port', type=int, help='The server port you want to forward to'
+                                                           ' (only use in combination with --forward).', default=-1)
 
     def init_app(self, args):
         if args.verbose:
@@ -98,7 +101,7 @@ class OpenportApp(object):
         self.args = args
 
         manager_port = get_and_save_manager_port(exit_on_fail=False)
-        Globals().tcp_listeners.add(manager_port)
+        Globals.Instance().tcp_listeners.add(manager_port)
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
@@ -118,7 +121,7 @@ class OpenportApp(object):
                      "remote port: %s - " % share.server_port + \
                      "running: %s - " % self.os_interaction.pid_is_openport_process(share.pid) + \
                      "restart on reboot: %s" % bool(share.restart_command)
-        if Globals().verbose:
+        if Globals.Instance().verbose:
             share_line += ' - pid: %s' % share.pid + \
                           ' - id: %s' % share.id
         return share_line
@@ -187,11 +190,11 @@ class OpenportApp(object):
         self.db_handler = dbhandler.getInstance()
 
 
-        Globals().manager_port = self.args.listener_port
-        Globals().openport_address = self.args.server
+        Globals.Instance().manager_port = self.args.listener_port
+        Globals.Instance().openport_address = self.args.server
 
         if self.args.config_file:
-            Globals().config = self.args.config_file
+            Globals.Instance().config = self.args.config_file
 
         logger.debug('db location: ' + dbhandler.db_location)
 
@@ -215,6 +218,9 @@ class OpenportApp(object):
         session.local_port = int(self.args.local_port)
         session.server_port = self.args.request_port
         session.server_session_token = self.args.request_token
+        session.forward_tunnel = self.args.forward_tunnel
+        if session.forward_tunnel:
+            session.server_port = self.args.remote_port
 
         db_share = self.db_handler.get_share_by_local_port(session.local_port)
         if db_share:

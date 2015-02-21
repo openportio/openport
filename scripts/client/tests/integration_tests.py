@@ -281,6 +281,39 @@ class IntegrationTest(unittest.TestCase):
         actual_response = c.get('http://%s' % remote_host)
         self.assertEqual(actual_response, response.strip())
 
+    def test_http_forward__same_address(self):
+        response = 'cha cha cha'
+        port = self.osinteraction.get_open_port()
+
+        s = self.start_http_server(port, response)
+        session = Session()
+        session.local_port = port
+        session.server_session_token = None
+        session.http_forward = True
+
+        self.app = self.start_openport_session(session)
+
+        remote_host = session.http_forward_address
+        print 'remote host:' + remote_host
+        self.assertTrue('.u.%s' % self.test_server in remote_host, 'expect .u. in remote_host: %s' % remote_host)
+
+        c = SimpleHTTPClient()
+        actual_response = c.get('http://localhost:%s' % port)
+        self.assertEqual(actual_response, response.strip())
+        actual_response = c.get('http://%s' % remote_host)
+        self.assertEqual(actual_response, response.strip())
+
+        session2 = Session()
+        session2.local_port = port
+        session2.server_session_token = None
+        session2.http_forward = True
+        session2.server_port = session.server_port
+        session2.server_session_token = session.server_session_token
+        self.app = self.start_openport_session(session2)
+
+      #  self.assertEqual(session.server_port, session2.server_port)
+        self.assertEqual(session.http_forward_address, session2.http_forward_address)
+
     def start_http_server(self, port, response):
         s = TestHTTPServer(port)
         s.reply(response)

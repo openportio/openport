@@ -4,7 +4,8 @@ import pickle
 class Session(object):
     def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=1, account_id=-1,
                  key_id=-1, local_port=-1, server_session_token='', restart_command='', http_forward=False,
-                 http_forward_address='', open_port_for_ip_link='', app_management_port=-1):
+                 http_forward_address='', open_port_for_ip_link='', app_management_port=-1,
+                 forward_tunnel=False):
         #todo: why is this ever a dict?
         if type(_id) == dict:
             self.id = -1
@@ -23,6 +24,7 @@ class Session(object):
         self.http_forward_address = http_forward_address
         self.open_port_for_ip_link = open_port_for_ip_link
         self.app_management_port = app_management_port
+        self.forward_tunnel = forward_tunnel
 
         self.success_observers = []
         self.error_observers = []
@@ -50,7 +52,8 @@ class Session(object):
             'http_forward': self.http_forward,
             'http_forward_address': self.http_forward_address,
             'open_port_for_ip_link': self.open_port_for_ip_link,
-            'app_management_port': self.app_management_port
+            'app_management_port': self.app_management_port,
+            'forward_tunnel': self.forward_tunnel,
         }
 
     @staticmethod
@@ -80,6 +83,7 @@ class Session(object):
         self.http_forward_address = dict['http_forward_address']
         self.app_management_port = dict['app_management_port']
         self.open_port_for_ip_link = dict.get('open_port_for_ip_link', '')
+        self.forward_tunnel = dict.get('forward_tunnel', False)
 
     def notify_success(self):
         for observer in self.success_observers:

@@ -159,6 +159,7 @@ class DBHandlerTests(unittest.TestCase):
         a = dbhandler.DBHandler(self.test_db)
         b = dbhandler.DBHandler(self.test_db)
         self.assertTrue(a == b)
+        self.assertEqual(a, b)
 
     def test_get_shares(self):
         share1 = Share(active=False)

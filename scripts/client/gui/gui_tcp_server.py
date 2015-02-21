@@ -26,13 +26,13 @@ def app_communicate(share, path, data=None):
         if response.strip() != 'ok':
             logger.error(response)
     except Exception, detail:
-        Globals().app.notify_error(share)
+        Globals.Instance().app.notify_error(share)
         logger.error("An error has occurred while communicating with the app on %s: %s" % (url,detail))
 
 
 def register_with_app(share):
     if share.app_management_port:
-        app_communicate(share, 'register', {'port': Globals().manager_port})
+        app_communicate(share, 'register', {'port': Globals.Instance().manager_port})
 
 
 @route('/newShare', method='POST')
@@ -45,10 +45,10 @@ def new_share(name='newShare'):
     if not share:
         return 'share not in db'
 
-    Globals().account_id = share.account_id
-    Globals().key_id = share.key_id
+    Globals.Instance().account_id = share.account_id
+    Globals.Instance().key_id = share.key_id
 
-    Globals().app.add_share_after(share)
+    Globals.Instance().app.add_share_after(share)
     return 'ok'
 
 
@@ -61,7 +61,7 @@ def success_share(name='success_share'):
     share = dbhandler.getInstance().get_share(id)
     if not share:
         return 'share not in db'
-    Globals().app.notify_success(share)
+    Globals.Instance().app.notify_success(share)
 
     return 'ok'
 
@@ -75,7 +75,7 @@ def error_share(name='error_share'):
     share = dbhandler.getInstance().get_share(id)
     if not share:
         return 'share not in db'
-    Globals().app.notify_error(share)
+    Globals.Instance().app.notify_error(share)
 
     return 'ok'
 
@@ -90,7 +90,7 @@ def stop_share(name='stop_share'):
     if not share:
         return 'share not in db'
 
-    Globals().app.remove_share(share)
+    Globals.Instance().app.remove_share(share)
     return 'ok'
 
 
@@ -106,7 +106,7 @@ def exit_manager():
         def shutdown():
             sleep(1)
             logger.debug('shutting down due to exit call')
-            Globals().app.exitApp('server_exit')
+            Globals.Instance().app.exitApp('server_exit')
         t = threading.Thread(target=shutdown)
         t.setDaemon(True)
         t.start()
@@ -133,8 +133,8 @@ def close_db_connections():
 def start_server():
     get_and_save_manager_port()
     try:
-        logger.info('Starting the manager on port %s' % Globals().manager_port)
-        run(host='127.0.0.1', port=Globals().manager_port, server='cherrypy', debug=True, quiet=True)
+        logger.info('Starting the manager on port %s' % Globals.Instance().manager_port)
+        run(host='127.0.0.1', port=Globals.Instance().manager_port, server='cherrypy', debug=True, quiet=True)
     except KeyboardInterrupt:
         pass
 

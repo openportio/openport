@@ -48,7 +48,7 @@ class SharesFrame(wx.Frame):
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.os_interaction = osinteraction.getInstance()
-        self.globals = Globals()
+        self.globals = Globals.Instance()
 
         if osinteraction.is_mac():
             icon_file = self.os_interaction.get_resource_path('resources/icon.icns')
@@ -449,7 +449,7 @@ if __name__ == '__main__':
             frame.notify_app_down(share)
 
     frame.Show(True)
-    Globals().app = frame
+    Globals.Instance().app = frame
 
     start_server_thread()
 

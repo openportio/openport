@@ -16,7 +16,7 @@ from time import sleep
 logger = get_logger('server')
 
 onNewShare = None
-globals = Globals()
+globals = Globals.Instance()
 shares = {}
 
 raise Exception()

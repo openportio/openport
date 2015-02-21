@@ -33,7 +33,7 @@ class OpenPortManager(object):
         self.share_processes = {}
         self.dbhandler = dbhandler.getInstance()
         self.os_interaction = osinteraction.getInstance()
-        self.globals = Globals()
+        self.globals = Globals.Instance()
 
         if self.os_interaction.is_compiled():
             from common.tee import TeeStdErr, TeeStdOut
@@ -167,7 +167,7 @@ class OpenPortManager(object):
         share.filePath = path
         raise Exception('todo')
         p = self.os_interaction.start_openport_process(share, hide_message=False, no_clipboard=False,
-                                                   manager_port=Globals().manager_port)
+                                                   manager_port=Globals.Instance().manager_port)
         self.share_processes[p.pid] = p
 
     # def print_shares(self):
@@ -182,7 +182,7 @@ class OpenPortManager(object):
     #                  "remote port: %s - " % share.server_port + \
     #                  "running: %s - " % self.os_interaction.pid_is_openport_process(share.pid) + \
     #                  "restart on reboot: %s" % bool(share.restart_command)
-    #     if Globals().verbose:
+    #     if Globals.Instance().verbose:
     #         share_line += ' - pid: %s' % share.pid + \
     #                       ' - id: %s' % share.id
     #     return share_line
@@ -243,17 +243,17 @@ def start_manager():
         from logging import DEBUG
         set_log_level(DEBUG)
         logger.debug('You are seeing debug output.')
-        Globals().verbose = True
+        Globals.Instance().verbose = True
 
     if args.manager_port not in xrange(-1, 65535):
         logger.error('--manager-port not in valid range [-1, 65535]')
         sys.exit(1)
 
-  #   Globals().manager_port = args.manager_port
-  #   Globals().openport_address = args.server
+  #   Globals.Instance().manager_port = args.manager_port
+  #   Globals.Instance().openport_address = args.server
   #
   #   if args.config_file:
-  #       Globals().config = args.config_file
+  #       Globals.Instance().config = args.config_file
   #
   #   manager = get_manager_instance()
   #
@@ -301,8 +301,8 @@ def start_manager():
 class OpenportManagerService(object):
     def __init__(self, manager_port=-1, server='openport.io'):
         self.manager = get_manager_instance()
-        Globals().manager_port = manager_port
-        Globals().openport_address = server
+        Globals.Instance().manager_port = manager_port
+        Globals.Instance().openport_address = server
         self.stopped = False
 
     def start(self, restart_shares=True):

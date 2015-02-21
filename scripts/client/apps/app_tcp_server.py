@@ -2,6 +2,7 @@ import threading
 import sys
 import urllib
 import urllib2
+from urllib2 import URLError
 
 from bottle import route, run, request, error, hook
 
@@ -13,7 +14,7 @@ from services.osinteraction import getInstance
 import os
 logger = get_logger('server')
 
-globals = Globals()
+globals = Globals.Instance()
 
 @route('/register', method='POST')
 def new_share(name='register'):
@@ -21,7 +22,7 @@ def new_share(name='register'):
     logger.debug('/register ' + str(dict(form_data.iteritems())))
 
     port = int(form_data['port'])
-    Globals().tcp_listeners.append(port)
+    Globals.Instance().tcp_listeners.append(port)
     return 'ok'
 
 @route('/ping', method='GET')
@@ -41,7 +42,7 @@ def exit_manager():
             if force:
                 os._exit(5)
             import signal
-            Globals().app.handleSigTERM(signal.SIGINT)
+            Globals.Instance().app.handleSigTERM(signal.SIGINT)
         t = threading.Thread(target=shutdown)
         t.setDaemon(True)
         t.start()
@@ -50,7 +51,7 @@ def exit_manager():
 
 def inform_listeners(share, path):
     def inform():
-        for port in Globals().tcp_listeners:
+        for port in Globals.Instance().tcp_listeners.copy():
             logger.debug('Informing success to %s.' % port)
             url = 'http://127.0.0.1:%s/%s' % (port, path)
             logger.debug('sending get request ' + url)
@@ -60,6 +61,8 @@ def inform_listeners(share, path):
                 response = urllib2.urlopen(req, timeout=1).read()
                 if response.strip() != 'ok':
                     logger.error(response)
+            except URLError:
+                Globals.Instance().tcp_listeners.remove(port)
             except Exception, detail:
                 logger.error("An error has occurred while informing the manager: %s" % detail)
     t = threading.Thread(target=inform)
@@ -131,7 +134,7 @@ def close_db_connections():
 def start_server():
     port = getInstance().get_open_port()
 
-    session = Globals().app.session
+    session = Globals.Instance().app.session
     session.app_management_port = port
 
     try:

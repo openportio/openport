@@ -10,10 +10,10 @@ logger = get_logger(__name__)
 
 def set_manager_port(command):
     os_interaction = osinteraction.getInstance()
-    if Globals().manager_port_from_config_file:
+    if Globals.Instance().manager_port_from_config_file:
         command = os_interaction.unset_variable(command, '--manager-port')
     else:
-        command = os_interaction.set_variable(command, '--manager-port', Globals().manager_port)
+        command = os_interaction.set_variable(command, '--manager-port', Globals.Instance().manager_port)
     return command
 
 

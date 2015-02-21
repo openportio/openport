@@ -25,6 +25,7 @@ from manager import dbhandler
 logger = get_logger(__name__)
 
 TEST_SERVER = 'test.openport.be'
+#TEST_SERVER = 'openport.io'
 
 if not osinteraction.is_windows():
     PYTHON_EXE = 'env/bin/python'
@@ -83,6 +84,36 @@ class AppTests(unittest.TestCase):
 
         self.check_tcp_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
         p.kill()
+
+    def test_openport_app__forward(self):
+        port_out = self.osinteraction.get_open_port()
+        #port_out = 5000
+        p_out = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port_out,
+                              '--server', TEST_SERVER, '--verbose', '--database', self.db_file],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+        self.processes_to_kill.append(p_out)
+        remote_host, remote_port, link = get_remote_host_and_port(p_out, self.osinteraction)
+        click_open_for_ip_link(link)
+        self.osinteraction.print_output_continuously_threaded(p_out, 'p_out')
+       # self.check_tcp_port_forward(remote_host=remote_host, local_port=port_out, remote_port=remote_port)
+
+
+        port_in = self.osinteraction.get_open_port()
+        logger.info('port_in: %s' % port_in)
+        p_in = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port_in,
+                              '--server', TEST_SERVER, '--verbose', '--database', self.db_file, '--forward',
+                              '--remote-port', str(remote_port)],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_in)
+        self.check_application_is_still_alive(p_in)
+        self.check_application_is_still_alive(p_out)
+        self.osinteraction.print_output_continuously_threaded(p_in, 'p_in')
+#        get_remote_host_and_port(p_in, self.osinteraction)
+        sleep(10)
+#        self.assertEqual(1, self.get_nr_of_shares_in_db_file(self.db_file))
+#        sleep(600)
+        self.check_tcp_port_forward(remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
 
     def test_openport_app__do_not_restart(self):
 
@@ -173,7 +204,7 @@ class AppTests(unittest.TestCase):
 
         p.kill()
 
-    def test_openport_app_http_forward(self):
+    def test_openport_app__http_forward(self):
         port = self.osinteraction.get_open_port()
 
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
