@@ -17,8 +17,8 @@ def reset_key_locations():
         log.debug('os.environ:')
         log.debug(os.environ)
     global PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
-    PRIVATE_KEY_FILE = os.path.join(home_dir, '.ssh', 'id_rsa')
-    PUBLIC_KEY_FILE = os.path.join(home_dir, '.ssh', 'id_rsa.pub')
+    PRIVATE_KEY_FILE = os.path.join(home_dir, '.openport', 'id_rsa')
+    PUBLIC_KEY_FILE = os.path.join(home_dir, '.openport', 'id_rsa.pub')
 
 reset_key_locations()
 
