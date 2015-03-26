@@ -79,6 +79,10 @@ class DBHandler(object):
     def add_share(self, share):
         logger.debug('add share')
         openport_session = OpenportSession()
+        session = self._get_session()
+
+        if share.id > 0:
+            openport_session = session.query(OpenportSession).filter_by(id=share.id).one()
 
         openport_session.server = share.server
         openport_session.remote_port = share.server_port
@@ -94,7 +98,6 @@ class DBHandler(object):
         openport_session.app_management_port = share.app_management_port
         openport_session.open_port_for_ip_link = share.open_port_for_ip_link
 
-        session = self._get_session()
         for previous_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
             previous_session.active = False
 

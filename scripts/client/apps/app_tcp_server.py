@@ -22,7 +22,7 @@ def new_share(name='register'):
     logger.debug('/register ' + str(dict(form_data.iteritems())))
 
     port = int(form_data['port'])
-    Globals.Instance().tcp_listeners.append(port)
+    Globals.Instance().tcp_listeners.add(port)
     return 'ok'
 
 @route('/ping', method='GET')
@@ -34,7 +34,7 @@ def ping():
 def exit_manager():
     logger.debug('/exit')
     if request.remote_addr == '127.0.0.1':
-        force = request.forms['force']
+        force = request.forms.get('force', False)
 
         def shutdown():
             sleep(1)
@@ -52,11 +52,12 @@ def exit_manager():
 def inform_listeners(share, path):
     def inform():
         for port in Globals.Instance().tcp_listeners.copy():
-            logger.debug('Informing success to %s.' % port)
+            logger.debug('Informing %s to %s.' % (path, port))
             url = 'http://127.0.0.1:%s/%s' % (port, path)
             logger.debug('sending get request ' + url)
             try:
                 data = urllib.urlencode({'id': share.id})
+                logger.debug(data)
                 req = urllib2.Request(url, data)
                 response = urllib2.urlopen(req, timeout=1).read()
                 if response.strip() != 'ok':
@@ -69,6 +70,7 @@ def inform_listeners(share, path):
     t.setDaemon(True)
     t.start()
 
+
 def inform_start(share):
     inform_listeners(share, 'newShare')
 
@@ -77,7 +79,7 @@ def inform_success(share):
     inform_listeners(share, 'successShare')
 
 
-def inform_failure(share):
+def inform_failure(share, exception):
     inform_listeners(share, 'errorShare')
 
 

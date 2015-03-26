@@ -74,6 +74,13 @@ class DBHandlerTests(unittest.TestCase):
         self.assertEquals(share.app_management_port, share2.app_management_port)
         self.assertEquals(share.open_port_for_ip_link, share2.open_port_for_ip_link)
 
+    def test_save(self):
+        share = Share()
+        self.dbhandler.add_share(share)
+        id = share.id
+        self.dbhandler.add_share(share)
+        self.assertEqual(id, share.id)
+
     def test_concurrency(self):
         dbhandler2 = dbhandler.DBHandler(self.test_db)
 

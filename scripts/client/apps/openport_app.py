@@ -57,6 +57,7 @@ class OpenportApp(object):
         logger.debug('got signal %s' % signum)
         if self.session:
             self.session.notify_stop()
+            sleep(1)
         os._exit(3)
 
     def save_share(self, share):
