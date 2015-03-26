@@ -406,10 +406,11 @@ class WindowsOsInteraction(OsInteraction):
         return 8
 
     def copy_to_clipboard(self, text):
-        #print 'copying to clipboard: %s' % text
-        #todo: subprocess hiervoor gebruiken
-        command = 'echo ' + text.strip() + '| clip'
-        os.system(command)
+        startupinfo = None
+        if os.platform == 'win32':
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        subprocess.check_output(['echo', text.strip(), '|', 'clip'], shell=True, startupinfo=startupinfo).decode()
 
     def pid_is_running(self, pid):
         """Check whether pid exists in the current process table."""
