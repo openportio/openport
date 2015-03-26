@@ -48,7 +48,8 @@ class Openport(object):
                     http_forward=session.http_forward,
                     server=server,
                     automatic_restart=self.automatic_restart,
-                    public_key=public_key
+                    public_key=public_key,
+                    forward_tunnel=session.forward_tunnel,
                 )
                 self.last_response = response
 

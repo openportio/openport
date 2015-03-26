@@ -529,8 +529,13 @@ class IntegrationTest(unittest.TestCase):
             bad_session.public_key_file = public_key_file
             bad_session.private_key_file = private_key_file
 
-            in_app = self.start_openport_session(bad_session)
-            sleep(10)
+            fail = False
+            try:
+                in_app = self.start_openport_session(bad_session)
+                fail = True
+            except AssertionError:
+                pass
+            self.assertFalse(fail)
 
             self.assertFalse(check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_bad_in, fail_on_error=False))
         finally:
