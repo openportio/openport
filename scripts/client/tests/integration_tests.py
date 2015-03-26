@@ -18,14 +18,13 @@ import logging
 import urllib2
 
 import xmlrunner
-print sys.path
 
 from apps.openportit import OpenportItApp
 from apps.openport import Openport
 from common.share import Share
 from common.session import Session
 
-from test_utils import SimpleHTTPClient, TestHTTPServer, click_open_for_ip_link
+from test_utils import SimpleHTTPClient, TestHTTPServer, click_open_for_ip_link, check_tcp_port_forward
 
 TOKEN = 'tokentest'
 
@@ -37,7 +36,7 @@ class IntegrationTest(unittest.TestCase):
     def setUp(self):
         print self._testMethodName
         set_log_level(logging.DEBUG)
-        self.test_server = 'test.openport.be'
+        self.test_server = 'http://test.openport.be'
         self.osinteraction = osinteraction.getInstance()
 
     def tearDown(self):
@@ -136,24 +135,12 @@ class IntegrationTest(unittest.TestCase):
     def test_same_port(self):
         path = os.path.join(os.path.dirname(__file__), '../logo-base.ico')
         share = self.get_share(path)
-        self.success_called_back = False
-        def success_callback(share):
-            self.success_called_back = True
-            print 'port forwarding success is called'
-        share.success_observers.append(success_callback)
 
         self.app = self.start_openportit_session(share)
-
-        i = 0
-        while i < 100 and not self.success_called_back:
-            i += 1
-            sleep(0.1)
-        print "escaped at ", i
-        self.assertTrue(self.success_called_back)
         port = share.server_port
 
         dict = request_port(
-            url='https://%s/api/v1/request-port' % self.test_server,
+            url='%s/api/v1/request-port' % self.test_server,
             public_key=get_or_create_public_key(),
             restart_session_token=share.server_session_token,
             request_server_port=port
@@ -162,7 +149,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertEqual(port, response.remote_port)
 
         dict = request_port(
-            url='https://%s/api/v1/request-port' % self.test_server,
+            url='%s/api/v1/request-port' % self.test_server,
             public_key=get_or_create_public_key(),
             restart_session_token='not the same token',
             request_server_port=port
@@ -177,7 +164,7 @@ class IntegrationTest(unittest.TestCase):
 
         logger.debug('requesting port')
         dictionary = request_port(
-            url='https://%s/api/v1/request-port' % self.test_server,
+            url='%s/api/v1/request-port' % self.test_server,
             public_key=public_key
         )
 
@@ -186,7 +173,7 @@ class IntegrationTest(unittest.TestCase):
         self.assertNotEqual(None, response.open_port_for_ip_link)
         logger.debug('requesting port')
         dictionary2 = request_port(
-            url='https://%s/api/v1/request-port' % self.test_server,
+            url='%s/api/v1/request-port' % self.test_server,
             public_key=public_key,
             restart_session_token=response.session_token,
             request_server_port=response.remote_port
@@ -198,7 +185,7 @@ class IntegrationTest(unittest.TestCase):
 
         logger.debug('requesting port')
         dictionary3 = request_port(
-            url='https://%s/api/v1/request-port' % self.test_server,
+            url='%s/api/v1/request-port' % self.test_server,
             public_key=public_key,
             restart_session_token='not the same token',
             request_server_port=response.remote_port
@@ -273,7 +260,7 @@ class IntegrationTest(unittest.TestCase):
 #        self.assertEqual(80, remote_port)
         remote_host = session.http_forward_address
         print 'remote host:' + remote_host
-        self.assertTrue('.u.%s' % self.test_server in remote_host, 'expect .u. in remote_host: %s' % remote_host)
+        self.assertTrue('.u.' in remote_host, 'expect .u. in remote_host: %s' % remote_host)
 
         c = SimpleHTTPClient()
         actual_response = c.get('http://localhost:%s' % port)
@@ -295,7 +282,7 @@ class IntegrationTest(unittest.TestCase):
 
         remote_host = session.http_forward_address
         print 'remote host:' + remote_host
-        self.assertTrue('.u.%s' % self.test_server in remote_host, 'expect .u. in remote_host: %s' % remote_host)
+        self.assertTrue('.u.' in remote_host, 'expect .u. in remote_host: %s' % remote_host)
 
         c = SimpleHTTPClient()
         actual_response = c.get('http://localhost:%s' % port)
@@ -493,6 +480,64 @@ class IntegrationTest(unittest.TestCase):
                 self.assertEqual(actual_response, response.strip())
         except (urllib2.HTTPError, urllib2.URLError) as e:
             self.fail('url error on connection nr %s' % i)
+
+    def test_forward_tunnel(self):
+        port_out = self.osinteraction.get_open_port()
+        #port_out = 5000
+
+        out_session = Session()
+        out_session.local_port = port_out
+        out_session.server_session_token = None
+
+        out_app, in_app = None, None
+        try:
+            out_app = self.start_openport_session(out_session)
+
+            remote_host, remote_port, link = out_session.server, out_session.server_port, out_session.open_port_for_ip_link
+            click_open_for_ip_link(link)
+            check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
+
+
+            port_in = self.osinteraction.get_open_port()
+            logger.info('port_in: %s' % port_in)
+
+            in_session = Session()
+            in_session.forward_tunnel = True
+            in_session.server_port = out_session.server_port
+            in_session.local_port = port_in
+
+            in_app = self.start_openport_session(in_session)
+            sleep(10)
+
+            check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
+
+            port_bad_in = self.osinteraction.get_open_port()
+            bad_session = Session()
+            bad_session.forward_tunnel = True
+            bad_session.server_port = out_session.server_port
+            bad_session.local_port = port_bad_in
+
+            keys = create_new_key_pair()
+            private_key_file = 'testfiles/tmp/tmp_key'
+            with open(private_key_file, 'w') as f:
+                f.write(keys[0])
+
+            public_key_file = 'testfiles/tmp/tmp_key.pub'
+            with open(public_key_file, 'w') as f:
+                f.write(keys[1])
+
+            bad_session.public_key_file = public_key_file
+            bad_session.private_key_file = private_key_file
+
+            in_app = self.start_openport_session(bad_session)
+            sleep(10)
+
+            self.assertFalse(check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_bad_in, fail_on_error=False))
+        finally:
+            if out_app:
+                out_app.stop()
+            if in_app:
+                in_app.stop()
 
 
 if __name__ == '__main__':

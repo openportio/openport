@@ -26,6 +26,9 @@ class Session(object):
         self.app_management_port = app_management_port
         self.forward_tunnel = forward_tunnel
 
+        self.public_key_file = None
+        self.private_key_file = None
+
         self.success_observers = []
         self.error_observers = []
         self.start_observers = []

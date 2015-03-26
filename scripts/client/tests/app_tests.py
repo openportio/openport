@@ -16,7 +16,7 @@ from services import osinteraction
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_success_callback
-from test_utils import print_all_output, click_open_for_ip_link, run_method_with_timeout
+from test_utils import print_all_output, click_open_for_ip_link, run_method_with_timeout, check_tcp_port_forward
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
 from apps.app_tcp_server import send_exit
@@ -24,8 +24,8 @@ from manager import dbhandler
 
 logger = get_logger(__name__)
 
-TEST_SERVER = 'test.openport.be'
-#TEST_SERVER = 'openport.io'
+TEST_SERVER = 'http://test.openport.be'
+#TEST_SERVER = 'https://openport.io'
 
 if not osinteraction.is_windows():
     PYTHON_EXE = 'env/bin/python'
@@ -82,10 +82,10 @@ class AppTests(unittest.TestCase):
 
 #        self.assertFalse(openportmanager.manager_is_running(8001))
 
-        self.check_tcp_port_forward(remote_host=remote_host, local_port=port, remote_port=remote_port)
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
         p.kill()
 
-    def test_openport_app__forward(self):
+    def test_openport_app__forward_tunnel(self):
         port_out = self.osinteraction.get_open_port()
         #port_out = 5000
         p_out = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port_out,
@@ -96,13 +96,13 @@ class AppTests(unittest.TestCase):
         remote_host, remote_port, link = get_remote_host_and_port(p_out, self.osinteraction)
         click_open_for_ip_link(link)
         self.osinteraction.print_output_continuously_threaded(p_out, 'p_out')
-       # self.check_tcp_port_forward(remote_host=remote_host, local_port=port_out, remote_port=remote_port)
+       # check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
 
 
         port_in = self.osinteraction.get_open_port()
         logger.info('port_in: %s' % port_in)
         p_in = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port_in,
-                              '--server', TEST_SERVER, '--verbose', '--database', self.db_file, '--forward',
+                              '--server', TEST_SERVER, '--verbose', '--database', self.db_file, '--forward-tunnel',
                               '--remote-port', str(remote_port)],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_in)
@@ -113,7 +113,7 @@ class AppTests(unittest.TestCase):
         sleep(10)
 #        self.assertEqual(1, self.get_nr_of_shares_in_db_file(self.db_file))
 #        sleep(600)
-        self.check_tcp_port_forward(remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
+        check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
 
     def test_openport_app__do_not_restart(self):
 
@@ -742,43 +742,6 @@ class AppTests(unittest.TestCase):
         self.assertEqual(actual_response, response.strip())
         print 'http portforward ok'
         s.server.shutdown()
-
-    def check_tcp_port_forward(self, remote_host, local_port, remote_port, fail_on_error=True):
-
-        text = 'ping'
-
-        s = SimpleTcpServer(local_port)
-        try:
-            s.runThreaded()
-
-            cl = SimpleTcpClient('127.0.0.1', local_port)
-            response = cl.send(text).strip()
-            if not fail_on_error and text != response:
-                return False
-            else:
-                self.assertEqual(text, response)
-            cl.close()
-
-            cr = SimpleTcpClient(remote_host, remote_port)
-            response = cr.send(text).strip()
-            if not fail_on_error and text != response:
-                return False
-            else:
-                self.assertEqual(text, response)
-
-            cr.close()
-            print 'tcp portforward ok'
-        except Exception, e:
-            tr = traceback.format_exc()
-            logger.error(e)
-            logger.error(tr)
-            if not fail_on_error:
-                return False
-            else:
-                raise e
-        finally:
-            s.close()
-        return True
 
     def kill_manager(self, manager_port):
         url = 'http://localhost:%s/exit' % manager_port

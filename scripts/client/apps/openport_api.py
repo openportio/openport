@@ -32,7 +32,7 @@ class PortForwardResponse():
         self.session_end_time = dict.get('session_end_time')
 
 
-def request_port(public_key, local_port=None, url='https://%s/api/v1/request-port' % DEFAULT_SERVER,
+def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEFAULT_SERVER,
                  restart_session_token='',
                  request_server_port=-1, http_forward=False, automatic_restart=False):
     """
@@ -66,17 +66,20 @@ def request_port(public_key, local_port=None, url='https://%s/api/v1/request-por
             logger.debug('error: got response: %s' % response)
         except:
             pass
-        print "An error has occurred while communicating the the openport servers. ", detail, detail.read()
+        print "An error has occurred while communicating the the openport servers. ", detail, \
+            detail.read() if hasattr(detail, 'read') else ''
         raise detail
 
 
 def request_open_port(local_port, restart_session_token='', request_server_port=-1, error_callback=None,
-                      http_forward=False, stop_callback=None, server=DEFAULT_SERVER, automatic_restart=False):
+                      http_forward=False, stop_callback=None, server=DEFAULT_SERVER, automatic_restart=False,
+                      public_key=None):
 
-    public_key = get_or_create_public_key()
+    if public_key is None:
+        public_key = get_or_create_public_key()
 
     logger.debug("requesting port forward - remote port: %s, restart session token: %s" % (request_server_port, restart_session_token))
-    url = 'https://%s/api/v1/request-port' % server
+    url = '%s/api/v1/request-port' % server
     dict = request_port(local_port=local_port, public_key=public_key, url=url,
                         restart_session_token=restart_session_token,
                         request_server_port=request_server_port, http_forward=http_forward,

@@ -1,6 +1,6 @@
 import os
 from common.singleton import Singleton
-DEFAULT_SERVER = 'www.openport.io'
+DEFAULT_SERVER = 'https://www.openport.io'
 
 @Singleton
 class Globals(object):

@@ -4,7 +4,6 @@ from manager.globals import DEFAULT_SERVER
 
 from apps import openport_api
 from apps.portforwarding import PortForwardingService, PortForwardException
-from apps.keyhandling import PUBLIC_KEY_FILE, PRIVATE_KEY_FILE
 from services.logger_service import get_logger
 
 logger = get_logger('openport')
@@ -32,6 +31,11 @@ class Openport(object):
         self.restart_on_failure = True
         self.automatic_restart = False
         self.session = session
+        if session.public_key_file:
+            with open(session.public_key_file, 'r') as f:
+                public_key = f.readline().strip()
+        else:
+            public_key = None
 
         while self.restart_on_failure:
             try:
@@ -43,7 +47,8 @@ class Openport(object):
                     stop_callback=session.notify_stop,
                     http_forward=session.http_forward,
                     server=server,
-                    automatic_restart=self.automatic_restart
+                    automatic_restart=self.automatic_restart,
+                    public_key=public_key
                 )
                 self.last_response = response
 
@@ -66,8 +71,8 @@ class Openport(object):
                     session.server,
                     SERVER_SSH_PORT,
                     SERVER_SSH_USER,
-                    PUBLIC_KEY_FILE,
-                    PRIVATE_KEY_FILE,
+                    session.public_key_file,
+                    session.private_key_file,
                     success_callback=self.session_success,
                     error_callback=session.notify_error,
                     fallback_server_ssh_port=FALLBACK_SERVER_SSH_PORT,
@@ -82,7 +87,7 @@ class Openport(object):
             except SystemExit as e:
                 raise
             except Exception as e:
-                logger.error(e)
+                logger.exception(e)
                 sleep(10)
             finally:
                 self.automatic_restart = True

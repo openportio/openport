@@ -11,6 +11,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import urllib2
 from services.logger_service import get_logger
 from services import osinteraction
+import traceback
 
 logger = get_logger(__name__)
 
@@ -328,6 +329,51 @@ def kill_all_processes(processes_to_kill):
 def click_open_for_ip_link(link):
     if link:
         logger.info('clicking link %s' % link)
+        import ssl
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
         req = urllib2.Request(link)
-        response = urllib2.urlopen(req, timeout=10).read()
+        response = urllib2.urlopen(req, timeout=10, context=ctx).read()
         assert 'is now open' in response
+
+servers = {}
+
+
+def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_error=True):
+
+    text = 'ping'
+
+    s = servers[local_port] if local_port in servers else SimpleTcpServer(local_port)
+    servers[local_port] = s
+    try:
+        s.runThreaded()
+
+        cl = SimpleTcpClient('127.0.0.1', local_port)
+        response = cl.send(text).strip()
+        if not fail_on_error and text != response:
+            return False
+        else:
+            test.assertEqual(text, response)
+        cl.close()
+
+        cr = SimpleTcpClient(remote_host, remote_port)
+        response = cr.send(text).strip()
+        if not fail_on_error and text != response:
+            return False
+        else:
+            test.assertEqual(text, response)
+
+        cr.close()
+        print 'tcp portforward ok'
+    except Exception, e:
+        tr = traceback.format_exc()
+        logger.error(e)
+        logger.error(tr)
+        if not fail_on_error:
+            return False
+        else:
+            raise e
+    finally:
+        s.close()
+    return True

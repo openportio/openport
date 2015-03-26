@@ -17,6 +17,7 @@ from manager import dbhandler
 from apps.openport import Openport
 from apps import openport_app_version
 from app_tcp_server import start_server_thread, send_exit, send_ping
+from keyhandling import PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
 
 from manager.globals import DEFAULT_SERVER
 
@@ -86,7 +87,7 @@ class OpenportApp(object):
         parser.add_argument('--config-file', action='store', type=str, default='', help=argparse.SUPPRESS)
         parser.add_argument('--forward-tunnel', action='store_true', help='Forward connections from your local port to the server port.')
         parser.add_argument('--remote-port', type=int, help='The server port you want to forward to'
-                                                           ' (only use in combination with --forward).', default=-1)
+                                                           ' (only use in combination with --forward-tunnel).', default=-1)
 
     def init_app(self, args):
         if args.verbose:
@@ -246,6 +247,9 @@ class OpenportApp(object):
         session.start_observers.append(self.save_share)
         session.error_observers.append(self.error_callback)
         session.success_observers.append(self.success_callback)
+
+        session.private_key_file = PRIVATE_KEY_FILE
+        session.public_key_file = PUBLIC_KEY_FILE
 
         self.session = session
 
