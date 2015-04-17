@@ -144,7 +144,7 @@ def start_server():
         session.success_observers.append(inform_success)
         session.error_observers.append(inform_failure)
         session.stop_observers.append(inform_stop)
-        logger.info('Starting the app management on port %s' % port)
+        logger.debug('Starting the app management on port %s' % port)
         run(host='127.0.0.1', port=port, server='cherrypy', debug=True, quiet=True)
     except KeyboardInterrupt:
         pass
