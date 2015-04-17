@@ -2,6 +2,7 @@ import os
 import paramiko
 import StringIO
 from services.logger_service import get_logger
+import shutil
 
 log = get_logger(__name__)
 
@@ -24,10 +25,22 @@ reset_key_locations()
 
 
 def get_or_create_public_key():
-    if not os.path.exists(PRIVATE_KEY_FILE) or not os.path.exists(PUBLIC_KEY_FILE):
-        write_new_key(PRIVATE_KEY_FILE, PUBLIC_KEY_FILE)
-
+    ensure_keys_exist()
     return open(PUBLIC_KEY_FILE, 'r').readline()
+
+
+def ensure_keys_exist():
+    if not os.path.exists(PRIVATE_KEY_FILE) or not os.path.exists(PUBLIC_KEY_FILE):
+        system_id_rsa=os.path.expanduser('~/.ssh/id_rsa')
+        system_id_rsa_pub=os.path.expanduser('~/.ssh/id_rsa.pub')
+        if os.path.exists(system_id_rsa) and os.path.exists(system_id_rsa_pub):
+            try:
+                paramiko.RSAKey.from_private_key_file(system_id_rsa)
+            except paramiko.PasswordRequiredException:
+                write_new_key(PRIVATE_KEY_FILE, PUBLIC_KEY_FILE)
+            else:
+                shutil.copy(system_id_rsa, PRIVATE_KEY_FILE)
+                shutil.copy(system_id_rsa_pub, PUBLIC_KEY_FILE)
 
 
 def write_new_key(private_key_filename, public_key_filename):

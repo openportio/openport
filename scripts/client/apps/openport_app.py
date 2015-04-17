@@ -17,7 +17,7 @@ from manager import dbhandler
 from apps.openport import Openport
 from apps import openport_app_version
 from app_tcp_server import start_server_thread, send_exit, send_ping
-from keyhandling import PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
+from keyhandling import PRIVATE_KEY_FILE, PUBLIC_KEY_FILE, ensure_keys_exist
 
 from manager.globals import DEFAULT_SERVER
 
@@ -249,6 +249,7 @@ class OpenportApp(object):
         session.error_observers.append(self.error_callback)
         session.success_observers.append(self.success_callback)
 
+        ensure_keys_exist()
         session.private_key_file = PRIVATE_KEY_FILE
         session.public_key_file = PUBLIC_KEY_FILE
 
