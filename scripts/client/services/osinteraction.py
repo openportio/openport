@@ -244,7 +244,7 @@ class OsInteraction(object):
             command = []
             path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport.exe'))
             if not os.path.exists(path):
-                path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport'))
+                path = self.quote_path('/usr/bin/openport')
             command.extend([path])
         else:
             command = self.get_python_exec()
