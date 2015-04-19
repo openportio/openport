@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['gui/shares_frame.py'],
+a = Analysis(['gui/openport_gui.py'],
              pathex=['/Users/jan/swprojects/openport-client/scripts/client'],
              hiddenimports=[],
              hookspath=None,
