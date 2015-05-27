@@ -6,16 +6,13 @@ import logging
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
-import xmlrunner
-from services.osinteraction import OsInteraction, getInstance, is_windows
-import subprocess
+from services.osinteraction import getInstance
 from time import sleep
 from services.logger_service import set_log_level
-from test_utils import run_command_with_timeout, run_command_with_timeout_return_process
 from apps.openport_app import OpenportApp
-from apps import openport_api
 import threading
 from manager import dbhandler
+
 
 class OpenportAppTests(unittest.TestCase):
 
@@ -39,7 +36,6 @@ class OpenportAppTests(unittest.TestCase):
         app.args.local_port = -1
         app.args.register_key = ''
         app.args.port = -1
-        app.args.manager = -1
 
         app.args.manager_port = 8001
         app.args.start_manager = True
@@ -51,8 +47,14 @@ class OpenportAppTests(unittest.TestCase):
         app.args.server = 'testserver.jdb'
         app.args.restart_on_reboot = False
         app.args.no_manager = False
-
-
+        app.args.config_file = ''
+        app.args.list = False
+        app.args.kill = 0
+        app.args.kill_all = False
+        app.args.restart_shares = False
+        app.args.listener_port = -1
+        app.args.forward_tunnel = False
+        app.args.remote_port = -1
 
     def test_request_same_port_if_old_port_is_denied(self):
         """ Check that if a session_token is denied, the new session token is stored and used. """
