@@ -3,6 +3,7 @@ import os
 import sys
 from time import sleep
 import threading
+
 import wx
 from wx.lib import intctrl
 from wx._core import EVT_PAINT
@@ -13,14 +14,16 @@ sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from manager import dbhandler
 from common.share import Share
 from services import osinteraction
-from manager.globals import Globals
 from services.logger_service import get_logger
 from services import qr_service, image_service
 from gui.trayicon import OpenPortItTaskBarIcon
-from services.app_service import start_openport_process_from_session
+from services.app_service import AppService
 from common.session import Session
+from manager.dbhandler import DBHandler
 
-from gui_tcp_server import start_server_thread, app_communicate, register_with_app
+from gui_tcp_server import GUITcpServer
+from common.config import OpenportAppConfig
+from services.config_service import ConfigService
 
 from services.logger_service import set_log_level
 import logging
@@ -40,7 +43,8 @@ class SharesFrame(wx.Frame):
     def onClose(self, evt):
         self.Hide()
 
-    def __init__(self, parent, id, title, application):
+    def __init__(self, parent=None, id=-1, title='', application=None):
+
         wx.Frame.__init__(self, parent, -1, title,
                           style=wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
         self.application = application
@@ -48,7 +52,15 @@ class SharesFrame(wx.Frame):
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.os_interaction = osinteraction.getInstance()
-        self.globals = Globals.Instance()
+        self.config = OpenportAppConfig()
+        self.config.app = self
+        self.config_service = ConfigService(self.config)
+        self.app_service = AppService(self.config)
+        self.db_handler = DBHandler(self.config.d)
+
+        port = self.config_service.get_and_save_manager_port()
+        self.server = GUITcpServer('127.0.0.1', port, self.config)
+        self.server.run_threaded()
 
         if osinteraction.is_mac():
             icon_file = self.os_interaction.get_resource_path('resources/icon.icns')
@@ -60,6 +72,23 @@ class SharesFrame(wx.Frame):
         self.SetIcon(icon)
 
         self.addTrayIcon()
+
+    def initialize(self):
+        db_handler = dbhandler.getInstance()
+
+        shares = db_handler.get_shares()
+
+        for share in shares:
+            frame.add_share(share)
+            if not osinteraction.getInstance().pid_is_openport_process(share.pid):
+                frame.notify_app_down(share)
+
+        frame.Show(True)
+
+        for share in shares:
+            frame.server.register_with_app(share)
+
+
 
     def showFrame(self, event):
         print "show frame"
@@ -135,7 +164,7 @@ class SharesFrame(wx.Frame):
             session = Session()
             session.local_port = dialog.port_input.GetValue()
             session.http_forward = dialog.http_forward_checkbox.GetValue()
-            start_openport_process_from_session(session)
+            self.app_service.start_openport_process_from_session(session)
 
     def rebuild(self):
         self.share_panels = {}
@@ -259,7 +288,7 @@ class SharesFrame(wx.Frame):
             s = dbhandler.getInstance().get_share(share.id)
             if s and s.app_management_port:
                 self.notify_app_down(s)
-                app_communicate(s, 'exit', {'id': share.id})
+                self.server.app_communicate(s, 'exit', {'id': share.id})
 
             def remove_killed_share():
                 while osinteraction.getInstance().pid_is_openport_process(s.pid):
@@ -428,7 +457,6 @@ class StartOpenportDialog(wx.Dialog):
         self.Destroy()
         self.EndModal(wx.ID_CANCEL)
 
-
     def on_ok(self, e):
         self.Destroy()
         self.EndModal(wx.ID_OK)
@@ -436,24 +464,7 @@ class StartOpenportDialog(wx.Dialog):
 
 if __name__ == '__main__':
     set_log_level(logging.DEBUG)
-
-    app = wx.App(False)
+    app = wx.App()
     frame = SharesFrame(None, -1, ' ', None)
-    db_handler = dbhandler.getInstance()
-
-    shares = db_handler.get_shares()
-
-    for share in shares:
-        frame.add_share(share)
-        if not osinteraction.getInstance().pid_is_openport_process(share.pid):
-            frame.notify_app_down(share)
-
-    frame.Show(True)
-    Globals.Instance().app = frame
-
-    start_server_thread()
-
-    for share in shares:
-        register_with_app(share)
-
+    frame.initialize()
     app.MainLoop()

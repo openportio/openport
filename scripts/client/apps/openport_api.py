@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
 import sys
-from apps.keyhandling import get_or_create_public_key
-from services.logger_service import get_logger
 import urllib
 import urllib2
 import json
-from manager.globals import DEFAULT_SERVER
+
+from apps.keyhandling import get_or_create_public_key
+from services.logger_service import get_logger
+from common.config import DEFAULT_SERVER
 from apps.openport_app_version import VERSION
+
 
 logger = get_logger('openport_api')
 

@@ -2,7 +2,7 @@
 import warnings
 
 warnings.warn("deprecated", DeprecationWarning)
-from manager.globals import DEFAULT_SERVER
+from common.config import DEFAULT_SERVER
 
 
 import os

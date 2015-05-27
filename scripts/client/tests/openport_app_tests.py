@@ -12,6 +12,7 @@ from services.logger_service import set_log_level
 from apps.openport_app import OpenportApp
 import threading
 from manager import dbhandler
+from test_utils import set_default_args
 
 
 class OpenportAppTests(unittest.TestCase):
@@ -32,34 +33,10 @@ class OpenportAppTests(unittest.TestCase):
 
         self.stop_port_forward = True
 
-    def set_default_args(self, app):
-        app.args.local_port = -1
-        app.args.register_key = ''
-        app.args.port = -1
-
-        app.args.manager_port = 8001
-        app.args.start_manager = True
-        app.args.database = self.test_db
-        app.args.request_port = -1
-        app.args.request_token = ''
-        app.args.verbose = True
-        app.args.http_forward = False
-        app.args.server = 'testserver.jdb'
-        app.args.restart_on_reboot = False
-        app.args.no_manager = False
-        app.args.config_file = ''
-        app.args.list = False
-        app.args.kill = 0
-        app.args.kill_all = False
-        app.args.restart_shares = False
-        app.args.listener_port = -1
-        app.args.forward_tunnel = False
-        app.args.remote_port = -1
-
     def test_request_same_port_if_old_port_is_denied(self):
         """ Check that if a session_token is denied, the new session token is stored and used. """
 
-        self.set_default_args(self.app)
+        set_default_args(self.app, self.test_db)
 
         this_test = self
         this_test.raise_exception = False
@@ -132,7 +109,7 @@ class OpenportAppTests(unittest.TestCase):
         dbhandler.destroy_instance()
 
         self.app = OpenportApp()
-        self.set_default_args(self.app)
+        set_default_args(self.app, self.test_db)
         self.app.openport.start_port_forward = fake_start_port_forward
 
         self.app.args.local_port = 24
@@ -165,7 +142,7 @@ class OpenportAppTests(unittest.TestCase):
         dbhandler.destroy_instance()
 
         self.app = OpenportApp()
-        self.set_default_args(self.app)
+        set_default_args(self.app, self.test_db)
         self.app.openport.start_port_forward = fake_start_port_forward
 
         self.app.args.local_port = 24

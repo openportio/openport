@@ -51,8 +51,7 @@ class AppTests(unittest.TestCase):
                 sleep(3)
                 os.remove(self.db_file)
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
-        dbhandler.db_location = self.db_file
-        self.db_handler = dbhandler.getInstance()
+        self.db_handler = dbhandler.DBHandler(self.db_file)
 
     def tearDown(self):
         if self.manager_port > 0:
@@ -84,6 +83,66 @@ class AppTests(unittest.TestCase):
 
         check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
         p.kill()
+
+    def test_openport_app__live_site(self):
+        port = self.osinteraction.get_open_port()
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--verbose', '--database', self.db_file],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.check_application_is_still_alive(p)
+        click_open_for_ip_link(link)
+
+        self.assertEqual(1, self.get_nr_of_shares_in_db_file(self.db_file))
+
+#        self.assertFalse(openportmanager.manager_is_running(8001))
+
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
+        p.kill()
+
+    def test_save_share(self):
+        port = self.osinteraction.get_open_port()
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--server', TEST_SERVER, '--verbose', '--database', self.db_file],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        share = self.db_handler.get_share_by_local_port(port, filter_active=False)[0]
+
+        self.assertEqual(1, share.id)
+        self.assertEqual(remote_host, share.server)
+        self.assertEqual(remote_port, share.server_port)
+        self.assertEqual(p.pid, share.pid)
+        self.assertTrue(share.active)
+        self.assertNotEqual(None, share.account_id)
+        self.assertNotEqual(None, share.key_id)
+        self.assertEqual(port, share.local_port)
+        self.assertNotEqual(None, share.server_session_token)
+        self.assertEqual('', share.restart_command)
+        self.assertFalse(share.http_forward)
+        self.assertEqual(None, share.http_forward_address)
+        self.assertTrue(share.app_management_port > 1024)
+        self.assertEqual(link, share.open_port_for_ip_link)
+        self.assertFalse(share.forward_tunnel)
+        p.kill()
+
+    def test_save_share__restart_on_reboot(self):
+        port = self.osinteraction.get_open_port()
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--server', TEST_SERVER, '--verbose', '--database', self.db_file, '--restart-on-reboot'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+
+        share = self.db_handler.get_share_by_local_port(port, filter_active=False)[0]
+
+        self.assertTrue(share.active)
+        self.assertEqual(['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
+                          TEST_SERVER], share.restart_command)
+        p.kill()
+
 
     def test_openport_app__forward_tunnel(self):
         port_out = self.osinteraction.get_open_port()
@@ -229,7 +288,7 @@ class AppTests(unittest.TestCase):
             print 'application terminated: ', self.osinteraction.get_all_output(p)
             self.fail('p_app.poll() should be None but was %s' % p.poll())
 
-    def test_manager(self):
+    def test_restart_shares(self):
         port = self.osinteraction.get_open_port()
         print 'localport :', port
         s = SimpleTcpServer(port)
@@ -314,20 +373,20 @@ class AppTests(unittest.TestCase):
         print 'manager_port :', manager_port
 
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', str(port), '--database', self.db_file,
-                                  '--verbose'],
+                                  '--verbose', '--server', TEST_SERVER],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
 
         sleep(3)
         p_app2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', str(port), '--database', self.db_file,
-                                   '--verbose'],
+                                   '--verbose', '--server', TEST_SERVER],
                                   stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app2)
         sleep(2)
         command_output = print_all_output(p_app2, self.osinteraction, 'p_app2')
 
         self.assertNotEqual(False, command_output[0])
-        self.assertTrue('Port forward already running for port %s' % port in command_output[0])
+        self.assertTrue('Port forward already running for port %s' % port in command_output[0], command_output[0])
         self.assertFalse(self.application_is_alive(p_app2))
         run_method_with_timeout(p_app2.wait, 5)
 

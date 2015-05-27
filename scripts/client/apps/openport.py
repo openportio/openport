@@ -1,10 +1,11 @@
 import os
 from time import sleep
-from manager.globals import DEFAULT_SERVER
 
+from common.config import DEFAULT_SERVER
 from apps import openport_api
 from apps.portforwarding import PortForwardingService, PortForwardException
 from services.logger_service import get_logger
+
 
 logger = get_logger('openport')
 

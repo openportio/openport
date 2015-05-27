@@ -426,45 +426,69 @@ def start_openportit_session(test, share):
 
 
 def start_openport_session(test, session):
-        openport = Openport()
-        test.called_back_success = False
-        test.called_back_error = False
+    openport = Openport()
+    test.called_back_success = False
+    test.called_back_error = False
 
-        def callback(session1):
-            print session1.as_dict()
-            test.assertEquals(test.test_server, session1.server)
-            test.assertTrue(session1.server_port >= 2000, 'expected server_port >= 2000 but was %s' % session1.server_port)
-           # test.assertTrue(share.server_port<= 51000)
+    def callback(session1):
+        print session1.as_dict()
+        test.assertEquals(test.test_server, session1.server)
+        test.assertTrue(session1.server_port >= 2000, 'expected server_port >= 2000 but was %s' % session1.server_port)
+       # test.assertTrue(share.server_port<= 51000)
 
-            test.assertTrue(session1.account_id > 0, 'share.account_id was %s' % session1.account_id)
-            test.assertTrue(session1.key_id > 0, 'share.key_id was %s' % session1.key_id)
-            print 'called back, thanks :)'
+        test.assertTrue(session1.account_id > 0, 'share.account_id was %s' % session1.account_id)
+        test.assertTrue(session1.key_id > 0, 'share.key_id was %s' % session1.key_id)
+        print 'called back, thanks :)'
 
-        def session_success_callback(session1):
-            test.called_back_success = True
+    def session_success_callback(session1):
+        test.called_back_success = True
 
-        def session_error_callback(session1, exception):
-            test.called_back_error = True
-            raise exception
+    def session_error_callback(session1, exception):
+        test.called_back_error = True
+        raise exception
 
-        session.success_observers.append(session_success_callback)
-        session.error_observers.append(session_error_callback)
+    session.success_observers.append(session_success_callback)
+    session.error_observers.append(session_error_callback)
 
-        def show_error(error_msg):
-            print "error:" + error_msg
+    def show_error(error_msg):
+        print "error:" + error_msg
 
-        def start_openport():
-            openport.start_port_forward(session, server=test.test_server)
+    def start_openport():
+        openport.start_port_forward(session, server=test.test_server)
 
-        thr = threading.Thread(target=start_openport)
-        thr.setDaemon(True)
-        thr.start()
-        i = 0
-        while i < 30 and (not test.called_back_success or session.server_port < 0):
-            if test.called_back_error:
-                test.fail('error call back!')
-            sleep(1)
-            i += 1
-        test.assertTrue(test.called_back_success, 'not called back in time')
-        print 'called back after %s seconds' % i
-        return openport
+    thr = threading.Thread(target=start_openport)
+    thr.setDaemon(True)
+    thr.start()
+    i = 0
+    while i < 30 and (not test.called_back_success or session.server_port < 0):
+        if test.called_back_error:
+            test.fail('error call back!')
+        sleep(1)
+        i += 1
+    test.assertTrue(test.called_back_success, 'not called back in time')
+    print 'called back after %s seconds' % i
+    return openport
+
+def set_default_args(app, db_location=None):
+    app.args.local_port = -1
+    app.args.register_key = ''
+    app.args.port = -1
+
+    app.args.manager_port = 8001
+    app.args.start_manager = True
+    app.args.database = db_location
+    app.args.request_port = -1
+    app.args.request_token = ''
+    app.args.verbose = True
+    app.args.http_forward = False
+    app.args.server = 'testserver.jdb'
+    app.args.restart_on_reboot = False
+    app.args.no_manager = False
+    app.args.config_file = ''
+    app.args.list = False
+    app.args.kill = 0
+    app.args.kill_all = False
+    app.args.restart_shares = False
+    app.args.listener_port = -1
+    app.args.forward_tunnel = False
+    app.args.remote_port = -1

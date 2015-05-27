@@ -160,14 +160,6 @@ class DBHandlerTests(unittest.TestCase):
             t.join()
         self.assertEqual([], errors)
 
-
-
-    def test_singleton(self):
-        a = dbhandler.DBHandler(self.test_db)
-        b = dbhandler.DBHandler(self.test_db)
-        self.assertTrue(a == b)
-        self.assertEqual(a, b)
-
     def test_get_shares(self):
         share1 = Share(active=False)
         share2 = Share(active=True, local_port=123)

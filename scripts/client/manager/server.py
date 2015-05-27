@@ -1,22 +1,18 @@
-
-import signal
 import threading
 import sys
+from time import sleep
 
 from bottle import route, run, request, error, hook
-
-
 from manager import dbhandler
-import os
 from common.session import Session
-from manager.globals import Globals
+from common.config import Globals
 from common.share import Share
 from services.logger_service import get_logger
-from time import sleep
+
 logger = get_logger('server')
 
 onNewShare = None
-globals = Globals.Instance()
+
 shares = {}
 
 raise Exception()

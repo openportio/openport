@@ -8,18 +8,18 @@ sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from services import osinteraction
 from services.logger_service import get_logger, set_log_level
-from manager.globals import Globals
+from common.config import OpenportAppConfig
 from common.session import Session
 from services import key_registration_service
-from services.config_service import get_and_save_manager_port
-from services.app_service import get_restart_command, set_manager_port
+from services.config_service import ConfigService
+from services.app_service import AppService
 from manager import dbhandler
 from apps.openport import Openport
 from apps import openport_app_version
-from app_tcp_server import start_server_thread, send_exit, send_ping
+from app_tcp_server import AppTcpServer, send_exit, send_ping
 from keyhandling import ensure_keys_exist, get_default_key_locations
 
-from manager.globals import DEFAULT_SERVER
+from common.config import DEFAULT_SERVER
 
 logger = get_logger('openport_app')
 from time import sleep
@@ -28,13 +28,16 @@ from time import sleep
 class OpenportApp(object):
 
     def __init__(self):
-        Globals.Instance().app = self
+        self.config = OpenportAppConfig()
+        self.config.app = self
         self.manager_app_started = False
         self.os_interaction = osinteraction.getInstance()
-        self.globals = Globals.Instance()
         self.args = UserDict()
         self.session = None
         self.openport = Openport()
+        self.server = AppTcpServer('127.0.0.1', self.os_interaction.get_open_port(), self.config)
+        self.config_service = ConfigService(self.config)
+        self.app_service = AppService(self.config)
         if self.os_interaction.is_compiled():
             from common.tee import TeeStdErr, TeeStdOut
             TeeStdOut(self.os_interaction.get_app_data_path('openport_app.out.log'), 'a')
@@ -96,14 +99,14 @@ class OpenportApp(object):
             set_log_level(DEBUG)
         logger.debug('client pid:%s' % os.getpid())
 
-        self.globals.server = args.server
+        self.config.server = args.server
         if args.port > 0:
             args.local_port = args.port
 
         self.args = args
 
-        manager_port = get_and_save_manager_port(exit_on_fail=False)
-        Globals.Instance().tcp_listeners.add(manager_port)
+        manager_port = self.config_service.get_and_save_manager_port(exit_on_fail=False)
+        self.config.tcp_listeners.add(manager_port)
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
@@ -123,7 +126,7 @@ class OpenportApp(object):
                      "remote port: %s - " % share.server_port + \
                      "running: %s - " % self.os_interaction.pid_is_openport_process(share.pid) + \
                      "restart on reboot: %s" % bool(share.restart_command)
-        if Globals.Instance().verbose:
+        if self.config.verbose:
             share_line += ' - pid: %s' % share.pid + \
                           ' - id: %s' % share.id
         return share_line
@@ -152,7 +155,7 @@ class OpenportApp(object):
             if not self.os_interaction.pid_is_openport_process(share.pid):
                 try:
                     logger.debug('restarting share: %s' % share.restart_command)
-                    share.restart_command = set_manager_port(share.restart_command)
+                    share.restart_command = self.app_service.set_manager_port(share.restart_command)
 
                     p = self.os_interaction.start_openport_process(share)
                     self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
@@ -187,18 +190,15 @@ class OpenportApp(object):
 
         key_registration_service.register_key(self.args, self.args.server)
 
-        if self.args.database != '':
-            dbhandler.db_location = self.args.database
-        self.db_handler = dbhandler.getInstance()
+        self.db_handler = dbhandler.DBHandler(self.args.database)
 
-
-        Globals.Instance().manager_port = self.args.listener_port
-        Globals.Instance().openport_address = self.args.server
+        self.config.manager_port = self.args.listener_port
+        self.config.openport_address = self.args.server
 
         if self.args.config_file:
-            Globals.Instance().config = self.args.config_file
+            self.config.config = self.args.config_file
 
-        logger.debug('db location: ' + dbhandler.db_location)
+        logger.debug('db location: ' + self.db_handler.db_location)
 
         if self.args.list:
             self.print_shares()
@@ -224,6 +224,8 @@ class OpenportApp(object):
         if session.forward_tunnel:
             session.server_port = self.args.remote_port
 
+        session.active = True
+
         db_share = self.db_handler.get_share_by_local_port(session.local_port)
         if db_share:
             if self.os_interaction.pid_is_openport_process(db_share[0].pid):
@@ -238,11 +240,12 @@ class OpenportApp(object):
             logger.debug('No db share session could be found.')
         session.http_forward = self.args.http_forward
 
-        session.restart_command = get_restart_command(session,
-                                                      database=self.args.database,
-                                                      verbose=self.args.verbose,
-                                                      server=self.args.server,
-                                                      )
+        if self.args.restart_on_reboot:
+            session.restart_command = self.app_service.get_restart_command(session,
+                                                          database=self.args.database,
+                                                          verbose=self.args.verbose,
+                                                          server=self.args.server,
+                                                          )
 
         session.stop_observers.append(self.stop_callback)
         session.start_observers.append(self.save_share)
@@ -251,9 +254,10 @@ class OpenportApp(object):
 
         ensure_keys_exist(*get_default_key_locations())
 
+        session.app_management_port = self.server.get_port()
         self.session = session
 
-        start_server_thread()
+        self.server.run_threaded()
         self.openport.start_port_forward(session, server=self.args.server)
 
     def error_callback(self, session, exception):

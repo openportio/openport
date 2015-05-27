@@ -1,8 +1,10 @@
 import sys
 import urllib
 import urllib2
+
 from apps.keyhandling import get_or_create_public_key
-from manager.globals import DEFAULT_SERVER
+from common.config import DEFAULT_SERVER
+
 
 try:
     import json

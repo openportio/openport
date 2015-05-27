@@ -1,149 +1,197 @@
-import threading
 import sys
 import urllib
 import urllib2
-from bottle import route, run, request, error, hook
+from time import sleep
+import threading
+
+from bottle import Bottle, ServerAdapter, request, response, run, error, hook
 
 from manager import dbhandler
-from manager.globals import Globals
 from services.logger_service import get_logger
-from time import sleep
+
+from common.config import OpenportAppConfig
 from manager.openportmanager import get_and_save_manager_port
 
 logger = get_logger('server')
 
 
-def app_communicate(share, path, data=None):
-    url = 'http://127.0.0.1:%s/%s' % (share.app_management_port, path)
-    logger.debug('sending get request ' + url)
-    try:
-        if data:
-            data = urllib.urlencode(data)
-            req = urllib2.Request(url, data)
-        else:
-            req = urllib2.Request(url)
-        response = urllib2.urlopen(req, timeout=1).read()
-        if response.strip() != 'ok':
-            logger.error(response)
-    except Exception, detail:
-        Globals.Instance().app.notify_error(share)
-        logger.error("An error has occurred while communicating with the app on %s: %s" % (url,detail))
+class CherryPyServer(ServerAdapter):
+    def run(self, handler):
+        from cherrypy import wsgiserver
+
+        self.server = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
+        try:
+            self.server.start()
+        finally:
+            self.server.stop()
+
+    def stop(self):
+        if hasattr(self, 'server'):
+            self.server.stop()
 
 
-def register_with_app(share):
-    if share.app_management_port:
-        app_communicate(share, 'register', {'port': Globals.Instance().manager_port})
+class GUITcpServer():
+
+    # CORS (cross-origin resource sharing) decorator
+    def enable_cors(self, fn):
+        def _enable_cors(*args, **kwargs):
+            # set CORS headers
+            response.headers['Access-Control-Allow-Origin'] = '127.0.0.1'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+            response.headers[
+                'Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
+
+            if request.method != 'OPTIONS':
+                # actual request; reply with the actual response
+                return fn(*args, **kwargs)
+            pass
+
+        return _enable_cors
+
+    def __init__(self, host, port, openport_app_config):
+        self.app = Bottle()
+        self.server = CherryPyServer(host=host, port=port)
+        self.running = False
+        self.openport_app_config = openport_app_config
+
+        @self.app.route('/newShare', method='POST')
+        def new_share(name='newShare'):
+            form_data = request.forms
+            logger.debug('/newShare ' + str(dict(form_data.iteritems())))
+
+            id = int(form_data['id'])
+            share = dbhandler.getInstance().get_share(id)
+            if not share:
+                return 'share not in db'
+
+            self.openport_app_config.account_id = share.account_id
+            self.openport_app_config.key_id = share.key_id
+
+            self.openport_app_config.app.add_share_after(share)
+            return 'ok'
 
 
-@route('/newShare', method='POST')
-def new_share(name='newShare'):
-    form_data = request.forms
-    logger.debug('/newShare ' + str(dict(form_data.iteritems())))
+        @self.app.route('/successShare', method='POST')
+        def success_share(name='success_share'):
+            form_data = request.forms
+            logger.debug('/success ' + str(dict(form_data.iteritems())))
 
-    id = int(form_data['id'])
-    share = dbhandler.getInstance().get_share(id)
-    if not share:
-        return 'share not in db'
+            id = int(form_data['id'])
+            share = dbhandler.getInstance().get_share(id)
+            if not share:
+                return 'share not in db'
+            self.openport_app_config.app.notify_success(share)
 
-    Globals.Instance().account_id = share.account_id
-    Globals.Instance().key_id = share.key_id
-
-    Globals.Instance().app.add_share_after(share)
-    return 'ok'
+            return 'ok'
 
 
-@route('/successShare', method='POST')
-def success_share(name='success_share'):
-    form_data = request.forms
-    logger.debug('/success ' + str(dict(form_data.iteritems())))
+        @self.app.route('/errorShare', method='POST')
+        def error_share(name='error_share'):
+            form_data = request.forms
+            logger.debug('/failure ' + str(dict(form_data.iteritems())))
 
-    id = int(form_data['id'])
-    share = dbhandler.getInstance().get_share(id)
-    if not share:
-        return 'share not in db'
-    Globals.Instance().app.notify_success(share)
+            id = int(form_data['id'])
+            share = dbhandler.getInstance().get_share(id)
+            if not share:
+                return 'share not in db'
+            self.openport_app_config.app.notify_error(share)
 
-    return 'ok'
-
-
-@route('/errorShare', method='POST')
-def error_share(name='error_share'):
-    form_data = request.forms
-    logger.debug('/failure ' + str(dict(form_data.iteritems())))
-
-    id = int(form_data['id'])
-    share = dbhandler.getInstance().get_share(id)
-    if not share:
-        return 'share not in db'
-    Globals.Instance().app.notify_error(share)
-
-    return 'ok'
+            return 'ok'
 
 
-@route('/stopShare', method='POST')
-def stop_share(name='stop_share'):
-    form_data = request.forms
-    logger.debug('/stop ' + str(dict(form_data.iteritems())))
+        @self.app.route('/stopShare', method='POST')
+        def stop_share(name='stop_share'):
+            form_data = request.forms
+            logger.debug('/stop ' + str(dict(form_data.iteritems())))
 
-    id = int(form_data['id'])
-    share = dbhandler.getInstance().get_share(id)
-    if not share:
-        return 'share not in db'
+            id = int(form_data['id'])
+            share = dbhandler.getInstance().get_share(id)
+            if not share:
+                return 'share not in db'
 
-    Globals.Instance().app.remove_share(share)
-    return 'ok'
-
-
-@route('/ping', method='GET')
-def ping():
-    return 'pong'
+            self.openport_app_config.app.remove_share(share)
+            return 'ok'
 
 
-@route('/exit', method='GET', )
-def exit_manager():
-    logger.debug('/exit')
-    if request.remote_addr == '127.0.0.1':
-        def shutdown():
-            sleep(1)
-            logger.debug('shutting down due to exit call')
-            Globals.Instance().app.exitApp('server_exit')
-        t = threading.Thread(target=shutdown)
+        @self.app.route('/ping', method='GET')
+        def ping():
+            return 'pong'
+
+
+        @self.app.route('/exit', method='GET', )
+        def exit_manager():
+            logger.debug('/exit')
+            if request.remote_addr == '127.0.0.1':
+                def shutdown():
+                    sleep(1)
+                    logger.debug('shutting down due to exit call')
+                    self.openport_app_config.app.exitApp('server_exit')
+                t = threading.Thread(target=shutdown)
+                t.setDaemon(True)
+                t.start()
+                return 'ok'
+
+
+        @self.app.route('/error', method='GET')
+        def error_():
+            raise Exception('The short error message.')
+
+
+        @self.app.error(500)
+        def custom500(httpError):
+            logger.error(httpError.exception)
+            return 'An error has occurred: %s' % httpError.exception
+
+
+        @self.app.hook('after_request')
+        def close_db_connections():
+            # Double tap? Session should be already closed...
+            dbhandler.getInstance().Session.remove()
+
+
+    def app_communicate(self, share, path, data=None):
+        url = 'http://127.0.0.1:%s/%s' % (share.app_management_port, path)
+        logger.debug('sending get request ' + url)
+        try:
+            if data:
+                data = urllib.urlencode(data)
+                req = urllib2.Request(url, data)
+            else:
+                req = urllib2.Request(url)
+            response = urllib2.urlopen(req, timeout=1).read()
+            if response.strip() != 'ok':
+                logger.error(response)
+        except Exception, detail:
+            self.openport_app_config.app.notify_error(share)
+            logger.error("An error has occurred while communicating with the app on %s: %s" % (url,detail))
+
+    def register_with_app(self, share):
+        if share.app_management_port:
+            self.app_communicate(share, 'register', {'port': self.openport_app_config.manager_port})
+
+    def run(self):
+        self.running = True
+        self.app.run(server=self.server, debug=True, quiet=False)
+        self.running = False
+
+    def run_threaded(self):
+        t = threading.Thread(target=self.run)
         t.setDaemon(True)
         t.start()
-        return 'ok'
+
+    def stop(self):
+        self.server.stop()
+
+    def get_port(self):
+        return self.server.port
+
+    def set_port(self, port):
+        self.server.port = port
 
 
-@route('/error', method='GET')
-def error_():
-    raise Exception('The short error message.')
-
-
-@error(500)
-def custom500(httpError):
-    logger.error(httpError.exception)
-    return 'An error has occurred: %s' % httpError.exception
-
-
-@hook('after_request')
-def close_db_connections():
-    # Double tap? Session should be already closed...
-    dbhandler.getInstance().Session.remove()
-
-
-def start_server():
-    get_and_save_manager_port()
-    try:
-        logger.info('Starting the manager on port %s' % Globals.Instance().manager_port)
-        run(host='127.0.0.1', port=Globals.Instance().manager_port, server='cherrypy', debug=True, quiet=True)
-    except KeyboardInterrupt:
-        pass
-
-
-def start_server_thread():
-    t = threading.Thread(target=start_server)
-    t.setDaemon(True)
-    t.start()
 
 if __name__ == '__main__':
     print sys.argv
-    start_server()
+
+    server = GUITcpServer('127.0.0.1', 6049, OpenportAppConfig())
+    server.start_server()

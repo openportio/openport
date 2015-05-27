@@ -1,12 +1,16 @@
+import sys
+import os
 import pickle
 import logging
+
+sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from common.session import Session
 from services.logger_service import get_logger
 from services import osinteraction
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, not_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm.exc import NoResultFound
@@ -48,20 +52,21 @@ class OpenportSession(Base):
 
 class DBHandler(object):
 
-    _instance = None
+    def __init__(self, db_location=None, init_db=True):
+        self.osinteraction = osinteraction.getInstance()
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(DBHandler, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
+        if not db_location:
+            db_location = self.osinteraction.get_app_data_path('openport.db')
 
-    def __init__(self, db_location):
         logger.debug('db location: %s' % db_location)
         self.engine = create_engine('sqlite:///%s' % db_location)
         self.db_location = db_location
         self.session_factory = sessionmaker(bind=self.engine)
         logger.debug('db location: %s' % db_location)
         self.Session = scoped_session(self.session_factory)
+
+        if init_db:
+            self.osinteraction.run_function_with_lock(self.init_db, '%s.lock' % db_location)
 
     def _get_session(self):
         logger.debug('getting session')
@@ -160,16 +165,20 @@ class DBHandler(object):
         logger.debug('get_shares')
 
         session = self._get_session()
-        openport_sessions = session.query(OpenportSession).filter_by(active=True)
+        openport_sessions = session.query(OpenportSession).filter(OpenportSession.restart_command.isnot(''))
         self.Session.remove()
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions
                     if self.convert_session_from_db(openport_session).restart_command)
 
-    def get_share_by_local_port(self, local_port):
+    def get_share_by_local_port(self, local_port, filter_active=True):
         logger.debug('get_share_by_local_port')
 
         session = self._get_session()
-        openport_sessions = session.query(OpenportSession).filter_by(active=True, local_port=local_port).all()
+        kwargs = {'local_port': local_port}
+        if filter_active:
+            kwargs['active'] = True
+
+        openport_sessions = session.query(OpenportSession).filter_by(**kwargs).all()
 
         self.Session.remove()
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
@@ -183,34 +192,10 @@ class DBHandler(object):
             session.commit()
         self.Session.remove()
 
-instance = None
-
-db_location = ''
-
-
-def getInstance(init_db=True):
-    global db_location
-
-    os_interaction = osinteraction.getInstance()
-    if db_location == '':
-        db_location = os_interaction.get_app_data_path('openport.db')
-
-    global instance
-    if instance is None:
-        instance = DBHandler(db_location)
-        if init_db:
-            os_interaction.run_function_with_lock(instance.init_db, '%s.lock' % db_location)
-    return instance
-
-
-def destroy_instance():
-    global instance
-    instance = None
-
 
 if __name__ == '__main__':
-    db_handler = getInstance()
-    rows = db_handler.executeQuery('select count(*) from sessions')
-    print 'nr of sessions: %s' % rows[0][0]
+    db_handler = DBHandler()
+    shares = db_handler.get_shares()
+    print 'nr of sessions: %s' % len(shares)
 
 

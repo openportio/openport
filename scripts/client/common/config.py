@@ -2,8 +2,8 @@ import os
 from common.singleton import Singleton
 DEFAULT_SERVER = 'https://www.openport.io'
 
-@Singleton
-class Globals(object):
+
+class OpenportAppConfig(object):
 
     def __init__(self):
         self.account_id = -1
