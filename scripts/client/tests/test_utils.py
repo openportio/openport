@@ -12,6 +12,8 @@ import urllib2
 from services.logger_service import get_logger
 from services import osinteraction
 import traceback
+from apps.openportit import OpenportItApp
+from apps.openport import Openport
 
 logger = get_logger(__name__)
 
@@ -377,3 +379,92 @@ def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_e
     finally:
         s.close()
     return True
+
+
+def start_openportit_session(test, share):
+    test.called_back_success = False
+    test.called_back_error = False
+
+    def callback(session1):
+        print session1.as_dict()
+        test.assertEquals(test.test_server, session1.server)
+        test.assertTrue(session1.server_port >= 2000, 'expected server_port >= 2000 but was %s' % session1.server_port)
+       # test.assertTrue(share.server_port<= 51000)
+
+        test.assertTrue(session1.account_id > 0, 'share.account_id was %s' % session1.account_id)
+        test.assertTrue(session1.key_id > 0, 'share.key_id was %s' % session1.key_id)
+        print 'called back, thanks :)'
+
+    def session_success_callback(session1):
+        test.called_back_success = True
+
+    def session_error_callback(session1, exception):
+        test.called_back_error = True
+        raise exception
+
+    share.success_observers.append(session_success_callback)
+    share.error_observers.append(session_error_callback)
+
+    app = OpenportItApp()
+    app.args.server = test.test_server
+
+    def start_openport_it():
+        app.open_port_file(share, callback=callback)
+    thr = threading.Thread(target=start_openport_it)
+    thr.setDaemon(True)
+    thr.start()
+
+    i = 0
+    while i < 30 and not test.called_back_success:
+        if test.called_back_error:
+            test.fail('error call back!')
+        sleep(1)
+        i += 1
+    test.assertTrue(test.called_back_success, 'not called back in time')
+    print 'called back after %s seconds' % i
+    return app
+
+
+def start_openport_session(test, session):
+        openport = Openport()
+        test.called_back_success = False
+        test.called_back_error = False
+
+        def callback(session1):
+            print session1.as_dict()
+            test.assertEquals(test.test_server, session1.server)
+            test.assertTrue(session1.server_port >= 2000, 'expected server_port >= 2000 but was %s' % session1.server_port)
+           # test.assertTrue(share.server_port<= 51000)
+
+            test.assertTrue(session1.account_id > 0, 'share.account_id was %s' % session1.account_id)
+            test.assertTrue(session1.key_id > 0, 'share.key_id was %s' % session1.key_id)
+            print 'called back, thanks :)'
+
+        def session_success_callback(session1):
+            test.called_back_success = True
+
+        def session_error_callback(session1, exception):
+            test.called_back_error = True
+            raise exception
+
+        session.success_observers.append(session_success_callback)
+        session.error_observers.append(session_error_callback)
+
+        def show_error(error_msg):
+            print "error:" + error_msg
+
+        def start_openport():
+            openport.start_port_forward(session, server=test.test_server)
+
+        thr = threading.Thread(target=start_openport)
+        thr.setDaemon(True)
+        thr.start()
+        i = 0
+        while i < 30 and (not test.called_back_success or session.server_port < 0):
+            if test.called_back_error:
+                test.fail('error call back!')
+            sleep(1)
+            i += 1
+        test.assertTrue(test.called_back_success, 'not called back in time')
+        print 'called back after %s seconds' % i
+        return openport

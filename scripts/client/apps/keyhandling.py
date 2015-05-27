@@ -6,43 +6,40 @@ import shutil
 
 log = get_logger(__name__)
 
-PRIVATE_KEY_FILE = ''
-PUBLIC_KEY_FILE = ''
 
-
-def reset_key_locations():
+def get_default_key_locations():
     home_dir = os.path.expanduser('~')
 
     if len(home_dir) < 3:
         log.debug('ERROR!!! saving keys to / : <<<%s>>>' % home_dir)
         log.debug('os.environ:')
         log.debug(os.environ)
-    global PRIVATE_KEY_FILE, PUBLIC_KEY_FILE
-    PRIVATE_KEY_FILE = os.path.join(home_dir, '.openport', 'id_rsa')
-    PUBLIC_KEY_FILE = os.path.join(home_dir, '.openport', 'id_rsa.pub')
+    private_key_file = os.path.join(home_dir, '.openport', 'id_rsa')
+    public_key_file = os.path.join(home_dir, '.openport', 'id_rsa.pub')
 
-reset_key_locations()
+    return public_key_file, private_key_file
 
 
 def get_or_create_public_key():
-    ensure_keys_exist()
-    return open(PUBLIC_KEY_FILE, 'r').readline()
+    public_key_file, private_key_file = get_default_key_locations()
+    ensure_keys_exist(public_key_file, private_key_file)
+    return open(public_key_file, 'r').readline()
 
 
-def ensure_keys_exist():
-    if not os.path.exists(PRIVATE_KEY_FILE) or not os.path.exists(PUBLIC_KEY_FILE):
+def ensure_keys_exist(public_key_file, private_key_file):
+    if not os.path.exists(private_key_file) or not os.path.exists(public_key_file):
         system_id_rsa = os.path.expanduser('~/.ssh/id_rsa')
         system_id_rsa_pub = os.path.expanduser('~/.ssh/id_rsa.pub')
         if os.path.exists(system_id_rsa) and os.path.exists(system_id_rsa_pub):
             try:
                 paramiko.RSAKey.from_private_key_file(system_id_rsa)
             except paramiko.PasswordRequiredException:
-                write_new_key(PRIVATE_KEY_FILE, PUBLIC_KEY_FILE)
+                write_new_key(private_key_file, public_key_file)
             else:
-                shutil.copy(system_id_rsa, PRIVATE_KEY_FILE)
-                shutil.copy(system_id_rsa_pub, PUBLIC_KEY_FILE)
+                shutil.copy(system_id_rsa, private_key_file)
+                shutil.copy(system_id_rsa_pub, public_key_file)
         else:
-            write_new_key(PRIVATE_KEY_FILE, PUBLIC_KEY_FILE)
+            write_new_key(private_key_file, public_key_file)
 
 
 def write_new_key(private_key_filename, public_key_filename):

@@ -82,7 +82,7 @@ class Openport(object):
                     start_callback=session.notify_start,
                     forward_tunnel=session.forward_tunnel,
                 )
-                self.port_forwarding_service.start() #hangs
+                self.port_forwarding_service.start()  # hangs
             except PortForwardException as e:
                 logger.info('The port forwarding has stopped: %s' % e)
             except SystemExit as e:

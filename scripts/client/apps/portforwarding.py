@@ -4,7 +4,7 @@ import paramiko
 import time
 from services.logger_service import get_logger
 from socket import error as SocketError
-from keyhandling import PUBLIC_KEY_FILE, PRIVATE_KEY_FILE
+from keyhandling import get_default_key_locations
 import errno
 
 logger = get_logger(__name__)
@@ -37,14 +37,17 @@ class PortForwardingService:
                  http_forward_address=None,
                  start_callback=None,
                  forward_tunnel=False):
-        self.local_port       = local_port
-        self.remote_port      = remote_port
-        self.server           = server
-        self.server_ssh_port  = server_ssh_port
-        self.ssh_user         = ssh_user
-        self.public_key_file  = public_key_file if public_key_file else PUBLIC_KEY_FILE
-        self.private_key_file = private_key_file if private_key_file else PRIVATE_KEY_FILE
-        self.error_callback   = error_callback
+        self.local_port = local_port
+        self.remote_port = remote_port
+        self.server = server
+        self.server_ssh_port = server_ssh_port
+        self.ssh_user = ssh_user
+
+        default_public_key_file, default_private_key_file = get_default_key_locations()
+
+        self.public_key_file = public_key_file if public_key_file else default_public_key_file
+        self.private_key_file = private_key_file if private_key_file else default_private_key_file
+        self.error_callback = error_callback
         self.success_callback = success_callback
         self.fallback_server_ssh_port = fallback_server_ssh_port
         self.fallback_ssh_server = fallback_ssh_server,
