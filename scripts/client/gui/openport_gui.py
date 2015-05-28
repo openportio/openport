@@ -11,7 +11,6 @@ from wx._gdi import PaintDC
 
 
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-from manager import dbhandler
 from common.share import Share
 from services import osinteraction
 from services.logger_service import get_logger
@@ -92,6 +91,7 @@ class SharesFrame(wx.Frame):
         self.Raise()
         self.Iconize(False)
         self.SetFocus()
+        self.os_interaction.activate_app()
 
     def exitApp(self, event):
         self.tbicon.RemoveIcon()

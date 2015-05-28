@@ -295,6 +295,9 @@ class OsInteraction(object):
                         self.logger.exception(e)
             self.logger.debug('lock released')
 
+    def activate_app(self):
+        pass
+
 
 class LinuxOsInteraction(OsInteraction):
 
@@ -476,6 +479,16 @@ class WindowsOsInteraction(OsInteraction):
         return False
 
 
+class MacOsInteraction(LinuxOsInteraction):
+    def activate_app(self):
+        subprocess.Popen(['osascript', '-e', '''\
+    tell application "System Events"
+      set procName to name of first process whose unix id is %s
+    end tell
+    tell application procName to activate
+''' % os.getpid()])
+
+
 def is_windows():
     return platform.system() == 'Windows'
 
@@ -485,7 +498,9 @@ def is_mac():
 
 
 def getInstance(use_logger=True):
-    if not is_windows():
-        return LinuxOsInteraction(use_logger)
-    else:
+    if is_mac():
+        return MacOsInteraction(use_logger)
+    if is_windows():
         return WindowsOsInteraction(use_logger)
+    else:
+        return LinuxOsInteraction(use_logger)
