@@ -28,14 +28,15 @@ class AppService(object):
         command = ['%s' % session.local_port]
         if session.http_forward:
             command.append('--http-forward')
-        if session.active:
-            command.append('--restart-on-reboot')
+        command.append('--restart-on-reboot')
         if database:
             command.extend(['--database', database])
         if verbose:
             command.append('--verbose')
         if server:
             command.extend(['--server', server])
+        if session.ip_link_protection is not None:
+            command = osinteraction.set_variable('--ip-link-protection', session.ip_link_protection)
 
         command = self.set_manager_port(command)
 

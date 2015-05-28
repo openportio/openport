@@ -3,7 +3,7 @@ import signal
 import os
 from UserDict import UserDict
 import argparse
-
+import ast
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from services import osinteraction
@@ -60,7 +60,6 @@ class OpenportApp(object):
         logger.debug('got signal %s' % signum)
         if self.session:
             self.session.notify_stop()
-            sleep(1)
         if self.openport:
             self.openport.stop()
         #os._exit(3)
@@ -94,6 +93,10 @@ class OpenportApp(object):
         parser.add_argument('--forward-tunnel', action='store_true', help='Forward connections from your local port to the server port.')
         parser.add_argument('--remote-port', type=int, help='The server port you want to forward to'
                                                            ' (only use in combination with --forward-tunnel).', default=-1)
+        parser.add_argument('--ip-link-protection', type=ast.literal_eval,
+                            help='Set to True or False to set if you want users to click a secret link before they can '
+                                 'access this port. This overwrites the standard setting in your profile for this '
+                                 'session.', default=None, choices=[True, False])
 
     def init_app(self, args):
         if args.verbose:
@@ -248,6 +251,8 @@ class OpenportApp(object):
                                                           verbose=self.args.verbose,
                                                           server=self.args.server,
                                                           )
+
+        session.ip_link_protection = self.args.ip_link_protection
 
         session.stop_observers.append(self.stop_callback)
         session.start_observers.append(self.save_share)

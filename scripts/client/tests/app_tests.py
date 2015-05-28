@@ -15,7 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from services import osinteraction
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer
-from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_success_callback
+from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
 from test_utils import print_all_output, click_open_for_ip_link, run_method_with_timeout, check_tcp_port_forward
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
@@ -558,7 +558,7 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_kill)
         self.osinteraction.print_output_continuously_threaded(p_kill, 'p_kill')
         run_method_with_timeout(p_kill.wait, 10)
-        run_method_with_timeout(p_app.wait, 5)
+        run_method_with_timeout(p_app.wait, 15)
         self.assertFalse(self.application_is_alive(p_app))
 
     def test_kill_all(self):
@@ -862,7 +862,8 @@ class AppTests(unittest.TestCase):
         # Sadly, this does not work on windows...
         if not osinteraction.is_windows():
             self.assertTrue('got signal ' in output[0])
-        self.assertNotEqual(None, p.poll())
+
+        wait_for_response(lambda: p.poll() is None)
 
     def test_openport_app_with_http_forward(self):
         port = self.osinteraction.get_open_port()
@@ -913,6 +914,35 @@ class AppTests(unittest.TestCase):
         p = subprocess.Popen(['python', '-c', 'print "hello"'], shell=False, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
         self.assertEqual(('hello', False), self.osinteraction.get_all_output(p))
+
+    def test_open_for_ip_option__False(self):
+        port = self.osinteraction.get_open_port()
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
+                              '--server', TEST_SERVER,
+                              '--database', self.db_file, '--ip-link-protection', 'False'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        self.check_application_is_still_alive(p)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+
+        check_tcp_port_forward(self, remote_host, port, remote_port)
+
+    def test_open_for_ip_option__True(self):
+        port = self.osinteraction.get_open_port()
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
+                              '--server', TEST_SERVER,
+                              '--database', self.db_file, '--ip-link-protection', 'True'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        self.check_application_is_still_alive(p)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+
+        self.assertFalse(check_tcp_port_forward(self, remote_host, port, remote_port, fail_on_error=False))
+        click_open_for_ip_link(link)
+        check_tcp_port_forward(self, remote_host, port, remote_port)
+
 
 
 if __name__ == '__main__':

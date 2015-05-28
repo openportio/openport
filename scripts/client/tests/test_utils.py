@@ -492,3 +492,4 @@ def set_default_args(app, db_location=None):
     app.args.listener_port = -1
     app.args.forward_tunnel = False
     app.args.remote_port = -1
+    app.args.ip_link_protection = None
