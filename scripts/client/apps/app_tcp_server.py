@@ -54,6 +54,7 @@ class AppTcpServer():
         self.openport_app_config = openport_app_config
     
         @self.app.route('/register', method='POST')
+        @self.enable_cors
         def new_share(name='register'):
             form_data = request.forms
             logger.debug('/register ' + str(dict(form_data.iteritems())))
@@ -63,11 +64,13 @@ class AppTcpServer():
             return 'ok'
         
         @self.app.route('/ping', method='GET')
+        @self.enable_cors
         def ping():
             return 'pong'
         
         
         @self.app.route('/exit', method='POST', )
+        @self.enable_cors
         def exit():
             logger.debug('/exit')
             if request.remote_addr == '127.0.0.1':
@@ -87,6 +90,7 @@ class AppTcpServer():
 
         
         @self.app.route('/error', method='GET')
+        @self.enable_cors
         def error_():
             raise Exception('The short error message.')
         

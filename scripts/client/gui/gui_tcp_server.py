@@ -54,6 +54,7 @@ class GUITcpServer():
         self.db_handler = db_handler
 
         @self.app.route('/newShare', method='POST')
+        @self.enable_cors
         def new_share(name='newShare'):
             form_data = request.forms
             logger.debug('/newShare ' + str(dict(form_data.iteritems())))
@@ -72,6 +73,7 @@ class GUITcpServer():
 
 
         @self.app.route('/successShare', method='POST')
+        @self.enable_cors
         def success_share(name='success_share'):
             form_data = request.forms
             logger.debug('/success ' + str(dict(form_data.iteritems())))
@@ -86,6 +88,7 @@ class GUITcpServer():
 
 
         @self.app.route('/errorShare', method='POST')
+        @self.enable_cors
         def error_share(name='error_share'):
             form_data = request.forms
             logger.debug('/failure ' + str(dict(form_data.iteritems())))
@@ -100,6 +103,7 @@ class GUITcpServer():
 
 
         @self.app.route('/stopShare', method='POST')
+        @self.enable_cors
         def stop_share(name='stop_share'):
             form_data = request.forms
             logger.debug('/stop ' + str(dict(form_data.iteritems())))
@@ -114,11 +118,13 @@ class GUITcpServer():
 
 
         @self.app.route('/ping', method='GET')
+        @self.enable_cors
         def ping():
             return 'pong'
 
 
         @self.app.route('/exit', method='GET', )
+        @self.enable_cors
         def exit_manager():
             logger.debug('/exit')
             if request.remote_addr == '127.0.0.1':
@@ -133,6 +139,7 @@ class GUITcpServer():
 
 
         @self.app.route('/error', method='GET')
+        @self.enable_cors
         def error_():
             raise Exception('The short error message.')
 

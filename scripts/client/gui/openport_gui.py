@@ -42,7 +42,7 @@ class SharesFrame(wx.Frame):
     def onClose(self, evt):
         self.Hide()
 
-    def __init__(self, parent=None, id=-1, title='', wx_app=None, db_location=''):
+    def __init__(self, parent=None, id=-1, title='Openport - Easy and secure reverse SSH', wx_app=None, db_location=''):
 
         wx.Frame.__init__(self, parent, -1, title,
                           style=wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
@@ -96,7 +96,9 @@ class SharesFrame(wx.Frame):
     def exitApp(self, event):
         self.tbicon.RemoveIcon()
         self.tbicon.Destroy()
-        os._exit(0)
+        self.server.stop()
+        wx.Exit()
+      #  os._exit(0)
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)
@@ -163,29 +165,29 @@ class SharesFrame(wx.Frame):
         self.share_panels = {}
         self.frame_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.account_panel = wx.Panel(self, style=wx.BORDER_NONE)
-        self.frame_sizer.Add(self.account_panel, 0, wx.EXPAND | wx.ALL, 0)
-        self.account_panel_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        self.account_amount_text = wx.StaticText(self.account_panel, -1, 'Openport - Easy and secure reverse SSH')
-        self.account_amount_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
-        self.account_amount_text.SetSize(self.account_amount_text.GetBestSize())
-        self.account_panel_sizer.Add(self.account_amount_text, 0, wx.EXPAND | wx.ALL)
-
-        self.account_reset_text = wx.StaticText(self.account_panel, -1, ' ')
-        self.account_reset_text.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
-        self.account_reset_text.SetSize(self.account_reset_text.GetBestSize())
-        self.account_panel_sizer.Add(self.account_reset_text, 0, wx.EXPAND | wx.ALL)
-        self.account_panel.SetSizer(self.account_panel_sizer)
-        self.account_panel.SetMinSize((400, 50))
-
-        self.account_panel.Layout()
-        self.Layout()
+        #self.account_panel = wx.Panel(self, style=wx.BORDER_NONE)
+        #self.frame_sizer.Add(self.account_panel, 0, wx.EXPAND | wx.ALL, 0)
+        #self.account_panel_sizer = wx.BoxSizer(wx.VERTICAL)
+#
+        #self.account_amount_text = wx.StaticText(self.account_panel, -1, 'Openport - Easy and secure reverse SSH')
+        #self.account_amount_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
+        #self.account_amount_text.SetSize(self.account_amount_text.GetBestSize())
+        #self.account_panel_sizer.Add(self.account_amount_text, 0, wx.EXPAND | wx.ALL)
+#
+        #self.account_reset_text = wx.StaticText(self.account_panel, -1, ' ')
+        #self.account_reset_text.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL))
+        #self.account_reset_text.SetSize(self.account_reset_text.GetBestSize())
+        #self.account_panel_sizer.Add(self.account_reset_text, 0, wx.EXPAND | wx.ALL)
+        #self.account_panel.SetSizer(self.account_panel_sizer)
+        #self.account_panel.SetMinSize((400, 50))
+#
+        #self.account_panel.Layout()
+        #self.Layout()
 
         self.scrolling_window = wx.ScrolledWindow(self)
         if not noColor:
             self.scrolling_window.SetBackgroundColour('green')
-        self.SetSize((400, 300))
+        self.SetSize((500, 300))
 
         self.scrolling_window.SetScrollRate(8, 8)
         self.scrolling_window.EnableScrolling(True, True)
@@ -460,7 +462,7 @@ class StartOpenportDialog(wx.Dialog):
 if __name__ == '__main__':
     set_log_level(logging.DEBUG)
     app = wx.App()
-    frame = SharesFrame(None, -1, ' ', None)
+    frame = SharesFrame()
     frame.initialize()
     frame.Show(True)
 

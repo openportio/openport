@@ -28,7 +28,8 @@ def gui_test(func):
                 self.exception = e
                 raise
             finally:
-                wx.Exit()
+                #wx.Exit()
+                self.gui_frame.exitApp(None)
         thr = threading.Thread(target=test_thread)
         thr.setDaemon(True)
         thr.start()
