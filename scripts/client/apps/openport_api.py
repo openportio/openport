@@ -98,11 +98,11 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
             if stop_callback:
                 stop_callback()
             logger.info("Session is killed, stopping app!!!")
-            sys.exit(9)
         if 'No session found' in dict['error']:
             if stop_callback:
                 stop_callback()
             logger.info(dict['error'])
+        if dict.get('fatal_error', False):
             sys.exit(9)
 
     logger.debug(dict)
