@@ -106,7 +106,8 @@ class DBHandler(object):
         for previous_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
             previous_session.active = False
 
-        session.add(openport_session)
+        if share.id <= 0:
+            session.add(openport_session)
         session.commit()
 
         share.id = openport_session.id
