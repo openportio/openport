@@ -43,11 +43,11 @@ class SharesFrame(wx.Frame):
     def onClose(self, evt):
         self.Hide()
 
-    def __init__(self, parent=None, id=-1, title='', application=None):
+    def __init__(self, parent=None, id=-1, title='', wx_app=None, db_location=''):
 
         wx.Frame.__init__(self, parent, -1, title,
                           style=wx.DEFAULT_FRAME_STYLE | wx.NO_FULL_REPAINT_ON_RESIZE)
-        self.application = application
+        self.wx_app = wx_app
         self.addMenuBar()
         self.rebuild()
         self.Bind(wx.EVT_CLOSE, self.onClose)
@@ -56,11 +56,10 @@ class SharesFrame(wx.Frame):
         self.config.app = self
         self.config_service = ConfigService(self.config)
         self.app_service = AppService(self.config)
-        self.db_handler = DBHandler(self.config.d)
+        self.db_handler = DBHandler(db_location)
 
         port = self.config_service.get_and_save_manager_port()
-        self.server = GUITcpServer('127.0.0.1', port, self.config)
-        self.server.run_threaded()
+        self.server = GUITcpServer('127.0.0.1', port, self.config, self.db_handler)
 
         if osinteraction.is_mac():
             icon_file = self.os_interaction.get_resource_path('resources/icon.icns')
@@ -74,21 +73,18 @@ class SharesFrame(wx.Frame):
         self.addTrayIcon()
 
     def initialize(self):
-        db_handler = dbhandler.getInstance()
 
-        shares = db_handler.get_shares()
+        self.server.run_threaded()
+
+        shares = self.db_handler.get_shares()
 
         for share in shares:
-            frame.add_share(share)
+            self.add_share(share)
             if not osinteraction.getInstance().pid_is_openport_process(share.pid):
-                frame.notify_app_down(share)
-
-        frame.Show(True)
+                self.notify_app_down(share)
 
         for share in shares:
-            frame.server.register_with_app(share)
-
-
+            self.server.register_with_app(share)
 
     def showFrame(self, event):
         print "show frame"
@@ -101,7 +97,6 @@ class SharesFrame(wx.Frame):
         self.tbicon.RemoveIcon()
         self.tbicon.Destroy()
         os._exit(0)
-        #self.application.exitApp(event)
 
     def addTrayIcon(self):
         self.tbicon = OpenPortItTaskBarIcon(self)
@@ -139,8 +134,6 @@ class SharesFrame(wx.Frame):
             (wx.ACCEL_CTRL,  ord('Q'), id_event_quit),
         ])
         self.SetAcceleratorTable(accelerator_tbl)
-
-
 
     #def showOpenportItDialog(self, event):
     #    dlg = wx.FileDialog(
@@ -227,6 +220,7 @@ class SharesFrame(wx.Frame):
         wx.CallAfter(self.add_share, share)
 
     def add_share(self, share):
+        logger.debug('add share')
         if share.id in self.share_panels:
             return
 
@@ -236,6 +230,8 @@ class SharesFrame(wx.Frame):
             filename = str(share.local_port)
 
         share_panel = wx.Panel(self.scrolling_window, id=2, style=wx.BORDER_RAISED)
+        self.share_panels[share.id] = share_panel
+
         self.scrolling_window_sizer.Add(share_panel, 0, wx.EXPAND, 0)
         share_panel_sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -285,7 +281,7 @@ class SharesFrame(wx.Frame):
             # self.add_share(share)
             # return
             logger.info("stopping %s" % share.id)
-            s = dbhandler.getInstance().get_share(share.id)
+            s = self.db_handler.get_share(share.id)
             if s and s.app_management_port:
                 self.notify_app_down(s)
                 self.server.app_communicate(s, 'exit', {'id': share.id})
@@ -294,7 +290,7 @@ class SharesFrame(wx.Frame):
                 while osinteraction.getInstance().pid_is_openport_process(s.pid):
                     sleep(1)
                 wx.CallAfter(self.remove_share, share)
-                dbhandler.getInstance().stop_share(share)
+                self.db_handler.stop_share(share)
             t = threading.Thread(target=remove_killed_share)
             t.setDaemon(True)
             t.start()
@@ -322,7 +318,6 @@ class SharesFrame(wx.Frame):
         share_panel_sizer.Add(dir_text, 0, wx.EXPAND | wx.ALL)
 
         share_panel.SetSizer(share_panel_sizer)
-        self.share_panels[share.id] = share_panel
 
         share_panel.GetParent().Layout()
         self.frame_sizer.Layout()
@@ -341,7 +336,7 @@ class SharesFrame(wx.Frame):
             wx.CallAfter(share_panel.SetBackgroundColour, COLOR_APP_ERROR)
             wx.CallAfter(share_panel.Refresh)
         else:
-            logger.debug('share not found while notify error')
+            logger.debug('share not found while notifying error')
 
     def notify_app_down(self, share):
         logger.debug('notify_error')
@@ -350,7 +345,7 @@ class SharesFrame(wx.Frame):
             wx.CallAfter(share_panel.SetBackgroundColour, COLOR_NO_APP_RUNNING)
             wx.CallAfter(share_panel.Refresh)
         else:
-            logger.debug('share not found while notify error')
+            logger.debug('share not found while notifying app down')
 
     def notify_success(self, share):
         logger.debug('notify_success')
@@ -359,7 +354,7 @@ class SharesFrame(wx.Frame):
             wx.CallAfter(share_panel.SetBackgroundColour, COLOR_OK)
             wx.CallAfter(share_panel.Refresh)
         else:
-            logger.debug('share not found while notify success')
+            logger.debug('share not found while notifying success')
 
     def remove_share(self, share):
         logger.debug('remove_share %s' % share.local_port)
@@ -467,4 +462,6 @@ if __name__ == '__main__':
     app = wx.App()
     frame = SharesFrame(None, -1, ' ', None)
     frame.initialize()
+    frame.Show(True)
+
     app.MainLoop()

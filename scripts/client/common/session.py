@@ -97,6 +97,7 @@ class Session(object):
             observer(self, exception)
 
     def notify_start(self):
+        self.active = True
         for observer in self.start_observers:
             observer(self)
 

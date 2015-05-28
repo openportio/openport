@@ -6,10 +6,9 @@ from time import sleep
 import os
 import threading
 
-from bottle import Bottle, ServerAdapter, request, response, run, error, hook
+from bottle import Bottle, ServerAdapter, request, response, error, hook
 
 from manager import dbhandler
-from services.osinteraction import getInstance
 from services.logger_service import get_logger
 
 logger = get_logger('server')
@@ -85,9 +84,6 @@ class AppTcpServer():
                 t.setDaemon(True)
                 t.start()
                 return 'ok'
-        
-        
-
 
         
         @self.app.route('/error', method='GET')
@@ -138,28 +134,10 @@ class AppTcpServer():
     def inform_stop(self, share):
         self.inform_listeners(share, 'stopShare')
 
-    def start_server_Sqdfq(self):
-        #Todo: move getting to port to app
-        port = getInstance().get_open_port()
-
-        session = self.openport_app_config.app.session
-        session.app_management_port = port
-
-        try:
-            session.start_observers.append(self.inform_start)
-            session.success_observers.append(self.inform_success)
-            session.error_observers.append(self.inform_failure)
-            session.stop_observers.append(self.inform_stop)
-            logger.debug('Starting the app management on port %s' % port)
-            self.run()
-        except KeyboardInterrupt:
-            pass
-
-
-
     def run(self):
         self.running = True
-        self.app.run(server=self.server, debug=True, quiet=False)
+        logger.debug('starting openport app server on port %s' % self.server.port)
+        self.app.run(server=self.server, debug=True, quiet=True)
         self.running = False
 
     def run_threaded(self):

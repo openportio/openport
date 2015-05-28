@@ -6,11 +6,9 @@ import threading
 
 from bottle import Bottle, ServerAdapter, request, response, run, error, hook
 
-from manager import dbhandler
 from services.logger_service import get_logger
 
 from common.config import OpenportAppConfig
-from manager.openportmanager import get_and_save_manager_port
 
 logger = get_logger('server')
 
@@ -48,11 +46,12 @@ class GUITcpServer():
 
         return _enable_cors
 
-    def __init__(self, host, port, openport_app_config):
+    def __init__(self, host, port, openport_app_config, db_handler):
         self.app = Bottle()
         self.server = CherryPyServer(host=host, port=port)
         self.running = False
         self.openport_app_config = openport_app_config
+        self.db_handler = db_handler
 
         @self.app.route('/newShare', method='POST')
         def new_share(name='newShare'):
@@ -60,8 +59,9 @@ class GUITcpServer():
             logger.debug('/newShare ' + str(dict(form_data.iteritems())))
 
             id = int(form_data['id'])
-            share = dbhandler.getInstance().get_share(id)
+            share = self.db_handler.get_share(id)
             if not share:
+                logger.debug('share not in DB')
                 return 'share not in db'
 
             self.openport_app_config.account_id = share.account_id
@@ -77,7 +77,7 @@ class GUITcpServer():
             logger.debug('/success ' + str(dict(form_data.iteritems())))
 
             id = int(form_data['id'])
-            share = dbhandler.getInstance().get_share(id)
+            share = self.db_handler.get_share(id)
             if not share:
                 return 'share not in db'
             self.openport_app_config.app.notify_success(share)
@@ -91,7 +91,7 @@ class GUITcpServer():
             logger.debug('/failure ' + str(dict(form_data.iteritems())))
 
             id = int(form_data['id'])
-            share = dbhandler.getInstance().get_share(id)
+            share = self.db_handler.get_share(id)
             if not share:
                 return 'share not in db'
             self.openport_app_config.app.notify_error(share)
@@ -105,7 +105,7 @@ class GUITcpServer():
             logger.debug('/stop ' + str(dict(form_data.iteritems())))
 
             id = int(form_data['id'])
-            share = dbhandler.getInstance().get_share(id)
+            share = self.db_handler.get_share(id)
             if not share:
                 return 'share not in db'
 
@@ -146,7 +146,7 @@ class GUITcpServer():
         @self.app.hook('after_request')
         def close_db_connections():
             # Double tap? Session should be already closed...
-            dbhandler.getInstance().Session.remove()
+            self.db_handler.Session.remove()
 
 
     def app_communicate(self, share, path, data=None):
@@ -171,6 +171,7 @@ class GUITcpServer():
 
     def run(self):
         self.running = True
+        logger.debug('starting openport gui server on port %s' % self.server.port)
         self.app.run(server=self.server, debug=True, quiet=False)
         self.running = False
 

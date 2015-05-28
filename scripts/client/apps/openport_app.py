@@ -224,7 +224,7 @@ class OpenportApp(object):
         if session.forward_tunnel:
             session.server_port = self.args.remote_port
 
-        session.active = True
+        session.active = False  # Will be set active in start_callback.
 
         db_share = self.db_handler.get_share_by_local_port(session.local_port)
         if db_share:
@@ -251,6 +251,12 @@ class OpenportApp(object):
         session.start_observers.append(self.save_share)
         session.error_observers.append(self.error_callback)
         session.success_observers.append(self.success_callback)
+
+        session.app_management_port = self.server.get_port()
+        session.start_observers.append(self.server.inform_start)
+        session.success_observers.append(self.server.inform_success)
+        session.error_observers.append(self.server.inform_failure)
+        session.stop_observers.append(self.server.inform_stop)
 
         ensure_keys_exist(*get_default_key_locations())
 
