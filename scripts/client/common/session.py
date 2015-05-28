@@ -2,7 +2,7 @@ import pickle
 
 
 class Session(object):
-    def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=1, account_id=-1,
+    def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=False, account_id=-1,
                  key_id=-1, local_port=-1, server_session_token='', restart_command='', http_forward=False,
                  http_forward_address='', open_port_for_ip_link='', app_management_port=-1,
                  forward_tunnel=False):
@@ -102,5 +102,6 @@ class Session(object):
             observer(self)
 
     def notify_stop(self):
+        self.active = False
         for observer in self.stop_observers:
             observer(self)

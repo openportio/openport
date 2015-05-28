@@ -68,7 +68,7 @@ class AppTcpServer():
         
         
         @self.app.route('/exit', method='POST', )
-        def exit_manager():
+        def exit():
             logger.debug('/exit')
             if request.remote_addr == '127.0.0.1':
                 force = request.forms.get('force', False)

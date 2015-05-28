@@ -26,7 +26,6 @@ class Openport(object):
         self.first_time_showing_message = True
         self.last_response = None
 
-
     def start_port_forward(self, session, server=DEFAULT_SERVER):
 
         self.restart_on_failure = True
@@ -124,3 +123,6 @@ class Openport(object):
 
     def stop(self):
         self.stop_port_forward()
+
+    def running(self):
+        return not self.port_forwarding_service.stopped

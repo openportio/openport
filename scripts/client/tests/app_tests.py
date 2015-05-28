@@ -288,6 +288,24 @@ class AppTests(unittest.TestCase):
             print 'application terminated: ', self.osinteraction.get_all_output(p)
             self.fail('p_app.poll() should be None but was %s' % p.poll())
 
+    def test_exit(self):
+        port = self.osinteraction.get_open_port()
+        print 'localport :', port
+
+        p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
+                                  '--verbose', '--server', TEST_SERVER, '--database', self.db_file],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app)
+
+        remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
+
+        share = self.db_handler.get_share_by_local_port(port)[0]
+        send_exit(share, force=True)
+
+        run_method_with_timeout(p_app.wait, 10)
+        self.assertTrue(p_app.poll() is not None)
+
+
     def test_restart_shares(self):
         port = self.osinteraction.get_open_port()
         print 'localport :', port

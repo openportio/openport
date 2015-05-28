@@ -3,6 +3,7 @@ __author__ = 'jan'
 import os
 import sys
 import logging
+import signal
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
@@ -11,8 +12,9 @@ from time import sleep
 from services.logger_service import set_log_level
 from apps.openport_app import OpenportApp
 import threading
+from services import osinteraction
 from manager import dbhandler
-from test_utils import set_default_args
+from test_utils import set_default_args, wait_for_response, click_open_for_ip_link, check_tcp_port_forward
 
 
 class OpenportAppTests(unittest.TestCase):
@@ -22,6 +24,7 @@ class OpenportAppTests(unittest.TestCase):
         self.os_interaction = getInstance()
         set_log_level(logging.DEBUG)
         self.app = OpenportApp()
+        self.os_interaction = osinteraction.getInstance()
         self.test_db = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'db_test.db')
         try:
             os.remove(self.test_db)
@@ -159,3 +162,28 @@ class OpenportAppTests(unittest.TestCase):
         # Stopping the app will make the share inactive.
         #self.app.stop()
         self.stop_port_forward = True
+
+    def test_exit(self):
+        set_default_args(self.app, self.test_db)
+
+        port = self.os_interaction.get_open_port()
+        print 'localport :', port
+        self.app.args.local_port = port
+
+        thr = threading.Thread(target=self.app.start)
+        thr.setDaemon(True)
+        thr.start()
+
+        wait_for_response(lambda: self.app.session and self.app.session.active)
+
+       # sleep(3)
+        session = self.app.session
+        click_open_for_ip_link(session.open_port_for_ip_link)
+
+        check_tcp_port_forward(self, session.server, port, session.server_port)
+
+        self.app.handleSigTERM(signal.SIGINT)
+
+        self.assertFalse(self.app.session.active)
+        self.assertFalse(self.app.openport.running())
+        self.assertFalse(check_tcp_port_forward(self, session.server, port, session.server_port, fail_on_error=False))

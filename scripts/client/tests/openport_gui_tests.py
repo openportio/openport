@@ -26,6 +26,7 @@ def gui_test(func):
                 func(self)
             except Exception as e:
                 self.exception = e
+                raise
             finally:
                 wx.Exit()
         thr = threading.Thread(target=test_thread)
@@ -92,6 +93,47 @@ class OpenportAppTests(unittest.TestCase):
         self.gui_frame.initialize()
         self.assertEqual(1, len(self.gui_frame.share_panels))
 
+    @gui_test
+    def test_stop_share(self):
+
+        self.gui_frame.initialize()
+        self.assertEqual(0, len(self.gui_frame.share_panels))
+
+        set_default_args(self.app, self.test_db)
+        self.app.args.database = self.test_db
+
+        self.app.args.local_port = 24
+        thr = threading.Thread(target=self.app.start)
+        thr.setDaemon(True)
+        thr.start()
+        wait_for_response(lambda: self.app.session and self.app.session.active)
+        sleep(5)
+
+        db_handler = dbhandler.DBHandler(self.test_db)
+        self.assertEqual(1, len(db_handler.get_shares()))
+        self.assertEqual(1, len(self.gui_frame.share_panels))
+
+        stop_button = self.find_element_with_label(self.gui_frame.share_panels[self.app.session.id], 'Stop sharing')
+        command_event = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, -1)
+        stop_button.Command(command_event)
+
+        wait_for_response(lambda: self.app.session and not self.app.session.active)
+        sleep(5)
+
+        self.assertEqual(0, len(db_handler.get_shares()))
+        self.assertEqual(0, len(self.gui_frame.share_panels))
+
+        logger.debug('Success!')
+
+    def find_element_with_label(self, widget, label):
+        for child in widget.GetChildren():
+            print child.GetLabel()
+            if child.GetLabel() == label:
+                return child
+            sub_child = self.find_element_with_label(child, label)
+            if sub_child:
+                return sub_child
+        return None
 
 
 # remove share kills share

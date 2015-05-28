@@ -61,7 +61,9 @@ class OpenportApp(object):
         if self.session:
             self.session.notify_stop()
             sleep(1)
-        os._exit(3)
+        if self.openport:
+            self.openport.stop()
+        #os._exit(3)
 
     def save_share(self, share):
         self.db_handler.add_share(share)
