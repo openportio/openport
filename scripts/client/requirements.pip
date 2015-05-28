@@ -12,7 +12,8 @@ argparse
 bottle
 cherrypy
 #pyinstaller
-git+https://github.com/pyinstaller/pyinstaller.git@develop
+#git+https://github.com/pyinstaller/pyinstaller.git@develop
+git+https://github.com/gholzmann/pyinstaller/@7be200b5a6f179f6753ca5a51713f19103f23393
 #pyinstaller
 sqlalchemy
 alembic
