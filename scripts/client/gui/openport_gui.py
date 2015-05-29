@@ -302,11 +302,7 @@ class SharesFrame(wx.Frame):
         button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND | wx.ALL)
 
         def show_qr_evt(evt):
-            if isinstance(share, Share):
-                title = share.filePath
-            else:
-                title = share.local_port
-            self.show_qr(title, share.get_link())
+            self.show_qr(share.get_link(), share.get_link())
 
         qr_button = wx.Button(button_panel, -1, label="Show QR")
         qr_button.Bind(wx.EVT_BUTTON, show_qr_evt)
@@ -377,7 +373,7 @@ class SharesFrame(wx.Frame):
 
 class QrFrame(wx.Frame):
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id)  #, title,
+        wx.Frame.__init__(self, parent, id, title)  #, title,
         #style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_NO_TASKBAR|wx.NO_FULL_REPAINT_ON_RESIZE|wx.NO_BORDER|
         #     wx.FRAME_TOOL_WINDOW|wx.STAY_ON_TOP)
 
