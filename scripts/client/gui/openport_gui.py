@@ -95,7 +95,7 @@ class SharesFrame(wx.Frame):
 
     def exitApp(self, event):
         self.tbicon.RemoveIcon()
-        self.tbicon.Destroy()
+#        self.tbicon.Destroy()
         self.server.stop()
         wx.Exit()
       #  os._exit(0)
@@ -108,7 +108,7 @@ class SharesFrame(wx.Frame):
         self.tbicon.Bind(wx.EVT_TASKBAR_LEFT_DCLICK, self.showFrame)
 
     def addMenuBar(self):
-        menubar = wx.MenuBar()
+        self.menubar = wx.MenuBar()
         file = wx.Menu()
         #        help = wx.Menu()
         #file.Append(101, '&New share', 'Share a new document')
@@ -120,9 +120,9 @@ class SharesFrame(wx.Frame):
         quit = wx.MenuItem(file, 105, '&Quit\tCtrl+Q', 'Quit the Application')
         self.Bind(wx.EVT_MENU, self.exitApp, id=105)
         file.AppendItem(quit)
-        menubar.Append(file, '&File')
+        self.menubar.Append(file, '&File')
         #        menubar.Append(help, '&Help')
-        self.SetMenuBar(menubar)
+        self.SetMenuBar(self.menubar)
 
     def init_shortcuts(self):
         id_event_open = wx.NewId()
@@ -205,6 +205,41 @@ class SharesFrame(wx.Frame):
         self.SetSizer(self.frame_sizer)
         self.Layout()
         self.init_shortcuts()
+        self.show_no_shares_message()
+
+    def show_no_shares_message(self):
+        logger.debug('showing no shares message')
+        self.no_shares_text_panel = wx.Panel(self.scrolling_window, id=2, style=wx.BORDER_NONE)
+
+        self.scrolling_window_sizer.Add(self.no_shares_text_panel, 0, wx.EXPAND, 0)
+        no_shares_text_panel_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        top_panel = wx.Panel(self.no_shares_text_panel)
+        top_panel_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        text_panel = wx.Panel(top_panel)
+        text_panel_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        filename_text = wx.StaticText(text_panel, -1, 'You have no active sessions. Start a session by using the "File" menu.')
+        filename_text.SetFont(wx.Font(14, wx.SWISS, wx.NORMAL, wx.BOLD))
+        filename_text.SetSize(filename_text.GetBestSize())
+        text_panel_sizer.Add(filename_text, 1, wx.EXPAND | wx.ALL)
+
+        text_panel.SetSizer(text_panel_sizer)
+        top_panel_sizer.Add(text_panel, 1, wx.EXPAND)
+
+        top_panel.SetSizer(top_panel_sizer)
+        no_shares_text_panel_sizer.Add(top_panel, 0, wx.EXPAND)
+
+
+        self.no_shares_text_panel.SetSizer(no_shares_text_panel_sizer)
+
+        self.no_shares_text_panel.GetParent().Layout()
+        self.frame_sizer.Layout()
+
+    def hide_no_shares_message(self):
+        if self.no_shares_text_panel:
+            self.no_shares_text_panel.Destroy()
 
     def update_account(self,
                        bytes_this_month=-1,
@@ -226,6 +261,7 @@ class SharesFrame(wx.Frame):
         if share.id in self.share_panels:
             return
 
+        self.hide_no_shares_message()
         if isinstance(share, Share):
             filename = share.filePath
         else:
@@ -366,6 +402,8 @@ class SharesFrame(wx.Frame):
                 self.scrolling_window.Layout()
                 self.scrolling_window.Refresh()
                 self.Layout()
+                if len(self.share_panels) == 0:
+                    self.show_no_shares_message()
             wx.CallAfter(do_it)
         else:
             logger.debug('share not found while removing')

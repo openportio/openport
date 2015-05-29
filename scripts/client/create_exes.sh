@@ -1,7 +1,6 @@
 #!/bin/sh
-env/bin/pyinstaller apps/openport_app.py --clean --onefile --name openport
-env/bin/pyinstaller --clean openport_gui.spec
-
+#env/bin/pyinstaller apps/openport_app.py --clean --name openport -y
+env/bin/pyinstaller --clean openport_gui.spec -y
 
 #If the exe fails with "cannot import _counter":
 # wget https://github.com/pyinstaller/pyinstaller/tarball/develop
