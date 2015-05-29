@@ -19,9 +19,9 @@ class AppService(object):
     def set_manager_port(self, command):
         os_interaction = osinteraction.getInstance()
         if self.config.manager_port_from_config_file:
-            command = os_interaction.unset_variable(command, '--manager-port')
+            command = os_interaction.unset_variable(command, '--listener-port')
         else:
-            command = os_interaction.set_variable(command, '--manager-port', self.config.manager_port)
+            command = os_interaction.set_variable(command, '--listener-port', self.config.manager_port)
         return command
 
     def start_openport_process(self, port):
@@ -47,8 +47,8 @@ class AppService(object):
 
         return command
 
-    def start_openport_process_from_session(self, session):
-        command = self.get_restart_command(session)
+    def start_openport_process_from_session(self, session, database=''):
+        command = self.get_restart_command(session, database=database)
         logger.debug(command)
         session.restart_command = command
         p = osinteraction.getInstance().start_openport_process(session)

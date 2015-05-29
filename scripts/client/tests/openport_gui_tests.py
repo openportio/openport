@@ -15,6 +15,9 @@ from apps.openport_app import OpenportApp
 from manager import dbhandler
 from test_utils import set_default_args
 from gui.openport_gui import SharesFrame
+from common.session import Session
+from services.app_service import AppService
+from common.config import OpenportAppConfig
 
 logger = get_logger(__name__)
 
@@ -136,6 +139,49 @@ class OpenportAppTests(unittest.TestCase):
                 return sub_child
         return None
 
+    def test_restart_gui(self):
+        processes = {}
 
-# remove share kills share
-# ...
+        def test_thread():
+            try:
+                self.gui_frame.initialize()
+                self.assertEqual(0, len(self.gui_frame.share_panels))
+
+                port = self.os_interaction.get_open_port()
+
+                app_service = AppService(OpenportAppConfig())
+                session = Session()
+                session.local_port = port
+                global p
+                p = app_service.start_openport_process_from_session(session, database=self.test_db)
+                processes[p.pid] = p
+
+                db_handler = dbhandler.DBHandler(self.test_db)
+                wait_for_response(lambda: len(db_handler.get_shares()) > 0)
+
+                self.assertEqual(1, len(self.gui_frame.share_panels))
+            finally:
+                #wx.Exit()
+                self.gui_frame.exitApp(None)
+        thr = threading.Thread(target=test_thread)
+        thr.setDaemon(True)
+        thr.start()
+        self.gui_app.MainLoop()
+
+
+        def test_thread():
+            try:
+                self.gui_frame.initialize()
+                self.assertEqual(1, len(self.gui_frame.share_panels))
+                logger.debug('Success!')
+            finally:
+                #wx.Exit()
+                for pid, p in processes.iteritems():
+                    logger.debug('killing %s' % p.pid)
+                    self.os_interaction.kill_pid(p.pid)
+                self.gui_frame.exitApp(None)
+        thr = threading.Thread(target=test_thread)
+        thr.setDaemon(True)
+        thr.start()
+        self.gui_app.MainLoop()
+

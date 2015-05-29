@@ -263,7 +263,8 @@ class OsInteraction(object):
             return os.path.dirname(sys.argv[0])
         else:
             self.logger.debug('sys.argv %s' % sys.argv[0])
-            base_path = os.path.dirname(os.path.dirname(sys.argv[0]))
+ #           base_path = os.path.dirname(os.path.dirname(sys.argv[0]))
+            base_path = os.path.dirname(os.path.dirname(__file__))
             if base_path == '':
                 base_path = '.'
             return base_path
