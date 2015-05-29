@@ -1,15 +1,20 @@
 import urllib2
+import os
 from urllib2 import URLError, HTTPError
 
-from services import osinteraction
 from common.session import Session
 from services.logger_service import get_logger
+from services import osinteraction
 
 logger = get_logger(__name__)
+
+USER_CONFIG_FILE = '/etc/openport/users.conf'
+
 
 class AppService(object):
     def __init__(self, openport_app_config):
         self.config = openport_app_config
+        self.os_interaction = osinteraction.getInstance()
 
     def set_manager_port(self, command):
         os_interaction = osinteraction.getInstance()
@@ -67,3 +72,20 @@ class AppService(object):
             return False
         except Exception, detail:
             raise Exception('Another application is running on port %s' % manager_port)
+
+    def check_username_in_config_file(self):
+        if not osinteraction.is_windows():
+            if not os.path.exists(USER_CONFIG_FILE):
+                logger.warning('The file %s does not exist. Your sessions will not be automatically restarted '
+                               'on reboot. You can restart your session with "openport --restart-shares"'
+                               % USER_CONFIG_FILE)
+                return
+            username = self.os_interaction.get_username()
+            with open(USER_CONFIG_FILE, 'r') as f:
+                lines = [l.strip() for l in f.readlines()]
+                if username not in lines:
+                    logger.warning('Your username (%s) is not in %s. Your sessions will not be automatically restarted '
+                                   'on reboot. You can restart your session with "openport --restart-shares"' %
+                                   (username, USER_CONFIG_FILE))
+                    return
+

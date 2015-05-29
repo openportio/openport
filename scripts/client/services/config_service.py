@@ -9,6 +9,7 @@ from services.app_service import AppService
 
 logger = get_logger(__name__)
 
+
 class ConfigService(object):
     def __init__(self, openport_app_config):
         self.config = openport_app_config

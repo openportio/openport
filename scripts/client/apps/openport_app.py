@@ -12,7 +12,7 @@ from common.config import OpenportAppConfig
 from common.session import Session
 from services import key_registration_service
 from services.config_service import ConfigService
-from services.app_service import AppService
+from services.app_service import AppService, USER_CONFIG_FILE
 from manager import dbhandler
 from apps.openport import Openport
 from apps import openport_app_version
@@ -176,9 +176,9 @@ class OpenportApp(object):
                     logger.exception(e)
             else:
                 logger.debug('not starting %s: still running' % share.local_port)
-        users_file = '/etc/openport/users.conf'
-        if not osinteraction.is_windows() and self.os_interaction.user_is_root() and os.path.exists(users_file):
-            with open(users_file, 'r') as f:
+
+        if not osinteraction.is_windows() and self.os_interaction.user_is_root() and os.path.exists(USER_CONFIG_FILE):
+            with open(USER_CONFIG_FILE, 'r') as f:
                 lines = f.readlines()
                 for line in lines:
                     if not line.strip() or line.strip()[0] == '#':
@@ -251,6 +251,7 @@ class OpenportApp(object):
                                                           verbose=self.args.verbose,
                                                           server=self.args.server,
                                                           )
+            self.app_service.check_username_in_config_file()
 
         session.ip_link_protection = self.args.ip_link_protection
 

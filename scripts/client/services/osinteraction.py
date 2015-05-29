@@ -10,6 +10,7 @@ import signal
 import psutil
 from lockfile import NotMyLock, LockTimeout
 from lockfile.mkdirlockfile import MkdirLockFile
+import pwd
 
 try:
     from Queue import Queue, Empty
@@ -399,6 +400,9 @@ class LinuxOsInteraction(OsInteraction):
     def user_is_root(self):
         return os.geteuid() == 0
 
+    def get_username(self):
+        return pwd.getpwuid( os.getuid() )[ 0 ]
+
 
 class WindowsOsInteraction(OsInteraction):
     def __init__(self, use_logger=True):
@@ -477,6 +481,9 @@ class WindowsOsInteraction(OsInteraction):
 
     def user_is_root(self):
         return False
+
+    def get_username(self):
+        return getpass.getuser()
 
 
 class MacOsInteraction(LinuxOsInteraction):
