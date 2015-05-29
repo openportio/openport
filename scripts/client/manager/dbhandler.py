@@ -6,7 +6,7 @@ import logging
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from common.session import Session
 from services.logger_service import get_logger
-from services import osinteraction
+from services import osinteraction, migration_service
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -58,6 +58,7 @@ class DBHandler(object):
         if not db_location:
             db_location = self.osinteraction.get_app_data_path('openport.db')
 
+        db_exists = os.path.exists(db_location)
         logger.debug('db location: %s' % db_location)
         self.engine = create_engine('sqlite:///%s' % db_location)
         self.db_location = db_location
@@ -66,13 +67,24 @@ class DBHandler(object):
         self.Session = scoped_session(self.session_factory)
 
         if init_db:
-            self.osinteraction.run_function_with_lock(self.init_db, '%s.lock' % db_location)
+            self.init_db(db_exists)
+
+    def init_db(self, db_exists):
+            if db_exists:
+                # check alembic tables exists
+                result = self.engine.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='alembic_version'")
+                if len(list(result)) <= 0:
+                    # if not, put it in the state of version 0.9.1
+                    self.engine.execute("CREATE TABLE alembic_version (	version_num VARCHAR(32) NOT NULL )")
+                    self.engine.execute("INSERT INTO alembic_version (version_num) VALUES ('1f5354d0e38f')")
+
+            self.osinteraction.run_function_with_lock(migration_service.update_if_needed, '%s.lock' % self.db_location, args=[self.db_location])
 
     def _get_session(self):
         logger.debug('getting session')
         return self.Session()
 
-    def init_db(self):
+    def init_db_without_migrations(self):
         logger.debug('init_db')
         Base.metadata.create_all(self.engine)
         self.Session.remove()

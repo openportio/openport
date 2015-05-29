@@ -40,7 +40,7 @@ class ConfigService(object):
                 original_port = self.config.manager_port
             except:
                 manager_port = self.get_and_save_random_manager_port()
-                logger.info("Manager port not found in config file. Starting manager on port %s." % manager_port)
+                logger.debug("Manager port not found in config file. Starting manager on port %s." % manager_port)
                 return manager_port
 
         try:

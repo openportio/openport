@@ -9,6 +9,7 @@ import xmlrunner
 from time import sleep
 import logging
 import traceback
+import shutil
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -482,7 +483,7 @@ class AppTests(unittest.TestCase):
   #      self.assertTrue('Manager is now running on port' in command_output[0])
   #      self.assertTrue(self.application_is_alive(p_manager2))
 #
-  #      s.stop()
+    #      s.stop()
 
     def getRemoteAddress(self, output):
         print 'getRemoteAddress - output:%s' % output
@@ -943,6 +944,45 @@ class AppTests(unittest.TestCase):
         click_open_for_ip_link(link)
         check_tcp_port_forward(self, remote_host, port, remote_port)
 
+    def test_alembic__0_9_1__new_share(self):
+        old_db = os.path.join(os.path.dirname(__file__), 'testfiles/openport-0.9.1.db')
+        old_db_tmp = os.path.join(os.path.dirname(__file__), 'testfiles/tmp/openport-0.9.1.db')
+
+        shutil.copy(old_db, old_db_tmp)
+
+        port = self.osinteraction.get_open_port()
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--server', TEST_SERVER, '--verbose', '--database', old_db_tmp],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.check_application_is_still_alive(p)
+        click_open_for_ip_link(link)
+
+        db_handler = dbhandler.DBHandler(old_db_tmp)
+        session_from_db = db_handler.get_share_by_local_port(port)
+        self.assertNotEqual(session_from_db, None)
+
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
+
+    def test_alembic__0_9_1__restart_shares(self):
+        pass
+
+    def test_alembic__create_migrations(self):
+        return
+        old_db = os.path.join(os.path.dirname(__file__), 'testfiles/openport-0.9.1.db')
+        old_db_tmp = os.path.join(os.path.dirname(__file__), 'testfiles/tmp/openport-0.9.1.db')
+
+        shutil.copy(old_db, old_db_tmp)
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--create-migrations', '--verbose', '--database', old_db_tmp],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+        p.wait()
+        process_output = print_all_output(p, self.osinteraction, 'list')
+        print process_output[0]
+        self.assertFalse(process_output[1])
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ import gc
 
 from time import sleep
 from cStringIO import StringIO
+import shutil
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -268,6 +269,17 @@ class DBHandlerTests(unittest.TestCase):
 
         t.join()
         self.assertTrue(not 'ProgrammingError' in str1.getvalue())
+
+    def test_alembic(self):
+        old_db = os.path.join(os.path.dirname(__file__), 'testfiles/openport-0.9.1.db')
+        old_db_tmp = os.path.join(os.path.dirname(__file__), 'testfiles/tmp/openport-0.9.1.db')
+
+        shutil.copy(old_db, old_db_tmp)
+
+        db_handler = dbhandler.DBHandler(old_db_tmp)
+
+        session = db_handler.get_share_by_local_port(22)
+        self.assertNotEqual(None, session)
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

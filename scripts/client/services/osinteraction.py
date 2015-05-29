@@ -300,6 +300,22 @@ class OsInteraction(object):
     def activate_app(self):
         pass
 
+    @staticmethod
+    def resource_path(*relative_paths):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+
+        if hasattr(sys, '_MEIPASS'):
+            # PyInstaller >= 1.6
+            filename = os.path.join(sys._MEIPASS, *relative_paths)
+        elif '_MEIPASS2' in os.environ:
+            # PyInstaller < 1.6 (tested on 1.5 only)
+            filename = os.path.join(os.environ['_MEIPASS2'], *relative_paths)
+        else:
+            # 2 dots because we start the applications from the apps folder.
+            filename = os.path.join(os.path.dirname(__file__), '..', *relative_paths)
+
+        return os.path.abspath(filename)
+
 
 class LinuxOsInteraction(OsInteraction):
 

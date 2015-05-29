@@ -80,6 +80,7 @@ class OpenportApp(object):
         group.add_argument('--kill', '-k', action='store', type=int, help="Stop a share", default=0)
         group.add_argument('--kill-all', '-K', action='store_true', help="Stop all shares")
         group.add_argument('--restart-shares', action='store_true', help='Restart all active shares.')
+        group.add_argument('--create-migrations', action='store_true', help=argparse.SUPPRESS)
 
         parser.add_argument('--listener-port', type=int, default=-1, help=argparse.SUPPRESS)
         parser.add_argument('--database', type=str, default='', help=argparse.SUPPRESS)
@@ -219,6 +220,11 @@ class OpenportApp(object):
 
         if self.args.restart_shares:
             self.restart_sharing()
+            sys.exit()
+
+        if self.args.create_migrations:
+            from services import migration_service
+            migration_service.create_migrations(self.db_handler.db_location)
             sys.exit()
 
         session = Session()
