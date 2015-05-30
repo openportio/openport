@@ -11,6 +11,17 @@ a = Analysis(['gui/openport_gui.py'],
              cipher=block_cipher)
 pyz = PYZ(a.pure,
              cipher=block_cipher)
+
+from os import listdir
+from os.path import isfile, join
+import os
+
+migration_script_folder = 'alembic/versions'
+for f in listdir(migration_script_folder):
+    path = join(migration_script_folder, f)
+    if isfile(path):
+        a.datas += [(path, path, 'DATA')]
+
 exe = EXE(pyz,
           a.scripts,
           a.binaries + [('msvcp100.dll', 'C:\\Windows\\System32\\msvcp100.dll', 'BINARY'),

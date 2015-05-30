@@ -25,7 +25,7 @@
 											<key>GID</key>
 											<integer>80</integer>
 											<key>PATH</key>
-											<string>../../client/dist/Openport.app</string>
+											<string>../../../client/dist/Openport.app</string>
 											<key>PATH_TYPE</key>
 											<integer>1</integer>
 											<key>PERMISSIONS</key>
@@ -522,6 +522,22 @@
 							<array>
 								<dict>
 									<key>CHILDREN</key>
+									<array/>
+									<key>GID</key>
+									<integer>0</integer>
+									<key>PATH</key>
+									<string>bin</string>
+									<key>PATH_TYPE</key>
+									<integer>0</integer>
+									<key>PERMISSIONS</key>
+									<integer>493</integer>
+									<key>TYPE</key>
+									<integer>2</integer>
+									<key>UID</key>
+									<integer>0</integer>
+								</dict>
+								<dict>
+									<key>CHILDREN</key>
 									<array>
 										<dict>
 											<key>CHILDREN</key>
@@ -529,7 +545,7 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
-											<string>../../client/dist/openport</string>
+											<string>../../../client/dist/openport</string>
 											<key>PATH_TYPE</key>
 											<integer>1</integer>
 											<key>PERMISSIONS</key>
@@ -543,7 +559,7 @@
 									<key>GID</key>
 									<integer>0</integer>
 									<key>PATH</key>
-									<string>bin</string>
+									<string>lib</string>
 									<key>PATH_TYPE</key>
 									<integer>0</integer>
 									<key>PERMISSIONS</key>
@@ -588,6 +604,13 @@
 			</dict>
 			<key>PACKAGE_SCRIPTS</key>
 			<dict>
+				<key>POSTINSTALL_PATH</key>
+				<dict>
+					<key>PATH</key>
+					<string>postinstall.sh</string>
+					<key>PATH_TYPE</key>
+					<integer>1</integer>
+				</dict>
 				<key>RESOURCES</key>
 				<array/>
 			</dict>
@@ -748,7 +771,7 @@
 						<key>VALUE</key>
 						<dict>
 							<key>PATH</key>
-							<string>../../client/nsis/license.txt</string>
+							<string>../../windows/license.txt</string>
 							<key>PATH_TYPE</key>
 							<integer>1</integer>
 						</dict>

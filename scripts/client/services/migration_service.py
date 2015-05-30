@@ -6,10 +6,13 @@ from alembic.operations import Operations
 from alembic.migration import MigrationContext
 from alembic import util, autogenerate as autogen
 from services.osinteraction import OsInteraction, getInstance as get_osinteraction_instance
+from services.logger_service import get_logger
 
+logger = get_logger(__name__)
 
 def get_script_directory():
     path = OsInteraction.resource_path('alembic')
+    logger.debug('alembic path: %s' % path)
     script_directory = ScriptDirectory(path)
     return script_directory
 
@@ -32,6 +35,7 @@ def get_current_db_revision(db_location):
 
 
 def update_if_needed(db_location):
+    logger.debug('update_if_needed')
     script_directory = get_script_directory()
     def upgrade(rev, context):
         revision = 'head'

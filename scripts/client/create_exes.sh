@@ -1,6 +1,10 @@
 #!/bin/sh
-#env/bin/pyinstaller apps/openport_app.py --clean --name openport -y
+env/bin/pyinstaller --clean openport.spec -y
 env/bin/pyinstaller --clean openport_gui.spec -y
+
+codesign --force --sign "Developer ID Application: Jan De Bleser" dist/openport
+codesign --force --sign "Developer ID Application: Jan De Bleser" dist/Openport.app
+
 
 #If the exe fails with "cannot import _counter":
 # wget https://github.com/pyinstaller/pyinstaller/tarball/develop
