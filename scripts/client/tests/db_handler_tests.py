@@ -30,7 +30,7 @@ class DBHandlerTests(unittest.TestCase):
             os.remove(self.test_db)
         set_log_level(logging.DEBUG)
         self.dbhandler = dbhandler.DBHandler(self.test_db)
-        self.dbhandler.init_db()
+        self.dbhandler.init_db(False)
 
     def tearDown(self):
         self.dbhandler.close()

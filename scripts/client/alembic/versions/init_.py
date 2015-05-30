@@ -25,6 +25,10 @@ def upgrade():
         sa.Column('pid', sa.Integer),
         sa.Column('active', sa.Boolean),
         sa.Column('restart_command', sa.String(200)),
+        sa.Column('account_id', sa.Integer(), nullable=True),
+        sa.Column('http_forward', sa.Boolean()),
+        sa.Column('http_forward_address', sa.String(length=50), nullable=True),
+        sa.Column('key_id', sa.Integer(), nullable=True),
     )
 
 def downgrade():

@@ -76,7 +76,7 @@ class DBHandler(object):
                 if len(list(result)) <= 0:
                     # if not, put it in the state of version 0.9.1
                     self.engine.execute("CREATE TABLE alembic_version (	version_num VARCHAR(32) NOT NULL )")
-                    self.engine.execute("INSERT INTO alembic_version (version_num) VALUES ('1f5354d0e38f')")
+                    self.engine.execute("INSERT INTO alembic_version (version_num) VALUES ('init')")
 
             self.osinteraction.run_function_with_lock(migration_service.update_if_needed, '%s.lock' % self.db_location, args=[self.db_location])
 

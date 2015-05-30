@@ -984,6 +984,23 @@ class AppTests(unittest.TestCase):
         print process_output[0]
         self.assertFalse(process_output[1])
 
+    def test_openport_app__no_errors(self):
+        port = self.osinteraction.get_open_port()
+        db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'tmp_openport4444.db')
+        if os.path.exists(db_file):
+            os.remove(db_file)
+
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--server', TEST_SERVER, '--verbose', '--database', db_file],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        sleep(5)
+
+        output = print_all_output(p, self.osinteraction)
+        self.assertFalse(output[1])
+       # self.assertFalse('UserWarning' in output[1])
+
+        p.kill()
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
