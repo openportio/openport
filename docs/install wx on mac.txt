@@ -10,13 +10,14 @@ ln -s /Library/Python/2.7/site-packages/wxredirect.pth env/lib/python2.7/site-pa
 
 virtualenv --python=python2.7 env
 
+# Download and install port https://www.macports.org/install.php#installing
+
 sudo port install freetype
 sudo ln -s /opt/local/include/freetype2 /opt/local/include/freetype
 
-env/bin/pip install PIL
+env/bin/pip install pillow
 
-ln -s /Library/Frameworks/Python.framework/Versions/2.7/bin/pythonw env/bin/pythonw
-
+ln -s $(which pythonw) env/bin/pythonw
 
 export PYTHONHOME=env/
 env/bin/pythonw -c 'import wx, PIL, psutil'
