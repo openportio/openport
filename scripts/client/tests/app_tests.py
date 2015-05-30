@@ -5,15 +5,14 @@ import unittest
 import os
 import signal
 import sys
-import xmlrunner
 from time import sleep
 import logging
-import traceback
 import shutil
+import xmlrunner
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from services import osinteraction
+from services import osinteraction, dbhandler
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
@@ -21,7 +20,6 @@ from test_utils import print_all_output, click_open_for_ip_link, run_method_with
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
 from apps.app_tcp_server import send_exit
-from manager import dbhandler
 
 logger = get_logger(__name__)
 
@@ -549,9 +547,9 @@ class AppTests(unittest.TestCase):
                                   '--verbose', '--server', TEST_SERVER,
                                   '--database', self.db_file],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='p_app')
         self.osinteraction.print_output_continuously_threaded(p_app, 'p_app')
         self.processes_to_kill.append(p_app)
-        sleep(3)
 
         p_kill = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--kill', str(port),
                                   '--database', self.db_file, '--verbose'],
@@ -559,7 +557,7 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_kill)
         self.osinteraction.print_output_continuously_threaded(p_kill, 'p_kill')
         run_method_with_timeout(p_kill.wait, 10)
-        run_method_with_timeout(p_app.wait, 15)
+        run_method_with_timeout(p_app.wait, 10)
         self.assertFalse(self.application_is_alive(p_app))
 
     def test_kill_all(self):

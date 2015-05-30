@@ -493,3 +493,4 @@ def set_default_args(app, db_location=None):
     app.args.forward_tunnel = False
     app.args.remote_port = -1
     app.args.ip_link_protection = None
+    app.args.create_migrations = False

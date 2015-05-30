@@ -7,9 +7,9 @@ import os
 import threading
 
 from bottle import Bottle, ServerAdapter, request, response, error, hook
-
-from manager import dbhandler
+from services import dbhandler
 from services.logger_service import get_logger
+
 
 logger = get_logger('server')
 

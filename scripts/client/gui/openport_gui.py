@@ -5,6 +5,7 @@ from time import sleep
 import threading
 
 import wx
+
 from wx.lib import intctrl
 from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
@@ -18,7 +19,7 @@ from services import qr_service, image_service
 from gui.trayicon import OpenPortItTaskBarIcon
 from services.app_service import AppService
 from common.session import Session
-from manager.dbhandler import DBHandler
+from services.dbhandler import DBHandler
 
 from gui_tcp_server import GUITcpServer
 from common.config import OpenportAppConfig

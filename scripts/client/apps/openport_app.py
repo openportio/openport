@@ -6,14 +6,13 @@ import argparse
 import ast
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
-from services import osinteraction
+from services import osinteraction, dbhandler
 from services.logger_service import get_logger, set_log_level
 from common.config import OpenportAppConfig
 from common.session import Session
 from services import key_registration_service
 from services.config_service import ConfigService
 from services.app_service import AppService, USER_CONFIG_FILE
-from manager import dbhandler
 from apps.openport import Openport
 from apps import openport_app_version
 from app_tcp_server import AppTcpServer, send_exit, send_ping
@@ -142,6 +141,8 @@ class OpenportApp(object):
         if len(shares) > 0:
             share = shares[0]
             self.kill_share(share)
+        else:
+            logger.info('No active sessions found for local port %s' % local_port)
         self.print_shares()
 
     def kill_share(self, share):

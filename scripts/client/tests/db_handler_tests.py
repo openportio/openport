@@ -1,17 +1,18 @@
 import unittest
 import sys
-import xmlrunner
 import os
 import gc
-
 from time import sleep
 from cStringIO import StringIO
 import shutil
 
+import xmlrunner
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from common.share import Share
-from manager import dbhandler
+from services import dbhandler
 from services.logger_service import set_log_level
 import logging
 import threading

@@ -1,18 +1,20 @@
 import os
 import sys
 import logging
-import wx
 import threading
 import unittest
 from time import sleep
 
+import wx
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from services.osinteraction import OsInteraction, getInstance
+from services.osinteraction import getInstance
 from services.logger_service import set_log_level, get_logger
 from test_utils import wait_for_response
 from apps.openport_app import OpenportApp
-from manager import dbhandler
+from services import dbhandler
 from test_utils import set_default_args
 from gui.openport_gui import SharesFrame
 from common.session import Session

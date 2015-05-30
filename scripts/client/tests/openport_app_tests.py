@@ -12,8 +12,7 @@ from time import sleep
 from services.logger_service import set_log_level
 from apps.openport_app import OpenportApp
 import threading
-from services import osinteraction
-from manager import dbhandler
+from services import osinteraction, dbhandler
 from test_utils import set_default_args, wait_for_response, click_open_for_ip_link, check_tcp_port_forward
 
 
@@ -87,7 +86,7 @@ class OpenportAppTests(unittest.TestCase):
 
         sleep(0.5)
        # sleep(60)
-        self.assertEqual(this_test.received_server, 'testserver.jdb')
+        self.assertEqual(this_test.received_server, 'http://test.openport.be')
 
         self.assertEqual(self.app.session.server_port, 1111)
         self.assertEqual(this_test.received_server_port, -1)
@@ -108,8 +107,6 @@ class OpenportAppTests(unittest.TestCase):
         this_test.returning_server_port = 2222
         this_test.returning_token = 'second token'
         self.stop_port_forward = False
-
-        dbhandler.destroy_instance()
 
         self.app = OpenportApp()
         set_default_args(self.app, self.test_db)
@@ -141,8 +138,6 @@ class OpenportAppTests(unittest.TestCase):
         this_test.returning_server_port = 2222
         this_test.returning_token = 'second token'
         self.stop_port_forward = False
-
-        dbhandler.destroy_instance()
 
         self.app = OpenportApp()
         set_default_args(self.app, self.test_db)

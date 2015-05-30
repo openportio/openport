@@ -1,10 +1,12 @@
 __author__ = 'jan'
+from sqlalchemy import create_engine
+
 from alembic.script import ScriptDirectory
 from alembic.operations import Operations
 from alembic.migration import MigrationContext
-from sqlalchemy import create_engine
 from alembic import util, autogenerate as autogen
 from services.osinteraction import OsInteraction, getInstance as get_osinteraction_instance
+
 
 def get_script_directory():
     path = OsInteraction.resource_path('alembic')
@@ -60,7 +62,8 @@ def create_migrations(db_location):
         autogen._produce_migration_diffs(context, template_args, imports)
         return []
 
-    from manager import dbhandler
+    from services import dbhandler
+
     metadata = dbhandler.Base.metadata
 
     context = get_migration_context(db_location, script_directory, {
