@@ -4,7 +4,6 @@
 /scripts/client/build/
 /scripts/client/tests/testfiles/tmp/*
 /scripts/client/openport.db
-/scripts/client/openport.spec
 /scripts/client/ghostdriver.log
 /scripts/openport.db
 /scripts/client/nsis/OpenPort-It.exe
