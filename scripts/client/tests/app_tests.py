@@ -394,7 +394,8 @@ class AppTests(unittest.TestCase):
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
 
-        sleep(3)
+        remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
+
         p_app2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', str(port), '--database', self.db_file,
                                    '--verbose', '--server', TEST_SERVER],
                                   stderr=subprocess.PIPE, stdout=subprocess.PIPE)

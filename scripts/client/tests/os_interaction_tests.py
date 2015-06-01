@@ -3,6 +3,7 @@ __author__ = 'jan'
 import os
 import sys
 import logging
+import threading
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
@@ -167,6 +168,26 @@ class OsInteractionTest(unittest.TestCase):
         print output[1]
         if not is_windows():
             self.assertTrue(output[0] and 'got signal' in output[0])
+
+    def test_run_function_with_lock(self):
+        x = [0]
+        def add_one():
+            a = x[0]
+            sleep(0.001)
+            x[0] = a + 1
+
+        threads = []
+
+        thread_amount = 10  # Setting this number too high will fail the tests because the system cannot generate so much lockfiles
+        for i in range(thread_amount):
+            t = threading.Thread(target=lambda: self.os_interaction.run_function_with_lock(add_one, 'add_one'))
+            t.setDaemon(True)
+            t.start()
+            threads.append(t)
+
+        for t in threads:
+            t.join()
+        self.assertEqual(x[0], thread_amount)
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

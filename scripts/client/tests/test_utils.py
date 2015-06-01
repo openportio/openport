@@ -377,7 +377,8 @@ def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_e
         else:
             raise e
     finally:
-        s.close()
+        #s.close()
+        pass
     return True
 
 

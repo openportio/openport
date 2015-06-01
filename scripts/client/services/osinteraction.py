@@ -9,7 +9,7 @@ from time import sleep
 import signal
 import psutil
 from lockfile import NotMyLock, LockTimeout
-from lockfile.mkdirlockfile import MkdirLockFile
+from lockfile import LockFile
 import pwd
 
 try:
@@ -271,7 +271,7 @@ class OsInteraction(object):
 
     def run_function_with_lock(self, function, lock_file, timeout=30, args=[], kwargs={}):
         self.logger.debug('starting function with lock: %s' % lock_file)
-        lock = MkdirLockFile(lock_file)
+        lock = LockFile(lock_file)
         try:
             while not lock.i_am_locking():
                 try:
@@ -418,7 +418,7 @@ class LinuxOsInteraction(OsInteraction):
         return os.geteuid() == 0
 
     def get_username(self):
-        return pwd.getpwuid( os.getuid() )[ 0 ]
+        return pwd.getpwuid(os.getuid())[0]
 
 
 class WindowsOsInteraction(OsInteraction):

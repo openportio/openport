@@ -73,7 +73,9 @@ class DBHandler(object):
             if db_exists:
                 # check alembic tables exists
                 result = self.engine.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='alembic_version'")
-                if len(list(result)) <= 0:
+                alembic_table_count = len(list(result))
+                result.close()
+                if alembic_table_count <= 0:
                     # if not, put it in the state of version 0.9.1
                     self.engine.execute("CREATE TABLE alembic_version (	version_num VARCHAR(32) NOT NULL )")
                     self.engine.execute("INSERT INTO alembic_version (version_num) VALUES ('init')")
