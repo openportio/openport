@@ -49,6 +49,7 @@ def update_if_needed(db_location):
 
     with context.begin_transaction():
         context.run_migrations()
+    context.connection.close()
 
 def create_migrations(db_location):
     script_directory = get_script_directory()

@@ -145,14 +145,14 @@ class DBHandlerTests(unittest.TestCase):
         def init_db_test():
             try:
                 dbh = dbhandler.DBHandler(self.test_db)
-                dbh.init_db()
+                dbh.init_db(True)
             except Exception, e:
                 global errors
                 errors.append(e)
 
         threads = []
 
-        for i in range(1000):
+        for i in range(10):
             t = threading.Thread(target=init_db_test)
             t.setDaemon(True)
             t.start()
