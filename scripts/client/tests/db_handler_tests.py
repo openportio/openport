@@ -99,10 +99,10 @@ class DBHandlerTests(unittest.TestCase):
         dbhandler2 = dbhandler.DBHandler(self.test_db)
         try:
 
-            share = Share()
+            share = Share(active=True)
             share.local_port = 2224
 
-            share2 = Share()
+            share2 = Share(active=True)
             share2.local_port = 2225
 
             saved_share = self.dbhandler.add_share(share)
@@ -221,11 +221,11 @@ class DBHandlerTests(unittest.TestCase):
         self.assertEqual(share.local_port, self.share2.local_port)
 
     def test_multi_thread_2(self):
-        share = Share(local_port=22)
+        share = Share(local_port=22, active=True)
         self.dbhandler.add_share(share)
 
         def get_share():
-            share2 = Share(local_port=23)
+            share2 = Share(local_port=23, active=True)
             self.dbhandler.add_share(share2)
             # It is super important that the session is closed on the end of the thread, otherwise this will result in
             # an error when the current thread is trying to close it.
