@@ -24,6 +24,6 @@ sudo ln -s /usr/local/share/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/bin/
 
 #To check if completed, just type:
 
-phantomjs —v
+phantomjs --version
 
 #Must appear: 1.9.7
