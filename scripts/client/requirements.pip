@@ -1,5 +1,6 @@
 setuptools
 pycrypto
+cryptography
 ecdsa
 paramiko
 #wxPython

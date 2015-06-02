@@ -9,6 +9,8 @@ import subprocess
 import threading
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import urllib2
+import ssl
+
 from services.logger_service import get_logger
 from services import osinteraction
 import traceback
@@ -203,11 +205,10 @@ def run_command_with_timeout(args, timeout_s):
 
 
 def run_method_with_timeout(function, timeout_s, args=[], kwargs={}, raise_exception=True):
-    return_value = None
+    return_value = [None]
 
     def method1():
-        global return_value
-        return_value = function(*args, **kwargs)
+        return_value[0] = function(*args, **kwargs)
 
     thread = threading.Thread(target=method1)
     thread.daemon = True
@@ -217,7 +218,7 @@ def run_method_with_timeout(function, timeout_s, args=[], kwargs={}, raise_excep
     if thread.is_alive():
         if raise_exception:
             raise Exception('Timeout!')
-    return return_value
+    return return_value[0]
 
 def run_command_with_timeout_return_process(args, timeout_s):
 
@@ -331,12 +332,12 @@ def kill_all_processes(processes_to_kill):
 def click_open_for_ip_link(link):
     if link:
         logger.info('clicking link %s' % link)
-        import ssl
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
         req = urllib2.Request(link)
-        response = urllib2.urlopen(req, timeout=10, context=ctx).read()
+        response = run_method_with_timeout(lambda: urllib2.urlopen(req, timeout=10, context=ctx).read(), 10)
+        assert response is not None
         assert 'is now open' in response
 
 servers = {}
