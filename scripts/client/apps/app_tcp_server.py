@@ -47,12 +47,13 @@ class AppTcpServer():
 
         return _enable_cors
 
-    def __init__(self, host, port, openport_app_config):
+    def __init__(self, host, port, openport_app_config, db_handler):
         self.app = Bottle()
         self.server = CherryPyServer(host=host, port=port)
         self.running = False
         self.openport_app_config = openport_app_config
-    
+        self.db_handler = db_handler
+
         @self.app.route('/register', method='POST')
         @self.enable_cors
         def new_share(name='register'):
@@ -67,7 +68,6 @@ class AppTcpServer():
         @self.enable_cors
         def ping():
             return 'pong'
-        
         
         @self.app.route('/exit', method='POST', )
         @self.enable_cors
@@ -88,12 +88,15 @@ class AppTcpServer():
                 t.start()
                 return 'ok'
 
-        
         @self.app.route('/error', method='GET')
         @self.enable_cors
         def error_():
             raise Exception('The short error message.')
-        
+
+        @self.app.route('/info', method='GET')
+        @self.enable_cors
+        def info():
+            return 'openport'
         
         @error(500)
         def custom500(httpError):
@@ -103,7 +106,8 @@ class AppTcpServer():
         @hook('after_request')
         def close_db_connections():
             # Double tap? Session should be already closed...
-            dbhandler.getInstance().Session.remove()
+            if self.db_handler:
+                self.db_handler.Session.remove()
 
     def inform_listeners(self, share, path):
         def inform():
@@ -176,7 +180,7 @@ def send_exit(share, force=False):
 
 def send_ping(share):
     port = share.app_management_port
-    logger.debug('Sending exit to %s.' % port)
+    logger.debug('Sending ping to %s.' % port)
     url = 'http://127.0.0.1:%s/ping' % (port,)
     logger.debug('sending get request ' + url)
     try:
@@ -190,9 +194,25 @@ def send_ping(share):
         logger.error("An error has occurred while pinging the app: %s" % detail)
 
 
+def is_running(share):
+    port = share.app_management_port
+    logger.debug('Sending info to %s.' % port)
+    url = 'http://127.0.0.1:%s/info' % (port,)
+    logger.debug('sending get request ' + url)
+    try:
+        req = urllib2.Request(url)
+        response = urllib2.urlopen(req, timeout=1).read()
+        if response.splitlines()[0].strip() != 'openport':
+            logger.error(response)
+            return False
+        return True
+    except Exception, detail:
+        logger.error("An error has occurred while getting info from the app: %s" % detail)
+
+
 if __name__ == '__main__':
     print sys.argv
 
     from common.config import OpenportAppConfig
-    server = AppTcpServer('127.0.0.1', 6005, OpenportAppConfig())
+    server = AppTcpServer('127.0.0.1', 6005, OpenportAppConfig(), None)
     server.start_server()

@@ -34,3 +34,18 @@ env/scripts/pip install -r requirements.pip
 if that doesnt work:
 install visual studio 2008:
 http://go.microsoft.com/?linkid=7729279
+
+
+install pycrypto:
+http://stackoverflow.com/questions/23691564/running-cython-in-windows-x64-fatal-error-c1083-cannot-open-include-file-ba
+
+Download and install Microsoft Visual C++ 2008 Express.
+Download and install Microsoft Windows SDK for Windows 7 and .NET Framework 3.5 SP1. You will need only:
+Developer Tools > Windows Headers and Libraries <-- this gives you basetsd.h
+Developer Tools > Visual C++ Compilers <-- this gives you the 64-bit compilers
+Copy C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars64.bat to C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat. Observe the change in file name.
+Add C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin to PATH. This may not be required (I did so before re-installing the SDK w/ Headers & Libs; therefore, the necessity is unknown).
+
+
+@set INCLUDE=C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;%INCLUDE%
+@set LIB=C:\Program Files\Microsoft SDKs\Windows\v7.1;%LIB%

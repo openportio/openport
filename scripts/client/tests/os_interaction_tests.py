@@ -123,8 +123,7 @@ class OsInteractionTest(unittest.TestCase):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         python_exe = self.os_interaction.get_python_exec()
         p = subprocess.Popen(python_exe + ['apps/openport_app.py', '--local-port', '%s' % port,
-                             '--start-manager', 'False', '--server', 'test.openport.be', '--verbose',
-                             '--no-manager', '--no-manager'],
+                             '--server', 'http://test.openport.be', '--verbose'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         try:
             self.assertTrue(self.os_interaction.pid_is_openport_process(p.pid))
