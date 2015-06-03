@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source client/apps/openport_app_version.py
+source ../../client/apps/openport_app_version.py
 
 echo $VERSION
 
@@ -18,8 +18,8 @@ sudo dpkg --remove $APPLICATION || echo "$APPLICATION not installed"
 
 rm -rf $PACKAGE
 mkdir $PACKAGE
-mkdir -p $PACKAGE/usr/bin
-cp client/dist/* $PACKAGE/usr/bin/ -r
+mkdir -p $PACKAGE/usr/lib
+cp ../../client/dist/* $PACKAGE/usr/lib/ -r
 tar -czf $TARBALL $PACKAGE
 rm -rf $PACKAGE
 rm -rf package
