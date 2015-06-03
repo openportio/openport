@@ -15,7 +15,7 @@ from services.config_service import ConfigService
 from services.app_service import AppService, USER_CONFIG_FILE
 from apps.openport import Openport
 from apps import openport_app_version
-from app_tcp_server import AppTcpServer, send_exit, send_ping
+from app_tcp_server import AppTcpServer, send_exit, send_ping, is_running
 from keyhandling import ensure_keys_exist, get_default_key_locations
 
 from common.config import DEFAULT_SERVER
@@ -34,7 +34,9 @@ class OpenportApp(object):
         self.args = UserDict()
         self.session = None
         self.openport = Openport()
-        self.server = AppTcpServer('127.0.0.1', self.os_interaction.get_open_port(), self.config)
+        self.db_handler = None
+
+        self.server = AppTcpServer('127.0.0.1', self.os_interaction.get_open_port(), self.config, self.db_handler)
         self.config_service = ConfigService(self.config)
         self.app_service = AppService(self.config)
         if self.os_interaction.is_compiled():
@@ -53,7 +55,6 @@ class OpenportApp(object):
             # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
             #signal.signal(signal.SIGTERM, self.handleSigTERM)
 
-        self.db_handler = None
 
     def handleSigTERM(self, signum, frame=-1):
         logger.debug('got signal %s' % signum)
@@ -129,7 +130,7 @@ class OpenportApp(object):
                #"pid: %s - " % share.pid + \
         share_line = "localport: %s - " % share.local_port + \
                      "remote port: %s - " % share.server_port + \
-                     "running: %s - " % self.os_interaction.pid_is_openport_process(share.pid) + \
+                     "running: %s - " % is_running(share) + \
                      "restart on reboot: %s" % bool(share.restart_command)
         if self.config.verbose:
             share_line += ' - pid: %s' % share.pid + \
@@ -159,7 +160,7 @@ class OpenportApp(object):
         shares = self.db_handler.get_shares_to_restart()
         logger.debug('restarting shares - amount: %s' % len(list(shares)))
         for share in shares:
-            if not self.os_interaction.pid_is_openport_process(share.pid):
+            if not is_running(share):
                 try:
                     logger.debug('restarting share: %s' % share.restart_command)
                     share.restart_command = self.app_service.set_manager_port(share.restart_command)
@@ -198,6 +199,7 @@ class OpenportApp(object):
         key_registration_service.register_key(self.args, self.args.server)
 
         self.db_handler = dbhandler.DBHandler(self.args.database)
+        self.server.db_handler = self.db_handler
 
         self.config.manager_port = self.args.listener_port
         self.config.openport_address = self.args.server
@@ -240,7 +242,7 @@ class OpenportApp(object):
 
         db_share = self.db_handler.get_share_by_local_port(session.local_port)
         if db_share:
-            if self.os_interaction.pid_is_openport_process(db_share[0].pid):
+            if is_running(db_share[0]):
                 logger.info('Port forward already running for port %s' % self.args.local_port)
                 sys.exit(6)
 

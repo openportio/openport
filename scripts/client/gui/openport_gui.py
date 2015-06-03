@@ -22,6 +22,7 @@ from common.session import Session
 from services.dbhandler import DBHandler
 
 from gui_tcp_server import GUITcpServer
+from apps.app_tcp_server import is_running
 from common.config import OpenportAppConfig
 from services.config_service import ConfigService
 
@@ -80,7 +81,7 @@ class SharesFrame(wx.Frame):
 
         for share in shares:
             self.add_share(share)
-            if not osinteraction.getInstance().pid_is_openport_process(share.pid):
+            if not is_running(share):
                 self.notify_app_down(share)
 
         for share in shares:
@@ -326,7 +327,7 @@ class SharesFrame(wx.Frame):
                 self.server.app_communicate(s, 'exit', {'id': share.id})
 
             def remove_killed_share():
-                while osinteraction.getInstance().pid_is_openport_process(s.pid):
+                while is_running(s):
                     sleep(1)
                 wx.CallAfter(self.remove_share, share)
                 self.db_handler.stop_share(share)

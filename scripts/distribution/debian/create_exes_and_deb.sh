@@ -1,4 +1,4 @@
-cd client
+cd ../../client
 bash -ex create_exes.sh
-cd ..
+cd ../distribution/debian
 bash -ex createdeb.sh
