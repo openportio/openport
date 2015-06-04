@@ -7,6 +7,8 @@ class TeeStdOut(object):
         sys.stdout = self
 
     def close(self):
+        if self is None:
+            return
         if self.stdout is not None:
             sys.stdout = self.stdout
             self.stdout = None
@@ -23,6 +25,7 @@ class TeeStdOut(object):
         self.stdout.flush()
 
     def __del__(self):
+        return
         self.close()
 
 
@@ -49,4 +52,5 @@ class TeeStdErr(object):
          self.stderr.flush()
 
      def __del__(self):
+         return
          self.close()

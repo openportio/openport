@@ -217,6 +217,7 @@ def run_method_with_timeout(function, timeout_s, args=[], kwargs={}, raise_excep
     thread.join(timeout_s)
     if thread.is_alive():
         if raise_exception:
+            logger.error('Timeout!')
             raise Exception('Timeout!')
     return return_value[0]
 

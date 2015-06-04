@@ -80,7 +80,7 @@ class OpenportAppTests(unittest.TestCase):
         sleep(5)
 
         db_handler = dbhandler.DBHandler(self.test_db)
-        self.assertEqual(1, len(db_handler.get_shares()))
+        self.assertEqual(1, len(db_handler.get_active_shares()))
         self.assertEqual(1, len(self.gui_frame.share_panels))
         logger.debug('Success!')
 
@@ -116,17 +116,17 @@ class OpenportAppTests(unittest.TestCase):
         sleep(5)
 
         db_handler = dbhandler.DBHandler(self.test_db)
-        self.assertEqual(1, len(db_handler.get_shares()))
+        self.assertEqual(1, len(db_handler.get_active_shares()))
         self.assertEqual(1, len(self.gui_frame.share_panels))
 
-        stop_button = self.find_element_with_label(self.gui_frame.share_panels[self.app.session.id], 'Stop sharing')
+        stop_button = self.find_element_with_label(self.gui_frame.share_panels[self.app.session.id], 'Stop')
         command_event = wx.CommandEvent(wx.wxEVT_COMMAND_BUTTON_CLICKED, -1)
         stop_button.Command(command_event)
 
         wait_for_response(lambda: self.app.session and not self.app.session.active)
         sleep(5)
 
-        self.assertEqual(0, len(db_handler.get_shares()))
+        self.assertEqual(0, len(db_handler.get_active_shares()))
         self.assertEqual(0, len(self.gui_frame.share_panels))
 
         logger.debug('Success!')
@@ -159,7 +159,7 @@ class OpenportAppTests(unittest.TestCase):
                 processes[p.pid] = p
 
                 db_handler = dbhandler.DBHandler(self.test_db)
-                wait_for_response(lambda: len(db_handler.get_shares()) > 0)
+                wait_for_response(lambda: len(db_handler.get_active_shares()) > 0)
 
                 self.assertEqual(1, len(self.gui_frame.share_panels))
             finally:
@@ -179,8 +179,8 @@ class OpenportAppTests(unittest.TestCase):
             finally:
                 #wx.Exit()
                 for pid, p in processes.iteritems():
-                    logger.debug('killing %s' % p.pid)
-                    self.os_interaction.kill_pid(p.pid)
+                    logger.debug('killing %s' % pid)
+                    self.os_interaction.kill_pid(pid)
                 self.gui_frame.exitApp(None)
         thr = threading.Thread(target=test_thread)
         thr.setDaemon(True)

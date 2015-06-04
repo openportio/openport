@@ -7,7 +7,6 @@ import os
 import threading
 
 from bottle import Bottle, ServerAdapter, request, response, error, hook
-from services import dbhandler
 from services.logger_service import get_logger
 
 
@@ -75,7 +74,7 @@ class AppTcpServer():
             logger.debug('/exit')
             if request.remote_addr == '127.0.0.1':
                 force = request.forms.get('force', False)
-        
+
                 def shutdown():
                     sleep(1)
                     logger.debug('shutting down due to exit call. Force: %s' % force)
@@ -178,7 +177,7 @@ def send_exit(share, force=False):
         logger.error("An error has occurred while killing the app: %s" % detail)
 
 
-def send_ping(share):
+def send_ping(share, print_error=True):
     port = share.app_management_port
     logger.debug('Sending ping to %s.' % port)
     url = 'http://127.0.0.1:%s/ping' % (port,)
@@ -191,10 +190,11 @@ def send_ping(share):
             return False
         return True
     except Exception, detail:
-        logger.error("An error has occurred while pinging the app: %s" % detail)
+        log_function = logger.error if print_error else logger.debug
+        log_function("An error has occurred while pinging the app: %s" % detail)
 
 
-def is_running(share):
+def is_running(share, print_error=False):
     port = share.app_management_port
     logger.debug('Sending info to %s.' % port)
     url = 'http://127.0.0.1:%s/info' % (port,)
@@ -207,7 +207,9 @@ def is_running(share):
             return False
         return True
     except Exception, detail:
-        logger.error("An error has occurred while getting info from the app: %s" % detail)
+        logger_function = logger.error if print_error else logger.debug
+        logger_function("An error has occurred while getting info from the app: %s" % detail)
+        return False
 
 
 if __name__ == '__main__':

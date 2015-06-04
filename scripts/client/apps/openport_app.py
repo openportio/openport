@@ -55,14 +55,16 @@ class OpenportApp(object):
             # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
             #signal.signal(signal.SIGTERM, self.handleSigTERM)
 
-
     def handleSigTERM(self, signum, frame=-1):
         logger.debug('got signal %s' % signum)
-        if self.session:
-            self.session.notify_stop()
-        if self.openport:
-            self.openport.stop()
-        #os._exit(3)
+        try:
+            if self.session:
+                self.session.notify_stop()
+            if self.openport:
+                self.openport.stop()
+        except Exception as e:
+            logger.exception(e)
+            os._exit(3)
 
     def save_share(self, share):
         self.db_handler.add_share(share)
@@ -119,9 +121,11 @@ class OpenportApp(object):
         self.add_default_arguments(parser)
         self.args = parser.parse_args()
 
-
     def print_shares(self):
-        shares = self.db_handler.get_shares()
+        shares = self.db_handler.get_active_shares()
+        shares.extend(self.db_handler.get_shares_to_restart())
+        shares = {x.id: x for x in shares}.values()
+
         logger.debug('listing shares - amount: %s' % len(list(shares)))
         for share in shares:
             print self.get_share_line(share)
@@ -147,12 +151,20 @@ class OpenportApp(object):
         self.print_shares()
 
     def kill_share(self, share):
-        if send_ping(share):
+        if send_ping(share, print_error=False):
             logger.debug('Share %s is running, will kill it.' % share.local_port)
             send_exit(share)
+        else:
+            share.active = False
+            share.restart_command = ''
+            self.db_handler.add_share(share)
 
     def kill_all(self):
-        shares = self.db_handler.get_shares()
+        shares = self.db_handler.get_active_shares()
+        for share in shares:
+            self.kill_share(share)
+
+        shares = self.db_handler.get_shares_to_restart()
         for share in shares:
             self.kill_share(share)
 
@@ -162,7 +174,7 @@ class OpenportApp(object):
         for share in shares:
             if not is_running(share):
                 try:
-                    logger.debug('restarting share: %s' % share.restart_command)
+                    logger.info('restarting share: %s' % ' '.join(share.restart_command))
                     share.restart_command = self.app_service.set_manager_port(share.restart_command)
 
                     p = self.os_interaction.start_openport_process(share)
@@ -240,7 +252,7 @@ class OpenportApp(object):
 
         session.active = False  # Will be set active in start_callback.
 
-        db_share = self.db_handler.get_share_by_local_port(session.local_port)
+        db_share = self.db_handler.get_share_by_local_port(session.local_port, filter_active=False)
         if db_share:
             if is_running(db_share[0]):
                 logger.info('Port forward already running for port %s' % self.args.local_port)

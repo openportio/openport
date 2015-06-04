@@ -72,21 +72,24 @@ class OsInteraction(object):
             return None
 
     def start_openport_process(self, share):
+        command = self.get_full_restart_command(share)
+        if command is None:
+            return
+
+        return self.start_process(command)
+
+    def get_full_restart_command(self, share):
         if not share.restart_command:
             self.logger.debug('no restart command for share with local port %s' % share.local_port)
             return
-
         # Legacy...
         restart_command = self.strip_sudo_command(share.restart_command)
-
         if 'openport' in restart_command[0]:
             restart_command = restart_command[1:]
         command = self.get_openport_exec()
-
-#        print share.restart_command
+        #        print share.restart_command
         command.extend(restart_command)
-
-        return self.start_process(command)
+        return command
 
     def start_process(self, args):
         if self.logger:
@@ -405,6 +408,7 @@ class LinuxOsInteraction(OsInteraction):
         return os.geteuid() == 0
 
     def get_username(self):
+        import pwd
         return pwd.getpwuid(os.getuid())[0]
 
 
@@ -484,6 +488,9 @@ class WindowsOsInteraction(OsInteraction):
 
 
 class MacOsInteraction(LinuxOsInteraction):
+    def __init__(self, use_logger=True):
+        super(MacOsInteraction, self).__init__(use_logger)
+
     def activate_app(self):
         subprocess.Popen(['osascript', '-e', '''\
     tell application "System Events"
@@ -491,6 +498,24 @@ class MacOsInteraction(LinuxOsInteraction):
     end tell
     tell application procName to activate
 ''' % os.getpid()])
+
+    def spawn_daemon(self, command):
+        try:
+            pid = os.fork()
+            if pid > 0:
+                # parent process, return and keep running
+                return pid
+        except OSError, e:
+            self.logger.error("fork #1 failed: %d (%s)" % (e.errno, e.strerror))
+            sys.exit(1)
+
+        os.setsid()
+
+        # don't do a second fork, OS X doesn't allow it.
+        self.run_command_and_print_output_continuously(command)
+
+        # all done
+        os._exit(os.EX_OK)
 
 
 def is_windows():

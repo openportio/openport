@@ -57,6 +57,7 @@ class SharesFrame(wx.Frame):
         self.config.app = self
         self.config_service = ConfigService(self.config)
         self.app_service = AppService(self.config)
+        self.db_location = db_location
         self.db_handler = DBHandler(db_location)
 
         port = self.config_service.get_and_save_manager_port()
@@ -77,7 +78,10 @@ class SharesFrame(wx.Frame):
 
         self.server.run_threaded()
 
-        shares = self.db_handler.get_shares()
+        shares = self.db_handler.get_active_shares()
+        shares.extend(self.db_handler.get_shares_to_restart())
+
+        shares = {x.id: x for x in shares}.values()
 
         for share in shares:
             self.add_share(share)
@@ -158,10 +162,13 @@ class SharesFrame(wx.Frame):
         dialog.ShowModal()
 
         if dialog.GetReturnCode() == wx.ID_OK:
-            session = Session()
-            session.local_port = dialog.port_input.GetValue()
-            session.http_forward = dialog.http_forward_checkbox.GetValue()
-            self.app_service.start_openport_process_from_session(session)
+
+            def foo():
+                session = Session()
+                session.local_port = dialog.port_input.GetValue()
+                session.http_forward = dialog.http_forward_checkbox.GetValue()
+                self.app_service.start_openport_process_from_session(session)
+            wx.CallAfter(foo)
 
     def rebuild(self):
         self.share_panels = {}
@@ -261,6 +268,7 @@ class SharesFrame(wx.Frame):
     def add_share(self, share):
         logger.debug('add share')
         if share.id in self.share_panels:
+            self.notify_success(share)
             return
 
         self.hide_no_shares_message()
@@ -301,6 +309,25 @@ class SharesFrame(wx.Frame):
             button_panel.SetBackgroundColour((255, 52, 0))
         top_panel_sizer.Add(button_panel, 0, wx.ALIGN_LEFT | wx.EXPAND)
 
+        def restart_share(evt):
+            def foo():
+                if not share.restart_command:
+                    share.restart_command = self.app_service.get_restart_command(share,
+                                                                                 self.db_location,
+                                                                                 self.config.verbose,
+                                                                                 self.config.openport_address)
+                full_command = self.os_interaction.get_full_restart_command(share)
+               # self.os_interaction.spawn_daemon(full_command)
+                self.os_interaction.start_process(full_command)
+                self.remove_share(share)
+            wx.CallAfter(foo)
+
+        restart_button = wx.Button(button_panel, -1, label="Restart")
+        restart_button.Bind(wx.EVT_BUTTON, restart_share)
+        button_panel_sizer.Add(restart_button, 0, wx.EXPAND | wx.ALL)
+        restart_button.Hide()
+        share_panel.restart_button = restart_button
+
         def copy_link(evt):
             self.os_interaction.copy_to_clipboard(share.get_link())
 
@@ -330,12 +357,12 @@ class SharesFrame(wx.Frame):
                 while is_running(s):
                     sleep(1)
                 wx.CallAfter(self.remove_share, share)
-                self.db_handler.stop_share(share)
+                self.db_handler.stop_share(share, restart=False)
             t = threading.Thread(target=remove_killed_share)
             t.setDaemon(True)
             t.start()
 
-        stop_sharing_button = wx.Button(button_panel, -1, label="Stop sharing")
+        stop_sharing_button = wx.Button(button_panel, -1, label="Stop")
         stop_sharing_button.Bind(wx.EVT_BUTTON, send_stop_share)
         button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND | wx.ALL)
 
@@ -375,11 +402,13 @@ class SharesFrame(wx.Frame):
             logger.debug('share not found while notifying error')
 
     def notify_app_down(self, share):
-        logger.debug('notify_error')
+        logger.debug('notify_app_down')
         if share.id in self.share_panels:
             share_panel = self.share_panels[share.id]
-            wx.CallAfter(share_panel.SetBackgroundColour, COLOR_NO_APP_RUNNING)
-            wx.CallAfter(share_panel.Refresh)
+            share_panel.SetBackgroundColour(COLOR_NO_APP_RUNNING)
+            share_panel.restart_button.Show()
+            share_panel.Refresh()
+            self.frame_sizer.Layout()
         else:
             logger.debug('share not found while notifying app down')
 
@@ -387,8 +416,11 @@ class SharesFrame(wx.Frame):
         logger.debug('notify_success')
         if share.id in self.share_panels:
             share_panel = self.share_panels[share.id]
-            wx.CallAfter(share_panel.SetBackgroundColour, COLOR_OK)
-            wx.CallAfter(share_panel.Refresh)
+
+            share_panel.SetBackgroundColour(COLOR_OK)
+            share_panel.restart_button.Hide()
+            share_panel.Refresh()
+            self.frame_sizer.Layout()
         else:
             logger.debug('share not found while notifying success')
 

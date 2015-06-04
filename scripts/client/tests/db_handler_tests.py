@@ -162,13 +162,13 @@ class DBHandlerTests(unittest.TestCase):
             t.join()
         self.assertEqual([], errors)
 
-    def test_get_shares(self):
+    def test_get_active_shares(self):
         share1 = Share(active=False)
         share2 = Share(active=True, local_port=123)
         self.dbhandler.add_share(share1)
         self.dbhandler.add_share(share2)
 
-        active_shares = self.dbhandler.get_shares()
+        active_shares = self.dbhandler.get_active_shares()
         self.assertEqual(1, len(active_shares))
         self.assertEqual(share2.id, active_shares[0].id)
 
@@ -235,7 +235,7 @@ class DBHandlerTests(unittest.TestCase):
         thr.start()
 
         sleep(2)
-        self.assertEqual(2, len(self.dbhandler.get_shares()))
+        self.assertEqual(2, len(self.dbhandler.get_active_shares()))
 
     def test_get_share__not_found(self):
         self.assertEqual(None, self.dbhandler.get_share(-1))
@@ -247,7 +247,7 @@ class DBHandlerTests(unittest.TestCase):
         share2 = Share(active=True, local_port=444)
         self.dbhandler.add_share(share2)
 
-        self.assertEqual(1, len(self.dbhandler.get_shares()))
+        self.assertEqual(1, len(self.dbhandler.get_active_shares()))
 
     def test_gc_in_thread(self):
 
@@ -261,7 +261,7 @@ class DBHandlerTests(unittest.TestCase):
         share = Share(active=True, local_port=444)
         self.dbhandler.add_share(share)
 
-        self.assertEqual(1, len(self.dbhandler.get_shares()))
+        self.assertEqual(1, len(self.dbhandler.get_active_shares()))
         self.assertEqual(share.id, self.dbhandler.get_share(1).id)
 
         t = threading.Thread(target=do_gc)

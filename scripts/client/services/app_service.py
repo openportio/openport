@@ -5,6 +5,7 @@ from urllib2 import URLError, HTTPError
 from common.session import Session
 from services.logger_service import get_logger
 from services import osinteraction
+from common.config import DEFAULT_SERVER
 
 logger = get_logger(__name__)
 
@@ -38,7 +39,7 @@ class AppService(object):
             command.extend(['--database', database])
         if verbose:
             command.append('--verbose')
-        if server:
+        if server and server != DEFAULT_SERVER:
             command.extend(['--server', server])
         if session.ip_link_protection is not None:
             command = osinteraction.set_variable('--ip-link-protection', session.ip_link_protection)
@@ -51,8 +52,10 @@ class AppService(object):
         command = self.get_restart_command(session, database=database)
         logger.debug(command)
         session.restart_command = command
-        p = osinteraction.getInstance().start_openport_process(session)
-        osinteraction.getInstance().print_output_continuously_threaded(p, 'openport_app')
+
+        os_interaction = osinteraction.getInstance()
+        full_command = os_interaction.get_full_restart_command(session)
+        p = os_interaction.start_process(full_command)
         return p
 
     def manager_is_running(self, manager_port):

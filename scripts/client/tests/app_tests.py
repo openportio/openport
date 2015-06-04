@@ -60,7 +60,7 @@ class AppTests(unittest.TestCase):
     def get_nr_of_shares_in_db_file(self, db_file):
         db_handler = dbhandler.DBHandler(db_file, init_db=False)
         try:
-            return len(db_handler.get_shares())
+            return len(db_handler.get_active_shares())
         except:
             return 0
 
@@ -336,7 +336,7 @@ class AppTests(unittest.TestCase):
                                       stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.osinteraction.print_output_continuously_threaded(p_manager2, 'p_manager2')
         self.processes_to_kill.append(p_manager2)
-        run_method_with_timeout(p_manager2.wait, 5)
+        run_method_with_timeout(p_manager2.wait, 10)
 
         #self.assertFalse(self.application_is_alive(p_manager2))
 
@@ -354,8 +354,7 @@ class AppTests(unittest.TestCase):
 
         share = self.db_handler.get_share_by_local_port(port)[0]
         send_exit(share, force=True)
-        run_method_with_timeout(p_manager2.wait, 10)
-        print_all_output(p_manager2, self.osinteraction, 'p_manager2')
+        sleep(5)
 
         self.assertFalse(check_tcp_port_forward(self, remote_host, port, remote_port, fail_on_error=False))
 
@@ -526,6 +525,8 @@ class AppTests(unittest.TestCase):
                                   '--verbose', '--server', TEST_SERVER,
                                   '--database', self.db_file],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+        # Todo: there still is a problem if the app gets the signal before the tunnel is set up.
         remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='p_app')
         self.osinteraction.print_output_continuously_threaded(p_app, 'p_app')
         self.processes_to_kill.append(p_app)
@@ -564,7 +565,7 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_app2)
         get_remote_host_and_port(p_app2, self.osinteraction)
 
-        for share in self.db_handler.get_shares():
+        for share in self.db_handler.get_active_shares():
             logger.debug(share.local_port)
 
         self.assertEqual(2, self.get_nr_of_shares_in_db_file(self.db_file))
@@ -834,13 +835,16 @@ class AppTests(unittest.TestCase):
         port = self.osinteraction.get_open_port()
 
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
-                      '--http-forward', '--server', TEST_SERVER,
+                      '--server', TEST_SERVER,
                       '--database', self.db_file],
                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         sleep(2)
+        get_remote_host_and_port(p, self.osinteraction)
+
+        print 'pid: %s' % p.pid
         self.osinteraction.kill_pid(p.pid, signal.SIGTERM)
-        sleep(5)
+        sleep(10)
         output = self.osinteraction.get_all_output(p)
         print output[0]
         print output[1]
@@ -848,6 +852,7 @@ class AppTests(unittest.TestCase):
         if not osinteraction.is_windows():
             self.assertTrue('got signal ' in output[0])
 
+        run_method_with_timeout(p.wait, 10)
         self.assertFalse(self.osinteraction.pid_is_running(p.pid))
 
     def test_openport_app_with_http_forward(self):

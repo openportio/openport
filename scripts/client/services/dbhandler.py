@@ -167,8 +167,8 @@ class DBHandler(object):
 
         return share
 
-    def get_shares(self):
-        logger.debug('get_shares')
+    def get_active_shares(self):
+        logger.debug('get_active_shares')
 
         session = self._get_session()
         openport_sessions = session.query(OpenportSession).filter_by(active=True)
@@ -177,7 +177,7 @@ class DBHandler(object):
         return l
 
     def get_shares_to_restart(self):
-        logger.debug('get_shares')
+        logger.debug('get_shares_to_restart')
 
         session = self._get_session()
         openport_sessions = session.query(OpenportSession).filter(OpenportSession.restart_command.isnot(''))
@@ -193,24 +193,26 @@ class DBHandler(object):
         if filter_active:
             kwargs['active'] = True
 
-        openport_sessions = session.query(OpenportSession).filter_by(**kwargs).all()
+        openport_sessions = session.query(OpenportSession).filter_by(**kwargs).order_by(OpenportSession.id.desc()).all()
 
         self.Session.remove()
         return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
 
-    def stop_share(self, share):
+    def stop_share(self, share, restart=True):
         logger.debug('stop_share')
         session = self._get_session()
         openport_session = session.query(OpenportSession).filter_by(id=share.id).first()
         if openport_session:
             openport_session.active = False
+            if not restart:
+                openport_session.restart_command = ''
             session.commit()
         self.Session.remove()
 
 
 if __name__ == '__main__':
     db_handler = DBHandler()
-    shares = db_handler.get_shares()
+    shares = db_handler.get_active_shares()
     print 'nr of sessions: %s' % len(shares)
 
 
