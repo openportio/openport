@@ -1,5 +1,5 @@
-cd ..
+cd ../../client
 bash create_exes_win.sh
-cd nsis
+cd ../distribution/windows
 create_installer.bat
 pause

@@ -395,7 +395,6 @@ class IntegrationTest(unittest.TestCase):
 
     def test_forward_tunnel(self):
         port_out = self.osinteraction.get_open_port()
-        #port_out = 5000
 
         out_session = Session()
         out_session.local_port = port_out
@@ -408,7 +407,6 @@ class IntegrationTest(unittest.TestCase):
             remote_host, remote_port, link = out_session.server, out_session.server_port, out_session.open_port_for_ip_link
             click_open_for_ip_link(link)
             check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
-
 
             port_in = self.osinteraction.get_open_port()
             logger.info('port_in: %s' % port_in)

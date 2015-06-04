@@ -20,6 +20,7 @@ sqlalchemy
 alembic
 psutil
 lockfile
+pyperclip
 #http://sourceforge.net/projects/py2exe/files/latest/download?source=files
 
 # For the error 'no module named wsgiserver2':

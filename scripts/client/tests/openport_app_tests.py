@@ -84,7 +84,7 @@ class OpenportAppTests(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
 
-        sleep(0.5)
+        wait_for_response(lambda: self.app.session and self.app.session.active)
        # sleep(60)
         self.assertEqual(this_test.received_server, 'http://test.openport.be')
 
@@ -117,7 +117,8 @@ class OpenportAppTests(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
 
-        sleep(1)
+        wait_for_response(lambda: self.app.session and self.app.session.active)
+
         self.assertEqual('first token', this_test.received_token)
         self.assertEqual(1111, this_test.received_server_port)
         self.assertEqual('second token', this_test.received_session.server_session_token)
@@ -148,7 +149,8 @@ class OpenportAppTests(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
 
-        sleep(1)
+        wait_for_response(lambda: self.app.session and self.app.session.active)
+
         self.assertEqual('second token', this_test.received_token)
         self.assertEqual(2222, this_test.received_server_port)
         self.assertEqual('second token', this_test.received_session.server_session_token)
