@@ -367,7 +367,7 @@ class SharesFrame(wx.Frame):
         button_panel_sizer.Add(stop_sharing_button, 0, wx.EXPAND | wx.ALL)
 
         def show_qr_evt(evt):
-            self.show_qr(share.get_link(), share.get_link())
+            self.show_qr('%s -> localhost:%s' % (share.get_link(), share.local_port), share.get_link())
 
         qr_button = wx.Button(button_panel, -1, label="Show QR")
         qr_button.Bind(wx.EVT_BUTTON, show_qr_evt)
