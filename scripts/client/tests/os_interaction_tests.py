@@ -15,6 +15,7 @@ from services.logger_service import set_log_level
 from test_utils import run_command_with_timeout, run_command_with_timeout_return_process, run_method_with_timeout
 from common.share import Share
 from mock import Mock, call
+import pyperclip
 
 
 class OsInteractionTest(unittest.TestCase):
@@ -187,6 +188,17 @@ class OsInteractionTest(unittest.TestCase):
         for t in threads:
             t.join()
         self.assertEqual(x[0], thread_amount)
+
+    def test_copy_to_clipboard(self):
+        text1 = 'hallo'
+        self.os_interaction.copy_to_clipboard(text1)
+        self.assertEqual(text1, pyperclip.paste())
+
+        text2 = 'daag'
+        self.os_interaction.copy_to_clipboard(text2)
+        self.assertEqual(text2, pyperclip.paste())
+
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

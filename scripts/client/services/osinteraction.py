@@ -10,6 +10,7 @@ import signal
 import psutil
 from lockfile import NotMyLock, LockTimeout
 from lockfile import LockFile
+import pyperclip
 
 try:
     from Queue import Queue, Empty
@@ -315,6 +316,9 @@ class OsInteraction(object):
 
         return os.path.abspath(filename)
 
+    def copy_to_clipboard(self, text):
+        pyperclip.copy(text)
+
 
 class LinuxOsInteraction(OsInteraction):
 
@@ -336,23 +340,6 @@ class LinuxOsInteraction(OsInteraction):
             return output.read()
         except:
             return False
-
-    def copy_to_clipboard(self, text):
-        self.run_shell_command('echo "%s" |pbcopy' % text)
-        self.run_shell_command('echo "%s" |xclip' % text)
-        return
-
-        from Tkinter import Tk
-        r = Tk()
-        r.withdraw()
-        r.clipboard_clear()
-        r.clipboard_append(text.strip())
-        r.destroy()
-
-        #r = Tk()
-        #result = r.selection_get(selection = "CLIPBOARD")
-        #logger.debug('tried to copy %s to clipboard, got %s' % (text, result))
-        #r.destroy()
 
     def pid_is_running(self, pid):
         """Check whether pid exists in the current process table."""
@@ -428,13 +415,6 @@ class WindowsOsInteraction(OsInteraction):
 
     def get_detached_process_creation_flag(self):
         return 8
-
-    def copy_to_clipboard(self, text):
-        startupinfo = None
-        if os.platform == 'win32':
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        subprocess.check_output(['echo', text.strip(), '|', 'clip'], shell=True, startupinfo=startupinfo).decode()
 
     def pid_is_running(self, pid):
         """Check whether pid exists in the current process table."""
