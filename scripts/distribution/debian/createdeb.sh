@@ -16,6 +16,13 @@ sudo dpkg --remove $APPLICATION || echo "$APPLICATION not installed"
 # If the uninstall keeps giving errors:
 # rm -rf /var/lib/dpkg/info/$APPLICATION.*
 
+rm debian/source/include-binaries
+ls debian/package/openport-*/usr/lib/openport/*.so.* >> debian/source/include-binaries
+ls debian/package/openport-*/usr/lib/openport/openport >> debian/source/include-binaries
+ls debian/package/openport-*/usr/lib/Openport_GUI >> debian/source/include-binaries
+ls debian/package/openport-*/usr/lib/openport/alembic/versions/*.pyc >> debian/source/include-binaries
+
+
 rm -rf $PACKAGE
 mkdir $PACKAGE
 mkdir -p $PACKAGE/usr/lib

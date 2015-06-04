@@ -4,11 +4,13 @@ block_cipher = None
 
 
 a = Analysis(['gui/openport_gui.py'],
-             pathex=['/Users/jan/swprojects/openport-client/scripts/client'],
+             pathex=['.'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None,
-             cipher=block_cipher)
+             cipher=block_cipher,
+             excludes=None,
+            )
 pyz = PYZ(a.pure,
              cipher=block_cipher)
 
@@ -22,20 +24,32 @@ for f in listdir(migration_script_folder):
     if isfile(path):
         a.datas += [(path, path, 'DATA')]
 
+a.datas += [
+            ('resources/icon.icns', 'resources/icon.icns', 'DATA'),
+            ('resources/icon.ico',  'resources/icon.ico', 'DATA'), 
+           ]
+
+
 exe = EXE(pyz,
           a.scripts,
-          a.binaries + [('msvcp100.dll', 'C:\\Windows\\System32\\msvcp100.dll', 'BINARY'),
-                        ('msvcr100.dll', 'C:\\Windows\\System32\\msvcr100.dll', 'BINARY')]
-          if sys.platform == 'win32' else a.binaries,
-          a.zipfiles,
-          a.datas + [('resources/icon.icns', 'resources/icon.icns', 'DATA'),
-                    ],
-          name=os.path.join('dist', 'Openport_GUI' + ('.exe' if sys.platform == 'win32' else '')),
+#          a.binaries + [('msvcp100.dll', 'C:\\Windows\\System32\\msvcp100.dll', 'BINARY'),
+#                        ('msvcr100.dll', 'C:\\Windows\\System32\\msvcr100.dll', 'BINARY')]
+#          if sys.platform == 'win32' else a.binaries,
+          exclude_binaries=True,
+          name='openport_gui' + ('.exe' if sys.platform == 'win32' else ''),
           debug=False,
           strip=None,
           upx=True,
           console=False,
-          icon='resources/icon.icns')
+          icon='resources/icon.ico')
+
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=None,
+               upx=True,
+               name='openport_gui')
 
 # Build a .app if on OS X
 if sys.platform == 'darwin':

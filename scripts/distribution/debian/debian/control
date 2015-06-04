@@ -7,5 +7,5 @@ Build-Depends:
 
 Package: openport
 Architecture: any
-Depends: 
+Depends: xclip
 Description: Opens a port from your machine to the outside world.

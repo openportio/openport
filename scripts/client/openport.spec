@@ -4,11 +4,14 @@ block_cipher = None
 
 
 a = Analysis(['apps/openport_app.py'],
-             pathex=['/Users/jan/swprojects/openport-client/scripts/client'],
+             pathex=['.'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None,
+             cipher=block_cipher,
              excludes=None,
+            )
+pyz = PYZ(a.pure,
              cipher=block_cipher)
 
 from os import listdir
@@ -21,8 +24,7 @@ for f in listdir(migration_script_folder):
     if isfile(path):
         a.datas += [(path, path, 'DATA')]
 
-pyz = PYZ(a.pure,
-             cipher=block_cipher)
+
 exe = EXE(pyz,
           a.scripts,
           exclude_binaries=True,
