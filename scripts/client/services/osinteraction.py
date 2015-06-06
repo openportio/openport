@@ -246,7 +246,7 @@ class OsInteraction(object):
     def get_openport_exec(self):
         if self.is_compiled():
             command = []
-            path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport.exe'))
+            path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openportw.exe'))
             if not os.path.exists(path):
                 path = self.quote_path('/usr/bin/openport')
             command.extend([path])
@@ -441,6 +441,9 @@ class WindowsOsInteraction(OsInteraction):
         #return a[0].startswith('SUCCESS')
 
     def handle_signals(self, handler):
+
+        return  # Do not use this, windows will say your program has crashed.
+
         from ctypes import WINFUNCTYPE, windll
         from ctypes.wintypes import BOOL, DWORD
 

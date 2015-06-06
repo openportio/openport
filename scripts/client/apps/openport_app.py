@@ -49,7 +49,11 @@ class OpenportApp(object):
                 signal.signal(signal.SIGTERM, self.handleSigTERM)
             else:
                 # To be honest, I don't think this does anything...
-                self.os_interaction.handle_signals(self.handleSigTERM)
+
+                signal.signal(signal.SIGINT, self.handleSigTERM)
+                signal.signal(signal.SIGTERM, self.handleSigTERM)
+
+                #self.os_interaction.handle_signals(self.handleSigTERM)
         except ValueError:
             pass
             # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.

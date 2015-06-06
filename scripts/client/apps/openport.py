@@ -1,5 +1,6 @@
 import os
 from time import sleep
+import errno
 
 from common.config import DEFAULT_SERVER
 from apps import openport_api
@@ -88,6 +89,9 @@ class Openport(object):
                 logger.info('The port forwarding has stopped: %s' % e)
             except SystemExit as e:
                 raise
+            except IOError, e:
+                if e.errno != errno.EINTR:
+                    raise
             except Exception as e:
                 logger.exception(e)
                 sleep(10)
