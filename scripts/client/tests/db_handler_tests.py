@@ -263,6 +263,7 @@ class DBHandlerTests(unittest.TestCase):
 
         self.assertEqual(1, len(self.dbhandler.get_active_shares()))
         self.assertEqual(share.id, self.dbhandler.get_share(1).id)
+        self.assertEqual(0, len(self.dbhandler.get_shares_to_restart()))
 
         t = threading.Thread(target=do_gc)
         t.setDaemon(True)

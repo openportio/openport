@@ -133,11 +133,11 @@ class DBHandler(object):
         session = self._get_session()
         try:
             openport_session = session.query(OpenportSession).filter_by(id=id).one()
-            return self.convert_session_from_db(openport_session)
         except NoResultFound:
             return None
-        finally:
-            self.Session.remove()
+        share = self.convert_session_from_db(openport_session)
+        self.Session.remove()
+        return share
 
     def convert_session_from_db(self, openport_session):
         logger.debug('convert_session_from_db')
@@ -156,8 +156,6 @@ class DBHandler(object):
         share.http_forward_address = openport_session.http_forward_address
         share.app_management_port = openport_session.app_management_port
         share.open_port_for_ip_link = openport_session.open_port_for_ip_link
-
-
         share.restart_command = openport_session.restart_command
         try:
             share.restart_command = pickle.loads(share.restart_command.encode('ascii', 'ignore'))
@@ -181,9 +179,10 @@ class DBHandler(object):
 
         session = self._get_session()
         openport_sessions = session.query(OpenportSession).filter(OpenportSession.restart_command.isnot(''))
-        self.Session.remove()
-        return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions
+        l = list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions
                     if self.convert_session_from_db(openport_session).restart_command)
+        self.Session.remove()
+        return l
 
     def get_share_by_local_port(self, local_port, filter_active=True):
         logger.debug('get_share_by_local_port')
