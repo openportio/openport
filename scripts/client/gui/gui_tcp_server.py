@@ -169,7 +169,7 @@ class GUITcpServer():
             if response.strip() != 'ok':
                 logger.error(response)
         except Exception, detail:
-            self.openport_app_config.app.notify_error(share)
+            self.openport_app_config.app.notify_app_down(share)
             logger.error("An error has occurred while communicating with the app on %s: %s" % (url,detail))
 
     def register_with_app(self, share):

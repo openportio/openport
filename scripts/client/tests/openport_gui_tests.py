@@ -6,8 +6,8 @@ import unittest
 from time import sleep
 
 import wx
-
-
+import subprocess
+import traceback
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from services.osinteraction import getInstance
@@ -15,11 +15,13 @@ from services.logger_service import set_log_level, get_logger
 from test_utils import wait_for_response
 from apps.openport_app import OpenportApp
 from services import dbhandler
-from test_utils import set_default_args
-from gui.openport_gui import SharesFrame
+from test_utils import set_default_args, run_method_with_timeout, kill_all_processes
+from gui.openport_gui import SharesFrame, COLOR_NO_APP_RUNNING, COLOR_OK
 from common.session import Session
 from services.app_service import AppService
 from common.config import OpenportAppConfig
+from app_tests import PYTHON_EXE
+from apps.app_tcp_server import send_exit
 
 logger = get_logger(__name__)
 
@@ -40,6 +42,7 @@ def gui_test(func):
         thr.start()
         self.gui_app.MainLoop()
         if self.exception:
+            logger.exception(self.exception)
             raise self.exception
     return inner
 
@@ -59,9 +62,11 @@ class OpenportAppTests(unittest.TestCase):
         self.gui_app = wx.App()
         self.gui_frame = SharesFrame(wx_app=self.gui_app, db_location=self.test_db)
         self.exception = None
+        self.processes_to_kill = []
 
     def tearDown(self):
-        pass
+        kill_all_processes(self.processes_to_kill)
+
 
     @gui_test
     def test_register_share(self):
@@ -131,6 +136,38 @@ class OpenportAppTests(unittest.TestCase):
 
         logger.debug('Success!')
 
+    @gui_test
+    def test_restart_shares(self):
+        port = self.os_interaction.get_open_port()
+        inactive_session = Session(active=False, local_port=port, server_port=1234)
+        app_service = AppService(OpenportAppConfig())
+        inactive_session.restart_command = app_service.get_restart_command(inactive_session, self.test_db, server='http://test.openport.be')
+
+        db_handler = dbhandler.DBHandler(self.test_db)
+        db_handler.add_share(inactive_session)
+
+        self.gui_frame.initialize()
+        #self.gui_frame.showFrame(None)
+        sleep(5)
+        self.assertEqual(1, len(self.gui_frame.share_panels))
+        self.assertEqual(COLOR_NO_APP_RUNNING, self.gui_frame.share_panels.values()[0].GetBackgroundColour())
+
+        p_manager = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--database', self.test_db,
+                               '--verbose', '--restart-shares'],
+                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.os_interaction.print_output_continuously_threaded(p_manager, 'p_manager2')
+        run_method_with_timeout(p_manager.wait, 10)
+
+        sleep(10)
+        try:
+            self.assertEqual(1, len(self.gui_frame.share_panels))
+            self.assertEqual(COLOR_OK, self.gui_frame.share_panels.values()[0].GetBackgroundColour())
+        finally:
+            for share in db_handler.get_share_by_local_port(port, filter_active=False):
+                send_exit(share, force=True)
+
+        logger.debug('Success!')
+
     def find_element_with_label(self, widget, label):
         for child in widget.GetChildren():
             print child.GetLabel()
@@ -169,7 +206,6 @@ class OpenportAppTests(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
         self.gui_app.MainLoop()
-
 
         def test_thread():
             try:

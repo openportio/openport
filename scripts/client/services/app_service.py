@@ -21,7 +21,7 @@ class AppService(object):
         os_interaction = osinteraction.getInstance()
         if self.config.manager_port_from_config_file:
             command = os_interaction.unset_variable(command, '--listener-port')
-        else:
+        elif self.config.manager_port > 0:
             command = os_interaction.set_variable(command, '--listener-port', self.config.manager_port)
         return command
 

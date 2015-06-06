@@ -27,8 +27,6 @@ class ConfigService(object):
 
 
     def get_and_save_manager_port(self, manager_port_from_command_line=-1, exit_on_fail=True):
-        original_port = self.config.manager_port
-
         if manager_port_from_command_line > 0:
             original_port = manager_port_from_command_line
         else:

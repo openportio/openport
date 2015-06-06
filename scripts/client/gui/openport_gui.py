@@ -37,7 +37,7 @@ BYTES_PER_MB = 1024 * 1024
 
 COLOR_NO_APP_RUNNING = (204, 204, 204)
 COLOR_APP_ERROR = (255, 52, 0)
-COLOR_OK = wx.NullColour
+COLOR_OK = (236, 236, 236)
 
 
 class SharesFrame(wx.Frame):
@@ -343,7 +343,6 @@ class SharesFrame(wx.Frame):
             copy_open_port_for_ip_link_button.Bind(wx.EVT_BUTTON, copy_open_port_for_ip_link)
             button_panel_sizer.Add(copy_open_port_for_ip_link_button, 0, wx.EXPAND | wx.ALL)
 
-
         def send_stop_share(evt):
             # self.add_share(share)
             # return
@@ -384,6 +383,17 @@ class SharesFrame(wx.Frame):
 
         share_panel.GetParent().Layout()
         self.frame_sizer.Layout()
+
+        shares = self.db_handler.get_shares_to_restart() + self.db_handler.get_active_shares()
+        for s in shares:
+            if s.local_port != share.local_port:
+                continue
+            if s.id == share.id:
+                continue
+            if s.id not in self.share_panels:
+                continue
+            if not s.active:
+                self.remove_share(s)
 
     def show_qr(self, title, data):
         pil_img = qr_service.get_qr_image(data)
