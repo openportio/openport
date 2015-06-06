@@ -9,7 +9,7 @@ import winerror
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from manager.openportmanager import OpenportManagerService
+from services.osinteraction import getInstance
 
 
 class OpenportManagerWindowsService(win32serviceutil.ServiceFramework):
@@ -22,14 +22,19 @@ class OpenportManagerWindowsService(win32serviceutil.ServiceFramework):
         self.hWaitStop = win32event.CreateEvent(None, 0, 0, None)
         self.stopped = False
 
-        self.openport_manager_service = OpenportManagerService()
+        self.os_interaction = getInstance()
+        openport_exec = self.os_interaction.get_openport_exec()
+        openport_exec.extend(['--restart-shares'])
+        self.os_interaction.start_process(openport_exec)
+        self.stopped = True
 
     def SvcStop(self):
 #        self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32evtlogutil.ReportEvent(self._svc_name_, servicemanager.PYS_SERVICE_STOPPING, 0,
                                     servicemanager.EVENTLOG_INFORMATION_TYPE, (self._svc_name_, ''))
         win32event.SetEvent(self.hWaitStop)
-        self.openport_manager_service.stop()
+
+        # No service to stop
 
         win32evtlogutil.ReportEvent(self._svc_name_, servicemanager.PYS_SERVICE_STOPPED, 0,
                                     servicemanager.EVENTLOG_INFORMATION_TYPE, (self._svc_name_, ''))
@@ -44,7 +49,7 @@ class OpenportManagerWindowsService(win32serviceutil.ServiceFramework):
         win32evtlogutil.ReportEvent(self._svc_name_, servicemanager.PYS_SERVICE_STARTED, 0,
                                     servicemanager.EVENTLOG_INFORMATION_TYPE, (self._svc_name_, ''))
 
-        self.openport_manager_service.start()
+        # No service to start
 
         win32evtlogutil.ReportEvent(self._svc_name_, servicemanager.PYS_SERVICE_STOPPED, 0,
                                     servicemanager.EVENTLOG_INFORMATION_TYPE, (self._svc_name_, ''))
