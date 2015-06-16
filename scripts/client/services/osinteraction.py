@@ -10,7 +10,6 @@ import signal
 import psutil
 from lockfile import NotMyLock, LockTimeout
 from lockfile import LockFile
-import pyperclip
 
 try:
     from Queue import Queue, Empty
@@ -320,6 +319,7 @@ class OsInteraction(object):
         return os.path.abspath(filename)
 
     def copy_to_clipboard(self, text):
+        import pyperclip
         pyperclip.copy(text)
 
 

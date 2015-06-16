@@ -16,17 +16,13 @@ sudo dpkg --remove $APPLICATION || echo "$APPLICATION not installed"
 # If the uninstall keeps giving errors:
 # rm -rf /var/lib/dpkg/info/$APPLICATION.*
 
-rm debian/source/include-binaries
-ls debian/package/openport-*/usr/lib/openport/*.so.* >> debian/source/include-binaries
-ls debian/package/openport-*/usr/lib/openport/openport >> debian/source/include-binaries
-ls debian/package/openport-*/usr/lib/Openport_GUI >> debian/source/include-binaries
-ls debian/package/openport-*/usr/lib/openport/alembic/versions/*.pyc >> debian/source/include-binaries
 
 
 rm -rf $PACKAGE
 mkdir $PACKAGE
 mkdir -p $PACKAGE/usr/lib
 cp ../../client/dist/* $PACKAGE/usr/lib/ -r
+
 tar -czf $TARBALL $PACKAGE
 rm -rf $PACKAGE
 rm -rf package
@@ -34,6 +30,15 @@ mkdir -p package
 cd package
 mv ../$TARBALL .
 tar -xf $TARBALL
+
+pwd
+rm -f debian/source/include-binaries
+ls ../package/openport-*/usr/lib/openport/*.so.* >> ../debian/source/include-binaries
+ls ../package/openport-*/usr/lib/openport/openport >> ../debian/source/include-binaries
+ls ../package/openport-*/usr/lib/openport_gui/*.so.* >> ../debian/source/include-binaries
+ls ../package/openport-*/usr/lib/openport_gui/openport_gui >> ../debian/source/include-binaries
+ls ../package/openport-*/usr/lib/openport/alembic/versions/*.pyc >> ../debian/source/include-binaries
+
 cd $PACKAGE
 cp ../../debian . -r
 echo "8" > debian/compat
