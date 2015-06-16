@@ -112,6 +112,9 @@ class PortForwardingService:
             self.stop()
             logger.info('Ctrl-c: Port forwarding stopped.')
 #            sys.exit(0)
+        except EOFError, e:
+            # Tunnel is stopped.
+            logger.debug(e)
 
     def keep_alive(self):
         while not self.stopped:
