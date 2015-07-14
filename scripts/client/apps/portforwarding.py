@@ -36,7 +36,8 @@ class PortForwardingService:
                  fallback_ssh_server=None,
                  http_forward_address=None,
                  start_callback=None,
-                 forward_tunnel=False):
+                 forward_tunnel=False,
+                 session_token=None):
         self.local_port = local_port
         self.remote_port = remote_port
         self.server = server
@@ -50,12 +51,13 @@ class PortForwardingService:
         self.error_callback = error_callback
         self.success_callback = success_callback
         self.fallback_server_ssh_port = fallback_server_ssh_port
-        self.fallback_ssh_server = fallback_ssh_server,
+        self.fallback_ssh_server = fallback_ssh_server
         self.http_forward_address = http_forward_address
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(IgnoreUnknownHostKeyPolicy())
         self.start_callback = start_callback
         self.forward_tunnel = forward_tunnel
+        self.session_token = session_token
 
         self.portForwardingRequestException = None
         self.stopped = False
@@ -92,6 +94,8 @@ class PortForwardingService:
                     self.error_callback(e)
                 return
 
+        stdin, stdout, stderr = self.client.exec_command(self.session_token)
+
         try:
             self.portForwardingRequestException = None
 
@@ -118,17 +122,18 @@ class PortForwardingService:
 
     def keep_alive(self):
         while not self.stopped:
+            time.sleep(10)
             if self.portForwardingRequestException is not None:
                 if self.error_callback:
                     self.error_callback(self.portForwardingRequestException)
                 logger.exception(self.portForwardingRequestException)
 
             logger.debug('sending keep_alive')
-            self.client.exec_command('echo ""', timeout=30)
-            logger.debug('keep_alive sent')
+            stdin, stdout, sterr = self.client.exec_command(self.session_token, timeout=30)
+            # logger.debug('keep_alive sent: stdout %s' % stdout.read())
+            # logger.debug('keep_alive sent: stderr %s' % sterr.read())
             if self.success_callback:
                 self.success_callback()
-            time.sleep(10)
 
     def _forward_local_port(self):
         try:

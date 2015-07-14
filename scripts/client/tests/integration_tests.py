@@ -4,6 +4,7 @@ import unittest
 import os
 import sys
 import urllib
+import subprocess
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -12,6 +13,7 @@ from apps.openport_api import PortForwardResponse, request_port
 from services.logger_service import set_log_level, get_logger
 from services.crypt_service import get_token
 from services import osinteraction
+from apps.openport_api import request_open_port
 import logging
 import urllib2
 
@@ -21,7 +23,7 @@ from common.share import Share
 from common.session import Session
 
 from test_utils import SimpleHTTPClient, TestHTTPServer, click_open_for_ip_link, check_tcp_port_forward
-from test_utils import start_openportit_session, start_openport_session
+from test_utils import start_openportit_session, start_openport_session, wait_for_response, run_method_with_timeout
 
 TOKEN = 'tokentest'
 
@@ -49,9 +51,27 @@ class IntegrationTest(unittest.TestCase):
         temp_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
                                  os.path.basename(share.filePath) + get_token(3))
 
-        sleep(5)
         print 'temp file: ' + temp_file
         self.downloadAndCheckFile(share, temp_file)
+
+    def test_start_session(self):
+        port_out = self.osinteraction.get_open_port()
+        out_session = Session()
+        out_session.local_port = port_out
+        out_session.server_session_token = None
+
+        out_app = None
+        try:
+            out_app = start_openport_session(self, out_session)
+            remote_host, remote_port, link = out_session.server, out_session.server_port, out_session.open_port_for_ip_link
+            click_open_for_ip_link(link)
+            print remote_port
+            sleep(10)
+            #sleep(1000)
+            check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
+        finally:
+            if out_app:
+                out_app.stop()
 
     def get_share(self, path):
         share = Share()
@@ -303,12 +323,7 @@ class IntegrationTest(unittest.TestCase):
         s.runThreaded()
         return s
 
-
-
-
-
     def test_brute_force_blocked(self):
-
         port = self.osinteraction.get_open_port()
         expected_response = 'cha cha cha'
 
@@ -453,6 +468,55 @@ class IntegrationTest(unittest.TestCase):
                 out_app.stop()
             if in_app:
                 in_app.stop()
+
+    def test_rogue_ssh_sessions(self):
+        port = self.osinteraction.get_open_port()
+        port2 = self.osinteraction.get_open_port()
+
+        self.assertNotEqual(port, port2)
+        request_open_port(port, server=self.test_server)
+        command = ['/usr/bin/ssh', 'open@%s' % self.test_server.split('//')[1], '-R',
+                   '%s:localhost:%s' % (port2, port2), 'wrong_session_token']
+        print command
+        p = subprocess.Popen(command,
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             shell=False)
+        failed = wait_for_response(lambda: p.poll() is not None, timeout=10, throw=False)
+
+        output = self.osinteraction.non_block_read(p)
+        print output
+        self.assertTrue('remote port forwarding failed for listen port' in output[1])
+        self.assertFalse(failed)
+
+    def test_rogue_ssh_session__correct(self):
+        port = self.osinteraction.get_open_port()
+
+        response = request_open_port(port, server=self.test_server)
+        command = ['/usr/bin/ssh', 'open@%s' % self.test_server.split('//')[1], '-R',
+                   '%s:localhost:%s' % (response.remote_port, port), response.session_token]
+        print command
+        p = subprocess.Popen(command,
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             shell=False)
+        run_method_with_timeout(lambda: wait_for_response(lambda: p.poll() is not None, timeout=10, throw=False), 10, raise_exception=False)
+        if p.returncode:
+            print p.communicate()
+        self.assertEqual(p.returncode, None)
+
+    def test_rogue_ssh_session__correct__old_version(self):
+        port = self.osinteraction.get_open_port()
+
+        response = request_open_port(port, server=self.test_server, client_version='0.9.3')
+        command = ['/usr/bin/ssh', 'open@%s' % self.test_server.split('//')[1], '-R',
+                   '%s:localhost:%s' % (response.remote_port, port)]  # No response.session_token!
+        print command
+        p = subprocess.Popen(command,
+                             bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             shell=False)
+        run_method_with_timeout(lambda: wait_for_response(lambda: p.poll() is not None, timeout=10, throw=False), 10, raise_exception=False)
+        if p.returncode is not None:
+            print p.communicate()
+        self.assertEqual(p.returncode, None)
 
 
 if __name__ == '__main__':

@@ -269,14 +269,10 @@ class AppTests(unittest.TestCase):
                               '--http-forward', '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
-        sleep(10)
-        process_output = print_all_output(p, self.osinteraction)
-        self.check_application_is_still_alive(p)
 
-        remote_host = self.getRemoteAddress(process_output[0])
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction, output_prefix='app', http_forward=True)
 
         self.check_http_port_forward(remote_host=remote_host, local_port=port)
-        p.kill()
 
     def application_is_alive(self, p):
         return run_method_with_timeout(p.poll, 1, raise_exception=False) is None
@@ -854,23 +850,6 @@ class AppTests(unittest.TestCase):
 
         run_method_with_timeout(p.wait, 10)
         self.assertFalse(self.osinteraction.pid_is_running(p.pid))
-
-    def test_openport_app_with_http_forward(self):
-        port = self.osinteraction.get_open_port()
-
-        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--verbose', '--local-port', '%s' % port,
-                              '--http-forward', '--server', TEST_SERVER,
-                              '--database', self.db_file],
-                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.processes_to_kill.append(p)
-        sleep(15)
-        process_output = print_all_output(p, self.osinteraction)
-
-        self.check_application_is_still_alive(p)
-
-        remote_host = self.getRemoteAddress(process_output[0])
-
-        self.check_http_port_forward(remote_host, port)
 
     def test_version(self):
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--version'],

@@ -258,7 +258,7 @@ def run_command_with_timeout_return_process(args, timeout_s):
     c = Command(args)
     return c.run(timeout_s)
 
-def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix=''):
+def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', http_forward=False):
     i = 0
     while i < timeout:
         i += 1
@@ -270,13 +270,21 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix=''):
         if not all_output[0]:
             sleep(1)
             continue
-        m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', all_output[0])
+
+        if http_forward:
+            m = re.search(r'Now forwarding remote address ([a-z\.]*) to localhost', all_output[0])
+        else:
+            m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', all_output[0])
         if m is None:
             sleep(1)
             continue
         else:
             sleep(3)
-            host, port = m.group(1), int(m.group(2))
+            if http_forward:
+                host = m.group(1)
+                port = 80
+            else:
+                host, port = m.group(1), int(m.group(2))
             m = re.search(r'to first go here: ([a-zA-Z0-9\:/\.]+) .', all_output[0])
             link = m.group(1) if m is not None else None
             return host, port, link
@@ -294,6 +302,7 @@ def wait_for_response(function, args=[], kwargs={}, timeout=30, throw=True):
         i += 1
     if throw:
         raise Exception('function did not response in time')
+    return False
 
 
 def print_all_output(app, osinteraction, output_prefix=''):

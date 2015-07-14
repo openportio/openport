@@ -83,6 +83,7 @@ class Openport(object):
                     http_forward_address=session.http_forward_address,
                     start_callback=session.notify_start,
                     forward_tunnel=session.forward_tunnel,
+                    session_token=session.server_session_token,
                 )
                 self.port_forwarding_service.start()  # hangs
             except PortForwardException as e:
@@ -91,9 +92,10 @@ class Openport(object):
                 raise
             except IOError, e:
                 if e.errno != errno.EINTR:
-                    raise
+                    logger.error(e)
+                    sleep(10)
             except Exception as e:
-                logger.exception(e)
+                logger.error(e)
                 sleep(10)
             finally:
                 self.automatic_restart = True
