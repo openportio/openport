@@ -84,8 +84,8 @@ class PortForwardingService:
                         self.fallback_ssh_server, self.fallback_server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
                     self.stopped = False
                 except Exception, e:
-                    logger.error('*** Failed to fallback connect to %s:%d: %r' % (self.server,
-                                                                                  self.fallback_server_ssh_port, e) )
+                    logger.error('*** Failed to fallback connect to %s:%d: %r' % (self.fallback_ssh_server,
+                                                                                  self.fallback_server_ssh_port, e))
                     if self.error_callback:
                         self.error_callback(e)
                     return
@@ -123,6 +123,8 @@ class PortForwardingService:
     def keep_alive(self):
         while not self.stopped:
             time.sleep(10)
+            if self.stopped:
+                return
             if self.portForwardingRequestException is not None:
                 if self.error_callback:
                     self.error_callback(self.portForwardingRequestException)
