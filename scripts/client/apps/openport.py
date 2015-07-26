@@ -76,12 +76,12 @@ class Openport(object):
                     SERVER_SSH_USER,
                     session.public_key_file,
                     session.private_key_file,
-                    success_callback=self.session_success,
+                    success_callback=session.notify_success,
                     error_callback=session.notify_error,
                     fallback_server_ssh_port=FALLBACK_SERVER_SSH_PORT,
                     fallback_ssh_server=FALLBACK_SSH_SERVER,
                     http_forward_address=session.http_forward_address,
-                    start_callback=session.notify_start,
+                    start_callback=self.session_start,
                     forward_tunnel=session.forward_tunnel,
                     session_token=session.server_session_token,
                 )
@@ -95,13 +95,14 @@ class Openport(object):
                     logger.error(e)
                     sleep(10)
             except Exception as e:
+                #logger.exception(e)
                 logger.error(e)
                 sleep(10)
             finally:
                 self.automatic_restart = True
 
-    def session_success(self):
-        self.session.notify_success()
+    def session_start(self):
+        self.session.notify_start()
         self.show_message()
 
     def show_message(self):
@@ -118,6 +119,8 @@ class Openport(object):
                             'You can keep track of your shares at https://openport.io/user .\n%s'
                             % (self.session.http_forward_address, self.session.local_port,
                                self.last_response.message))
+        elif self.automatic_restart:
+            logger.info('Session restarted')
         self.repeat_message = False
         self.first_time_showing_message = False
 
