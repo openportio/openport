@@ -15,7 +15,8 @@ from services.logger_service import set_log_level, get_logger
 from test_utils import wait_for_response
 from apps.openport_app import OpenportApp
 from services import dbhandler
-from test_utils import set_default_args, run_method_with_timeout, kill_all_processes
+from test_utils import set_default_args, kill_all_processes
+from services.utils import run_method_with_timeout
 from gui.openport_gui import SharesFrame, COLOR_NO_APP_RUNNING, COLOR_OK
 from common.session import Session
 from services.app_service import AppService

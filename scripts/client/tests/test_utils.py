@@ -1,7 +1,5 @@
-import os
 import socket
 import sys
-import signal
 import re
 from time import sleep
 import inspect
@@ -10,12 +8,13 @@ import threading
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import urllib2
 import ssl
+import traceback
 
 from services.logger_service import get_logger
 from services import osinteraction
-import traceback
 from apps.openportit import OpenportItApp
 from apps.openport import Openport
+from services.utils import run_method_with_timeout
 
 logger = get_logger(__name__)
 
@@ -203,23 +202,6 @@ def run_command_with_timeout(args, timeout_s):
     c = Command(args)
     return c.run(timeout_s)
 
-
-def run_method_with_timeout(function, timeout_s, args=[], kwargs={}, raise_exception=True):
-    return_value = [None]
-
-    def method1():
-        return_value[0] = function(*args, **kwargs)
-
-    thread = threading.Thread(target=method1)
-    thread.daemon = True
-    thread.start()
-
-    thread.join(timeout_s)
-    if thread.is_alive():
-        if raise_exception:
-            logger.error('Timeout!')
-            raise Exception('Timeout!')
-    return return_value[0]
 
 def run_command_with_timeout_return_process(args, timeout_s):
 

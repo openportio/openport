@@ -9,17 +9,22 @@ import inspect
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
+import logging
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
 from services import osinteraction
+from services.logger_service import get_logger, set_log_level
 
+
+logger = get_logger(__name__)
 
 class SiteInteractionTest(unittest.TestCase):
 
     def setUp(self):
         print self._testMethodName
+        set_log_level(logging.DEBUG)
 
         self.server = "http://test.openport.be"
         #self.server = "localhost:8000"
@@ -143,20 +148,18 @@ class SiteInteractionTest(unittest.TestCase):
         self.kill_session(server_port)
         sleep(2)
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
-        sleep(20)
+        sleep(30)
         process_output = self.os_interaction.get_all_output(p)
         print "process output stdout: ", process_output[0]
         print "process output stderr: ", process_output[1]
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
-        self.assertTrue(p.poll() in (9, -9), 'poll output was %s' % p.poll())
+        self.assertEqual(0, p.poll(), 'poll output was %s' % p.poll())
 
     def test_restart_killed_session(self):
 
         db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'tmp_openport.db')
-        try:
+        if os.path.exists(db_file):
             os.remove(db_file)
-        except OSError:
-            pass
 
         self.login_to_site()
         self.remove_all_keys_from_account()
@@ -171,11 +174,11 @@ class SiteInteractionTest(unittest.TestCase):
         self.kill_session(server_port)
         sleep(2)
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
-        sleep(20)
+        sleep(30)
         process_output = self.os_interaction.get_all_output(p)
         print "process output: ", process_output
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
-        self.assertTrue(p.poll() in (9, -9), 'poll output was %s' % p.poll())
+        self.assertEqual(0, p.poll(), 'poll output was %s' % p.poll())
 
         p = self.start_session(8888, db_file=db_file)
         remote_host, server_port, link = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
@@ -210,6 +213,7 @@ class SiteInteractionTest(unittest.TestCase):
             elem = self.browser.find_element_by_xpath("//td[contains(., ':%s')]/following-sibling::td[1]/button[2]" % server_port)
             elem.click()
             self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+            logger.info('session %s killed using the site' % server_port)
 
         except NoSuchElementException:
             self.fail("session not found")

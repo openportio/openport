@@ -23,7 +23,8 @@ from common.share import Share
 from common.session import Session
 
 from test_utils import SimpleHTTPClient, TestHTTPServer, click_open_for_ip_link, check_tcp_port_forward
-from test_utils import start_openportit_session, start_openport_session, wait_for_response, run_method_with_timeout
+from test_utils import start_openportit_session, start_openport_session, wait_for_response
+from services.utils import run_method_with_timeout
 
 TOKEN = 'tokentest'
 
@@ -482,7 +483,7 @@ class IntegrationTest(unittest.TestCase):
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              shell=False)
         failed = wait_for_response(lambda: p.poll() is not None, timeout=10, throw=False)
-
+        sleep(3)
         output = self.osinteraction.non_block_read(p)
         print output
         self.assertTrue('remote port forwarding failed for listen port' in output[1])

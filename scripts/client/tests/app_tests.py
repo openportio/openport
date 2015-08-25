@@ -16,7 +16,8 @@ from services import osinteraction, dbhandler
 
 from test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
-from test_utils import print_all_output, click_open_for_ip_link, run_method_with_timeout, check_tcp_port_forward
+from test_utils import print_all_output, click_open_for_ip_link, check_tcp_port_forward
+from services.utils import run_method_with_timeout
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
 from apps.app_tcp_server import send_exit

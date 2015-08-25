@@ -12,7 +12,8 @@ from services.osinteraction import OsInteraction, getInstance, is_windows
 import subprocess
 from time import sleep
 from services.logger_service import set_log_level
-from test_utils import run_command_with_timeout, run_command_with_timeout_return_process, run_method_with_timeout
+from test_utils import run_command_with_timeout, run_command_with_timeout_return_process
+from services.utils import run_method_with_timeout
 from common.share import Share
 from mock import Mock, call
 import pyperclip
