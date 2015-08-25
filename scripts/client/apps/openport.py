@@ -38,6 +38,7 @@ class Openport(object):
         else:
             public_key = None
 
+        # This is the main loop. Exit this and the program ends.
         while self.restart_on_failure:
             try:
                 response = openport_api.request_open_port(
@@ -88,6 +89,9 @@ class Openport(object):
                 self.port_forwarding_service.start()  # hangs
             except PortForwardException as e:
                 logger.info('The port forwarding has stopped: %s' % e)
+            except openport_api.FatalSessionError as e:
+                logger.info('(Re)starting the session was denied: %s' % e)
+                break
             except SystemExit as e:
                 raise
             except IOError, e:
@@ -96,7 +100,7 @@ class Openport(object):
                     sleep(10)
             except Exception as e:
                 #logger.exception(e)
-                logger.error(e)
+                logger.error('general exception: %s' % e)
                 sleep(10)
             finally:
                 self.automatic_restart = True

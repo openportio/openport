@@ -1,13 +1,10 @@
 import sys
-import urllib
-import urllib2
 from time import sleep
 import threading
 
 from bottle import Bottle, ServerAdapter, request, response, run, error, hook
-
+import requests
 from services.logger_service import get_logger
-
 from common.config import OpenportAppConfig
 
 logger = get_logger('server')
@@ -160,17 +157,12 @@ class GUITcpServer():
         url = 'http://127.0.0.1:%s/%s' % (share.app_management_port, path)
         logger.debug('sending get request ' + url)
         try:
-            if data:
-                data = urllib.urlencode(data)
-                req = urllib2.Request(url, data)
-            else:
-                req = urllib2.Request(url)
-            response = urllib2.urlopen(req, timeout=1).read()
-            if response.strip() != 'ok':
-                logger.error(response)
+            r = requests.post(url, data=data, timeout=1)
+            if r.text.strip() != 'ok':
+                logger.error(r.text)
         except Exception, detail:
             self.openport_app_config.app.notify_app_down(share)
-            logger.error("An error has occurred while communicating with the app on %s: %s" % (url,detail))
+            logger.error("An error has occurred while communicating with the app on %s: %s" % (url, detail))
 
     def register_with_app(self, share):
         if share.app_management_port:

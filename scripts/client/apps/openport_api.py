@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-import urllib
-import urllib2
-import json
-
+import os
+import requests
 from apps.keyhandling import get_or_create_public_key
 from services.logger_service import get_logger
 from common.config import DEFAULT_SERVER
@@ -12,6 +10,9 @@ from apps.openport_app_version import VERSION
 
 
 logger = get_logger('openport_api')
+
+class FatalSessionError(Exception):
+    pass
 
 
 class PortForwardResponse():
@@ -43,7 +44,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
     return a tuple with ( server_ip, server_port, message )
     """
 
-    response = None
+    r = None
     try:
         request_data = {
             'public_key': public_key,
@@ -58,25 +59,28 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
         if ip_link_protection is not None:
             request_data['ip_link_protection'] = 'on' if ip_link_protection else ''
 
-        data = urllib.urlencode(request_data)
-        req = urllib2.Request(url, data)
-        response = urllib2.urlopen(req).read()
-        dict = json.loads(response)
-        return dict
-    except urllib2.HTTPError, detail:
-        logger.debug('error: got response: %s' % response)
-        logger.error("An error has occurred while communicating the the openport servers. %s" % detail)
-        if detail.getcode() == 500:
-            logger.error(detail.read())
+ #       if sys.version_info >= (2, 7, 9):
+ #           import ssl
+ #           ssl._create_default_https_context = ssl._create_unverified_context
+#
+        r = requests.post(url, data=request_data)
+        return r.json()
+    except requests.HTTPError as e:
+        if e.response:
+            logger.debug('error: got response: %s' % e.response.text)
+        logger.error("An error has occurred while communicating the the openport servers. %s" % e)
+        if e.response.status_code == 500:
+            logger.error(e.response.text)
+        with open(os.path.join(os.path.dirname(__file__), 'error.html'), 'w') as f:
+            f.write(e.response.text)
         raise
-    except Exception, detail:
-        try:
-            logger.debug('error: got response: %s' % response)
-        except:
-            pass
-        print "An error has occurred while communicating the the openport servers. ", detail, \
-            detail.read() if hasattr(detail, 'read') else ''
-        raise detail
+    except Exception as e:
+        if r:
+            logger.debug('error: got response: %s' % r.text)
+            with open(os.path.join(os.path.dirname(__file__), 'error.html'), 'w') as f:
+                f.write(r.text)
+        logger.error("An error has occurred while communicating the the openport servers. %s" % e)
+        raise e
 
 
 def request_open_port(local_port, restart_session_token='', request_server_port=-1, error_callback=None,
@@ -109,7 +113,7 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
                 stop_callback()
             logger.info(dict['error'])
         if dict.get('fatal_error', False):
-            sys.exit(9)
+            raise FatalSessionError(dict.get('error'))
 
     logger.debug(dict)
 

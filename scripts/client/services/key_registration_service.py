@@ -1,6 +1,5 @@
 import sys
-import urllib
-import urllib2
+import requests
 
 from apps.keyhandling import get_or_create_public_key
 from common.config import DEFAULT_SERVER
@@ -25,13 +24,12 @@ def register_key(args, server=DEFAULT_SERVER):
         url = "%s/linkKey" % server
 
         try:
-            data = urllib.urlencode({
+            data = {
                 'public_key': public_key,
-                'key_binding_token': token})
-            req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req).read()
-            dictionary = json.loads(response)
-            if not 'status' in dictionary or dictionary['status'] != 'ok':
+                'key_binding_token': token}
+            r = requests.post(url, data=data)
+            dictionary = r.json()
+            if 'status' not in dictionary or dictionary['status'] != 'ok':
                 raise Exception('Did not get status ok: %s' % dictionary)
             print "key successfully registered"
 

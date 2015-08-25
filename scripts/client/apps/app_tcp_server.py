@@ -1,10 +1,8 @@
 import sys
-import urllib
-import urllib2
-from urllib2 import URLError
 from time import sleep
 import os
 import threading
+import requests
 
 from bottle import Bottle, ServerAdapter, request, response, error, hook
 from services.logger_service import get_logger
@@ -115,13 +113,12 @@ class AppTcpServer():
                 url = 'http://127.0.0.1:%s/%s' % (port, path)
                 logger.debug('sending get request ' + url)
                 try:
-                    data = urllib.urlencode({'id': share.id})
+                    data = {'id': share.id}
                     logger.debug(data)
-                    req = urllib2.Request(url, data)
-                    response = urllib2.urlopen(req, timeout=1).read()
-                    if response.strip() != 'ok':
+                    r = requests.post(url, data=data, timeout=1)
+                    if r.text.strip() != 'ok':
                         logger.error(response)
-                except URLError:
+                except requests.ConnectionError:
                     self.openport_app_config.tcp_listeners.remove(port)
                 except Exception, detail:
                     logger.error("An error has occurred while informing the manager: %s" % detail)
@@ -168,10 +165,9 @@ def send_exit(share, force=False):
     url = 'http://127.0.0.1:%s/exit' % (port,)
     logger.debug('sending get request ' + url)
     try:
-        data = urllib.urlencode({'id': share.id, 'force': force})
-        req = urllib2.Request(url, data)
-        response = urllib2.urlopen(req, timeout=1).read()
-        if response.strip() != 'ok':
+        data = {'id': share.id, 'force': force}
+        r = requests.post(url, data=data)
+        if r.text.strip() != 'ok':
             logger.error(response)
     except Exception, detail:
         logger.error("An error has occurred while killing the app: %s" % detail)
@@ -183,9 +179,8 @@ def send_ping(share, print_error=True):
     url = 'http://127.0.0.1:%s/ping' % (port,)
     logger.debug('sending get request ' + url)
     try:
-        req = urllib2.Request(url)
-        response = urllib2.urlopen(req, timeout=1).read()
-        if response.strip() != 'pong':
+        r = requests.get(url)
+        if r.text.strip() != 'pong':
             logger.error(response)
             return False
         return True
@@ -200,9 +195,8 @@ def is_running(share, print_error=False):
     url = 'http://127.0.0.1:%s/info' % (port,)
     logger.debug('sending get request ' + url)
     try:
-        req = urllib2.Request(url)
-        response = urllib2.urlopen(req, timeout=1).read()
-        if response.splitlines()[0].strip() != 'openport':
+        r = requests.get(url, timeout=1)
+        if r.text.splitlines()[0].strip() != 'openport':
             logger.error(response)
             return False
         return True

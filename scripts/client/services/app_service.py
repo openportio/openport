@@ -1,6 +1,5 @@
-import urllib2
 import os
-from urllib2 import URLError, HTTPError
+import requests
 
 from common.session import Session
 from services.logger_service import get_logger
@@ -62,16 +61,15 @@ class AppService(object):
         url = 'http://localhost:%s/ping' % manager_port
         logger.debug('sending get request ' + url)
         try:
-            req = urllib2.Request(url)
-            response = urllib2.urlopen(req, timeout=5).read()
-            if response.strip() != 'pong':
-                logger.debug('got response: %s' % response)
+            r = requests.get(url, timeout=5)
+            if r.text.strip() != 'pong':
+                logger.debug('got response: %s' % r.text)
                 raise Exception('Another application is running on port %s' % manager_port)
             else:
                 return True
-        except HTTPError:
+        except requests.HTTPError:
             raise Exception('Another application is running on port %s' % manager_port)
-        except URLError, detail:
+        except requests.ConnectionError, detail:
             return False
         except Exception, detail:
             raise Exception('Another application is running on port %s' % manager_port)
