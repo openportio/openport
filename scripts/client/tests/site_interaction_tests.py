@@ -13,7 +13,7 @@ import logging
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
+from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
 from services import osinteraction
 from services.logger_service import get_logger, set_log_level
 
@@ -139,7 +139,7 @@ class SiteInteractionTest(unittest.TestCase):
         key_binding_token = self.get_key_binding_token()
         self.register_key(key_binding_token)
 
-        p = self.start_session(8888, db_file=db_file)
+        p = self.start_session(8888, db_file=db_file, verbose=False)
 
         remote_host, server_port, link = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
         print 'server port: %s' % server_port
@@ -148,12 +148,14 @@ class SiteInteractionTest(unittest.TestCase):
         self.kill_session(server_port)
         sleep(2)
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
-        sleep(30)
+        wait_for_response(lambda : p.poll() is not None)
         process_output = self.os_interaction.get_all_output(p)
         print "process output stdout: ", process_output[0]
         print "process output stderr: ", process_output[1]
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
         self.assertEqual(0, p.poll(), 'poll output was %s' % p.poll())
+        self.assertTrue('Traceback' not in process_output[0])
+        self.assertTrue(not process_output[1] or 'Traceback' not in process_output[1])
 
     def test_restart_killed_session(self):
 
@@ -186,11 +188,12 @@ class SiteInteractionTest(unittest.TestCase):
 
         self.assertTrue(self.session_exists_on_site(server_port), 'session was not allowed back on the server.')
 
-
-    def start_session(self, local_port, db_file=None):
+    def start_session(self, local_port, db_file=None, verbose=True):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = ['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port, '--server',
-                   '%s' % self.server, '--verbose']
+                   '%s' % self.server]
+        if verbose:
+            command.append('--verbose')
         if db_file:
             command.extend(['--database', db_file])
         p = subprocess.Popen(command,

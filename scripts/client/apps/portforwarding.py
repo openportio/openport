@@ -5,12 +5,11 @@ from services.logger_service import get_logger
 from socket import error as SocketError
 from keyhandling import get_default_key_locations
 import errno
-from services.utils import run_method_with_timeout
+from services.utils import run_method_with_timeout, TimeoutException
 
 logger = get_logger(__name__)
 
-
-class PortForwardException(Exception):
+class TunnelError(Exception):
     pass
 
 
@@ -94,7 +93,10 @@ class PortForwardingService:
                     self.error_callback(e)
                 return
 
-        stdin, stdout, stderr = run_method_with_timeout(lambda: self.client.exec_command(self.session_token, timeout=10), timeout_s=10)
+        try:
+            stdin, stdout, stderr = run_method_with_timeout(lambda: self.client.exec_command(self.session_token), timeout_s=10)
+        except (TimeoutException, paramiko.SSHException):
+            raise TunnelError('Connection to the server seems to be lost.')
 
         try:
             self.portForwardingRequestException = None
@@ -118,7 +120,11 @@ class PortForwardingService:
 #            sys.exit(0)
         except EOFError, e:
             # Tunnel is stopped.
+            self.stop()
             logger.debug(e)
+        except:
+            self.stop()
+            raise
 
     def keep_alive(self):
         while not self.stopped:
@@ -131,7 +137,12 @@ class PortForwardingService:
                 logger.exception(self.portForwardingRequestException)
 
             logger.debug('sending keep_alive')
-            stdin, stdout, stderr = run_method_with_timeout(lambda: self.client.exec_command(self.session_token), timeout_s=10)
+
+            try:
+                stdin, stdout, stderr = run_method_with_timeout(lambda: self.client.exec_command(self.session_token), timeout_s=10)
+            except (TimeoutException, paramiko.SSHException):
+                raise TunnelError('Connection to the server seems to be lost.')
+
             # logger.debug('keep_alive sent: stdout %s' % stdout.read())
             # logger.debug('keep_alive sent: stderr %s' % sterr.read())
             if self.success_callback:

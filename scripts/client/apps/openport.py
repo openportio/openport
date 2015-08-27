@@ -4,7 +4,7 @@ import errno
 
 from common.config import DEFAULT_SERVER
 from apps import openport_api
-from apps.portforwarding import PortForwardingService, PortForwardException
+from apps.portforwarding import PortForwardingService, TunnelError
 from services.logger_service import get_logger
 
 
@@ -87,17 +87,18 @@ class Openport(object):
                     session_token=session.server_session_token,
                 )
                 self.port_forwarding_service.start()  # hangs
-            except PortForwardException as e:
-                logger.info('The port forwarding has stopped: %s' % e)
             except openport_api.FatalSessionError as e:
                 logger.info('(Re)starting the session was denied: %s' % e)
                 break
             except SystemExit as e:
                 raise
-            except IOError, e:
+            except IOError as e:
                 if e.errno != errno.EINTR:
                     logger.error(e)
                     sleep(10)
+            except TunnelError as e:
+                logger.error(e)
+                sleep(10)
             except Exception as e:
                 #logger.exception(e)
                 logger.error('general exception: %s' % e)

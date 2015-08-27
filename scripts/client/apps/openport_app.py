@@ -301,8 +301,8 @@ class OpenportApp(object):
 
     def error_callback(self, session, exception):
         logger.debug('error_callback')
-        logger.error('exception in session %s' % session.id)
-        logger.exception(exception)
+        logger.debug('exception in session %s' % session.id)
+        #logger.exception(exception)
 
     def success_callback(self, session):
         logger.debug('success_callback')
