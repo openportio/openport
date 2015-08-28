@@ -35,7 +35,7 @@ class OpenportAppTests(unittest.TestCase):
 
         self.stop_port_forward = True
 
-    def test_request_same_port_if_old_port_is_denied(self):
+    def test_session_token_is_stored_if_port_request_is_denied(self):
         """ Check that if a session_token is denied, the new session token is stored and used. """
 
         set_default_args(self.app, self.test_db)
@@ -95,6 +95,7 @@ class OpenportAppTests(unittest.TestCase):
         # Stopping the app will make the share inactive.
         #self.app.stop()
         self.stop_port_forward = True
+        self.app.server.stop()
 
         sleep(3)
 
@@ -127,11 +128,11 @@ class OpenportAppTests(unittest.TestCase):
         # Stopping the app will make the share inactive.
         #self.app.stop()
         self.stop_port_forward = True
+        self.app.server.stop()
 
         sleep(3)
 
         self.assertFalse(thr.isAlive())
-
 
 
         # Check that new session_token is used
@@ -159,6 +160,7 @@ class OpenportAppTests(unittest.TestCase):
         # Stopping the app will make the share inactive.
         #self.app.stop()
         self.stop_port_forward = True
+        self.app.server.stop()
 
     def test_exit(self):
         set_default_args(self.app, self.test_db)

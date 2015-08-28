@@ -197,7 +197,7 @@ def run_command_with_timeout(args, timeout_s):
                 self.process.terminate()
                 thread.join()
             print self.process.returncode
-            return osinteraction.getInstance().get_all_output(self.process)
+            return osinteraction.getInstance().get_output(self.process)
 
     c = Command(args)
     return c.run(timeout_s)
@@ -244,7 +244,7 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', htt
     i = 0
     while i < timeout:
         i += 1
-        all_output = osinteraction.get_all_output(p)
+        all_output = osinteraction.get_output(p)
         if all_output[0]:
             print '%s - stdout -  %s' % (output_prefix, all_output[0])
         if all_output[1]:
@@ -288,7 +288,7 @@ def wait_for_response(function, args=[], kwargs={}, timeout=30, throw=True):
 
 
 def print_all_output(app, osinteraction, output_prefix=''):
-    all_output = osinteraction.get_all_output(app)
+    all_output = osinteraction.get_output(app)
     if all_output[0]:
         print '%s - stdout -  <<<%s>>>' % (output_prefix, all_output[0])
     if all_output[1]:

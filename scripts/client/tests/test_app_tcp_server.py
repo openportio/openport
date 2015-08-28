@@ -7,13 +7,15 @@ import threading
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
-import xmlrunner
+import requests
 from services.osinteraction import OsInteraction, getInstance, is_windows
+from apps.app_tcp_server import AppTcpServer
 import subprocess
 from apps.app_tcp_server import is_running
 from time import sleep
 from services import dbhandler
 from test_utils import get_remote_host_and_port
+from common.config import OpenportAppConfig
 
 
 class AppTcpServerTests(unittest.TestCase):
@@ -40,8 +42,26 @@ class AppTcpServerTests(unittest.TestCase):
         get_remote_host_and_port(p, self.os_interaction)
 
         try:
-            shares = self.db_handler.get_share_by_local_port(port)
-            self.assertEqual(1, len(shares))
-            self.assertTrue(is_running(shares[0]))
+            share = self.db_handler.get_share_by_local_port(port)
+            self.assertNotEqual(None, share)
+            self.assertTrue(is_running(share))
         finally:
             p.kill()
+
+    def test_stop(self):
+        config = OpenportAppConfig()
+        port = self.os_interaction.get_open_port()
+
+        server = AppTcpServer('localhost', port, config, self.db_handler)
+        server.run_threaded()
+
+        r = requests.get('http://localhost:%s/info' % port)
+        self.assertEqual('openport', r.text.strip())
+
+        server.stop()
+
+        try:
+            r = requests.get('http://localhost:%s/info' % port)
+            self.fail('expecting exception')
+        except requests.ConnectionError:
+            pass

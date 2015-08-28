@@ -149,7 +149,7 @@ class SiteInteractionTest(unittest.TestCase):
         sleep(2)
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
         wait_for_response(lambda : p.poll() is not None)
-        process_output = self.os_interaction.get_all_output(p)
+        process_output = self.os_interaction.get_output(p)
         print "process output stdout: ", process_output[0]
         print "process output stderr: ", process_output[1]
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
@@ -177,7 +177,7 @@ class SiteInteractionTest(unittest.TestCase):
         sleep(2)
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
         sleep(30)
-        process_output = self.os_interaction.get_all_output(p)
+        process_output = self.os_interaction.get_output(p)
         print "process output: ", process_output
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
         self.assertEqual(0, p.poll(), 'poll output was %s' % p.poll())

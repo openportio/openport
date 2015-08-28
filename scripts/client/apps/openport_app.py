@@ -146,12 +146,11 @@ class OpenportApp(object):
         return share_line
 
     def kill(self, local_port):
-        shares = self.db_handler.get_share_by_local_port(local_port)
-        if len(shares) > 0:
-            share = shares[0]
+        share = self.db_handler.get_share_by_local_port(local_port)
+        if share:
             self.kill_share(share)
         else:
-            logger.info('No active sessions found for local port %s' % local_port)
+            logger.info('No active session found for local port %s' % local_port)
         self.print_shares()
 
     def kill_share(self, share):
@@ -258,14 +257,19 @@ class OpenportApp(object):
 
         db_share = self.db_handler.get_share_by_local_port(session.local_port, filter_active=False)
         if db_share:
-            if is_running(db_share[0]):
+            logger.debug('previous share found in database')
+            if is_running(db_share):
                 logger.info('Port forward already running for port %s' % self.args.local_port)
                 sys.exit(6)
 
+            if db_share.restart_command and not self.args.restart_on_reboot:
+                logger.warn('Port forward for port %s that would be restarted on reboot will not be restarted anymore.'
+                            % self.args.local_port)
+
             if not session.server_session_token:
-                logger.debug("retrieved db share session token: %s" % db_share[0].server_session_token)
-                session.server_session_token = db_share[0].server_session_token
-                session.server_port = db_share[0].server_port
+                logger.debug("retrieved db share session token: %s" % db_share.server_session_token)
+                session.server_session_token = db_share.server_session_token
+                session.server_port = db_share.server_port
         else:
             logger.debug('No db share session could be found.')
         session.http_forward = self.args.http_forward
@@ -313,7 +317,10 @@ class OpenportApp(object):
         self.save_share(session)
 
     def stop(self):
-        self.openport.stop_port_forward()
+        if self.openport:
+            self.openport.stop_port_forward()
+        if self.server:
+            self.server.stop()
 
 if __name__ == '__main__':
     app = OpenportApp()

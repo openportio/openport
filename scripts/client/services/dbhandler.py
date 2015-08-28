@@ -143,6 +143,9 @@ class DBHandler(object):
         return share
 
     def convert_session_from_db(self, openport_session):
+        if openport_session is None:
+            return None
+
         logger.debug('convert_session_from_db')
 
         share = Session()
@@ -199,10 +202,10 @@ class DBHandler(object):
         if filter_active:
             kwargs['active'] = True
 
-        openport_sessions = session.query(OpenportSession).filter_by(**kwargs).order_by(OpenportSession.id.desc()).all()
+        openport_session = session.query(OpenportSession).filter_by(**kwargs).order_by(OpenportSession.id.desc()).first()
 
         self.Session.remove()
-        return list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
+        return self.convert_session_from_db(openport_session)
 
     def stop_share(self, share, restart=True):
         logger.debug('stop_share')

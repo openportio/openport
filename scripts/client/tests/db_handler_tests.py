@@ -108,8 +108,8 @@ class DBHandlerTests(unittest.TestCase):
             saved_share = self.dbhandler.add_share(share)
             saved_share2 = dbhandler2.add_share(share2)
 
-            retrieved_share2 = self.dbhandler.get_share_by_local_port(2225)[0]
-            retrieved_share = self.dbhandler.get_share_by_local_port(2224)[0]
+            retrieved_share2 = self.dbhandler.get_share_by_local_port(2225)
+            retrieved_share = self.dbhandler.get_share_by_local_port(2224)
 
             self.assertEqual(retrieved_share.local_port, share.local_port)
             self.assertEqual(retrieved_share2.local_port, share2.local_port)
@@ -193,9 +193,9 @@ class DBHandlerTests(unittest.TestCase):
         self.dbhandler.add_share(share2)
         self.dbhandler.add_share(share3)
 
-        shares = self.dbhandler.get_share_by_local_port(123)
-        self.assertEqual(1, len(shares))
-        self.assertEqual(share2.id, shares[0].id)
+        share = self.dbhandler.get_share_by_local_port(123)
+        self.assertNotEqual(None, share)
+        self.assertEqual(share2.id, share.id)
 
     def test_stop_share(self):
         share = Share(active=True, local_port=444)

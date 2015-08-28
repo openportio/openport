@@ -26,6 +26,7 @@ class OsInteraction(object):
             from services.logger_service import get_logger
             self.logger = get_logger('OsInteraction')
         self.output_queues = {}
+        self.all_output = {}
 
     def get_app_name(self):
         return os.path.basename(sys.argv[0])
@@ -154,7 +155,7 @@ class OsInteraction(object):
 
         all_output = [False, False]
         while True:
-            output = self.get_all_output(s)
+            output = self.get_output(s)
             if output[0]:
                 self.logger.debug('silent command stdout: %s<<<<%s>>>>' % (prefix, output[0]))
             if output[1]:
@@ -181,8 +182,17 @@ class OsInteraction(object):
         t_stdout.daemon = True
         t_stdout.start()
 
-    def get_all_output(self, p):
+    def get_output(self, p):
         return self.non_block_read(p)
+
+    def get_all_output(self, p):
+        self.get_output(p)
+
+        if p.pid not in self.all_output:
+            return None
+
+        output = [out.strip() for out in self.all_output.get(p.pid)]
+        return tuple([out if out else False for out in output])
 
     def non_block_read(self, process):
 
@@ -198,12 +208,12 @@ class OsInteraction(object):
 
             q_stdout = Queue()
             t_stdout = Thread(target=enqueue_output, args=(process.stdout, q_stdout))
-            t_stdout.daemon = True # thread dies with the program
+            t_stdout.daemon = True  # thread dies with the program
             t_stdout.start()
 
             q_stderr = Queue()
             t_stderr = Thread(target=enqueue_output, args=(process.stderr, q_stderr))
-            t_stderr.daemon = True # thread dies with the program
+            t_stderr.daemon = True  # thread dies with the program
             t_stderr.start()
             sleep(0.1)
             self.output_queues[process.pid] = (q_stdout, q_stderr)
@@ -225,7 +235,16 @@ class OsInteraction(object):
                     return output.rstrip('\n\r')
                 #return False if empty else output
 
-        return read_queue(q_stdout), read_queue(q_stderr)
+        new_output = (read_queue(q_stdout), read_queue(q_stderr))
+
+        if process.pid not in self.all_output:
+            self.all_output[process.pid] = ['', '']
+        for i, new_out in enumerate(new_output):
+            if not new_out:
+                new_out = ''
+            self.all_output[process.pid][i] = os.linesep.join([self.all_output[process.pid][i], new_out])
+
+        return new_output
 
     def get_open_port(self):
         import socket

@@ -29,7 +29,10 @@ logger = get_logger(__name__)
 
 def gui_test(func):
     def inner(self):
+        logger.debug('starting test')
+
         def test_thread():
+            logger.debug('in thread')
             try:
                 func(self)
             except Exception as e:
@@ -38,18 +41,21 @@ def gui_test(func):
             finally:
                 #wx.Exit()
                 self.gui_frame.exitApp(None)
+            logger.debug('thread done')
         thr = threading.Thread(target=test_thread)
         thr.setDaemon(True)
         thr.start()
         self.gui_app.MainLoop()
         if self.exception:
             logger.exception(self.exception)
-            raise self.exception
+            raise Exception(self.exception)
+        logger.debug('test done')
     return inner
 
 
 class OpenportAppTests(unittest.TestCase):
     def setUp(self):
+        logger.debug('setup')
         print self._testMethodName
         self.os_interaction = getInstance()
         set_log_level(logging.DEBUG)
@@ -64,10 +70,18 @@ class OpenportAppTests(unittest.TestCase):
         self.gui_frame = SharesFrame(wx_app=self.gui_app, db_location=self.test_db)
         self.exception = None
         self.processes_to_kill = []
+        logger.debug('setup done')
 
     def tearDown(self):
+        logger.debug('teardown')
         kill_all_processes(self.processes_to_kill)
+        if self.app:
+            self.app.stop()
+        #sleep(20)
+        logger.debug('teardown done')
 
+        #if self.gui_frame.server:
+        #    self.gui_frame.server.stop()
 
     @gui_test
     def test_register_share(self):
@@ -164,8 +178,8 @@ class OpenportAppTests(unittest.TestCase):
             self.assertEqual(1, len(self.gui_frame.share_panels))
             self.assertEqual(COLOR_OK, self.gui_frame.share_panels.values()[0].GetBackgroundColour())
         finally:
-            for share in db_handler.get_share_by_local_port(port, filter_active=False):
-                send_exit(share, force=True)
+            share = db_handler.get_share_by_local_port(port, filter_active=False)
+            send_exit(share, force=True)
 
         logger.debug('Success!')
 

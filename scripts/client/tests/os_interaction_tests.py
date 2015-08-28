@@ -59,6 +59,23 @@ class OsInteractionTest(unittest.TestCase):
         sleep(2)
         self.assertEqual(('bbb', False), self.os_interaction.non_block_read(p))
         #todo: close_fds = ON_POSIX ?
+        self.assertEqual(('aaa%sbbb' % os.linesep, False), self.os_interaction.get_all_output(p))
+
+    def test_non_block_read__no_output(self):
+        # The flush is needed for the tests.
+        # See http://stackoverflow.com/questions/6257800/incremental-output-with-subprocess-pipe
+
+        p = subprocess.Popen(['python', '-c', "from time import sleep;import sys; "
+                                              "sleep(1); print 'bbb'"],
+                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             bufsize=1, close_fds=not is_windows())
+        sleep(0.1)
+        self.assertEqual((False, False), self.os_interaction.non_block_read(p))
+        self.assertEqual((False, False), self.os_interaction.get_all_output(p))
+
+        sleep(2)
+        self.assertEqual(('bbb', False), self.os_interaction.non_block_read(p))
+        self.assertEqual(('bbb', False), self.os_interaction.get_all_output(p))
 
     def test_run_command_and_print_output_continuously(self):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
@@ -80,7 +97,7 @@ class OsInteractionTest(unittest.TestCase):
         output = self.os_interaction.print_output_continuously(s)
         self.assertEqual(['aaa', False], output)
 
-    def test_get_all_output__kill_app(self):
+    def test_get_output__kill_app(self):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = self.os_interaction.get_python_exec()
         print command
@@ -89,7 +106,7 @@ class OsInteractionTest(unittest.TestCase):
         output = run_command_with_timeout(command, 1)
         self.assertEqual(('aaa', False), output)
 
-    def test_get_all_output__simple(self):
+    def test_get_output__simple(self):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = self.os_interaction.get_python_exec()
         print command
@@ -97,7 +114,7 @@ class OsInteractionTest(unittest.TestCase):
         output = run_command_with_timeout(command, 1)
         self.assertEqual(('hello', False), output)
 
-    def test_get_all_output__stderr(self):
+    def test_get_output__stderr(self):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = self.os_interaction.get_python_exec()
         command.extend(['-c', "import sys; sys.stderr.write('hello_err')"])
@@ -164,7 +181,7 @@ class OsInteractionTest(unittest.TestCase):
         run_method_with_timeout(p.wait, 2)
 
         self.assertNotEqual(None, p.poll())
-        output = self.os_interaction.get_all_output(p)
+        output = self.os_interaction.output(p)
         print output[0]
         print output[1]
         if not is_windows():
