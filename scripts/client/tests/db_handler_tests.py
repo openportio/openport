@@ -133,7 +133,7 @@ class DBHandlerTests(unittest.TestCase):
                 saved_share = dbhandler2.add_share(share)
                 retrieved_share = self.dbhandler.get_share(saved_share.id)
                 self.assertEqual(retrieved_share.local_port, share.local_port)
-              except:
+              except AssertionError:
                 print 'error on i:%s' % i
                 errors.append(i)
             self.assertEqual([], errors)
@@ -282,6 +282,17 @@ class DBHandlerTests(unittest.TestCase):
 
         session = db_handler.get_share_by_local_port(22)
         self.assertNotEqual(None, session)
+
+    def test_add_share_other_properties(self):
+        share = Share(local_port=22, restart_command='22 --restart-on-reboot', active=True)
+        self.dbhandler.add_share(share)
+
+        new_share = Share(local_port=22, active=True)
+        self.dbhandler.add_share(new_share)
+
+        self.assertEqual(1, len(self.dbhandler.get_active_shares()))
+        self.assertEqual(0, len(self.dbhandler.get_shares_to_restart()))
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

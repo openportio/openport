@@ -10,7 +10,7 @@ from services import osinteraction, migration_service
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, not_
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm.exc import NoResultFound
@@ -97,11 +97,14 @@ class DBHandler(object):
 
     def add_share(self, share):
         logger.debug('add share')
-        openport_session = OpenportSession()
         session = self._get_session()
 
-        if share.id > 0:
-            openport_session = session.query(OpenportSession).filter_by(id=share.id).one()
+        openport_session = session.query(OpenportSession).filter_by(local_port=share.local_port).first()
+
+        new_entry = False
+        if openport_session is None:
+            openport_session = OpenportSession()
+            new_entry = True
 
         openport_session.server = share.server
         openport_session.remote_port = share.server_port
@@ -109,7 +112,7 @@ class DBHandler(object):
         openport_session.local_port = share.local_port
         openport_session.pid = share.pid
         openport_session.active = share.active
-        openport_session.restart_command = pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
+        openport_session.restart_command = self.pickle_restart_command(share)
         openport_session.account_id = share.account_id
         openport_session.key_id = share.key_id
         openport_session.http_forward = share.http_forward
@@ -117,16 +120,16 @@ class DBHandler(object):
         openport_session.app_management_port = share.app_management_port
         openport_session.open_port_for_ip_link = share.open_port_for_ip_link
 
-        for previous_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
-            previous_session.active = False
-
-        if share.id <= 0:
+        if new_entry:
             session.add(openport_session)
         session.commit()
 
         share.id = openport_session.id
         self.Session.remove()
         return self.get_share(openport_session.id)
+
+    def pickle_restart_command(self, share):
+        return pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
 
     def get_share(self, id):
         logger.debug('get_share')
@@ -179,9 +182,13 @@ class DBHandler(object):
 
         session = self._get_session()
         openport_sessions = session.query(OpenportSession).filter(OpenportSession.restart_command.isnot(''))
-        l = list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions
-                    if self.convert_session_from_db(openport_session).restart_command)
+        l = self.filter_sessions_with_restart_command(openport_sessions)
         self.Session.remove()
+        return l
+
+    def filter_sessions_with_restart_command(self, openport_sessions):
+        l = list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions
+                 if self.convert_session_from_db(openport_session).restart_command)
         return l
 
     def get_share_by_local_port(self, local_port, filter_active=True):
