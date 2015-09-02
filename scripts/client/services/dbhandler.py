@@ -99,9 +99,11 @@ class DBHandler(object):
         logger.debug('add share')
         session = self._get_session()
 
+        openport_session = None
         if share.id > 0:
             openport_session = session.query(OpenportSession).filter_by(id=share.id).first()
-        else:
+
+        if openport_session is None:
             openport_session = session.query(OpenportSession).filter_by(local_port=share.local_port).first()
 
         new_entry = False
@@ -126,6 +128,11 @@ class DBHandler(object):
         if new_entry:
             session.add(openport_session)
         session.commit()
+
+        for other_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
+            if other_session.id == openport_session.id:
+                continue
+            other_session.delete()
 
         share.id = openport_session.id
         self.Session.remove()
