@@ -109,6 +109,7 @@ class OpenportApp(object):
         if args.verbose:
             from logging import DEBUG
             set_log_level(DEBUG)
+            self.config.verbose = True
         logger.debug('client pid:%s' % os.getpid())
 
         self.config.server = args.server
@@ -161,13 +162,13 @@ class OpenportApp(object):
             share.active = False
             share.restart_command = ''
             self.db_handler.add_share(share)
+        logger.debug('killed share %s for port %s' % (share.id, share.local_port))
 
     def kill_all(self):
         shares = self.db_handler.get_active_shares()
-        for share in shares:
-            self.kill_share(share)
+        shares.extend(self.db_handler.get_shares_to_restart())
 
-        shares = self.db_handler.get_shares_to_restart()
+        shares = {x.id: x for x in shares}.values()
         for share in shares:
             self.kill_share(share)
 

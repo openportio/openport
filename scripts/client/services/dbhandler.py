@@ -99,7 +99,10 @@ class DBHandler(object):
         logger.debug('add share')
         session = self._get_session()
 
-        openport_session = session.query(OpenportSession).filter_by(local_port=share.local_port).first()
+        if share.id > 0:
+            openport_session = session.query(OpenportSession).filter_by(id=share.id).first()
+        else:
+            openport_session = session.query(OpenportSession).filter_by(local_port=share.local_port).first()
 
         new_entry = False
         if openport_session is None:
@@ -190,8 +193,8 @@ class DBHandler(object):
         return l
 
     def filter_sessions_with_restart_command(self, openport_sessions):
-        l = list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions
-                 if self.convert_session_from_db(openport_session).restart_command)
+        l = [self.convert_session_from_db(openport_session) for openport_session in openport_sessions
+                 if self.convert_session_from_db(openport_session).restart_command]
         return l
 
     def get_share_by_local_port(self, local_port, filter_active=True):
