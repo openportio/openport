@@ -187,6 +187,7 @@ def send_ping(share, print_error=True):
     except Exception, detail:
         log_function = logger.error if print_error else logger.debug
         log_function("An error has occurred while pinging the app: %s" % detail)
+        return False
 
 
 def is_running(share, print_error=False):

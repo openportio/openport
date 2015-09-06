@@ -31,7 +31,7 @@ class OpenportItApp(OpenportApp):
 
 
         parser = argparse.ArgumentParser()
-        self.add_default_arguments(parser, local_port_required=False)
+        self.add_default_arguments(parser, group_required=False)
         parser.add_argument('--file-token', default='', help='The token needed to download the file.')
         parser.add_argument('filename', help='The file you want to openport.')
         args = parser.parse_args()
