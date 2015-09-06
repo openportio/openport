@@ -66,6 +66,14 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
         r = requests.post(url, data=request_data)
         return r.json()
     except requests.HTTPError as e:
+        if r:
+            logger.debug('error: got response: %s' % r.text)
+            try:
+                with open(os.path.join(os.path.dirname(__file__), 'error.html'), 'w') as f:
+                    f.write(r.text)
+            except:
+                pass
+
         if e.response:
             logger.debug('error: got response: %s' % e.response.text)
         logger.error("An error has occurred while communicating the the openport servers. %s" % e)
@@ -76,9 +84,11 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
         raise
     except Exception as e:
         if r:
-            logger.debug('error: got response: %s' % r.text)
-            with open(os.path.join(os.path.dirname(__file__), 'error.html'), 'w') as f:
-                f.write(r.text)
+            try:
+                with open(os.path.join(os.path.dirname(__file__), 'error.html'), 'w') as f:
+                    f.write(r.text)
+            except:
+                pass
         logger.error("An error has occurred while communicating the the openport servers. %s" % e)
         raise e
 

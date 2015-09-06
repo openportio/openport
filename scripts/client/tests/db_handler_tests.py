@@ -293,6 +293,33 @@ class DBHandlerTests(unittest.TestCase):
         self.assertEqual(1, len(self.dbhandler.get_active_shares()))
         self.assertEqual(0, len(self.dbhandler.get_shares_to_restart()))
 
+    def test_remove_doubles(self):
+        old_db = os.path.join(os.path.dirname(__file__), 'testfiles/openport-0.9.1.db')
+        old_db_tmp = os.path.join(os.path.dirname(__file__), 'testfiles/tmp/openport-0.9.1.db')
+
+        shutil.copy(old_db, old_db_tmp)
+
+        db_handler = dbhandler.DBHandler(old_db_tmp)
+
+        def filter_shares_by_local_port(shares, local_port):
+            return [share for share in shares if share.local_port==local_port]
+
+        all_shares = db_handler.get_all_shares()
+        filtered = filter_shares_by_local_port(all_shares, 22)
+        self.assertTrue(len(filtered) > 1)
+        self.assertEqual(2, len(filtered))
+
+        new_share = Share(local_port=22, active=True)
+        db_handler.add_share(new_share)
+
+        all_shares = db_handler.get_all_shares()
+        filtered = filter_shares_by_local_port(all_shares, 22)
+        self.assertEqual(1, len(filtered))
+
+        session = db_handler.get_share_by_local_port(22)
+        self.assertNotEqual(None, session)
+
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

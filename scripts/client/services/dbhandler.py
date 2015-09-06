@@ -52,7 +52,7 @@ class OpenportSession(Base):
 
 class DBHandler(object):
 
-    def __init__(self, db_location=None, init_db=True):
+    def __init__(self, db_location=None, init_db=True, echo_queries=False):
         self.osinteraction = osinteraction.getInstance()
 
         if not db_location:
@@ -60,7 +60,7 @@ class DBHandler(object):
 
         db_exists = os.path.exists(db_location)
         logger.debug('db location: %s' % db_location)
-        self.engine = create_engine('sqlite:///%s' % db_location)
+        self.engine = create_engine('sqlite:///%s' % db_location, echo=echo_queries)
         self.db_location = db_location
         self.session_factory = sessionmaker(bind=self.engine)
         logger.debug('db location: %s' % db_location)
@@ -132,7 +132,8 @@ class DBHandler(object):
         for other_session in session.query(OpenportSession).filter_by(local_port=share.local_port):
             if other_session.id == openport_session.id:
                 continue
-            other_session.delete()
+            session.delete(other_session)
+        session.commit()
 
         share.id = openport_session.id
         self.Session.remove()
