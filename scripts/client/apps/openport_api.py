@@ -64,6 +64,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
  #           ssl._create_default_https_context = ssl._create_unverified_context
 #
         r = requests.post(url, data=request_data)
+        logger.debug(r.text)
         return r.json()
     except requests.HTTPError as e:
         if r:
