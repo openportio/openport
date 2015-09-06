@@ -1,4 +1,5 @@
 #!/bin/sh
+set -ex
 
 source ../../client/apps/openport_app_version.py
 
@@ -54,6 +55,6 @@ sudo rm -rf /usr/bin/openport
 #fi
 sudo rm -f /etc/init.d/openport-manager
 
-sudo killall python || echo "no python process found"
+#sudo killall python || echo "no python process found"
 sudo dpkg -i package/openport_$(echo $VERSION)-1_*.deb
 openport -h
