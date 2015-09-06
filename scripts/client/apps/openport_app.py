@@ -39,6 +39,9 @@ class OpenportApp(object):
         self.server = AppTcpServer('127.0.0.1', self.os_interaction.get_open_port(), self.config, self.db_handler)
         self.config_service = ConfigService(self.config)
         self.app_service = AppService(self.config)
+
+        self.argument_parser = argparse.ArgumentParser()
+
         if self.os_interaction.is_compiled():
             from common.tee import TeeStdErr, TeeStdOut
             TeeStdOut(self.os_interaction.get_app_data_path('openport_app.out.log'), 'a')
@@ -73,9 +76,9 @@ class OpenportApp(object):
     def save_share(self, share):
         self.db_handler.add_share(share)
 
-    def add_default_arguments(self, parser, local_port_required=True):
+    def add_default_arguments(self, parser, group_required=True):
 
-        group = parser.add_mutually_exclusive_group(required=local_port_required)
+        group = parser.add_mutually_exclusive_group(required=group_required)
         group.add_argument('--local-port', type=int, help='The port you want to openport.', default=-1)
         group.add_argument('--register-key', default='', help='Use this to add your link your client to your account.')
         group.add_argument('port', nargs='?', type=int, help='The port you want to openport.', default=-1)
@@ -122,9 +125,10 @@ class OpenportApp(object):
         self.config.tcp_listeners.add(manager_port)
 
     def parse_args(self):
-        parser = argparse.ArgumentParser()
-        self.add_default_arguments(parser)
-        self.args = parser.parse_args()
+        group_required = not '--forward-tunnel' in sys.argv
+
+        self.add_default_arguments(self.argument_parser, group_required)
+        self.args = self.argument_parser.parse_args()
 
     def print_shares(self):
         shares = self.db_handler.get_active_shares()
@@ -251,29 +255,32 @@ class OpenportApp(object):
         session.server_port = self.args.request_port
         session.server_session_token = self.args.request_token
         session.forward_tunnel = self.args.forward_tunnel
-        if session.forward_tunnel:
-            session.server_port = self.args.remote_port
-
         session.active = False  # Will be set active in start_callback.
 
-        db_share = self.db_handler.get_share_by_local_port(session.local_port, filter_active=False)
-        if db_share:
-            logger.debug('previous share found in database')
-            if is_running(db_share):
-                logger.info('Port forward already running for port %s' % self.args.local_port)
-                sys.exit(6)
+        if session.forward_tunnel:
+            session.server_port = self.args.remote_port
+            if self.args.local_port < 0:
+                session.local_port = self.os_interaction.get_open_port()
 
-            if db_share.restart_command and not self.args.restart_on_reboot:
-                logger.warn('Port forward for port %s that would be restarted on reboot will not be restarted anymore.'
-                            % self.args.local_port)
-
-            if not session.server_session_token:
-                logger.debug("retrieved db share session token: %s" % db_share.server_session_token)
-                session.server_session_token = db_share.server_session_token
-                session.server_port = db_share.server_port
         else:
-            logger.debug('No db share session could be found.')
-        session.http_forward = self.args.http_forward
+            db_share = self.db_handler.get_share_by_local_port(session.local_port, filter_active=False)
+            if db_share:
+                logger.debug('previous share found in database')
+                if is_running(db_share):
+                    logger.info('Port forward already running for port %s' % self.args.local_port)
+                    sys.exit(6)
+
+                if db_share.restart_command and not self.args.restart_on_reboot:
+                    logger.warn('Port forward for port %s that would be restarted on reboot will not be restarted anymore.'
+                                % self.args.local_port)
+
+                if not session.server_session_token:
+                    logger.debug("retrieved db share session token: %s" % db_share.server_session_token)
+                    session.server_session_token = db_share.server_session_token
+                    session.server_port = db_share.server_port
+            else:
+                logger.debug('No db share session could be found.')
+            session.http_forward = self.args.http_forward
 
         if self.args.restart_on_reboot:
             session.restart_command = self.app_service.get_restart_command(session,

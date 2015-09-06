@@ -114,13 +114,15 @@ class Openport(object):
         if not self.session:
             logger.error('session is None???')
         elif self.first_time_showing_message and (not self.automatic_restart or self.repeat_message):
-            if self.session.http_forward_address is None or self.session.http_forward_address == '':
-                logger.info('Now forwarding remote port %s:%d to localhost:%d .\n'
+            if self.session.forward_tunnel:
+                logger.info(self.last_response.message)
+            elif self.session.http_forward_address is None or self.session.http_forward_address == '':
+                logger.info('Now forwarding remote port %s:%d to localhost:%d.\n'
                             'You can keep track of your shares at https://openport.io/user .\n%s'
                             % (self.session.server, self.session.server_port, self.session.local_port,
                                self.last_response.message))
             else:
-                logger.info('Now forwarding remote address %s to localhost:%d .\n'
+                logger.info('Now forwarding remote address %s to localhost:%d.\n'
                             'You can keep track of your shares at https://openport.io/user .\n%s'
                             % (self.session.http_forward_address, self.session.local_port,
                                self.last_response.message))

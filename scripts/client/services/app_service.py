@@ -41,7 +41,10 @@ class AppService(object):
         if server and server != DEFAULT_SERVER:
             command.extend(['--server', server])
         if session.ip_link_protection is not None:
-            command = osinteraction.set_variable('--ip-link-protection', session.ip_link_protection)
+            command = self.os_interaction.set_variable(command, '--ip-link-protection', session.ip_link_protection)
+        if session.forward_tunnel:
+            command = self.os_interaction.set_variable(command, '--forward-tunnel')
+            command = self.os_interaction.set_variable(command, '--remote-port', str(session.server_port))
 
         command = self.set_manager_port(command)
 

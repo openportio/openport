@@ -240,33 +240,41 @@ def run_command_with_timeout_return_process(args, timeout_s):
     c = Command(args)
     return c.run(timeout_s)
 
-def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', http_forward=False):
+def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', http_forward=False, forward_tunnel=False):
     i = 0
     while i < timeout:
         i += 1
         all_output = osinteraction.get_output(p)
         if all_output[0]:
-            print '%s - stdout -  %s' % (output_prefix, all_output[0])
+            logger.info('%s - stdout -  %s' % (output_prefix, all_output[0]))
         if all_output[1]:
-            print '%s - stderr - %s' % (output_prefix, all_output[1])
+            logger.error('%s - stderr - %s' % (output_prefix, all_output[1]))
         if not all_output[0]:
             sleep(1)
             continue
 
         if http_forward:
-            m = re.search(r'Now forwarding remote address ([a-z\.]*) to localhost', all_output[0])
+            m = re.search(r'Now forwarding remote address (?P<host>[a-z\.]*) to localhost', all_output[0])
+        elif forward_tunnel:
+            m = re.search(r'INFO - You are now connected. You can access the remote pc\'s port (?P<remote_port>\d*) '
+                          r'on localhost:(?P<local_port>\d*)', all_output[0])
         else:
-            m = re.search(r'Now forwarding remote port ([^:]*):(\d*) to localhost', all_output[0])
+            m = re.search(r'Now forwarding remote port (?P<host>[^:]*):(?P<remote_port>\d*) to localhost', all_output[0])
         if m is None:
+            if p.poll() is not None:
+                raise Exception('Application is stopped')
             sleep(1)
             continue
         else:
             sleep(3)
             if http_forward:
-                host = m.group(1)
+                host = m.group('host')
                 port = 80
+            elif forward_tunnel:
+                host = 'localhost'
+                port = int(m.group('local_port'))
             else:
-                host, port = m.group(1), int(m.group(2))
+                host, port = m.group('host'), int(m.group('remote_port'))
             m = re.search(r'to first go here: ([a-zA-Z0-9\:/\.]+) .', all_output[0])
             link = m.group(1) if m is not None else None
             return host, port, link

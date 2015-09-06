@@ -228,6 +228,14 @@ class DBHandler(object):
             session.commit()
         self.Session.remove()
 
+    def get_all_shares(self):
+        logger.debug('get_all_shares')
+        session = self._get_session()
+        openport_sessions = session.query(OpenportSession).all()
+        l = list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
+        self.Session.remove()
+        return l
+
 
 if __name__ == '__main__':
     db_handler = DBHandler()
