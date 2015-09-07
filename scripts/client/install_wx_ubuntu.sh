@@ -1,18 +1,16 @@
 #!/bin/bash
 
-set -ex 
+set -ex
 current_dir=$(pwd)
 
-sudo apt-get install libgtk2.0-dev
-
-#sudo apt-get install libgstreamer0.10-dev
-sudo apt-get install libgstreamer-plugins-base0.10-dev 
+sudo apt-get install -y libgtk2.0-dev
+sudo apt-get install -y libgstreamer-plugins-base0.10-dev 
+sudo apt-get install -y libgl1-mesa-dev
+sudo apt-get install -y libglu1-mesa-dev
+sudo apt-get install -y libopenal-dev
 
 #sudo apt-get install gstreamer-0.10
-
-#sudo apt-get install libgles1-mesa-dev
-sudo apt-get install libgl1-mesa-dev
-#sudo apt-get install libopenal-dev
+#sudo apt-get install libgstreamer0.10-dev
 #sudo apt-get install libsdl-mixer1.2-dev
 #sudo apt-get install libsdl-net1.2-dev
 

@@ -20,9 +20,9 @@ sudo make install
 echo "export LD_LIBRARY_PATH=$PYTHON_LOCATION/lib/" >> ~/.bashrc
 export LD_LIBRARY_PATH="$PYTHON_LOCATION/lib/"
 
-./install_wx_ubuntu.sh
 
 cd $current_dir
+./install_wx_ubuntu.sh
 
 virtualenv env --python=$PYTHON_LOCATION/bin/python
 #virtualenv env
