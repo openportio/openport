@@ -17,7 +17,7 @@ cherrypy
 git+https://github.com/gholzmann/pyinstaller/@7be200b5a6f179f6753ca5a51713f19103f23393
 #pyinstaller
 sqlalchemy
-alembic
+alembic==0.7.6
 psutil
 lockfile
 pyperclip
@@ -27,4 +27,5 @@ pyperclip
 # cd scripts/client/env/lib/python2.7/site-packages/cherrypy/wsgiserver
 # wget https://bitbucket.org/cherrypy/cherrypy/raw/9c2d91cac2e84f166d75f748a836ffe8f244c56c/cherrypy/wsgiserver/wsgiserver2.py
 
-requests
+requests[security]
+ndg-httpsclient 
