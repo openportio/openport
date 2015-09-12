@@ -9,12 +9,13 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import urllib2
 import ssl
 import traceback
+import datetime
 
 from services.logger_service import get_logger
 from services import osinteraction
 from apps.openportit import OpenportItApp
 from apps.openport import Openport
-from services.utils import run_method_with_timeout
+from services.utils import run_method_with_timeout, TimeoutException
 
 logger = get_logger(__name__)
 
@@ -282,14 +283,21 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', htt
     raise Exception('remote host and port not found in output')
 
 
-def wait_for_response(function, args=[], kwargs={}, timeout=30, throw=True):
-    i = 0
-    while i < timeout:
-        output = function(*args, **kwargs)
-        if output:
-            return output
+def wait_for_response(function, args=[], kwargs={}, timeout=30, throw=True, max_method_run_time=None):
+    if max_method_run_time is None:
+        max_method_run_time = timeout
+
+    start_time = datetime.datetime.now()
+    while start_time + datetime.timedelta(seconds=timeout) > datetime.datetime.now():
+        try:
+            output = run_method_with_timeout(function, max_method_run_time, args=args, kwargs=kwargs, raise_exception=True)
+            if output:
+                return output
+        except TimeoutException:
+            logger.debug('method timeout')
+            pass
+        logger.debug('no response, try again')
         sleep(1)
-        i += 1
     if throw:
         raise Exception('function did not response in time')
     return False

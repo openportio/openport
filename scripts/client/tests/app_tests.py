@@ -238,9 +238,10 @@ class AppTests(unittest.TestCase):
 
         def foo():
             forward_tunnel_session = self.db_handler.get_share_by_local_port(port_in, filter_active=False)
-            return send_ping(forward_tunnel_session)
+            result = send_ping(forward_tunnel_session)
+            return result
 
-        wait_for_response(foo)
+        wait_for_response(foo, max_method_run_time=5)
         check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
 
     def test_openport_app__do_not_restart(self):

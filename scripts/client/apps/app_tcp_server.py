@@ -6,6 +6,7 @@ import requests
 
 from bottle import Bottle, ServerAdapter, request, response, error, hook
 from services.logger_service import get_logger
+from services.utils import run_method_with_timeout
 
 
 logger = get_logger('server')
@@ -179,7 +180,7 @@ def send_ping(share, print_error=True):
     url = 'http://127.0.0.1:%s/ping' % (port,)
     logger.debug('sending get request ' + url)
     try:
-        r = requests.get(url)
+        r = run_method_with_timeout(requests.get, 5, args=[url])
         if r.text.strip() != 'pong':
             logger.error(response)
             return False
@@ -212,4 +213,4 @@ if __name__ == '__main__':
 
     from common.config import OpenportAppConfig
     server = AppTcpServer('127.0.0.1', 6005, OpenportAppConfig(), None)
-    server.start_server()
+    server.run()
