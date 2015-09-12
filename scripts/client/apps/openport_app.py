@@ -166,6 +166,8 @@ class OpenportApp(object):
             share.active = False
             share.restart_command = ''
             self.db_handler.add_share(share)
+            self.server.inform_stop(share)
+
         logger.debug('killed share %s for port %s' % (share.id, share.local_port))
 
     def kill_all(self):
