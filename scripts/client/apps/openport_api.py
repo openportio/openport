@@ -64,32 +64,40 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
  #           ssl._create_default_https_context = ssl._create_unverified_context
 #
         r = requests.post(url, data=request_data)
-        logger.debug(r.text)
+        #logger.debug(r.text)
         return r.json()
     except requests.HTTPError as e:
-        if r:
+        logger.error("An error has occurred while communicating the the openport servers. %s" % e)
+        if r is not None:
             logger.debug('error: got response: %s' % r.text)
             try:
-                with open(os.path.join(os.path.dirname(__file__), 'error.html'), 'w') as f:
+                error_page_file_path = os.path.join(os.path.dirname(__file__), 'error.html')
+                with open(error_page_file_path, 'w') as f:
                     f.write(r.text)
-            except:
-                pass
+                    logger.debug('error is available here: %s' % error_page_file_path)
+            except Exception as e:
+                logger.debug(e)
 
         if e.response:
             logger.debug('error: got response: %s' % e.response.text)
-        logger.error("An error has occurred while communicating the the openport servers. %s" % e)
-        if e.response.status_code == 500:
-            logger.error(e.response.text)
-        with open(os.path.join(os.path.dirname(__file__), 'error.html'), 'w') as f:
-            f.write(e.response.text)
+            if e.response.status_code == 500:
+                try:
+                    error_page_file_path = os.path.join(os.path.dirname(__file__), 'error.html')
+                    with open(error_page_file_path, 'w') as f:
+                        logger.debug('error is available here: %s' % error_page_file_path)
+                        f.write(e.response.text)
+                except Exception as e:
+                    logger.debug(e)
         raise
     except Exception as e:
-        if r:
+        if r is not None:
             try:
-                with open(os.path.join(os.path.dirname(__file__), 'error.html'), 'w') as f:
+                error_page_file_path = os.path.join(os.path.dirname(__file__), 'error.html')
+                with open(error_page_file_path, 'w') as f:
                     f.write(r.text)
-            except:
-                pass
+                    logger.debug('error is available here: %s' % error_page_file_path)
+            except Exception as e:
+                logger.debug(e)
         logger.error("An error has occurred while communicating the the openport servers. %s" % e)
         raise e
 

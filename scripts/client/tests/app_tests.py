@@ -56,9 +56,9 @@ class AppTests(unittest.TestCase):
     def tearDown(self):
         if self.manager_port > 0:
             self.kill_manager(self.manager_port)
-        kill_all_processes(self.processes_to_kill)
         for session in self.db_handler.get_all_shares():
             send_exit(session)
+        kill_all_processes(self.processes_to_kill)
 
     def get_nr_of_shares_in_db_file(self, db_file):
         db_handler = dbhandler.DBHandler(db_file, init_db=False)
@@ -206,13 +206,14 @@ class AppTests(unittest.TestCase):
 
         self.processes_to_kill.append(p_out)
         remote_host, remote_port, link = get_remote_host_and_port(p_out, self.osinteraction)
+        click_open_for_ip_link(link)
         self.osinteraction.print_output_continuously_threaded(p_out, 'p_out')
 
 
         p_in = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py',
-                              '--server', TEST_SERVER, '--database', self.db_file, '--forward-tunnel', '--verbose',
-                              '--remote-port', str(remote_port), '--restart-on-reboot'],
-                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                                 '--server', TEST_SERVER, '--database', self.db_file, '--forward-tunnel', '--verbose',
+                                 '--remote-port', str(remote_port), '--restart-on-reboot'],
+                                stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_in)
         self.check_application_is_still_alive(p_in)
         self.check_application_is_still_alive(p_out)
@@ -233,13 +234,18 @@ class AppTests(unittest.TestCase):
         p_restart = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--restart-shares', '--verbose',
                                       '--database', self.db_file],
                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_restart)
         self.osinteraction.print_output_continuously_threaded(p_restart, 'p_restart')
         run_method_with_timeout(p_restart.wait, 10)
 
+        self.check_application_is_still_alive(p_out)
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
+
         def foo():
             forward_tunnel_session = self.db_handler.get_share_by_local_port(port_in, filter_active=False)
-            result = send_ping(forward_tunnel_session)
-            return result
+            if forward_tunnel_session:
+                result = send_ping(forward_tunnel_session)
+                return result
 
         wait_for_response(foo, max_method_run_time=5)
         check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)

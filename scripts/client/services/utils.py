@@ -15,7 +15,7 @@ def run_method_with_timeout(function, timeout_s, args=[], kwargs={}, raise_excep
         except Exception as e:
             exception[0] = e
 
-    thread = threading.Thread(target=method1, verbose=True)
+    thread = threading.Thread(target=method1)
     thread.daemon = True
     thread.start()
 

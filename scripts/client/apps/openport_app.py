@@ -4,6 +4,7 @@ import os
 from UserDict import UserDict
 import argparse
 import ast
+import threading
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from services import osinteraction, dbhandler
@@ -69,6 +70,15 @@ class OpenportApp(object):
                 self.session.notify_stop()
             if self.openport:
                 self.openport.stop()
+
+            def kill_if_needed():
+                sleep(5)
+                logger.debug('App did not end cleanly.')
+                os._exit(-1)
+            t = threading.Thread(target=kill_if_needed())
+            t.daemon = True
+            t.start()
+
         except Exception as e:
             logger.exception(e)
             os._exit(3)
@@ -307,7 +317,6 @@ class OpenportApp(object):
 
         ensure_keys_exist(*get_default_key_locations())
 
-        session.app_management_port = self.server.get_port()
         self.session = session
 
         self.server.run_threaded()

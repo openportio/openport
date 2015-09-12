@@ -6,7 +6,7 @@ log_level = logging.INFO
 
 loggers = {}
 
-long_formatter = logging.Formatter('%(asctime)s - %(thread)d - %(name)s - %(levelname)s - %(message)s')
+long_formatter = logging.Formatter('%(asctime)s - %(thread)d - %(name)s:%(lineno)d - %(levelname)s - %(message)s')
 short_formatter = logging.Formatter('%(levelname)s - %(message)s')
 
 

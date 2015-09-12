@@ -26,6 +26,7 @@ class Openport(object):
         self.repeat_message = True
         self.first_time_showing_message = True
         self.last_response = None
+        self.stopped = False
 
     def start_port_forward(self, session, server=DEFAULT_SERVER):
 
@@ -39,7 +40,7 @@ class Openport(object):
             public_key = None
 
         # This is the main loop. Exit this and the program ends.
-        while self.restart_on_failure:
+        while self.restart_on_failure and not self.stopped:
             try:
                 response = openport_api.request_open_port(
                     session.local_port,
@@ -139,6 +140,7 @@ class Openport(object):
             self.session.notify_stop()
 
     def stop(self):
+        self.stopped = True
         self.stop_port_forward()
 
     def running(self):
