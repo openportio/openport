@@ -235,7 +235,7 @@ class AppTests(unittest.TestCase):
         logger.debug('p_in wait')
 #        p_in.wait()
 #        logger.debug('done')
-#        #run_method_with_timeout(p_in.wait, 10)
+        run_method_with_timeout(p_in.wait, 10)
 #        self.assertNotEqual(None, p_in.poll())
 #        self.assertFalse(check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out,
 #                                                remote_port=port_in, fail_on_error=False))
