@@ -202,8 +202,9 @@ class OsInteraction(object):
         else:
 
             def enqueue_output(out, queue):
-                for line in iter(out.readline, b''):
-                    queue.put(line)
+                if out:
+                    for line in iter(out.readline, b''):
+                        queue.put(line)
 #                out.close()
 
             q_stdout = Queue()
@@ -491,22 +492,39 @@ class WindowsOsInteraction(OsInteraction):
             return ['python.exe']
 
     def spawn_daemon(self, command):
-        def foo():
-            try:
-                output = self.run_command_and_print_output_continuously(command)
-                self.logger.debug('daemon stopped: %s ' % output)
-            except Exception, e:
-                self.logger.error(e)
 
-        t = Thread(target=foo)
-        t.setDaemon(True)
-        t.start()
+        args = command
+        if self.logger:
+            self.logger.debug('Running command: %s' % args)
+            self.logger.debug('cwd: %s' % os.path.abspath(os.curdir))
+            self.logger.debug('base_path: %s' % self.get_base_path())
+        self.logger.debug('start process')
+        p = subprocess.Popen(args,
+                             bufsize=0, executable=None, stdin=None, stdout=None, stderr=None,
+                             preexec_fn=None, close_fds=True, shell=False,
+                             cwd=self.get_base_path(),
+                             env=None,
+                             universal_newlines=False, startupinfo=None,
+                             #creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                             creationflags=8,  # from win32process import DETACHED_PROCESS
+                             )
+        self.logger.debug('process started')
+
+        return p
+
 
     def user_is_root(self):
         return False
 
     def get_username(self):
         return getpass.getuser()
+
+    def start_openport_process(self, share):
+        command = self.get_full_restart_command(share)
+        if command is None:
+            return
+
+        return self.spawn_daemon(command)
 
 
 class MacOsInteraction(LinuxOsInteraction):

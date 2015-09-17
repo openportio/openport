@@ -20,7 +20,7 @@ from test_utils import print_all_output, click_open_for_ip_link, check_tcp_port_
 from services.utils import run_method_with_timeout
 from services.logger_service import get_logger, set_log_level
 from apps import openport_app_version
-from apps.app_tcp_server import send_exit, send_ping
+from apps.app_tcp_server import send_exit, send_ping, is_running
 
 logger = get_logger(__name__)
 
@@ -54,11 +54,14 @@ class AppTests(unittest.TestCase):
         self.db_handler = dbhandler.DBHandler(self.db_file)
 
     def tearDown(self):
+        logger.debug('teardown!')
         if self.manager_port > 0:
+            logger.debug('killing manager')
             self.kill_manager(self.manager_port)
         for session in self.db_handler.get_all_shares():
             send_exit(session)
         kill_all_processes(self.processes_to_kill)
+        logger.debug('end of teardown!')
 
     def get_nr_of_shares_in_db_file(self, db_file):
         db_handler = dbhandler.DBHandler(db_file, init_db=False)
@@ -203,6 +206,7 @@ class AppTests(unittest.TestCase):
         p_out = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port_out,  # --verbose,
                                   '--server', TEST_SERVER, '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        logger.debug('p_out.pid: %s' % p_out.pid)
 
         self.processes_to_kill.append(p_out)
         remote_host, remote_port, link = get_remote_host_and_port(p_out, self.osinteraction)
@@ -214,40 +218,60 @@ class AppTests(unittest.TestCase):
                                  '--server', TEST_SERVER, '--database', self.db_file, '--forward-tunnel', '--verbose',
                                  '--remote-port', str(remote_port), '--restart-on-reboot'],
                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        logger.debug('p_in.pid: %s' % p_in.pid)
+
         self.processes_to_kill.append(p_in)
         self.check_application_is_still_alive(p_in)
         self.check_application_is_still_alive(p_out)
         #self.osinteraction.print_output_continuously_threaded(p_in, 'p_in')
         host, port_in, link = get_remote_host_and_port(p_in, self.osinteraction, forward_tunnel=True)
         sleep(2)
+        in_session = self.db_handler.get_share_by_local_port(port_in, filter_active=False)
+        in_app_management_port = in_session.app_management_port
         check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
         self.assertEqual(2, self.get_nr_of_shares_in_db_file(self.db_file))
-
+#
         p_in.terminate()
-        run_method_with_timeout(p_in.wait, 10)
-        self.assertNotEqual(None, p_in.poll())
-        self.assertFalse(check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out,
-                                                remote_port=port_in, fail_on_error=False))
-
-        self.assertEqual(1, len(self.db_handler.get_shares_to_restart()))
+        logger.debug('p_in wait')
+#        p_in.wait()
+#        logger.debug('done')
+#        #run_method_with_timeout(p_in.wait, 10)
+#        self.assertNotEqual(None, p_in.poll())
+#        self.assertFalse(check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out,
+#                                                remote_port=port_in, fail_on_error=False))
+#
+#        self.assertEqual(1, len(self.db_handler.get_shares_to_restart()))
 
         p_restart = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--restart-shares', '--verbose',
                                       '--database', self.db_file],
                                      stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_restart)
         self.osinteraction.print_output_continuously_threaded(p_restart, 'p_restart')
+       # p_restart.communicate()
+        logger.debug('p_restart.pid: %s' % p_restart.pid)
+        logger.debug('p_restart.wait')
         run_method_with_timeout(p_restart.wait, 10)
+       # p_restart.wait()
+        logger.debug('p_restart.wait done')
 
         self.check_application_is_still_alive(p_out)
+        logger.debug('alive!')
         check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
 
         def foo():
-            forward_tunnel_session = self.db_handler.get_share_by_local_port(port_in, filter_active=False)
-            if forward_tunnel_session:
-                result = send_ping(forward_tunnel_session)
-                return result
+            in_session2 = self.db_handler.get_share_by_local_port(port_in, filter_active=False)
+            in_app_management_port2 = in_session2.app_management_port
+            # wait for the session to be renewed
+            if in_app_management_port == in_app_management_port2:
+                return False
 
-        wait_for_response(foo, max_method_run_time=5)
+            return run_method_with_timeout(is_running, args=[in_session2], timeout_s=5)
+
+        wait_for_response(foo, timeout=10)
+        logger.debug('sleeping now')
+        #sleep(20)
+        logger.debug('wait_for_response done')
+
         check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
 
     def test_openport_app__do_not_restart(self):
@@ -374,6 +398,7 @@ class AppTests(unittest.TestCase):
 
         remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
         print lineNumber(), "remote port:", remote_port
+        sleep(1)
         click_open_for_ip_link(link)
         logger.debug('ping')
 
@@ -419,7 +444,7 @@ class AppTests(unittest.TestCase):
 
     def test_openport_app__start_twice(self):
         port = self.osinteraction.get_open_port()
-        print 'localport :', port
+        print 'local port :', port
 
         manager_port = self.osinteraction.get_open_port()
         self.manager_port = manager_port
@@ -433,15 +458,20 @@ class AppTests(unittest.TestCase):
 
         p_app2 = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app2)
-        sleep(2)
-        command_output = print_all_output(p_app2, self.osinteraction, 'p_app2')
+        def foo():
+            command_output = print_all_output(p_app2, self.osinteraction, 'p_app2')
+            if command_output[0]:
+                return 'Port forward already running for port %s' % port in command_output[0], command_output[0]
+            else:
+                return False
 
-        self.assertNotEqual(False, command_output[0])
-        self.assertTrue('Port forward already running for port %s' % port in command_output[0], command_output[0])
-        self.assertFalse(self.application_is_alive(p_app2))
+        wait_for_response(foo)
+
         run_method_with_timeout(p_app2.wait, 5)
+        self.assertFalse(self.application_is_alive(p_app2))
 
         p_app.kill()
+        run_method_with_timeout(p_app.wait, 5)
 
         p_app3 = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app3)
@@ -1055,6 +1085,114 @@ class AppTests(unittest.TestCase):
         output = self.osinteraction.get_all_output(q)
 
         self.assertTrue('Port forward for port %s that would be restarted on reboot will not be restarted anymore.' % port in output[0])
+
+    def test_hang(self):
+        sleep_and_print = '''from time import sleep
+for i in range(%s):
+    print i
+    sleep(1)
+print 'Now forwarding remote port test.openport.be:12345 to localhost:555'
+print 'to first go here: http://1235.be .'
+print 'INFO - You are now connected. You can access the remote pc\\\'s port 7777 on localhost:8888'
+
+for i in range(%s):
+    print i
+    sleep(1)
+    '''
+        port_out = self.osinteraction.get_open_port()
+        if 1 == 1:
+            p_out = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port_out,  # --verbose,
+                                    '--server', TEST_SERVER, '--database', self.db_file],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        else:
+            p_out = subprocess.Popen([PYTHON_EXE, '-c', sleep_and_print % (3, 60)],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            logger.debug('p_out.pid: %s' % p_out.pid)
+
+        self.processes_to_kill.append(p_out)
+        remote_host, remote_port, link = get_remote_host_and_port(p_out, self.osinteraction)
+     #   click_open_for_ip_link(link)
+        self.osinteraction.print_output_continuously_threaded(p_out, 'p_out')
+
+        sleep(1)
+        logger.debug(self.osinteraction.get_output(p_out))
+
+        if 1 == 1:
+            if 1 == 1:
+                p_in = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py',
+                                     '--server', TEST_SERVER, '--database', self.db_file, '--forward-tunnel', '--verbose',
+                                     '--remote-port', str(remote_port), '--restart-on-reboot'],
+                                    stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                host, port_in, link = get_remote_host_and_port(p_in, self.osinteraction, forward_tunnel=True)
+
+            else:
+                port_out = self.osinteraction.get_open_port()
+                p_in = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port_out,  # --verbose,
+                                    '--server', TEST_SERVER, '--database', self.db_file],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                host, port_in, link = get_remote_host_and_port(p_in, self.osinteraction)
+
+
+
+        else:
+            p_in = subprocess.Popen([PYTHON_EXE, '-c', sleep_and_print % (3, 60)],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            host, port_in, link = get_remote_host_and_port(p_in, self.osinteraction, forward_tunnel=True)
+        logger.debug('p_in.pid: %s' % p_in.pid)
+
+        self.processes_to_kill.append(p_in)
+        self.check_application_is_still_alive(p_in)
+        self.check_application_is_still_alive(p_out)
+
+
+        sleep(1)
+        logger.debug(self.osinteraction.get_output(p_in))
+
+      #  sleep(2)
+      #  in_session = self.db_handler.get_share_by_local_port(port_in, filter_active=False)
+      #  check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
+
+        p_in.terminate()
+        logger.debug('p_in wait')
+        run_method_with_timeout(p_in.wait, 10)
+        logger.debug('p_in wait done')
+
+        if 1 == 1:
+            p_restart = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--restart-shares', '--verbose',
+                                      '--database', self.db_file],
+                                     stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        else:
+
+            p_restart = subprocess.Popen([PYTHON_EXE, '-c', sleep_and_print % (1, 3)],
+                                         stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        logger.debug('p_restart started')
+        self.processes_to_kill.append(p_restart)
+        logger.debug('p_restart continuous print')
+        self.osinteraction.print_output_continuously_threaded(p_restart, 'p_restart')
+        logger.debug('p_restart.wait')
+        #run_method_with_timeout(p_restart.wait, 10)
+       # p_restart.communicate()
+        logger.debug('p_restart.pid: %s' % p_restart.pid)
+        run_method_with_timeout(p_restart.wait, 10)
+      #  p_restart.wait()
+        logger.debug('p_restart.wait done')
+
+        self.check_application_is_still_alive(p_out)
+        logger.debug('alive!')
+#        check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
+
+        def foo():
+            return False
+
+        logger.debug('wait for response')
+#        wait_for_response(foo, timeout=5)
+        logger.debug('sleeping now')
+        sleep(1)
+        #sleep(20)
+        logger.debug('wait_for_response done')
+
+     #   check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
+
 
 
 if __name__ == '__main__':

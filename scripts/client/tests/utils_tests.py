@@ -3,10 +3,12 @@ import unittest
 import datetime
 from time import sleep
 
+import requests
+
 from services import utils
 
 
-class AppTcpServerTests(unittest.TestCase):
+class UtilsTests(unittest.TestCase):
     def test_run_method_with_timeout(self):
         def foo():
             sleep(0.3)
@@ -25,4 +27,12 @@ class AppTcpServerTests(unittest.TestCase):
         except RuntimeError:
             success = True
         self.assertTrue(success)
+        self.assertTrue(start_time + datetime.timedelta(seconds=0.2) > datetime.datetime.now())
+
+
+    def test_run_method_with_timeout__requests(self):
+        def foo():
+            requests.get('http://localhost:1234')
+        start_time = datetime.datetime.now()
+        utils.run_method_with_timeout(foo, 0.1, raise_exception=False)
         self.assertTrue(start_time + datetime.timedelta(seconds=0.2) > datetime.datetime.now())

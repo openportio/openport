@@ -167,7 +167,7 @@ def send_exit(share, force=False):
     logger.debug('sending get request ' + url)
     try:
         data = {'id': share.id, 'force': force}
-        r = requests.post(url, data=data)
+        r = requests.post(url, data=data, timeout=1)
         if r.text.strip() != 'ok':
             logger.error(response)
     except Exception, detail:

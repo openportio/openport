@@ -198,6 +198,7 @@ class OpenportApp(object):
                     share.restart_command = self.app_service.set_manager_port(share.restart_command)
 
                     p = self.os_interaction.start_openport_process(share)
+                    logger.debug('process started with pid %s' % p.pid)
                     self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
                     sleep(1)
                     if p.poll() is not None:
@@ -255,6 +256,7 @@ class OpenportApp(object):
 
         if self.args.restart_shares:
             self.restart_sharing()
+            logger.debug('exiting')
             sys.exit()
 
         if self.args.create_migrations:

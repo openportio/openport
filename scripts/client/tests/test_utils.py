@@ -331,6 +331,7 @@ def kill_all_processes(processes_to_kill):
     for p in processes_to_kill:
         try:
             if p.poll() is None:
+                logger.debug('killing process %s' % p.pid)
                 osinteraction.getInstance().kill_pid(p.pid)
             p.wait()
         except Exception as e:
@@ -378,9 +379,8 @@ def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_e
         cr.close()
         print 'tcp portforward ok'
     except Exception, e:
-        tr = traceback.format_exc()
         logger.error(e)
-        logger.error(tr)
+        logger.exception(e)
         if not fail_on_error:
             return False
         else:
