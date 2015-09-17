@@ -3,58 +3,82 @@ set -ex
 
 source ../../client/apps/openport_app_version.py
 
-echo $VERSION
-
-APPLICATION=openport
-PACKAGE=openport-$VERSION
-TARBALL=openport_$VERSION.orig.tar.gz
-
 sudo apt-get --yes install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder python-dev python-pip python-virtualenv libsqlite3-dev
 sudo apt-get --yes install python-dev libffi-dev libssl-dev
+
+echo $VERSION
+
 # if you have errors from locale: sudo dpkg-reconfigure locales
 
-sudo dpkg --remove $APPLICATION || echo "$APPLICATION not installed"
-# If the uninstall keeps giving errors:
-# rm -rf /var/lib/dpkg/info/$APPLICATION.*
+function create_deb {
+    start_dir=$(pwd)
+    PACKAGE=$APPLICATION-$VERSION
+    TARBALL=$(echo $APPLICATION)_$VERSION.orig.tar.gz
+    sudo dpkg --remove $APPLICATION || echo "$APPLICATION not installed"
+    # If the uninstall keeps giving errors:
+    # rm -rf /var/lib/dpkg/info/$APPLICATION.*
+
+    rm -rf $PACKAGE
+    mkdir $PACKAGE
+    mkdir -p $PACKAGE/usr/lib/$APPLICATION
+    cp ../../client/dist/$APPLICATION/* $PACKAGE/usr/lib/$APPLICATION -r
+
+    tar -czf $TARBALL $PACKAGE
+    # rm -rf $PACKAGE
+    rm -rf package
+    mkdir -p package
+    cd package
+    mv ../$TARBALL .
+    tar -xf $TARBALL
+
+    create_include_binaries
+
+    cd $PACKAGE
+    rm -rf debian
+    cp ../../debian_$APPLICATION debian -r
+
+   # read -p "Press [Enter] key to continue..."
 
 
+    echo "8" > debian/compat
+    ls debian/
+    DEB_BUILD_OPTIONS="noopt nostrip"
+    pwd
+    dch --create -v $(echo $VERSION)-1 --package $APPLICATION "TODO 12321"
+    debuild -us -uc
 
-rm -rf $PACKAGE
-mkdir $PACKAGE
-mkdir -p $PACKAGE/usr/lib
-cp ../../client/dist/* $PACKAGE/usr/lib/ -r
+    cd $start_dir
 
-tar -czf $TARBALL $PACKAGE
-rm -rf $PACKAGE
-rm -rf package
-mkdir -p package
-cd package
-mv ../$TARBALL .
-tar -xf $TARBALL
+    #sudo rm -rf /usr/bin/openport
+    #if [ -e /etc/init.d/openport ] ; then
+    #	sudo rm -f /etc/init.d/openport
+    #fi
+    #sudo rm -f /etc/init.d/openport-manager
+    cp package/$(echo $APPLICATION)_$(echo $VERSION)-1_*.deb .
+}
 
-pwd
-rm -f debian/source/include-binaries
-ls ../package/openport-*/usr/lib/openport/*.so.* >> ../debian/source/include-binaries
-ls ../package/openport-*/usr/lib/openport/openport >> ../debian/source/include-binaries
-ls ../package/openport-*/usr/lib/openport_gui/*.so.* >> ../debian/source/include-binaries
-ls ../package/openport-*/usr/lib/openport_gui/openport_gui >> ../debian/source/include-binaries
-ls ../package/openport-*/usr/lib/openport/alembic/versions/*.pyc >> ../debian/source/include-binaries
 
-cd $PACKAGE
-cp ../../debian . -r
-echo "8" > debian/compat
-ls debian/
-DEB_BUILD_OPTIONS="noopt nostrip"
-dch --create -v $(echo $VERSION)-1 --package $APPLICATION "TODO 12321"
-debuild -us -uc
+export APPLICATION=openport
+function create_include_binaries {
+    ls ../package/openport-*/usr/lib/openport/*.so* > ../debian_$APPLICATION/source/include-binaries
+    ls ../package/openport-*/usr/lib/openport/openport >> ../debian_$APPLICATION/source/include-binaries
+    ls ../package/openport-*/usr/lib/openport/alembic/versions/*.pyc >> ../debian_$APPLICATION/source/include-binaries
+}
 
-cd ../..
-sudo rm -rf /usr/bin/openport
-#if [ -e /etc/init.d/openport ] ; then
-#	sudo rm -f /etc/init.d/openport
-#fi
-sudo rm -f /etc/init.d/openport-manager
+create_deb
 
-#sudo killall python || echo "no python process found"
-sudo dpkg -i package/openport_$(echo $VERSION)-1_*.deb
+#######sudo killall python || echo "no python process found"
+sudo dpkg -i openport_$(echo $VERSION)-1_*.deb
 openport -h
+
+
+export APPLICATION=openport-gui
+function create_include_binaries {
+    ls ../package/openport-gui-*/usr/lib/openport-gui/*.so > ../debian_$APPLICATION/source/include-binaries
+    ls ../package/openport-gui-*/usr/lib/openport-gui/openport-gui >> ../debian_$APPLICATION/source/include-binaries
+}
+
+create_deb
+sudo dpkg -i openport-gui_$(echo $VERSION)-1_*.deb
+openport-gui
+

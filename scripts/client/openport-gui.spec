@@ -36,7 +36,7 @@ exe = EXE(pyz,
 #                        ('msvcr100.dll', 'C:\\Windows\\System32\\msvcr100.dll', 'BINARY')]
 #          if sys.platform == 'win32' else a.binaries,
           exclude_binaries=True,
-          name='openport_gui' + ('.exe' if sys.platform == 'win32' else ''),
+          name='openport-gui' + ('.exe' if sys.platform == 'win32' else ''),
           debug=False,
           strip=None,
           upx=True,
@@ -49,7 +49,7 @@ coll = COLLECT(exe,
                a.datas,
                strip=None,
                upx=True,
-               name='openport_gui')
+               name='openport-gui')
 
 # Build a .app if on OS X
 if sys.platform == 'darwin':

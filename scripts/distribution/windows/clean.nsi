@@ -66,7 +66,7 @@ Section # hidden section
 ;	file /r ..\..\client\dist\*.* 
 	file /r ..\..\client\dist\openport\*.* 
 	file /r ..\..\client\dist\openportw\*.* 
-	file /r ..\..\client\dist\openport_gui\*.* 
+	file /r ..\..\client\dist\openport-gui\*.*
 	file ..\..\client\resources\logo-base.ico
 ;	file ..\..\client\resources\install_windows_service.bat
 ;	file ..\..\client\resources\server.pem
@@ -85,7 +85,7 @@ Section # hidden section
 	
 	
 ;	# Start Menu
-	createShortCut "$SMPROGRAMS\${APPNAME}.lnk" "$INSTDIR\openport_gui.exe" "" "$INSTDIR\logo-base.ico"
+	createShortCut "$SMPROGRAMS\${APPNAME}.lnk" "$INSTDIR\openport-gui.exe" "" "$INSTDIR\logo-base.ico"
 
 	${EnvVarUpdate} $0 "PATH" "A" "HKLM" "$INSTDIR"
 SectionEnd

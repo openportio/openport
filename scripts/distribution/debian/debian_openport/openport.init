@@ -9,7 +9,7 @@
 # Description:       Restarts all shares for the users in /etc/openport/users.txt
 ### END INIT INFO
 
-# Author: Jan De Bleser <jan@dangersoftware.be>
+# Author: Jan De Bleser <jan@openport.io>
 
 # Do NOT "set -e"
 
