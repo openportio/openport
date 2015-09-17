@@ -11,12 +11,9 @@ def get_default_key_locations():
     home_dir = os.path.expanduser('~')
 
     if len(home_dir) < 3:
-        log.error('ERROR!!! system indicates home_dir is <<<%s>>>' % home_dir)
-        log.error('os.environ:')
-        log.error(os.environ)
-        log.info('setting home_dir to /root')
-        home_dir = '/root'
-
+        log.debug('ERROR!!! saving keys to / : <<<%s>>>' % home_dir)
+        log.debug('os.environ:')
+        log.debug(os.environ)
     private_key_file = os.path.join(home_dir, '.openport', 'id_rsa')
     public_key_file = os.path.join(home_dir, '.openport', 'id_rsa.pub')
 
