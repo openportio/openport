@@ -13,7 +13,7 @@ cd ~/Downloads
 wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tgz
 tar xfz Python-2.7.9.tgz
 cd Python-2.7.9/
-./configure --prefix $PYTHON_LOCATION --enable-shared
+./configure --prefix $PYTHON_LOCATION --enable-shared --enable-unicode=ucs4
 make
 sudo make install
 

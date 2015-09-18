@@ -20,6 +20,7 @@ tar -xf wxPython-src-3.0.2.0.tar.bz2
 
 cd wxPython-src-3.0.2.0/wxPython
 
+export LD_LIBRARY_PATH=/usr/local/lib/python2.7.9/lib/
 sudo /usr/local/lib/python2.7.9/bin/python build-wxpython.py --install --prefix=/usr/local/lib/python2.7.9/
 
 cd $current_dir

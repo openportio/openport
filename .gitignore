@@ -31,3 +31,6 @@ scripts/client/openportmanager.spec
 scripts/client/test-reports
 ghostdriver.log
 scripts/mac/build
+scripts/distribution/debian/debian_openport-gui/source/include-binaries
+scripts/distribution/debian/debian_openport/source/include-binaries
+
