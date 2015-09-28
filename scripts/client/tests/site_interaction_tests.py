@@ -27,7 +27,7 @@ class SiteInteractionTest(unittest.TestCase):
         set_log_level(logging.DEBUG)
 
         self.server = "http://test.openport.be"
-        #self.server = "localhost:8000"
+        # self.server = "http://localhost:8000"
         if os.path.exists('/usr/bin/phantomjs'):
             self.browser = webdriver.PhantomJS('/usr/bin/phantomjs')
         else:
@@ -49,12 +49,13 @@ class SiteInteractionTest(unittest.TestCase):
 
     def login_to_site(self):
         self.browser.get('%s/user/login' % self.server)
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s-1.png' % inspect.stack()[0][3]))
         elem = self.browser.find_element_by_name("username")
         elem.send_keys("jandebleser+test@gmail.com")
         elem2 = self.browser.find_element_by_name("password")
         elem2.send_keys("test")
         elem.send_keys(Keys.RETURN)
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s-2.png' % inspect.stack()[0][3]))
 
 
     def test_login_to_site(self):
@@ -91,11 +92,14 @@ class SiteInteractionTest(unittest.TestCase):
             if not found:
                 self.fail("remove button not found. Form not loaded? Checkout %s" % '%s-2.png' % inspect.stack()[0][3])
 
-    def register_key(self, key_binding_token):
+    def register_key(self, key_binding_token, name=None):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
-        print run_command_with_timeout(['env/bin/python', 'apps/openport_app.py', '--register-key',
-                                        key_binding_token, '--server', '%s' % self.server], 10)
+        args = ['env/bin/python', 'apps/openport_app.py', '--register-key', key_binding_token, '--server',
+                   '%s' % self.server]
+        if name is not None:
+            args.extend(['--name', name])
+        print run_command_with_timeout(args, 10)
 
     def test_add_key_to_account(self):
         self.login_to_site()
@@ -103,15 +107,21 @@ class SiteInteractionTest(unittest.TestCase):
         self.remove_all_keys_from_account()
 
         key_binding_token = self.get_key_binding_token()
-        self.register_key(key_binding_token)
+        key_name = 'test123'
+        self.register_key(key_binding_token, name=key_name)
 
         sleep(2)
         try:
             self.browser.get('%s/user/keys' % self.server)
             self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
             elems = self.browser.find_elements_by_css_selector('button[data-title="Edit Key"]')
-
             self.assertEqual(1, len(elems), 'more than 1 key found: %s' % len(elems))
+
+            elems = self.browser.find_elements_by_css_selector('td.key_name')
+            self.assertEqual(1, len(elems), 'more than 1 key_name found: %s' % len(elems))
+            key_name_on_site = elems[0].text
+            self.assertEqual(key_name, key_name_on_site)
+
         except NoSuchElementException:
             self.fail('key not added to account')
         #todo: what if key is linked to different account? -> test

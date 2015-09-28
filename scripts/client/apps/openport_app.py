@@ -118,6 +118,8 @@ class OpenportApp(object):
                                  'access this port. This overwrites the standard setting in your profile for this '
                                  'session.', default=None, choices=[True, False])
 
+        parser.add_argument('--name', default='', help='The name for this client. (Use in combination with --register-key)')
+
     def init_app(self, args):
         if args.verbose:
             from logging import DEBUG

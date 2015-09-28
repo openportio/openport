@@ -26,7 +26,9 @@ def register_key(args, server=DEFAULT_SERVER):
         try:
             data = {
                 'public_key': public_key,
-                'key_binding_token': token}
+                'key_binding_token': token,
+                'key_name': args.name
+            }
             r = requests.post(url, data=data)
             dictionary = r.json()
             if 'status' not in dictionary or dictionary['status'] != 'ok':
