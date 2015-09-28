@@ -16,6 +16,7 @@ def get_default_key_locations():
         log.error(os.environ)
         log.info('setting home_dir to /root')
         home_dir = '/root'
+    log.debug('home_dir: %s' % home_dir)
     private_key_file = os.path.join(home_dir, '.openport', 'id_rsa')
     public_key_file = os.path.join(home_dir, '.openport', 'id_rsa.pub')
 

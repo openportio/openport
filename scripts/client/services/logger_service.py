@@ -17,6 +17,7 @@ def get_logger(name):
 
     ch = logging.StreamHandler(stdout)
     ch.setFormatter(short_formatter)
+    ch.setLevel(log_level)
     logger.addHandler(ch)
 
     os_interaction = osinteraction.getInstance(use_logger=False)
@@ -24,9 +25,20 @@ def get_logger(name):
     fh.setFormatter(long_formatter)
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
-    logger.setLevel(log_level)
+    logger.setLevel(logging.DEBUG)
     loggers[name] = logger
     return logger
+
+
+def set_log_level(new_log_level):
+    global log_level
+    log_level = new_log_level
+    for name, logger in loggers.iteritems():
+        for handler in logger.handlers:
+            if type(handler) is logging.StreamHandler:
+                handler.setLevel(log_level)
+                if log_level == logging.DEBUG:
+                    handler.setFormatter(long_formatter)
 
 if __name__ == '__main__':
     logger = get_logger('test')
@@ -38,12 +50,7 @@ if __name__ == '__main__':
     logger.warning('%d warning' % i) ; i += 1
     logger.exception('%d exception' % i) ; i += 1
 
+    set_log_level(logging.DEBUG)
 
-def set_log_level(new_log_level):
-    global log_level
-    log_level = new_log_level
-    for name, logger in loggers.iteritems():
-        logger.setLevel(log_level)
-        if log_level == logging.DEBUG:
-            for handler in logger.handlers:
-                handler.setFormatter(long_formatter)
+    logger.debug('%d debug' % i) ; i += 1
+
