@@ -1,4 +1,5 @@
 import logging
+import logging.handlers
 from sys import stdout
 from services import osinteraction
 
@@ -21,7 +22,8 @@ def get_logger(name):
     logger.addHandler(ch)
 
     os_interaction = osinteraction.getInstance(use_logger=False)
-    fh = logging.FileHandler(os_interaction.get_app_data_path('%s.log' % os_interaction.get_app_name()))
+    fh = logging.handlers.RotatingFileHandler(os_interaction.get_app_data_path('%s.log' % os_interaction.get_app_name()),
+                                              maxBytes=1000000, backupCount=5)
     fh.setFormatter(long_formatter)
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
