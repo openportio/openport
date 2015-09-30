@@ -14,7 +14,7 @@ function create_deb {
     start_dir=$(pwd)
     PACKAGE=$APPLICATION-$VERSION
     TARBALL=$(echo $APPLICATION)_$VERSION.orig.tar.gz
-    sudo dpkg --remove $APPLICATION || echo "$APPLICATION not installed"
+#    sudo dpkg --remove $APPLICATION || echo "$APPLICATION not installed"
     # If the uninstall keeps giving errors:
     # rm -rf /var/lib/dpkg/info/$APPLICATION.*
 
@@ -68,8 +68,8 @@ function create_include_binaries {
 create_deb
 
 #######sudo killall python || echo "no python process found"
-sudo dpkg -i openport_$(echo $VERSION)-1_*.deb
-openport -h
+#sudo dpkg -i openport_$(echo $VERSION)-1_*.deb
+#openport -h
 
 
 export APPLICATION=openport-gui
@@ -79,6 +79,7 @@ function create_include_binaries {
 }
 
 create_deb
-sudo dpkg -i openport-gui_$(echo $VERSION)-1_*.deb
+
+#sudo dpkg -i openport-gui_$(echo $VERSION)-1_*.deb
 #openport-gui
 
