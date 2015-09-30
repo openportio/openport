@@ -80,5 +80,5 @@ function create_include_binaries {
 
 create_deb
 sudo dpkg -i openport-gui_$(echo $VERSION)-1_*.deb
-openport-gui
+#openport-gui
 
