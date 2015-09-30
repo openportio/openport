@@ -57,6 +57,7 @@ function create_deb {
     cp package/$(echo $APPLICATION)_$(echo $VERSION)-1_*.deb .
 }
 
+rm *.deb
 
 export APPLICATION=openport
 function create_include_binaries {
@@ -77,9 +78,19 @@ function create_include_binaries {
     ls ../package/openport-gui-*/usr/lib/openport-gui/*.so > ../debian_$APPLICATION/source/include-binaries
     ls ../package/openport-gui-*/usr/lib/openport-gui/openport-gui >> ../debian_$APPLICATION/source/include-binaries
 }
+no_gui=0
+for i in "$@" ; do
+    if [[ $i = "--no-gui" ]] ; then
+        no_gui=1
+        break
+    fi
+done
 
-create_deb
+if [[ $no_gui != 1 ]]
+then
+	create_deb
+	#sudo dpkg -i openport-gui_$(echo $VERSION)-1_*.deb
+	#openport-gui
+fi
 
-#sudo dpkg -i openport-gui_$(echo $VERSION)-1_*.deb
-#openport-gui
-
+md5sum *.deb > hash-$(uname -m).md5
