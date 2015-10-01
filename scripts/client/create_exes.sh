@@ -1,6 +1,20 @@
 #!/bin/sh
 env/bin/pyinstaller --clean openport.spec -y
-env/bin/pyinstaller --clean openport-gui.spec -y
+
+
+
+no_gui=0
+for i in "$@" ; do
+    if [[ $i = "--no-gui" ]] ; then
+        no_gui=1
+        break
+    fi
+done
+
+if [[ $no_gui != 1 ]]
+then
+	env/bin/pyinstaller --clean openport-gui.spec -y
+fi
 
 #If the exe fails with "cannot import _counter":
 # wget https://github.com/pyinstaller/pyinstaller/tarball/develop
