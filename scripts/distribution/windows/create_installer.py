@@ -31,8 +31,8 @@ command = [signtool_path, 'sign',  '/sm', '/a', '/v', '/sm', '/s', 'My', '/n', '
 print command
 run_command(command)
 
-with open('hash-windows.md5', 'w') as f: 
-	output = run_command(['md5sum', 'Openport_%s.exe' % VERSION])
-	f.write(output[0])
+with open('hash-windows.md5', 'wb') as f:
+	output = run_command(['md5sum', 'Openport_%s.exe' % VERSION])[0]
+	f.write(output.replace('\r\n', '\n'))
 
 #raw_input("press any key to continue...")
