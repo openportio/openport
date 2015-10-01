@@ -134,14 +134,14 @@ class OsInteraction(object):
                              close_fds=not is_windows())
         return s.communicate()
 
-    def run_command_and_print_output_continuously(self, command_array):
+    def run_command_and_print_output_continuously(self, command_array, prefix=''):
         creation_flags = self.get_detached_process_creation_flag()
         s = subprocess.Popen(command_array,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              creationflags=creation_flags, shell=False,
                              close_fds=not is_windows())
 
-        return self.print_output_continuously(s)
+        return self.print_output_continuously(s, prefix=prefix)
 
     def print_output_continuously(self, s, prefix=''):
         def append_output(initial, extra):
