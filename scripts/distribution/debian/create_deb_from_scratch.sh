@@ -8,4 +8,4 @@ cd ../../client
 env/bin/pip install -r requirements.pip
 bash -ex ./create_exes.sh
 cd ../distribution/debian
-bash -ex create_exes_and_deb.sh
+bash -ex create_exes_and_deb.sh $1
