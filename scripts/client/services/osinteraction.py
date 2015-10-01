@@ -125,21 +125,21 @@ class OsInteraction(object):
             pass
         return os.path.join(self.APP_DATA_PATH, filename)
 
-    def run_shell_command(self, command):
+    def run_shell_command(self, command, cwd=None):
         if isinstance(command, list):
             command = ' '.join(['"%s"' % arg for arg in command])
         s = subprocess.Popen(command,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              shell=True,
-                             close_fds=not is_windows())
+                             close_fds=not is_windows(), cwd=cwd)
         return s.communicate()
 
-    def run_command_and_print_output_continuously(self, command_array, prefix=''):
+    def run_command_and_print_output_continuously(self, command_array, prefix='', cwd=None):
         creation_flags = self.get_detached_process_creation_flag()
         s = subprocess.Popen(command_array,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              creationflags=creation_flags, shell=False,
-                             close_fds=not is_windows())
+                             close_fds=not is_windows(), cwd=cwd)
 
         return self.print_output_continuously(s, prefix=prefix)
 
