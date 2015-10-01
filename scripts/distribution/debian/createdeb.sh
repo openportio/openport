@@ -57,7 +57,7 @@ function create_deb {
     cp package/$(echo $APPLICATION)_$(echo $VERSION)-1_*.deb .
 }
 
-rm *.deb
+rm -f *.deb
 
 export APPLICATION=openport
 function create_include_binaries {
