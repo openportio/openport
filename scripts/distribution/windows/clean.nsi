@@ -10,7 +10,9 @@
 !define APPNAME "Openport"
 !define INSTDIR "$PROGRAMFILES\${APPNAME}"
 !define OPENPORT_EXE "openport.exe"
-!define version 1.0.0
+!ifndef VERSION
+	!define version 0.0.0
+!endif
 
 Name "${APPNAME}"
 OutFile "${APPNAME}_${VERSION}.exe"
