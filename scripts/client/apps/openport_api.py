@@ -7,6 +7,7 @@ from apps.keyhandling import get_or_create_public_key
 from services.logger_service import get_logger
 from common.config import DEFAULT_SERVER
 from apps.openport_app_version import VERSION
+from services import osinteraction
 
 
 logger = get_logger('openport_api')
@@ -44,6 +45,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
     return a tuple with ( server_ip, server_port, message )
     """
 
+    os_interaction = osinteraction.getInstance()
     r = None
     try:
         request_data = {
@@ -71,7 +73,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
         if r is not None:
             logger.debug('error: got response: %s' % r.text)
             try:
-                error_page_file_path = os.path.join(os.path.dirname(__file__), 'error.html')
+                error_page_file_path = os_interaction.get_app_data_path('error.html')
                 with open(error_page_file_path, 'w') as f:
                     f.write(r.text)
                     logger.debug('error is available here: %s' % error_page_file_path)
@@ -82,7 +84,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
             logger.debug('error: got response: %s' % e.response.text)
             if e.response.status_code == 500:
                 try:
-                    error_page_file_path = os.path.join(os.path.dirname(__file__), 'error.html')
+                    error_page_file_path = os_interaction.get_app_data_path('error.html')
                     with open(error_page_file_path, 'w') as f:
                         logger.debug('error is available here: %s' % error_page_file_path)
                         f.write(e.response.text)
@@ -92,13 +94,13 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
     except Exception as e:
         if r is not None:
             try:
-                error_page_file_path = os.path.join(os.path.dirname(__file__), 'error.html')
+                error_page_file_path = os_interaction.get_app_data_path('error.html')
                 with open(error_page_file_path, 'w') as f:
                     f.write(r.text)
                     logger.debug('error is available here: %s' % error_page_file_path)
             except Exception as e:
                 logger.debug(e)
-        logger.error("An error has occurred while communicating the the openport servers. %s" % e)
+        logger.error("An error has occurred while communicating with the openport servers. %s" % e)
         raise e
 
 
