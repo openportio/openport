@@ -3,9 +3,17 @@
 block_cipher = None
 
 
+
+def get_crypto_path():
+    '''Auto import sometimes fails on linux'''
+    import Crypto
+    crypto_path = Crypto.__path__[0]
+    return crypto_path
+
+
 a = Analysis(['apps/openport_app.py'],
              pathex=['.'],
-             hiddenimports=[],
+             hiddenimports=['cffi', 'cryptography'],
              hookspath=None,
              runtime_hooks=None,
              cipher=block_cipher,
@@ -14,6 +22,13 @@ a = Analysis(['apps/openport_app.py'],
 pyz = PYZ(a.pure,
              cipher=block_cipher)
 
+dict_tree = Tree(get_crypto_path(), prefix='Crypto', excludes=["*.pyc"])
+a.datas += dict_tree
+
+print a.datas
+
+a.binaries = filter(lambda x: 'Crypto' not in x[0], a.binaries)
+			 
 from os import listdir
 from os.path import isfile, join
 import os
