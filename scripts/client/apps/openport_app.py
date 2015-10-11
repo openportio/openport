@@ -201,11 +201,12 @@ class OpenportApp(object):
 
                     p = self.os_interaction.start_openport_process(share)
                     logger.debug('process started with pid %s' % p.pid)
-                    self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
+                    #self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
                     sleep(1)
                     if p.poll() is not None:
-                        logger.debug('could not start openport process: StdOut:%s\nStdErr:%s' %
-                                     self.os_interaction.non_block_read(p))
+                        all_output = self.os_interaction.get_all_output(p)
+                        logger.debug('could not start openport process for port %s: StdOut:%s\nStdErr:%s' %
+                                     (share.local_port, all_output[0], all_output[1]))
                     else:
                         logger.debug('started app with pid %s : %s' % (p.pid, share.restart_command))
                         sleep(1)

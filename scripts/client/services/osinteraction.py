@@ -178,7 +178,7 @@ class OsInteraction(object):
         return all_output
 
     def print_output_continuously_threaded(self, s, prefix=''):
-        t_stdout = Thread(target=self.print_output_continuously, args=(s,prefix))
+        t_stdout = Thread(target=self.print_output_continuously, args=(s, prefix))
         t_stdout.daemon = True
         t_stdout.start()
 
