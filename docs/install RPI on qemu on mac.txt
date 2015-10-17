@@ -1,0 +1,32 @@
+#From http://www.royvanrijn.com/blog/2014/06/raspberry-pi-emulation-on-os-x/
+
+
+brew install qemu
+brew install jpeg
+brew link --overwrite jpeg
+
+qemu-system-arm -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw init=/bin/bash" -kernel zImage  -hda 2015-05-05-raspbian-wheezy.img
+
+
+in qemu:
+nano /etc/ld.so.preload
+Comment out first line
+
+nano /etc/udev/rules.d/90-qemu.rules
+KERNEL=="sda", SYMLINK+="mmcblk0"
+KERNEL=="sda?", SYMLINK+="mmcblk0p%n"
+KERNEL=="sda2", SYMLINK+="root"
+
+shutdown the emulator (close the window)
+
+qemu-img resize 2015-05-05-raspbian-wheezy.img +8G
+From now on we can do a normal boot (save this command) by removing the “init=/bin/bash” part:
+
+qemu-system-arm -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -kernel kernel-qemu -hda 2014-01-07-wheezy-raspbian.img
+The last thing we need to do to get our virtual Raspberry Pi up and running is:
+
+sudo ln -snf mmcblk0p2 /dev/root
+
+sudo raspi-config
+
+In this menu, you can “Expand filesystem” to make use of the increased image size (need to reboot afterwards).

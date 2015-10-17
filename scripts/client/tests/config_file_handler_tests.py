@@ -1,16 +1,9 @@
 import unittest
 import sys
-import xmlrunner
 import os
-import logging
-from time import sleep
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from common.share import Share
-from manager import dbhandler
-from services.logger_service import set_log_level
-import logging
-import threading
 from common.config_file_handler import ConfigFileHandler
 
 

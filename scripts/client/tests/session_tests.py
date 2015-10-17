@@ -1,5 +1,9 @@
 __author__ = 'jan'
 import unittest
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from common.share import Share
 
 
@@ -23,6 +27,7 @@ class SessionTests(unittest.TestCase):
         share.restart_command = ['restart', 'command']
         share.http_forward = True
         share.http_forward_address = 'http://jan.u.openport.io'
+        share.open_port_for_ip_link = 'http//openport.io/l/1234/zerazer'
 
         share2 = Share().from_dict(share.as_dict())
 
@@ -38,3 +43,4 @@ class SessionTests(unittest.TestCase):
         self.assertEquals(share.restart_command, share2.restart_command)
         self.assertEquals(share.http_forward, share2.http_forward)
         self.assertEquals(share.http_forward_address, share2.http_forward_address)
+        self.assertEquals(share.open_port_for_ip_link, share2.open_port_for_ip_link)

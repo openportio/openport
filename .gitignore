@@ -4,7 +4,6 @@
 /scripts/client/build/
 /scripts/client/tests/testfiles/tmp/*
 /scripts/client/openport.db
-/scripts/client/openport.spec
 /scripts/client/ghostdriver.log
 /scripts/openport.db
 /scripts/client/nsis/OpenPort-It.exe
@@ -28,8 +27,10 @@ sass_stdlib.xml
 scripts/mac/iceberg/Openport/build/Openport-0.9.0.pkg
 .idea
 scripts/client/nosetests.xml
-scripts/client/openport_app.spec
 scripts/client/openportmanager.spec
 scripts/client/test-reports
 ghostdriver.log
 scripts/mac/build
+scripts/distribution/debian/debian_openport-gui/source/include-binaries
+scripts/distribution/debian/debian_openport/source/include-binaries
+

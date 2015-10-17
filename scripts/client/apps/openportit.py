@@ -23,7 +23,7 @@ class OpenportItApp(OpenportApp):
         thr.setDaemon(True)
         thr.start()
 
-        self.openport.start_port_forward(share, callback=callback, server=self.args.server)
+        self.openport.start_port_forward(share, server=self.args.server)
 
     def start(self):
         logger.debug('client pid:%s' % os.getpid())
@@ -31,7 +31,7 @@ class OpenportItApp(OpenportApp):
 
 
         parser = argparse.ArgumentParser()
-        self.add_default_arguments(parser, local_port_required=False)
+        self.add_default_arguments(parser, group_required=False)
         parser.add_argument('--file-token', default='', help='The token needed to download the file.')
         parser.add_argument('filename', help='The file you want to openport.')
         args = parser.parse_args()

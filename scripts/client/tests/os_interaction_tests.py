@@ -3,17 +3,20 @@ __author__ = 'jan'
 import os
 import sys
 import logging
+import threading
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
 import xmlrunner
-from services.osinteraction import OsInteraction, getInstance, is_linux
+from services.osinteraction import OsInteraction, getInstance, is_windows
 import subprocess
 from time import sleep
 from services.logger_service import set_log_level
 from test_utils import run_command_with_timeout, run_command_with_timeout_return_process
+from services.utils import run_method_with_timeout
 from common.share import Share
 from mock import Mock, call
+import pyperclip
 
 
 class OsInteractionTest(unittest.TestCase):
@@ -50,12 +53,29 @@ class OsInteractionTest(unittest.TestCase):
         p = subprocess.Popen(['python', '-c', "from time import sleep;import sys; print 'aaa'; sys.stdout.flush(); "
                                               "sleep(1); print 'bbb'"],
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             bufsize=1, close_fds=is_linux())
+                             bufsize=1, close_fds=not is_windows())
         sleep(0.1)
         self.assertEqual(('aaa', False), self.os_interaction.non_block_read(p))
         sleep(2)
         self.assertEqual(('bbb', False), self.os_interaction.non_block_read(p))
         #todo: close_fds = ON_POSIX ?
+        self.assertEqual(('aaa%sbbb' % os.linesep, False), self.os_interaction.get_all_output(p))
+
+    def test_non_block_read__no_output(self):
+        # The flush is needed for the tests.
+        # See http://stackoverflow.com/questions/6257800/incremental-output-with-subprocess-pipe
+
+        p = subprocess.Popen(['python', '-c', "from time import sleep;import sys; "
+                                              "sleep(1); print 'bbb'"],
+                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             bufsize=1, close_fds=not is_windows())
+        sleep(0.1)
+        self.assertEqual((False, False), self.os_interaction.non_block_read(p))
+        self.assertEqual((False, False), self.os_interaction.get_all_output(p))
+
+        sleep(2)
+        self.assertEqual(('bbb', False), self.os_interaction.non_block_read(p))
+        self.assertEqual(('bbb', False), self.os_interaction.get_all_output(p))
 
     def test_run_command_and_print_output_continuously(self):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
@@ -77,7 +97,7 @@ class OsInteractionTest(unittest.TestCase):
         output = self.os_interaction.print_output_continuously(s)
         self.assertEqual(['aaa', False], output)
 
-    def test_get_all_output__kill_app(self):
+    def test_get_output__kill_app(self):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = self.os_interaction.get_python_exec()
         print command
@@ -86,7 +106,7 @@ class OsInteractionTest(unittest.TestCase):
         output = run_command_with_timeout(command, 1)
         self.assertEqual(('aaa', False), output)
 
-    def test_get_all_output__simple(self):
+    def test_get_output__simple(self):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = self.os_interaction.get_python_exec()
         print command
@@ -94,7 +114,7 @@ class OsInteractionTest(unittest.TestCase):
         output = run_command_with_timeout(command, 1)
         self.assertEqual(('hello', False), output)
 
-    def test_get_all_output__stderr(self):
+    def test_get_output__stderr(self):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         command = self.os_interaction.get_python_exec()
         command.extend(['-c', "import sys; sys.stderr.write('hello_err')"])
@@ -105,16 +125,16 @@ class OsInteractionTest(unittest.TestCase):
         command = self.os_interaction.get_python_exec()
         command.extend(['-c', "print 'hello'"])
         process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   shell=not is_linux(),
-                                   close_fds=is_linux())
+                                   shell=is_windows(),
+                                   close_fds=not is_windows())
         process.wait()
         self.assertFalse(self.os_interaction.pid_is_running(process.pid))
 
         command = self.os_interaction.get_python_exec()
         command.extend(['-c', "from time import sleep;sleep(1); print 'hello'"])
         process = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                                   shell=not is_linux(),
-                                   close_fds=is_linux())
+                                   shell=is_windows(),
+                                   close_fds=not is_windows())
         self.assertTrue(self.os_interaction.pid_is_running(process.pid))
 
     def test_pid_is_openport_process(self):
@@ -122,8 +142,7 @@ class OsInteractionTest(unittest.TestCase):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
         python_exe = self.os_interaction.get_python_exec()
         p = subprocess.Popen(python_exe + ['apps/openport_app.py', '--local-port', '%s' % port,
-                             '--start-manager', 'False', '--server', 'test.openport.be', '--verbose',
-                             '--no-manager', '--no-manager'],
+                             '--server', 'http://test.openport.be', '--verbose'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         try:
             self.assertTrue(self.os_interaction.pid_is_openport_process(p.pid))
@@ -147,6 +166,57 @@ class OsInteractionTest(unittest.TestCase):
                        '31261', '--request-token', 'WkSXfYyksNy4vN2h', '--start-manager', 'False'])])
         finally:
             self.os_interaction.start_process = method
+
+    def test_kill_pid(self):
+        if not is_windows():
+            return
+        os.chdir(os.path.dirname(os.path.dirname(__file__)))
+        python_exe = self.os_interaction.get_python_exec()
+        p = subprocess.Popen(python_exe + ['tryouts/signal_test.py'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        sleep(1)
+
+        self.os_interaction.kill_pid(p.pid)
+
+        run_method_with_timeout(p.wait, 2)
+
+        self.assertNotEqual(None, p.poll())
+        output = self.os_interaction.output(p)
+        print output[0]
+        print output[1]
+        if not is_windows():
+            self.assertTrue(output[0] and 'got signal' in output[0])
+
+    def test_run_function_with_lock(self):
+        x = [0]
+        def add_one():
+            a = x[0]
+            sleep(0.001)
+            x[0] = a + 1
+
+        threads = []
+
+        thread_amount = 10  # Setting this number too high will fail the tests because the system cannot generate so much lockfiles
+        for i in range(thread_amount):
+            t = threading.Thread(target=lambda: self.os_interaction.run_function_with_lock(add_one, 'add_one'))
+            t.setDaemon(True)
+            t.start()
+            threads.append(t)
+
+        for t in threads:
+            t.join()
+        self.assertEqual(x[0], thread_amount)
+
+    def test_copy_to_clipboard(self):
+        text1 = 'hallo'
+        self.os_interaction.copy_to_clipboard(text1)
+        self.assertEqual(text1, pyperclip.paste())
+
+        text2 = 'daag'
+        self.os_interaction.copy_to_clipboard(text2)
+        self.assertEqual(text2, pyperclip.paste())
+
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

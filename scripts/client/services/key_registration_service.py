@@ -1,8 +1,9 @@
 import sys
-import urllib
-import urllib2
+import requests
+
 from apps.keyhandling import get_or_create_public_key
-from manager.globals import DEFAULT_SERVER
+from common.config import DEFAULT_SERVER
+
 
 try:
     import json
@@ -20,21 +21,22 @@ def register_key(args, server=DEFAULT_SERVER):
         public_key = get_or_create_public_key()
         token = args.register_key
 
-        url = "https://%s/linkKey" % server
+        url = "%s/linkKey" % server
 
         try:
-            data = urllib.urlencode({
+            data = {
                 'public_key': public_key,
-                'key_binding_token': token})
-            req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req).read()
-            dictionary = json.loads(response)
-            if not 'status' in dictionary or dictionary['status'] != 'ok':
+                'key_binding_token': token,
+                'key_name': args.name
+            }
+            r = requests.post(url, data=data)
+            dictionary = r.json()
+            if 'status' not in dictionary or dictionary['status'] != 'ok':
                 raise Exception('Did not get status ok: %s' % dictionary)
             print "key successfully registered"
 
         except Exception, detail:
-            print "An error has occurred while communicating the the openport servers. ", detail
+            print "An error has occurred while communicating with the openport servers. ", detail
             if hasattr(detail, 'read'):
                 print detail.read()
             raise detail

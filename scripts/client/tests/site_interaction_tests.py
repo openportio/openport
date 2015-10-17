@@ -9,20 +9,25 @@ import inspect
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
+import logging
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes
+from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
 from services import osinteraction
+from services.logger_service import get_logger, set_log_level
 
+
+logger = get_logger(__name__)
 
 class SiteInteractionTest(unittest.TestCase):
 
     def setUp(self):
         print self._testMethodName
+        set_log_level(logging.DEBUG)
 
-        self.server = "test.openport.be"
-        #self.server = "localhost:8000"
+        self.server = "http://test.openport.be"
+        # self.server = "http://localhost:8000"
         if os.path.exists('/usr/bin/phantomjs'):
             self.browser = webdriver.PhantomJS('/usr/bin/phantomjs')
         else:
@@ -38,30 +43,31 @@ class SiteInteractionTest(unittest.TestCase):
         self.browser.quit()
 
     def test_site_is_online(self):
-        self.browser.get('http://%s/' % self.server)
+        self.browser.get('%s/' % self.server)
         self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
         self.assertTrue('Openport' in self.browser.title)
 
     def login_to_site(self):
-        self.browser.get('http://%s/user/login' % self.server)
+        self.browser.get('%s/user/login' % self.server)
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s-1.png' % inspect.stack()[0][3]))
         elem = self.browser.find_element_by_name("username")
         elem.send_keys("jandebleser+test@gmail.com")
         elem2 = self.browser.find_element_by_name("password")
         elem2.send_keys("test")
         elem.send_keys(Keys.RETURN)
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s-2.png' % inspect.stack()[0][3]))
 
 
     def test_login_to_site(self):
         self.login_to_site()
         self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
-        self.browser.get('http://%s/user' % self.server)
+        self.browser.get('%s/user' % self.server)
         self.assertTrue('Welcome, Jan' in self.browser.page_source)
 
     def remove_all_keys_from_account(self):
         sleep(5)
         while True:
-            self.browser.get('http://%s/user/keys' % self.server)
+            self.browser.get('%s/user/keys' % self.server)
             self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
             try:
                 elem = self.browser.find_element_by_css_selector('button[data-title="Edit Key"]')
@@ -86,11 +92,14 @@ class SiteInteractionTest(unittest.TestCase):
             if not found:
                 self.fail("remove button not found. Form not loaded? Checkout %s" % '%s-2.png' % inspect.stack()[0][3])
 
-    def register_key(self, key_binding_token):
+    def register_key(self, key_binding_token, name=None):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
-        print run_command_with_timeout(['env/bin/python', 'apps/openport_app.py', '--register-key',
-                                        key_binding_token, '--server', '%s' % self.server], 10)
+        args = ['env/bin/python', 'apps/openport_app.py', '--register-key', key_binding_token, '--server',
+                   '%s' % self.server]
+        if name is not None:
+            args.extend(['--name', name])
+        print run_command_with_timeout(args, 10)
 
     def test_add_key_to_account(self):
         self.login_to_site()
@@ -98,21 +107,27 @@ class SiteInteractionTest(unittest.TestCase):
         self.remove_all_keys_from_account()
 
         key_binding_token = self.get_key_binding_token()
-        self.register_key(key_binding_token)
+        key_name = 'test123'
+        self.register_key(key_binding_token, name=key_name)
 
         sleep(2)
         try:
-            self.browser.get('http://test.openport.be/user/keys')
+            self.browser.get('%s/user/keys' % self.server)
             self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
             elems = self.browser.find_elements_by_css_selector('button[data-title="Edit Key"]')
-
             self.assertEqual(1, len(elems), 'more than 1 key found: %s' % len(elems))
+
+            elems = self.browser.find_elements_by_css_selector('td.key_name')
+            self.assertEqual(1, len(elems), 'more than 1 key_name found: %s' % len(elems))
+            key_name_on_site = elems[0].text
+            self.assertEqual(key_name, key_name_on_site)
+
         except NoSuchElementException:
             self.fail('key not added to account')
         #todo: what if key is linked to different account? -> test
 
     def get_key_binding_token(self):
-        self.browser.get('http://%s/user/keys')
+        self.browser.get('%s/user/keys' % self.server)
         self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
         try:
             code_elem = self.browser.find_elements_by_xpath("//*[contains(text(), '--register-key')]")[0]
@@ -134,7 +149,7 @@ class SiteInteractionTest(unittest.TestCase):
         key_binding_token = self.get_key_binding_token()
         self.register_key(key_binding_token)
 
-        p = self.start_session(8888, db_file=db_file)
+        p = self.start_session(8888, db_file=db_file, verbose=False)
 
         remote_host, server_port, link = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
         print 'server port: %s' % server_port
@@ -143,20 +158,20 @@ class SiteInteractionTest(unittest.TestCase):
         self.kill_session(server_port)
         sleep(2)
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
-        sleep(20)
-        process_output = self.os_interaction.get_all_output(p)
+        wait_for_response(lambda : p.poll() is not None)
+        process_output = self.os_interaction.get_output(p)
         print "process output stdout: ", process_output[0]
         print "process output stderr: ", process_output[1]
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
-        self.assertTrue(p.poll() in (9, -9), 'poll output was %s' % p.poll())
+        self.assertEqual(0, p.poll(), 'poll output was %s' % p.poll())
+        self.assertTrue('Traceback' not in process_output[0])
+        self.assertTrue(not process_output[1] or 'Traceback' not in process_output[1])
 
     def test_restart_killed_session(self):
 
         db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'tmp_openport.db')
-        try:
+        if os.path.exists(db_file):
             os.remove(db_file)
-        except OSError:
-            pass
 
         self.login_to_site()
         self.remove_all_keys_from_account()
@@ -171,11 +186,11 @@ class SiteInteractionTest(unittest.TestCase):
         self.kill_session(server_port)
         sleep(2)
         self.assertFalse(self.session_exists_on_site(server_port), 'session did not disappear')
-        sleep(20)
-        process_output = self.os_interaction.get_all_output(p)
+        sleep(30)
+        process_output = self.os_interaction.get_output(p)
         print "process output: ", process_output
         self.assertFalse(self.session_exists_on_site(server_port), 'session came back')
-        self.assertTrue(p.poll() in (9, -9), 'poll output was %s' % p.poll())
+        self.assertEqual(0, p.poll(), 'poll output was %s' % p.poll())
 
         p = self.start_session(8888, db_file=db_file)
         remote_host, server_port, link = get_remote_host_and_port(p, self.os_interaction, output_prefix='app')
@@ -183,11 +198,12 @@ class SiteInteractionTest(unittest.TestCase):
 
         self.assertTrue(self.session_exists_on_site(server_port), 'session was not allowed back on the server.')
 
-
-    def start_session(self, local_port, db_file=None):
+    def start_session(self, local_port, db_file=None, verbose=True):
         os.chdir(os.path.dirname(os.path.dirname(__file__)))
-        command = ['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port, '--start-manager',
-                   'False', '--server', '%s' % self.server, '--verbose', '--manager-port', '-1']
+        command = ['env/bin/python', 'apps/openport_app.py', '--local-port', '%s' % local_port, '--server',
+                   '%s' % self.server]
+        if verbose:
+            command.append('--verbose')
         if db_file:
             command.extend(['--database', db_file])
         p = subprocess.Popen(command,
@@ -196,19 +212,22 @@ class SiteInteractionTest(unittest.TestCase):
         return p
 
     def session_exists_on_site(self, server_port):
-        self.browser.get('http://%s/user/sessions' % self.server)
+        self.browser.get('%s/user/sessions' % self.server)
         self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
         code_elements = self.browser.find_elements_by_xpath("//*[contains(text(), ':%s')]" % server_port)
         return len(code_elements) == 1
 
     def kill_session(self, server_port):
-        self.browser.get('http://%s/user/sessions' % self.server)
+        self.browser.get('%s/user/sessions' % self.server)
         try:
             js_confirm = 'window.confirm = function(){return true;}'
             self.browser.execute_script(js_confirm)
             #elem = self.browser.find_element_by_partial_link_text(":%s" % server_port)
-            elem = self.browser.find_element_by_xpath("//td[contains(., ':%s')]/following-sibling::td[1]/button" % server_port)
+            elem = self.browser.find_element_by_xpath("//td[contains(., ':%s')]/following-sibling::td[1]/button[2]" % server_port)
             elem.click()
+            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+            logger.info('session %s killed using the site' % server_port)
+
         except NoSuchElementException:
             self.fail("session not found")
 

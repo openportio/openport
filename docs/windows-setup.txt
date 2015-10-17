@@ -1,0 +1,58 @@
+install python
+https://www.python.org/downloads/windows/
+
+install pip
+https://bootstrap.pypa.io/get-pip.py
+
+modify path: add
+;c:\Python27;c:\Python27\scripts
+
+download pywin32:
+http://sourceforge.net/projects/pywin32/files/pywin32/Build%20214/
+
+install git bash:
+http://git-scm.com/download/win
+
+install Microsoft Visual C++ 2008 Redistributable Package (x86):
+http://www.microsoft.com/en-us/download/details.aspx?id=29
+
+install opensll for 64 bit:
+http://slproweb.com/download/Win64OpenSSL-1_0_0m.exe
+
+install pywin32 (for pyinstaller)
+http://sourceforge.net/projects/pywin32/files/pywin32/
+then run (in scripts folder)
+env/Scripts/easy_install "C:\Users\Jan\Downloads\pywin32-219.win32-py2.7.exe"
+
+wx:
+http://www.wxpython.org/download.php#msw
+install, use env/lib directory as destination
+
+
+PIL:
+env/scripts/easy_install pil
+
+in scripts folder:
+pip install virtualenv
+virtualenv env
+env/scripts/pip install -r requirements.pip
+
+
+if that doesnt work:
+install visual studio 2008:
+http://go.microsoft.com/?linkid=7729279
+
+
+install pycrypto:
+http://stackoverflow.com/questions/23691564/running-cython-in-windows-x64-fatal-error-c1083-cannot-open-include-file-ba
+
+Download and install Microsoft Visual C++ 2008 Express.
+Download and install Microsoft Windows SDK for Windows 7 and .NET Framework 3.5 SP1. You will need only:
+Developer Tools > Windows Headers and Libraries <-- this gives you basetsd.h
+Developer Tools > Visual C++ Compilers <-- this gives you the 64-bit compilers
+Copy C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\vcvars64.bat to C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64\vcvarsamd64.bat. Observe the change in file name.
+Add C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin to PATH. This may not be required (I did so before re-installing the SDK w/ Headers & Libs; therefore, the necessity is unknown).
+
+
+@set INCLUDE=C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;%INCLUDE%
+@set LIB=C:\Program Files\Microsoft SDKs\Windows\v7.1;%LIB%

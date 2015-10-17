@@ -1,7 +1,8 @@
-openport-it
+Openport - Client
 ===========
 
-A client to the openport project.
+The official client of the Openport project.
 
-Allows you to share ports and files to the internet using public reverse ssh servers.
+Allows you to share ports to the internet using public reverse ssh servers.
 
+Checkout https://openport.io/wiki for more information.

@@ -1,0 +1,11 @@
+Source: openport-gui
+Maintainer: Jan De Bleser <info@openport.io>
+Section: misc
+Priority: optional
+Standards-Version: ??
+Build-Depends: 
+
+Package: openport-gui
+Architecture: any
+Depends: openport
+Description: The graphical user interface to control the openport processes.

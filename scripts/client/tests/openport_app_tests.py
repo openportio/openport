@@ -3,19 +3,18 @@ __author__ = 'jan'
 import os
 import sys
 import logging
+import signal
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import unittest
-import xmlrunner
-from services.osinteraction import OsInteraction, getInstance, is_linux
-import subprocess
+from services.osinteraction import getInstance
 from time import sleep
 from services.logger_service import set_log_level
-from test_utils import run_command_with_timeout, run_command_with_timeout_return_process
 from apps.openport_app import OpenportApp
-from apps import openport_api
 import threading
-from manager import dbhandler
+from services import osinteraction, dbhandler
+from test_utils import set_default_args, wait_for_response, click_open_for_ip_link, check_tcp_port_forward
+
 
 class OpenportAppTests(unittest.TestCase):
 
@@ -24,6 +23,7 @@ class OpenportAppTests(unittest.TestCase):
         self.os_interaction = getInstance()
         set_log_level(logging.DEBUG)
         self.app = OpenportApp()
+        self.os_interaction = osinteraction.getInstance()
         self.test_db = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'db_test.db')
         try:
             os.remove(self.test_db)
@@ -35,36 +35,15 @@ class OpenportAppTests(unittest.TestCase):
 
         self.stop_port_forward = True
 
-    def set_default_args(self, app):
-        app.args.local_port = -1
-        app.args.register_key = ''
-        app.args.port = -1
-        app.args.manager = -1
-
-        app.args.manager_port = 8001
-        app.args.start_manager = True
-        app.args.database = self.test_db
-        app.args.request_port = -1
-        app.args.request_token = ''
-        app.args.verbose = True
-        app.args.http_forward = False
-        app.args.server = 'testserver.jdb'
-        app.args.restart_on_reboot = False
-        app.args.no_manager = False
-
-
-
-    def test_request_same_port_if_old_port_is_denied(self):
+    def test_session_token_is_stored_if_port_request_is_denied(self):
         """ Check that if a session_token is denied, the new session token is stored and used. """
 
-        self.set_default_args(self.app)
+        set_default_args(self.app, self.test_db)
 
         this_test = self
         this_test.raise_exception = False
 
         this_test.received_session = None
-        this_test.received_success_callback = None
-        this_test.received_error_callback = None
         this_test.received_server = None
 
         this_test.returning_token = 'first token'
@@ -76,10 +55,8 @@ class OpenportAppTests(unittest.TestCase):
         def extra_function(session):
             pass
 
-        def fake_start_port_forward(session, callback=None, error_callback=None, server=None):
+        def fake_start_port_forward(session, server=None):
             this_test.received_session = session
-            this_test.received_success_callback = callback
-            this_test.received_error_callback = error_callback
             this_test.received_server = server
 
             this_test.received_token = session.server_session_token
@@ -91,6 +68,7 @@ class OpenportAppTests(unittest.TestCase):
             session.server = 'testserver123.jdb'
 
             extra_function(session)
+            session.notify_start()
 
             while not this_test.stop_port_forward:
                 sleep(1)
@@ -106,19 +84,18 @@ class OpenportAppTests(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
 
-        sleep(0.5)
-        self.assertEqual(this_test.received_server, 'testserver.jdb')
+        wait_for_response(lambda: self.app.session and self.app.session.active)
+       # sleep(60)
+        self.assertEqual(this_test.received_server, 'http://test.openport.be')
 
         self.assertEqual(self.app.session.server_port, 1111)
         self.assertEqual(this_test.received_server_port, -1)
         self.assertEqual(this_test.received_token, '')
 
-        # Fake response with a session token
-        this_test.received_success_callback(this_test.received_session)
-
         # Stopping the app will make the share inactive.
         #self.app.stop()
         self.stop_port_forward = True
+        self.app.server.stop()
 
         sleep(3)
 
@@ -132,10 +109,8 @@ class OpenportAppTests(unittest.TestCase):
         this_test.returning_token = 'second token'
         self.stop_port_forward = False
 
-        dbhandler.destroy_instance()
-
         self.app = OpenportApp()
-        self.set_default_args(self.app)
+        set_default_args(self.app, self.test_db)
         self.app.openport.start_port_forward = fake_start_port_forward
 
         self.app.args.local_port = 24
@@ -143,24 +118,21 @@ class OpenportAppTests(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
 
-        sleep(1)
+        wait_for_response(lambda: self.app.session and self.app.session.active)
+
         self.assertEqual('first token', this_test.received_token)
         self.assertEqual(1111, this_test.received_server_port)
         self.assertEqual('second token', this_test.received_session.server_session_token)
         self.assertEqual(2222, this_test.received_session.server_port)
 
-        # Fake response with a session token
-        this_test.received_success_callback(this_test.received_session)
-
-
         # Stopping the app will make the share inactive.
         #self.app.stop()
         self.stop_port_forward = True
+        self.app.server.stop()
 
         sleep(3)
 
         self.assertFalse(thr.isAlive())
-
 
 
         # Check that new session_token is used
@@ -169,10 +141,8 @@ class OpenportAppTests(unittest.TestCase):
         this_test.returning_token = 'second token'
         self.stop_port_forward = False
 
-        dbhandler.destroy_instance()
-
         self.app = OpenportApp()
-        self.set_default_args(self.app)
+        set_default_args(self.app, self.test_db)
         self.app.openport.start_port_forward = fake_start_port_forward
 
         self.app.args.local_port = 24
@@ -180,7 +150,8 @@ class OpenportAppTests(unittest.TestCase):
         thr.setDaemon(True)
         thr.start()
 
-        sleep(1)
+        wait_for_response(lambda: self.app.session and self.app.session.active)
+
         self.assertEqual('second token', this_test.received_token)
         self.assertEqual(2222, this_test.received_server_port)
         self.assertEqual('second token', this_test.received_session.server_session_token)
@@ -189,3 +160,29 @@ class OpenportAppTests(unittest.TestCase):
         # Stopping the app will make the share inactive.
         #self.app.stop()
         self.stop_port_forward = True
+        self.app.server.stop()
+
+    def test_exit(self):
+        set_default_args(self.app, self.test_db)
+
+        port = self.os_interaction.get_open_port()
+        print 'localport :', port
+        self.app.args.local_port = port
+
+        thr = threading.Thread(target=self.app.start)
+        thr.setDaemon(True)
+        thr.start()
+
+        wait_for_response(lambda: self.app.session and self.app.session.active)
+
+       # sleep(3)
+        session = self.app.session
+        click_open_for_ip_link(session.open_port_for_ip_link)
+
+        check_tcp_port_forward(self, session.server, port, session.server_port)
+
+        self.app.handleSigTERM(signal.SIGINT)
+
+        self.assertFalse(self.app.session.active)
+        self.assertFalse(self.app.openport.running())
+        self.assertFalse(check_tcp_port_forward(self, session.server, port, session.server_port, fail_on_error=False))

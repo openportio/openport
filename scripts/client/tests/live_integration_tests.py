@@ -12,7 +12,7 @@ class LiveIntegrationTest(IntegrationTest):
     def setUp(self):
         print self._testMethodName
         IntegrationTest.setUp(self)
-        self.test_server='openport.io'
+        self.test_server = 'https://openport.io'
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(LiveIntegrationTest)

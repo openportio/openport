@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 
 import sys
+import os
+import requests
 from apps.keyhandling import get_or_create_public_key
 from services.logger_service import get_logger
-import urllib
-import urllib2
-import json
-from manager.globals import DEFAULT_SERVER
+from common.config import DEFAULT_SERVER
 from apps.openport_app_version import VERSION
+from services import osinteraction
+
 
 logger = get_logger('openport_api')
 
-SERVER_SSH_PORT = 22
-FALLBACK_SERVER_SSH_PORT = 443
-SERVER_SSH_USER = 'open'
+class FatalSessionError(Exception):
+    pass
 
 
 class PortForwardResponse():
@@ -36,64 +36,105 @@ class PortForwardResponse():
         self.session_end_time = dict.get('session_end_time')
 
 
-def request_port(public_key, local_port=None, url='https://%s/api/v1/request-port' % DEFAULT_SERVER,
+def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEFAULT_SERVER,
                  restart_session_token='',
-                 request_server_port=-1, http_forward=False, automatic_restart=False):
+                 request_server_port=-1, http_forward=False, automatic_restart=False,
+                 forward_tunnel=False, ip_link_protection=None, client_version=VERSION):
     """
     Requests a port on the server using the openPort protocol
     return a tuple with ( server_ip, server_port, message )
     """
 
-    response = None
+    os_interaction = osinteraction.getInstance()
+    r = None
     try:
-        data = urllib.urlencode({
+        request_data = {
             'public_key': public_key,
             'request_port': request_server_port,
             'restart_session_token': restart_session_token,
             'http_forward': 'on' if http_forward else '',
             'automatic_restart': 'on' if automatic_restart else '',
             'local_port': local_port if local_port else '',
-            'client_version': VERSION,
-            })
-        req = urllib2.Request(url, data)
-        response = urllib2.urlopen(req).read()
-        dict = json.loads(response)
-        return dict
-    except urllib2.HTTPError, detail:
-        logger.debug('error: got response: %s' % response)
-        logger.error("An error has occurred while communicating the the openport servers. %s" % detail)
-        if detail.getcode() == 500:
-            logger.error(detail.read())
+            'client_version': client_version,
+            'forward_tunnel': 'on' if forward_tunnel else ''
+            }
+        if ip_link_protection is not None:
+            request_data['ip_link_protection'] = 'on' if ip_link_protection else ''
+
+ #       if sys.version_info >= (2, 7, 9):
+ #           import ssl
+ #           ssl._create_default_https_context = ssl._create_unverified_context
+#
+        r = requests.post(url, data=request_data)
+        #logger.debug(r.text)
+        return r.json()
+    except requests.HTTPError as e:
+        logger.error("An error has occurred while communicating the the openport servers. %s" % e)
+        if r is not None:
+            logger.debug('error: got response: %s' % r.text)
+            try:
+                error_page_file_path = os_interaction.get_app_data_path('error.html')
+                with open(error_page_file_path, 'w') as f:
+                    f.write(r.text)
+                    logger.debug('error is available here: %s' % error_page_file_path)
+            except Exception as e:
+                logger.debug(e)
+
+        if e.response:
+            logger.debug('error: got response: %s' % e.response.text)
+            if e.response.status_code == 500:
+                try:
+                    error_page_file_path = os_interaction.get_app_data_path('error.html')
+                    with open(error_page_file_path, 'w') as f:
+                        logger.debug('error is available here: %s' % error_page_file_path)
+                        f.write(e.response.text)
+                except Exception as e:
+                    logger.debug(e)
         raise
-    except Exception, detail:
-        try:
-            logger.debug('error: got response: %s' % response)
-        except:
-            pass
-        print "An error has occurred while communicating the the openport servers. ", detail, detail.read()
-        raise detail
+    except Exception as e:
+        if r is not None:
+            try:
+                error_page_file_path = os_interaction.get_app_data_path('error.html')
+                with open(error_page_file_path, 'w') as f:
+                    f.write(r.text)
+                    logger.debug('error is available here: %s' % error_page_file_path)
+            except Exception as e:
+                logger.debug(e)
+        logger.error("An error has occurred while communicating with the openport servers. %s" % e)
+        raise e
 
 
 def request_open_port(local_port, restart_session_token='', request_server_port=-1, error_callback=None,
-                      http_forward=False, stop_callback=None, server=DEFAULT_SERVER, automatic_restart=False):
+                      http_forward=False, stop_callback=None, server=DEFAULT_SERVER, automatic_restart=False,
+                      public_key=None, forward_tunnel=False, ip_link_protection=None, client_version=VERSION):
 
-    public_key = get_or_create_public_key()
+    if public_key is None:
+        public_key = get_or_create_public_key()
 
     logger.debug("requesting port forward - remote port: %s, restart session token: %s" % (request_server_port, restart_session_token))
-    url = 'https://%s/api/v1/request-port' % server
+    url = '%s/api/v1/request-port' % server
     dict = request_port(local_port=local_port, public_key=public_key, url=url,
                         restart_session_token=restart_session_token,
                         request_server_port=request_server_port, http_forward=http_forward,
-                        automatic_restart=automatic_restart)
+                        automatic_restart=automatic_restart,
+                        forward_tunnel=forward_tunnel,
+                        ip_link_protection=ip_link_protection,
+                        client_version=client_version,
+                        )
 
     if 'error' in dict:
         if error_callback:
-            error_callback('An error has occurred:\n%s' %(dict['error']))
+            error_callback(Exception('An error has occurred:\n%s' % (dict['error'])))
         if dict['error'] == 'Session killed':
             if stop_callback:
                 stop_callback()
-            logger.info("Session is killed, stopping app!!!")
-            sys.exit(9)
+        if 'No session found' in dict['error']:
+            if stop_callback:
+                stop_callback()
+            logger.info(dict['error'])
+        if dict.get('fatal_error', False):
+            raise FatalSessionError(dict.get('error'))
+
     logger.debug(dict)
 
     response = PortForwardResponse(dict)

@@ -1,16 +1,18 @@
 import os
 from time import sleep
-from manager.globals import DEFAULT_SERVER
+import errno
 
+from common.config import DEFAULT_SERVER
 from apps import openport_api
-from apps.portforwarding import PortForwardingService, PortForwardException
-from apps.keyhandling import PUBLIC_KEY_FILE, PRIVATE_KEY_FILE
+from apps.portforwarding import PortForwardingService, TunnelError
 from services.logger_service import get_logger
+
 
 logger = get_logger('openport')
 
 SERVER_SSH_PORT = 22
 FALLBACK_SERVER_SSH_PORT = 443
+FALLBACK_SSH_SERVER = 's.openport.io'
 SERVER_SSH_USER = 'open'
 
 
@@ -22,25 +24,36 @@ class Openport(object):
         self.session = None
         self.automatic_restart = False
         self.repeat_message = True
+        self.first_time_showing_message = True
         self.last_response = None
+        self.stopped = False
 
-    def start_port_forward(self, session, callback=None, error_callback=None, server=DEFAULT_SERVER):
+    def start_port_forward(self, session, server=DEFAULT_SERVER):
 
         self.restart_on_failure = True
         self.automatic_restart = False
         self.session = session
+        if session.public_key_file:
+            with open(session.public_key_file, 'r') as f:
+                public_key = f.readline().strip()
+        else:
+            public_key = None
 
-        while self.restart_on_failure:
+        # This is the main loop. Exit this and the program ends.
+        while self.restart_on_failure and not self.stopped:
             try:
                 response = openport_api.request_open_port(
                     session.local_port,
                     request_server_port=session.server_port,
                     restart_session_token=session.server_session_token,
-                    error_callback=error_callback,
+                    error_callback=session.notify_error,
                     stop_callback=session.notify_stop,
                     http_forward=session.http_forward,
                     server=server,
-                    automatic_restart=self.automatic_restart
+                    automatic_restart=self.automatic_restart,
+                    public_key=public_key,
+                    forward_tunnel=session.forward_tunnel,
+                    ip_link_protection=session.ip_link_protection,
                 )
                 self.last_response = response
 
@@ -48,7 +61,8 @@ class Openport(object):
                     self.repeat_message = True
 
                 session.server = response.server
-                session.server_port = response.remote_port
+                if not session.forward_tunnel:
+                    session.server_port = response.remote_port
                 session.pid = os.getpid()
                 session.account_id = response.account_id
                 session.key_id = response.key_id
@@ -56,57 +70,78 @@ class Openport(object):
                 session.http_forward_address = response.http_forward_address
                 session.open_port_for_ip_link = response.open_port_for_ip_link
 
-                if callback is not None:
-                    import threading
-                    thr = threading.Thread(target=callback, args=(session,))
-                    thr.setDaemon(True)
-                    thr.start()
-
                 self.port_forwarding_service = PortForwardingService(
                     session.local_port,
-                    response.remote_port,
-                    response.server,
+                    session.server_port,
+                    session.server,
                     SERVER_SSH_PORT,
                     SERVER_SSH_USER,
-                    PUBLIC_KEY_FILE,
-                    PRIVATE_KEY_FILE,
+                    session.public_key_file,
+                    session.private_key_file,
                     success_callback=session.notify_success,
                     error_callback=session.notify_error,
                     fallback_server_ssh_port=FALLBACK_SERVER_SSH_PORT,
+                    fallback_ssh_server=FALLBACK_SSH_SERVER,
                     http_forward_address=session.http_forward_address,
-                    start_callback=self.show_message
+                    start_callback=self.session_start,
+                    forward_tunnel=session.forward_tunnel,
+                    session_token=session.server_session_token,
                 )
-                self.port_forwarding_service.start() #hangs
-            except PortForwardException as e:
-                logger.info('The port forwarding has stopped: %s' % e)
+                self.port_forwarding_service.start()  # hangs
+            except openport_api.FatalSessionError as e:
+                logger.info('(Re)starting the session was denied: %s' % e)
+                break
             except SystemExit as e:
                 raise
-            except Exception as e:
+            except IOError as e:
+                if e.errno != errno.EINTR:
+                    logger.error(e)
+                    sleep(10)
+            except TunnelError as e:
                 logger.error(e)
+                sleep(10)
+            except Exception as e:
+                #logger.exception(e)
+                logger.error('general exception: %s' % e)
                 sleep(10)
             finally:
                 self.automatic_restart = True
 
+    def session_start(self):
+        self.session.notify_start()
+        self.show_message()
+
     def show_message(self):
         if not self.session:
             logger.error('session is None???')
-        elif not self.automatic_restart or self.repeat_message:
-            if self.session.http_forward_address is None or self.session.http_forward_address == '':
-                logger.info('Now forwarding remote port %s:%d to localhost:%d .\n'
+        elif self.first_time_showing_message and (not self.automatic_restart or self.repeat_message):
+            if self.session.forward_tunnel:
+                logger.info(self.last_response.message)
+            elif self.session.http_forward_address is None or self.session.http_forward_address == '':
+                logger.info('Now forwarding remote port %s:%d to localhost:%d.\n'
                             'You can keep track of your shares at https://openport.io/user .\n%s'
                             % (self.session.server, self.session.server_port, self.session.local_port,
                                self.last_response.message))
             else:
-                logger.info('Now forwarding remote address %s to localhost:%d .\n'
+                logger.info('Now forwarding remote address %s to localhost:%d.\n'
                             'You can keep track of your shares at https://openport.io/user .\n%s'
                             % (self.session.http_forward_address, self.session.local_port,
                                self.last_response.message))
+        elif self.automatic_restart:
+            logger.info('Session restarted')
         self.repeat_message = False
+        self.first_time_showing_message = False
 
     def stop_port_forward(self):
         self.restart_on_failure = False
         if self.port_forwarding_service:
             self.port_forwarding_service.stop()
+        if self.session:
+            self.session.notify_stop()
 
     def stop(self):
+        self.stopped = True
         self.stop_port_forward()
+
+    def running(self):
+        return not self.port_forwarding_service.stopped
