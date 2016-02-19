@@ -8,7 +8,7 @@ log = get_logger(__name__)
 
 
 def get_default_key_locations():
-    home_dir = os.path.expanduser('~')
+    home_dir = os.path.expanduser('~{}'.format(os.environ.get('USER', '')))
 
     if len(home_dir) < 3:
         log.error('ERROR!!! system indicates home_dir is <<<%s>>>' % home_dir)
@@ -31,8 +31,8 @@ def get_or_create_public_key():
 
 def ensure_keys_exist(public_key_file, private_key_file):
     if not os.path.exists(private_key_file) or not os.path.exists(public_key_file):
-        system_id_rsa = os.path.expanduser('~/.ssh/id_rsa')
-        system_id_rsa_pub = os.path.expanduser('~/.ssh/id_rsa.pub')
+        system_id_rsa = os.path.expanduser('~{}/.ssh/id_rsa'.format(os.environ.get('USER', '')))
+        system_id_rsa_pub = os.path.expanduser('~{}/.ssh/id_rsa.pub'.format(os.environ.get('USER', '')))
         if os.path.exists(system_id_rsa) and os.path.exists(system_id_rsa_pub):
             try:
                 paramiko.RSAKey.from_private_key_file(system_id_rsa)
@@ -63,8 +63,8 @@ def write_new_key(private_key_filename, public_key_filename):
     open(public_key_filename, 'w', 0o644).write("ssh-rsa %s %s \n" % (pk.get_base64(), username))
 
 
-def create_new_key_pair():
-    key = paramiko.RSAKey.generate(1024)
+def create_new_key_pair(length=1024):
+    key = paramiko.RSAKey.generate(length)
 
     private_key = StringIO.StringIO()
     key.write_private_key(private_key)

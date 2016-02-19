@@ -29,7 +29,7 @@ class ConfigFileHandler(object):
             location = self.config_location
 
         if not os.path.exists(os.path.dirname(location)):
-            os.makedirs(os.path.dirname(location), mode=600)
+            os.makedirs(os.path.dirname(location), mode=0600)
 
         with open(location, 'w') as f:
             self.config_parser.write(f)

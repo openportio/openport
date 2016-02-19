@@ -11,7 +11,7 @@ class OpenportAppConfig(object):
         self.openport_address = DEFAULT_SERVER
         self.manager_port = -1
         self.manager_port_from_config_file = False
-        self.config = os.path.expanduser('~/.openport/openport.cfg')
+        self.config = os.path.expanduser('~{}/.openport/openport.cfg'.format(os.environ.get('USER', '')))
         self.contact_manager = True
         self.verbose = False
         self.tcp_listeners = set()
