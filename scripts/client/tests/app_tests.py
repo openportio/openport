@@ -392,7 +392,7 @@ class AppTests(unittest.TestCase):
 
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER,
-                                  '--restart-on-reboot', '--database', self.db_file],
+                                  '--restart-on-reboot', '--database', self.db_file, '--ip-link-protection', 'True'],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_app)
 

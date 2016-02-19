@@ -1,4 +1,10 @@
 setuptools
+
+# Fix the "'openssl/aes.h': No such file or directory" error:
+# in bash:
+# LIB=C:/OPenSSL-win32/lib
+# INCLUDE=C:/OPenSSL-win32/include
+
 pycrypto
 cryptography
 ecdsa
