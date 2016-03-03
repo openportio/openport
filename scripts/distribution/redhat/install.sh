@@ -1,9 +1,7 @@
 cd $(dirname $0)
 cd ../../client
-yum install git
-yum install python-virtualenv
+sudo yum install -y git python-devel gcc libsqlite3-devel libffi-devel openssl-devel rpm-build
+curl https://bootstrap.pypa.io/get-pip.py |python -
+pip install virtualenv
 virtualenv env
-yum install gcc
-yum install libsqlite3-devel libffi-devel openssl-devl
 env/bin/pip install -r requirements.pip
-

@@ -1,10 +1,9 @@
-setuptools
 
 # Fix the "'openssl/aes.h': No such file or directory" error:
 # in bash:
 # LIB=C:/OPenSSL-win32/lib
 # INCLUDE=C:/OPenSSL-win32/include
-
+setuptools==19.2
 pycrypto
 cryptography
 ecdsa
@@ -34,4 +33,6 @@ pyperclip
 # wget https://bitbucket.org/cherrypy/cherrypy/raw/9c2d91cac2e84f166d75f748a836ffe8f244c56c/cherrypy/wsgiserver/wsgiserver2.py
 
 requests[security]
-ndg-httpsclient 
+ndg-httpsclient
+
+ 

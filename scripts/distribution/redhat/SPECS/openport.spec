@@ -1,6 +1,6 @@
 Summary: Opens a port from your pc to the internet.
 Name: openport
-Version: 1.0.1
+Version: 1.0.2
 Release: 1
 License: GPL
 Group: Tools/Networking
@@ -11,12 +11,13 @@ TODO
 
 
 %prep
-tar -cvf openport-1.Â0..tar.gz $RPM_BUILD_DIR/../../../client/ 
+tar -cvf openport-1.0.2.tar.gz $RPM_BUILD_DIR/../../../client/ 
 
 
 %build
+tar -xf *.tar.gz
 cd client
-virtualenv env
+virtualenv env --python=/usr/local/bin/python2.7
 env/bin/pip install -r requirements.pip
 cd $RPM_BUILD_DIR/client
 ./create_exes.sh
