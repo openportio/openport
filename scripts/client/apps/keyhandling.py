@@ -32,8 +32,8 @@ def get_or_create_public_key():
 
 def ensure_keys_exist(public_key_file, private_key_file):
     if not os.path.exists(private_key_file) or not os.path.exists(public_key_file):
-        system_id_rsa = os.path.expanduser('~{}/.ssh/id_rsa'.format(os.environ.get('USER', '')))
-        system_id_rsa_pub = os.path.expanduser('~{}/.ssh/id_rsa.pub'.format(os.environ.get('USER', '')))
+        system_id_rsa = os.path.expanduser('{}/.ssh/id_rsa'.format(os.environ.get('HOME', '/root')))
+        system_id_rsa_pub = os.path.expanduser('{}/.ssh/id_rsa.pub'.format(os.environ.get('HOME', '/root')))
         if os.path.exists(system_id_rsa) and os.path.exists(system_id_rsa_pub):
             try:
                 paramiko.RSAKey.from_private_key_file(system_id_rsa)

@@ -354,7 +354,7 @@ class LinuxOsInteraction(OsInteraction):
 
     def __init__(self, use_logger=True):
         super(LinuxOsInteraction, self).__init__(use_logger)
-        self.APP_DATA_PATH = '~{}/.ssh/id_rsa.pub'.format(os.environ.get('USER', ''))
+        self.APP_DATA_PATH = '{}/.ssh/id_rsa.pub'.format(os.environ.get('HOME', '/root'))
 
     def get_detached_process_creation_flag(self):
         return 0
