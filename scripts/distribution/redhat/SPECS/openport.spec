@@ -27,6 +27,8 @@ cd $RPM_BUILD_DIR/client
 mkdir -p $RPM_BUILD_ROOT/usr/lib/openport
 cp $RPM_BUILD_DIR/client/dist/openport/* $RPM_BUILD_ROOT/usr/lib/openport/ -r
 
+mkdir -p $RPM_BUILD_ROOT/etc/init
+cp $RPM_BUILD_DIR/../fs/etc/init/openport.conf $RPM_BUILD_ROOT/etc/init/
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -36,11 +38,15 @@ rm -rf $RPM_BUILD_ROOT
 #%doc README TODO COPYING ChangeLog
 
 /usr/lib/openport/
+/etc/init/openport.conf
 
 
 %post
 ln -s /usr/lib/openport/openport /usr/bin/openport
+initctl reload-configuration
 
+%postun
+rm /usr/bin/openport
 
 %global __os_install_post %{nil}
 

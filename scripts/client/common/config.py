@@ -1,5 +1,6 @@
 import os
 from common.singleton import Singleton
+from services import osinteraction
 DEFAULT_SERVER = 'https://www.openport.io'
 
 
@@ -11,7 +12,7 @@ class OpenportAppConfig(object):
         self.openport_address = DEFAULT_SERVER
         self.manager_port = -1
         self.manager_port_from_config_file = False
-        self.config = os.path.expanduser('~{}/.openport/openport.cfg'.format(os.environ.get('USER', '')))
+        self.config = osinteraction.getInstance().get_app_data_path('openport.cfg')
         self.contact_manager = True
         self.verbose = False
         self.tcp_listeners = set()
