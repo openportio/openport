@@ -3,22 +3,23 @@ import paramiko
 import StringIO
 from services.logger_service import get_logger
 import shutil
+from services import osinteraction
 
 log = get_logger(__name__)
 
 
 def get_default_key_locations():
-    home_dir = os.path.expanduser('~{}'.format(os.environ.get('USER', '')))
+    app_data_path = osinteraction.getInstance().get_app_data_path()
 
-    if len(home_dir) < 3:
-        log.error('ERROR!!! system indicates home_dir is <<<%s>>>' % home_dir)
+    if app_data_path == '/.openport':
+        log.error('ERROR!!! system indicates app_data_path is <<<%s>>>' % app_data_path)
         log.error('os.environ:')
         log.error(os.environ)
-        log.info('setting home_dir to /root')
-        home_dir = '/root'
-    log.debug('home_dir: %s' % home_dir)
-    private_key_file = os.path.join(home_dir, '.openport', 'id_rsa')
-    public_key_file = os.path.join(home_dir, '.openport', 'id_rsa.pub')
+        log.info('setting app_data_path to /root/.openport')
+        app_data_path = '/root/.openport'
+    log.debug('app_data_path: %s' % app_data_path)
+    private_key_file = os.path.join(app_data_path, 'id_rsa')
+    public_key_file = os.path.join(app_data_path, 'id_rsa.pub')
 
     return public_key_file, private_key_file
 
