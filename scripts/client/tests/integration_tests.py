@@ -36,7 +36,8 @@ class IntegrationTest(unittest.TestCase):
     def setUp(self):
         print self._testMethodName
         set_log_level(logging.DEBUG)
-        self.test_server = 'http://test.openport.be'
+        #self.test_server = 'http://test.openport.be'
+        self.test_server = 'https://openport.io'
         self.osinteraction = osinteraction.getInstance()
 
     def tearDown(self):
@@ -211,6 +212,37 @@ class IntegrationTest(unittest.TestCase):
         response3 = PortForwardResponse(dictionary3)
         self.assertNotEqual(response3.remote_port, response.remote_port)
         logger.debug('test done')
+
+    def test_long_key(self):
+        private_key_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'id_rsa_tmp')
+        public_key_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'id_rsa_tmp.pub')
+
+        logger.debug('getting key pair')
+        private_key, public_key = create_new_key_pair(4096)
+        with open(private_key_file, 'w') as f:
+            f.write(private_key)
+        with open(public_key_file, 'w') as f:
+            f.write(public_key)
+
+        port_out = self.osinteraction.get_open_port()
+        out_session = Session()
+        out_session.local_port = port_out
+        out_session.server_session_token = None
+        out_session.public_key_file = public_key_file
+        out_session.private_key_file = private_key_file
+
+        out_app = None
+        try:
+            out_app = start_openport_session(self, out_session)
+            remote_host, remote_port, link = out_session.server, out_session.server_port, out_session.open_port_for_ip_link
+            click_open_for_ip_link(link)
+            print remote_port
+            sleep(10)
+            #sleep(1000)
+            check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
+        finally:
+            if out_app:
+                out_app.stop()
 
     def test_new_key__not_clicking_open_for_ip_link(self):
         private_key_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', 'id_rsa_tmp')
