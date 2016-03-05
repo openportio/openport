@@ -154,6 +154,7 @@ class OpenportApp(object):
     def get_share_line(self, share):
                #"pid: %s - " % share.pid + \
         share_line = "localport: %s - " % share.local_port + \
+                     "remote server: %s - " % share.server + \
                      "remote port: %s - " % share.server_port + \
                      "running: %s - " % is_running(share) + \
                      "restart on reboot: %s" % bool(share.restart_command)
