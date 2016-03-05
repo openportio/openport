@@ -79,6 +79,8 @@ class AppService(object):
 
     def check_username_in_config_file(self):
         if not osinteraction.is_windows():
+            if osinteraction.getInstance().user_is_root():
+                return
             if not os.path.exists(USER_CONFIG_FILE):
                 logger.warning('The file %s does not exist. Your sessions will not be automatically restarted '
                                'on reboot. You can restart your session with "openport --restart-shares"'

@@ -64,7 +64,7 @@ class OpenportApp(object):
             #signal.signal(signal.SIGTERM, self.handleSigTERM)
 
     def handleSigTERM(self, signum, frame=-1):
-        logger.debug('got signal %s' % signum)
+        logger.info('got signal %s, exiting...' % signum)
         try:
             if self.session:
                 self.session.notify_stop()
@@ -223,6 +223,8 @@ class OpenportApp(object):
                     if not line.strip() or line.strip()[0] == '#':
                         continue
                     username = line.strip().split()[0]
+                    if username == 'root':
+                        continue
                     openport_command = self.os_interaction.get_openport_exec()
                     command = ['sudo', '-u', username, '-H'] + openport_command + ['--restart-shares']
                     logger.debug('restart command: %s' % command)
