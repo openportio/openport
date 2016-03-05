@@ -17,7 +17,7 @@ packagesbuild -v packages/Openport.pkgproj.tmp
 # right-click, choose Get Info, change to the Access Control tab and select the "Allow all applications to access this item".
 
 
-codesign --force --sign "Developer ID Application: Jan De Bleser" packages/build/Openport.pkg
+#codesign --force --sign "Developer ID Application: Jan De Bleser" packages/build/Openport.pkg
 
 hdiutil create -volname Openport_$VERSION -srcfolder packages/build -ov -format UDZO Openport_$VERSION.dmg
 

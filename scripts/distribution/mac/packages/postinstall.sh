@@ -1,3 +1,3 @@
 #!/bin/sh
-sudo rm -f /usr/bin/openport
-sudo ln -s /usr/lib/openport/openport /usr/bin/openport
+sudo rm -f /opt/local/bin/openport
+sudo ln -s /opt/local/lib/openport/openport /opt/local/bin/openport

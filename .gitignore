@@ -34,6 +34,8 @@ scripts/mac/build
 scripts/distribution/debian/debian_openport-gui/source/include-binaries
 scripts/distribution/debian/debian_openport/source/include-binaries
 
+scripts/distribution/mac/local_settings.sh
+
 scripts/distribution/redhat/BUILD/*
 scripts/distribution/redhat/RPMS/*
 scripts/distribution/redhat/SOURCES/*

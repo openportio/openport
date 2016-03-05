@@ -91,7 +91,9 @@ class OsInteraction(object):
         command.extend(restart_command)
         return command
 
-    def start_process(self, args):
+    def start_process(self, args, cwd=None):
+        if isinstance(args, basestring):
+            args = args.split()
         if self.logger:
             self.logger.debug('Running command: %s' % args)
             self.logger.debug('cwd: %s' % os.path.abspath(os.curdir))
@@ -99,7 +101,7 @@ class OsInteraction(object):
         p = subprocess.Popen(args,
                              bufsize=0, executable=None, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              preexec_fn=None, close_fds=not is_windows(), shell=False,
-                             cwd=self.get_base_path(),
+                             cwd=cwd if cwd else self.get_base_path(),
                              env=None,
                              universal_newlines=False, startupinfo=None, creationflags=0)
         return p
@@ -134,14 +136,14 @@ class OsInteraction(object):
                              close_fds=not is_windows(), cwd=cwd)
         return s.communicate()
 
-    def run_command_and_print_output_continuously(self, command_array, prefix='', cwd=None):
+    def run_command_and_print_output_continuously(self, command_array, prefix='', cwd=None, shell=False):
         creation_flags = self.get_detached_process_creation_flag()
         s = subprocess.Popen(command_array,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             creationflags=creation_flags, shell=False,
+                             creationflags=creation_flags, shell=shell,
                              close_fds=not is_windows(), cwd=cwd)
 
-        return self.print_output_continuously(s, prefix=prefix)
+        return self.print_output_continuously(s, prefix=prefix), s
 
     def print_output_continuously(self, s, prefix=''):
         def append_output(initial, extra):
@@ -268,6 +270,8 @@ class OsInteraction(object):
             path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openportw.exe'))
             if not os.path.exists(path):
                 path = self.quote_path('/usr/bin/openport')
+            if not os.path.exists(path):
+                path = self.quote_path('/opt/local/bin/openport')
             command.extend([path])
         else:
             command = self.get_python_exec()
@@ -342,15 +346,15 @@ class OsInteraction(object):
         import pyperclip
         pyperclip.copy(text)
 
+    def user_is_root(self):
+        return hasattr(os, 'getuid') and os.getuid() == 0
+
 
 class LinuxOsInteraction(OsInteraction):
 
     def __init__(self, use_logger=True):
         super(LinuxOsInteraction, self).__init__(use_logger)
-        import os
-        import pwd
-        import fcntl
-        self.APP_DATA_PATH = '/root/.openport' if os.getuid() == 0 else os.path.join(os.path.expanduser('~/.openport'))
+        self.APP_DATA_PATH = '~{}/.ssh/id_rsa.pub'.format(os.environ.get('USER', ''))
 
     def get_detached_process_creation_flag(self):
         return 0

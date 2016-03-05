@@ -83,7 +83,7 @@ class OsInteractionTest(unittest.TestCase):
         print command
         command.extend(['-c', "from time import sleep;import sys; print 'aaa'; sys.stdout.flush(); "
                                               "sleep(1); print 'bbb'"])
-        output = self.os_interaction.run_command_and_print_output_continuously(command)
+        output, p = self.os_interaction.run_command_and_print_output_continuously(command)
         self.assertEqual(['aaa%sbbb' % os.linesep, False], output)
 
     def test_run_command_and_print_output_continuously__kill_app(self):

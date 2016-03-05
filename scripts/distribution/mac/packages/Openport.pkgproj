@@ -446,6 +446,89 @@
 											<key>GID</key>
 											<integer>0</integer>
 											<key>PATH</key>
+											<string>bin</string>
+											<key>PATH_TYPE</key>
+											<integer>0</integer>
+											<key>PERMISSIONS</key>
+											<integer>493</integer>
+											<key>TYPE</key>
+											<integer>2</integer>
+											<key>UID</key>
+											<integer>0</integer>
+										</dict>
+										<dict>
+											<key>CHILDREN</key>
+											<array>
+												<dict>
+													<key>CHILDREN</key>
+													<array/>
+													<key>GID</key>
+													<integer>0</integer>
+													<key>PATH</key>
+													<string>../../../client/dist/openport</string>
+													<key>PATH_TYPE</key>
+													<integer>1</integer>
+													<key>PERMISSIONS</key>
+													<integer>493</integer>
+													<key>TYPE</key>
+													<integer>3</integer>
+													<key>UID</key>
+													<integer>0</integer>
+												</dict>
+											</array>
+											<key>GID</key>
+											<integer>0</integer>
+											<key>PATH</key>
+											<string>lib</string>
+											<key>PATH_TYPE</key>
+											<integer>0</integer>
+											<key>PERMISSIONS</key>
+											<integer>493</integer>
+											<key>TYPE</key>
+											<integer>2</integer>
+											<key>UID</key>
+											<integer>0</integer>
+										</dict>
+									</array>
+									<key>GID</key>
+									<integer>0</integer>
+									<key>PATH</key>
+									<string>local</string>
+									<key>PATH_TYPE</key>
+									<integer>0</integer>
+									<key>PERMISSIONS</key>
+									<integer>493</integer>
+									<key>TYPE</key>
+									<integer>2</integer>
+									<key>UID</key>
+									<integer>0</integer>
+								</dict>
+							</array>
+							<key>GID</key>
+							<integer>0</integer>
+							<key>PATH</key>
+							<string>opt</string>
+							<key>PATH_TYPE</key>
+							<integer>0</integer>
+							<key>PERMISSIONS</key>
+							<integer>493</integer>
+							<key>TYPE</key>
+							<integer>2</integer>
+							<key>UID</key>
+							<integer>0</integer>
+						</dict>
+						<dict>
+							<key>CHILDREN</key>
+							<array>
+								<dict>
+									<key>CHILDREN</key>
+									<array>
+										<dict>
+											<key>CHILDREN</key>
+											<array/>
+											<key>GID</key>
+											<integer>0</integer>
+											<key>PATH</key>
 											<string>Extensions</string>
 											<key>PATH_TYPE</key>
 											<integer>0</integer>
@@ -514,72 +597,6 @@
 							<integer>493</integer>
 							<key>TYPE</key>
 							<integer>1</integer>
-							<key>UID</key>
-							<integer>0</integer>
-						</dict>
-						<dict>
-							<key>CHILDREN</key>
-							<array>
-								<dict>
-									<key>CHILDREN</key>
-									<array/>
-									<key>GID</key>
-									<integer>0</integer>
-									<key>PATH</key>
-									<string>bin</string>
-									<key>PATH_TYPE</key>
-									<integer>0</integer>
-									<key>PERMISSIONS</key>
-									<integer>493</integer>
-									<key>TYPE</key>
-									<integer>2</integer>
-									<key>UID</key>
-									<integer>0</integer>
-								</dict>
-								<dict>
-									<key>CHILDREN</key>
-									<array>
-										<dict>
-											<key>CHILDREN</key>
-											<array/>
-											<key>GID</key>
-											<integer>0</integer>
-											<key>PATH</key>
-											<string>../../../client/dist/openport</string>
-											<key>PATH_TYPE</key>
-											<integer>1</integer>
-											<key>PERMISSIONS</key>
-											<integer>493</integer>
-											<key>TYPE</key>
-											<integer>3</integer>
-											<key>UID</key>
-											<integer>0</integer>
-										</dict>
-									</array>
-									<key>GID</key>
-									<integer>0</integer>
-									<key>PATH</key>
-									<string>lib</string>
-									<key>PATH_TYPE</key>
-									<integer>0</integer>
-									<key>PERMISSIONS</key>
-									<integer>493</integer>
-									<key>TYPE</key>
-									<integer>2</integer>
-									<key>UID</key>
-									<integer>0</integer>
-								</dict>
-							</array>
-							<key>GID</key>
-							<integer>0</integer>
-							<key>PATH</key>
-							<string>usr</string>
-							<key>PATH_TYPE</key>
-							<integer>0</integer>
-							<key>PERMISSIONS</key>
-							<integer>493</integer>
-							<key>TYPE</key>
-							<integer>2</integer>
 							<key>UID</key>
 							<integer>0</integer>
 						</dict>
@@ -857,6 +874,13 @@
 				<string>build</string>
 				<key>PATH_TYPE</key>
 				<integer>1</integer>
+			</dict>
+			<key>CERTIFICATE</key>
+			<dict>
+				<key>NAME</key>
+				<string>Developer ID Application: Jan De Bleser (3FJPW62YLR)</string>
+				<key>PATH</key>
+				<string>/Users/jan/Library/Keychains/login.keychain</string>
 			</dict>
 			<key>EXCLUDED_FILES</key>
 			<array>
