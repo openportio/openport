@@ -34,6 +34,8 @@ class PortForwardResponse():
         self.open_port_for_ip_link = dict.get('open_port_for_ip_link')
         self.session_id = dict.get('session_id')
         self.session_end_time = dict.get('session_end_time')
+        self.fallback_ssh_server_ip = dict.get('fallback_ssh_server_ip')
+        self.fallback_ssh_server_port = dict.get('fallback_ssh_server_port')
 
 
 def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEFAULT_SERVER,
@@ -64,10 +66,14 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
  #       if sys.version_info >= (2, 7, 9):
  #           import ssl
  #           ssl._create_default_https_context = ssl._create_unverified_context
+        logger.debug('sending request %s %s' % (url, request_data))
 #
         r = requests.post(url, data=request_data)
+        if r.status_code == 200:
         #logger.debug(r.text)
-        return r.json()
+            return r.json()
+        if r.status_code == 500:
+            return {'error': r.reason}
     except requests.HTTPError as e:
         logger.error("An error has occurred while communicating the the openport servers. %s" % e)
         if r is not None:

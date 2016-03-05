@@ -79,6 +79,7 @@ class PortForwardingService:
             logger.error('*** Failed to connect to %s:%d: %r' % (self.server, self.server_ssh_port, e))
             if self.fallback_server_ssh_port is not None:
                 try:
+                    logger.debug('Connecting to fallback ssh host %s:%d ...' % (self.fallback_ssh_server, self.fallback_server_ssh_port))
                     self.client.connect(
                         self.fallback_ssh_server, self.fallback_server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
                     self.stopped = False
