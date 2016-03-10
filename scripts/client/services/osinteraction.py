@@ -354,7 +354,10 @@ class LinuxOsInteraction(OsInteraction):
 
     def __init__(self, use_logger=True):
         super(LinuxOsInteraction, self).__init__(use_logger)
-        self.APP_DATA_PATH = '{}/.openport'.format(os.environ.get('HOME', '/root'))
+        home_dir = os.path.expanduser("~{}/".format(os.environ.get("USER")))
+        if len(home_dir) < 3:
+            home_dir = '/root/'
+        self.APP_DATA_PATH = os.path.join(home_dir, '.openport')
 
     def get_detached_process_creation_flag(self):
         return 0

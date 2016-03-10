@@ -10,13 +10,6 @@ log = get_logger(__name__)
 
 def get_default_key_locations():
     app_data_path = osinteraction.getInstance().get_app_data_path()
-
-    if app_data_path == '/.openport':
-        log.error('ERROR!!! system indicates app_data_path is <<<%s>>>' % app_data_path)
-        log.error('os.environ:')
-        log.error(os.environ)
-        log.info('setting app_data_path to /root/.openport')
-        app_data_path = '/root/.openport'
     log.debug('app_data_path: %s' % app_data_path)
     private_key_file = os.path.join(app_data_path, 'id_rsa')
     public_key_file = os.path.join(app_data_path, 'id_rsa.pub')
