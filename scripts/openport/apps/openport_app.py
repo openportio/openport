@@ -7,15 +7,15 @@ import ast
 import threading
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
-from services import osinteraction, dbhandler
-from services.logger_service import get_logger, set_log_level
-from common.config import OpenportAppConfig
-from common.session import Session
-from services import key_registration_service
-from services.config_service import ConfigService
-from services.app_service import AppService, USER_CONFIG_FILE
-from apps.openport import Openport
-from apps import openport_app_version
+from openport.services import osinteraction, dbhandler
+from openport.services.logger_service import get_logger, set_log_level
+from openport.common.config import OpenportAppConfig
+from openport.common.session import Session
+from openport.services import key_registration_service
+from openport.services.config_service import ConfigService
+from openport.services.app_service import AppService, USER_CONFIG_FILE
+from openport.apps.openport_service import Openport
+from openport.apps import openport_app_version
 from app_tcp_server import AppTcpServer, send_exit, send_ping, is_running
 from keyhandling import ensure_keys_exist, get_default_key_locations
 

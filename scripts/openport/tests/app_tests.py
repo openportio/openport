@@ -25,7 +25,7 @@ from apps.app_tcp_server import send_exit, send_ping, is_running
 logger = get_logger(__name__)
 
 TEST_SERVER = 'http://test.openport.be'
-#TEST_SERVER = 'https://openport.io'
+TEST_SERVER = 'https://openport.io'
 
 if not osinteraction.is_windows():
     PYTHON_EXE = 'env/bin/python'

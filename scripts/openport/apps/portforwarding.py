@@ -1,11 +1,11 @@
 import threading
 import paramiko
 import time
-from services.logger_service import get_logger
 from socket import error as SocketError
-from keyhandling import get_default_key_locations
 import errno
-from services.utils import run_method_with_timeout, TimeoutException
+from openport.services.logger_service import get_logger
+from openport.services.utils import run_method_with_timeout, TimeoutException
+from keyhandling import get_default_key_locations
 
 logger = get_logger(__name__)
 
@@ -36,7 +36,9 @@ class PortForwardingService:
                  http_forward_address=None,
                  start_callback=None,
                  forward_tunnel=False,
-                 session_token=None):
+                 session_token=None,
+                 keep_alive_interval=10
+                 ):
         self.local_port = local_port
         self.remote_port = remote_port
         self.server = server
@@ -57,6 +59,7 @@ class PortForwardingService:
         self.start_callback = start_callback
         self.forward_tunnel = forward_tunnel
         self.session_token = session_token
+        self.keep_alive_interval = keep_alive_interval
 
         self.portForwardingRequestException = None
         self.stopped = False
@@ -129,7 +132,7 @@ class PortForwardingService:
 
     def keep_alive(self):
         while not self.stopped:
-            time.sleep(10)
+            time.sleep(self.keep_alive_interval)
             if self.stopped:
                 return
             if self.portForwardingRequestException is not None:

@@ -1,6 +1,5 @@
 import os
-from common.singleton import Singleton
-from services import osinteraction
+from openport.services import osinteraction
 DEFAULT_SERVER = 'https://www.openport.io'
 
 

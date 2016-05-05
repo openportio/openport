@@ -1,9 +1,9 @@
 import os
 import paramiko
 import StringIO
-from services.logger_service import get_logger
 import shutil
-from services import osinteraction
+from openport.services.logger_service import get_logger
+from openport.services import osinteraction
 
 log = get_logger(__name__)
 

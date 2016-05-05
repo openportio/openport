@@ -23,7 +23,7 @@ class OsInteraction(object):
 
     def __init__(self, use_logger=True):
         if use_logger:
-            from services.logger_service import get_logger
+            from openport.services.logger_service import get_logger
             self.logger = get_logger('OsInteraction')
         self.output_queues = {}
         self.all_output = {}

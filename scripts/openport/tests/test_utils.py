@@ -11,11 +11,11 @@ import ssl
 import traceback
 import datetime
 
-from services.logger_service import get_logger
-from services import osinteraction
-from apps.openportit import OpenportItApp
-from apps.openport import Openport
-from services.utils import run_method_with_timeout, TimeoutException
+from openport.services.logger_service import get_logger
+from openport.services import osinteraction
+from openport.apps.openportit import OpenportItApp
+from openport.apps.openport_service import Openport
+from openport.services.utils import run_method_with_timeout, TimeoutException
 
 logger = get_logger(__name__)
 
@@ -341,11 +341,11 @@ def kill_all_processes(processes_to_kill):
 def click_open_for_ip_link(link):
     if link:
         logger.info('clicking link %s' % link)
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
+#        ctx = ssl.create_default_context()
+#        ctx.check_hostname = False
+#        ctx.verify_mode = ssl.CERT_NONE
         req = urllib2.Request(link)
-        response = run_method_with_timeout(lambda: urllib2.urlopen(req, timeout=10, context=ctx).read(), 10)
+        response = run_method_with_timeout(lambda: urllib2.urlopen(req, timeout=10).read(), 10)
         assert response is not None
         assert 'is now open' in response
 

@@ -2,10 +2,10 @@ import os
 from time import sleep
 import errno
 
-from common.config import DEFAULT_SERVER
-from apps import openport_api
-from apps.portforwarding import PortForwardingService, TunnelError
-from services.logger_service import get_logger
+from openport.apps import openport_api
+from openport.common.config import DEFAULT_SERVER
+from openport.apps.portforwarding import PortForwardingService, TunnelError
+from openport.services.logger_service import get_logger
 
 
 logger = get_logger('openport')

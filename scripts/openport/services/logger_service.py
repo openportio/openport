@@ -1,7 +1,7 @@
 import logging
 import logging.handlers
 from sys import stdout
-from services import osinteraction
+from openport.services import osinteraction
 
 log_level = logging.INFO
 
