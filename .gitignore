@@ -1,34 +1,34 @@
 *.pyc
 /www/local_settings.py
-/scripts/client/dist/
-/scripts/client/build/
-/scripts/client/tests/testfiles/tmp/*
-/scripts/client/openport.db
-/scripts/client/ghostdriver.log
+/scripts/openport/dist/
+/scripts/openport/build/
+/scripts/openport/tests/testfiles/tmp/*
+/scripts/openport/openport.db
+/scripts/openport/ghostdriver.log
 /scripts/openport.db
-/scripts/client/nsis/OpenPort-It.exe
+/scripts/openport/nsis/OpenPort-It.exe
 /external/twitter-bootstrap-v1.4.0-58-g5217131.zip
 /www/env/*
-/scripts/client/.idea/workspace.xml
-/scripts/client/nsis/*.exe
+/scripts/openport/.idea/workspace.xml
+/scripts/openport/nsis/*.exe
 sass_stdlib.xml
 /scripts/.idea/*.iml
 /scripts/.idea/scopes/*.xml
 /scripts/.idea/inspectionProfiles/*.xml
 /openport.log
 
-/scripts/client/tests/test-reports/*.xml
+/scripts/openport/tests/test-reports/*.xml
 
-/scripts/client/env/*
+/scripts/openport/env/*
 /scripts/package/*
 
 **/.idea/*
 *~
 scripts/mac/iceberg/Openport/build/Openport-0.9.0.pkg
 .idea
-scripts/client/nosetests.xml
-scripts/client/openportmanager.spec
-scripts/client/test-reports
+scripts/openport/nosetests.xml
+scripts/openport/openportmanager.spec
+scripts/openport/test-reports
 ghostdriver.log
 scripts/mac/build
 scripts/distribution/debian/debian_openport-gui/source/include-binaries
