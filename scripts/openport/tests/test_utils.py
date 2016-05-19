@@ -13,6 +13,7 @@ import datetime
 
 from openport.services.logger_service import get_logger
 from openport.services import osinteraction
+from openport.services import dbhandler
 from openport.apps.openportit import OpenportItApp
 from openport.apps.openport_service import Openport
 from openport.services.utils import run_method_with_timeout, TimeoutException
@@ -255,7 +256,7 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', htt
             continue
 
         if http_forward:
-            m = re.search(r'Now forwarding remote address (?P<host>[a-z\.]*) to localhost', all_output[0])
+            m = re.search(r'Now forwarding remote address (?P<host>[a-z\.\-]*) to localhost', all_output[0])
         elif forward_tunnel:
             m = re.search(r'INFO - You are now connected. You can access the remote pc\'s port (?P<remote_port>\d*) '
                           r'on localhost:(?P<local_port>\d*)', all_output[0])
@@ -276,7 +277,7 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', htt
                 port = int(m.group('local_port'))
             else:
                 host, port = m.group('host'), int(m.group('remote_port'))
-            m = re.search(r'to first go here: ([a-zA-Z0-9\:/\.]+) .', all_output[0])
+            m = re.search(r'to first go here: ([a-zA-Z0-9\:/\.\-]+) .', all_output[0])
             link = m.group(1) if m is not None else None
             return host, port, link
 
@@ -340,6 +341,7 @@ def kill_all_processes(processes_to_kill):
 
 def click_open_for_ip_link(link):
     if link:
+        link = link.replace('https', 'http')
         logger.info('clicking link %s' % link)
 #        ctx = ssl.create_default_context()
 #        ctx.check_hostname = False
@@ -504,3 +506,12 @@ def set_default_args(app, db_location=None):
     app.args.remote_port = -1
     app.args.ip_link_protection = None
     app.args.create_migrations = False
+    app.args.daemonize = False
+
+
+def get_nr_of_shares_in_db_file(db_file):
+    db_handler = dbhandler.DBHandler(db_file, init_db=False)
+    try:
+        return len(db_handler.get_active_shares())
+    except:
+        return 0

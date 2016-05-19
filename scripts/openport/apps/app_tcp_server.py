@@ -5,8 +5,8 @@ import threading
 import requests
 
 from bottle import Bottle, ServerAdapter, request, response, error, hook
-from services.logger_service import get_logger
-from services.utils import run_method_with_timeout
+from openport.services.logger_service import get_logger
+from openport.services.utils import run_method_with_timeout
 
 
 logger = get_logger('server')

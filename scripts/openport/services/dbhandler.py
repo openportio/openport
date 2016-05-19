@@ -3,17 +3,16 @@ import os
 import pickle
 import logging
 
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-from common.session import Session
-from services.logger_service import get_logger
-from services import osinteraction, migration_service
-
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm.exc import NoResultFound
+
+from openport.common.session import Session
+from openport.services.logger_service import get_logger
+from openport.services import osinteraction, migration_service
 
 logger = get_logger('dbhandler')
 

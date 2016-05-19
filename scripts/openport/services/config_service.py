@@ -2,10 +2,10 @@ __author__ = 'jan'
 
 import os
 
-from common.config_file_handler import ConfigFileHandler
-from services import osinteraction
-from services.logger_service import get_logger
-from services.app_service import AppService
+from openport.common.config_file_handler import ConfigFileHandler
+from openport.services import osinteraction
+from openport.services.logger_service import get_logger
+from openport.services.app_service import AppService
 
 logger = get_logger(__name__)
 

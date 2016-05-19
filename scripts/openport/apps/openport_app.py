@@ -5,6 +5,7 @@ from UserDict import UserDict
 import argparse
 import ast
 import threading
+
 sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from openport.services import osinteraction, dbhandler
@@ -19,14 +20,13 @@ from openport.apps import openport_app_version
 from app_tcp_server import AppTcpServer, send_exit, send_ping, is_running
 from keyhandling import ensure_keys_exist, get_default_key_locations
 
-from common.config import DEFAULT_SERVER
+from openport.common.config import DEFAULT_SERVER
 
 logger = get_logger('openport_app')
 from time import sleep
 
 
 class OpenportApp(object):
-
     def __init__(self):
         self.config = OpenportAppConfig()
         self.config.app = self
@@ -57,11 +57,11 @@ class OpenportApp(object):
                 signal.signal(signal.SIGINT, self.handleSigTERM)
                 signal.signal(signal.SIGTERM, self.handleSigTERM)
 
-                #self.os_interaction.handle_signals(self.handleSigTERM)
+                # self.os_interaction.handle_signals(self.handleSigTERM)
         except ValueError:
             pass
             # Do not handle the sigterm signal, otherwise the share will not be restored after reboot.
-            #signal.signal(signal.SIGTERM, self.handleSigTERM)
+            # signal.signal(signal.SIGTERM, self.handleSigTERM)
 
     def handleSigTERM(self, signum, frame=-1):
         logger.info('got signal %s, exiting...' % signum)
@@ -75,6 +75,7 @@ class OpenportApp(object):
                 sleep(5)
                 logger.debug('App did not end cleanly.')
                 os._exit(-1)
+
             t = threading.Thread(target=kill_if_needed())
             t.daemon = True
             t.start()
@@ -103,27 +104,35 @@ class OpenportApp(object):
 
         parser.add_argument('--listener-port', type=int, default=-1, help=argparse.SUPPRESS)
         parser.add_argument('--database', type=str, default='', help=argparse.SUPPRESS)
-        parser.add_argument('--request-port', type=int, default=-1, help='Request the server port for the share. Do not forget to pass the token.')
+        parser.add_argument('--request-port', type=int, default=-1,
+                            help='Request the server port for the share. Do not forget to pass the token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
         parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
-        parser.add_argument('--http-forward', action='store_true', help='Request an http forward, so you can connect to port 80 on the server.')
+        parser.add_argument('--http-forward', action='store_true',
+                            help='Request an http forward, so you can connect to port 80 on the server.')
         parser.add_argument('--server', default=DEFAULT_SERVER, help=argparse.SUPPRESS)
-        parser.add_argument('--restart-on-reboot', '-R', action='store_true', help='Restart this share when the manager app is started.')
+        parser.add_argument('--restart-on-reboot', '-R', action='store_true',
+                            help='Restart this share when the manager app is started.')
         parser.add_argument('--config-file', action='store', type=str, default='', help=argparse.SUPPRESS)
-        parser.add_argument('--forward-tunnel', action='store_true', help='Forward connections from your local port to the server port.')
+        parser.add_argument('--forward-tunnel', action='store_true',
+                            help='Forward connections from your local port to the server port.')
         parser.add_argument('--remote-port', type=int, help='The server port you want to forward to'
-                                                           ' (only use in combination with --forward-tunnel).', default=-1)
+                                                            ' (only use in combination with --forward-tunnel).',
+                            default=-1)
         parser.add_argument('--ip-link-protection', type=ast.literal_eval,
                             help='Set to True or False to set if you want users to click a secret link before they can '
                                  'access this port. This overwrites the standard setting in your profile for this '
                                  'session.', default=None, choices=[True, False])
 
-        parser.add_argument('--name', default='', help='The name for this client. (Use in combination with --register-key)')
+        parser.add_argument('--name', default='',
+                            help='The name for this client. (Use in combination with --register-key)')
+        parser.add_argument('--daemonize', '-d', action='store_true', help='Start the app in the background.')
 
     def init_app(self, args):
         if args.verbose:
-            from logging import DEBUG
-            set_log_level(DEBUG)
+            import logging
+            set_log_level(logging.DEBUG)
+            logging.getLogger('sqlalchemy').setLevel(logging.WARN)
             self.config.verbose = True
         logger.debug('client pid:%s' % os.getpid())
 
@@ -152,12 +161,14 @@ class OpenportApp(object):
             print self.get_share_line(share)
 
     def get_share_line(self, share):
-               #"pid: %s - " % share.pid + \
+        # "pid: %s - " % share.pid + \
         share_line = "localport: %s - " % share.local_port + \
                      "remote server: %s - " % share.server + \
-                     "remote port: %s - " % share.server_port + \
-                     "running: %s - " % is_running(share) + \
-                     "restart on reboot: %s" % bool(share.restart_command)
+                     "remote port: %s - " % share.server_port
+        if share.open_port_for_ip_link:
+            share_line += "open-for-ip-link: %s - " % share.open_port_for_ip_link
+        share_line += "running: %s - " % is_running(share) + \
+                      "restart on reboot: %s" % bool(share.restart_command)
         if self.config.verbose:
             share_line += ' - pid: %s' % share.pid + \
                           ' - id: %s' % share.id
@@ -202,7 +213,7 @@ class OpenportApp(object):
 
                     p = self.os_interaction.start_openport_process(share)
                     logger.debug('process started with pid %s' % p.pid)
-                    #self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
+                    # self.os_interaction.print_output_continuously_threaded(p, 'share port: %s - ' % share.local_port)
                     sleep(1)
                     if p.poll() is not None:
                         all_output = self.os_interaction.get_all_output(p)
@@ -235,6 +246,15 @@ class OpenportApp(object):
         # print 'sys.argv: %s' % sys.argv
         self.init_app(self.args)
 
+        if self.args.daemonize:
+            args = self.os_interaction.get_python_exec()
+            args.extend(sys.argv)
+            args = self.os_interaction.unset_variable(args, '--daemonize')
+            args = self.os_interaction.unset_variable(args, '-d')
+            self.os_interaction.spawn_daemon(args)
+            logger.info('App started in background.')
+            sys.exit(0)
+
         key_registration_service.register_key(self.args, self.args.server)
 
         self.db_handler = dbhandler.DBHandler(self.args.database)
@@ -266,7 +286,7 @@ class OpenportApp(object):
             sys.exit()
 
         if self.args.create_migrations:
-            from services import migration_service
+            from openport.services import migration_service
             migration_service.create_migrations(self.db_handler.db_location)
             sys.exit()
 
@@ -291,8 +311,9 @@ class OpenportApp(object):
                     sys.exit(6)
 
                 if db_share.restart_command and not self.args.restart_on_reboot:
-                    logger.warn('Port forward for port %s that would be restarted on reboot will not be restarted anymore.'
-                                % self.args.local_port)
+                    logger.warn(
+                        'Port forward for port %s that would be restarted on reboot will not be restarted anymore.'
+                        % self.args.local_port)
 
                 if not session.server_session_token:
                     logger.debug("retrieved db share session token: %s" % db_share.server_session_token)
@@ -304,10 +325,10 @@ class OpenportApp(object):
 
         if self.args.restart_on_reboot:
             session.restart_command = self.app_service.get_restart_command(session,
-                                                          database=self.args.database,
-                                                          verbose=self.args.verbose,
-                                                          server=self.args.server,
-                                                          )
+                                                                           database=self.args.database,
+                                                                           verbose=self.args.verbose,
+                                                                           server=self.args.server,
+                                                                           )
             self.app_service.check_username_in_config_file()
 
         session.ip_link_protection = self.args.ip_link_protection
@@ -328,12 +349,13 @@ class OpenportApp(object):
         self.session = session
 
         self.server.run_threaded()
+        self.save_share(session)
         self.openport.start_port_forward(session, server=self.args.server)
 
     def error_callback(self, session, exception):
         logger.debug('error_callback')
         logger.debug('exception in session %s' % session.id)
-        #logger.exception(exception)
+        # logger.exception(exception)
 
     def success_callback(self, session):
         logger.debug('success_callback')
@@ -348,6 +370,7 @@ class OpenportApp(object):
             self.openport.stop_port_forward()
         if self.server:
             self.server.stop()
+
 
 if __name__ == '__main__':
     app = OpenportApp()

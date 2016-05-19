@@ -1,10 +1,10 @@
 import os
 import requests
 
-from common.session import Session
-from services.logger_service import get_logger
-from services import osinteraction
-from common.config import DEFAULT_SERVER
+from openport.common.session import Session
+from openport.services.logger_service import get_logger
+from openport.services import osinteraction
+from openport.common.config import DEFAULT_SERVER
 
 logger = get_logger(__name__)
 

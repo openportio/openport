@@ -1,12 +1,12 @@
 import os
 import sys
-
-from apps.openport_app import OpenportApp
-from services import crypt_service
-from common.share import Share
-from services.logger_service import get_logger
-from apps.servefile import serve_file_on_port
 from time import sleep
+
+from openport.apps.openport_app import OpenportApp
+from openport.services import crypt_service
+from openport.common.share import Share
+from openport.services.logger_service import get_logger
+from openport.apps.servefile import serve_file_on_port
 logger = get_logger('openportit')
 
 class OpenportItApp(OpenportApp):

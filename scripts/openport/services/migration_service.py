@@ -5,8 +5,8 @@ from alembic.script import ScriptDirectory
 from alembic.operations import Operations
 from alembic.migration import MigrationContext
 from alembic import util, autogenerate as autogen
-from services.osinteraction import OsInteraction, getInstance as get_osinteraction_instance
-from services.logger_service import get_logger
+from openport.services.osinteraction import OsInteraction, getInstance as get_osinteraction_instance
+from openport.services.logger_service import get_logger
 
 logger = get_logger(__name__)
 

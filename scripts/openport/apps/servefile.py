@@ -8,8 +8,8 @@ import posixpath
 import socket
 import urllib
 from OpenSSL import SSL
-from services.logger_service import get_logger
-from services import osinteraction
+from openport.services.logger_service import get_logger
+from openport.services import osinteraction
 from ext_http_server import RangeHandler
 
 

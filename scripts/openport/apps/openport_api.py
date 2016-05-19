@@ -3,14 +3,17 @@
 import sys
 import os
 import requests
-from apps.keyhandling import get_or_create_public_key
-from services.logger_service import get_logger
-from common.config import DEFAULT_SERVER
-from apps.openport_app_version import VERSION
-from services import osinteraction
+from openport.apps.keyhandling import get_or_create_public_key
+from openport.services.logger_service import get_logger
+from openport.common.config import DEFAULT_SERVER
+from openport.apps.openport_app_version import VERSION
+from openport.services import osinteraction
 
 
 logger = get_logger('openport_api')
+
+class SessionError(Exception):
+    pass
 
 class FatalSessionError(Exception):
     pass
@@ -68,12 +71,13 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
  #           ssl._create_default_https_context = ssl._create_unverified_context
         logger.debug('sending request %s %s' % (url, request_data))
 #
-        r = requests.post(url, data=request_data)
+        r = requests.post(url, data=request_data, verify=('test' not in url))
         if r.status_code == 200:
         #logger.debug(r.text)
             return r.json()
         if r.status_code == 500:
             return {'error': r.reason}
+        return {'error' : 'status code: {} text: {}'.format(r.status_code, r.text)}
     except requests.HTTPError as e:
         logger.error("An error has occurred while communicating the the openport servers. %s" % e)
         if r is not None:
@@ -107,6 +111,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
             except Exception as e:
                 logger.debug(e)
         logger.error("An error has occurred while communicating with the openport servers. %s" % e)
+        logger.exception(e)
         raise e
 
 
@@ -140,6 +145,7 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
             logger.info(dict['error'])
         if dict.get('fatal_error', False):
             raise FatalSessionError(dict.get('error'))
+        raise SessionError(dict['error'])
 
     logger.debug(dict)
 

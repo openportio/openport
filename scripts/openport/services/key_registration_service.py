@@ -1,8 +1,8 @@
 import sys
 import requests
 
-from apps.keyhandling import get_or_create_public_key
-from common.config import DEFAULT_SERVER
+from openport.apps.keyhandling import get_or_create_public_key
+from openport.common.config import DEFAULT_SERVER
 
 
 try:

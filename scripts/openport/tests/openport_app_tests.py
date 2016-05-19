@@ -1,19 +1,21 @@
-__author__ = 'jan'
-
 import os
 import sys
 import logging
 import signal
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-import unittest
-from services.osinteraction import getInstance
-from time import sleep
-from services.logger_service import set_log_level
-from apps.openport_app import OpenportApp
 import threading
-from services import osinteraction, dbhandler
-from test_utils import set_default_args, wait_for_response, click_open_for_ip_link, check_tcp_port_forward
+from time import sleep
+
+from mock import patch
+from requests import ConnectionError
+import unittest
+
+from openport.services.osinteraction import getInstance
+from openport.services.logger_service import set_log_level
+from openport.apps.openport_app import OpenportApp
+from openport.services import osinteraction, dbhandler
+from test_utils import set_default_args, wait_for_response, click_open_for_ip_link, check_tcp_port_forward,\
+    get_nr_of_shares_in_db_file
 
 
 class OpenportAppTests(unittest.TestCase):
@@ -186,3 +188,20 @@ class OpenportAppTests(unittest.TestCase):
         self.assertFalse(self.app.session.active)
         self.assertFalse(self.app.openport.running())
         self.assertFalse(check_tcp_port_forward(self, session.server, port, session.server_port, fail_on_error=False))
+
+    @patch('requests.post', side_effect=ConnectionError)
+    @patch('requests.get', side_effect=ConnectionError)
+    def test_openport_app__offline(self, mock_post, mock_get):
+        set_default_args(self.app, self.test_db)
+
+        self.app.args.local_port = 24
+        self.app.args.restart_on_reboot = True
+        thr = threading.Thread(target=self.app.start)
+        thr.setDaemon(True)
+        thr.start()
+        sleep(2)
+        self.assertTrue(thr.is_alive)
+
+        db_handler = dbhandler.DBHandler(self.test_db, init_db=False)
+        self.assertEqual(1, len(db_handler.get_shares_to_restart()))
+        self.app.stop()
