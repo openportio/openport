@@ -6,7 +6,7 @@ import argparse
 import ast
 import threading
 
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
+sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..', '..'))
 
 from openport.services import osinteraction, dbhandler
 from openport.services.logger_service import get_logger, set_log_level
@@ -44,7 +44,7 @@ class OpenportApp(object):
         self.argument_parser = argparse.ArgumentParser()
 
         if self.os_interaction.is_compiled():
-            from common.tee import TeeStdErr, TeeStdOut
+            from openport.common.tee import TeeStdErr, TeeStdOut
             TeeStdOut(self.os_interaction.get_app_data_path('openport_app.out.log'), 'a')
             TeeStdErr(self.os_interaction.get_app_data_path('openport_app.error.log'), 'a')
         try:
@@ -171,7 +171,8 @@ class OpenportApp(object):
                       "restart on reboot: %s" % bool(share.restart_command)
         if self.config.verbose:
             share_line += ' - pid: %s' % share.pid + \
-                          ' - id: %s' % share.id
+                          ' - id: %s' % share.id + \
+                          ' - token: %s' % share.server_session_token
         return share_line
 
     def kill(self, local_port):

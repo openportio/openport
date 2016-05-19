@@ -4,8 +4,8 @@ import threading
 
 from bottle import Bottle, ServerAdapter, request, response, run, error, hook
 import requests
-from services.logger_service import get_logger
-from common.config import OpenportAppConfig
+from openport.services.logger_service import get_logger
+from openport.common.config import OpenportAppConfig
 
 logger = get_logger('server')
 

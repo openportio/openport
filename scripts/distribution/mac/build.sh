@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ../../client/apps/openport_app_version.py
+source ../../openport/apps/openport_app_version.py
 
 export PATH="$PATH:/usr/local/bin"
 

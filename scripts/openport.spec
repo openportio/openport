@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['apps/openport_app.py'],
+a = Analysis(['openport/apps/openport_app.py'],
              pathex=['.'],
              hiddenimports=[],
              hookspath=None,
@@ -18,12 +18,11 @@ from os import listdir
 from os.path import isfile, join
 import os
 
-migration_script_folder = 'alembic/versions'
+migration_script_folder = 'openport/alembic/versions'
 for f in listdir(migration_script_folder):
     path = join(migration_script_folder, f)
     if isfile(path):
-        a.datas += [(path, path, 'DATA')]
-
+        a.datas += [(path[9:], path, 'DATA')]
 
 exe = EXE(pyz,
           a.scripts,

@@ -1,5 +1,6 @@
 #!/bin/sh
-env/bin/pyinstaller --clean openport.spec -y
+rm -rf dist/*
+openport/env/bin/pyinstaller --clean openport.spec -y
 
 
 
@@ -13,7 +14,7 @@ done
 
 if [[ $no_gui != 1 ]]
 then
-	env/bin/pyinstaller --clean openport-gui.spec -y
+	openport/env/bin/pyinstaller --clean openport-gui.spec -y
 fi
 
 #If the exe fails with "cannot import _counter":

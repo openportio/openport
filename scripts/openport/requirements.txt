@@ -7,7 +7,7 @@ setuptools==19.2
 pycrypto
 cryptography
 ecdsa
-paramiko
+paramiko==1.17  # to avoid "Multibackend cannot be initialized with no backends" error
 #wxPython
 unittest-xml-reporting
 pyopenssl

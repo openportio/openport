@@ -1,5 +1,5 @@
 import wx
-from services import osinteraction
+from openport.services import osinteraction
 import os
 
 

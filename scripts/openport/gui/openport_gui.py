@@ -11,22 +11,22 @@ from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
 
 
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..'))
-from common.share import Share
-from services import osinteraction
-from services.logger_service import get_logger
-from services import qr_service, image_service
-from gui.trayicon import OpenPortItTaskBarIcon
-from services.app_service import AppService
-from common.session import Session
-from services.dbhandler import DBHandler
+sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..', '..'))
+from openport.common.share import Share
+from openport.services import osinteraction
+from openport.services.logger_service import get_logger
+from openport.services import qr_service, image_service
+from openport.gui.trayicon import OpenPortItTaskBarIcon
+from openport.services.app_service import AppService
+from openport.common.session import Session
+from openport.services.dbhandler import DBHandler
 
 from gui_tcp_server import GUITcpServer
-from apps.app_tcp_server import is_running
-from common.config import OpenportAppConfig
-from services.config_service import ConfigService
+from openport.apps.app_tcp_server import is_running
+from openport.common.config import OpenportAppConfig
+from openport.services.config_service import ConfigService
 
-from services.logger_service import set_log_level
+from openport.services.logger_service import set_log_level
 import logging
 
 
@@ -167,7 +167,8 @@ class SharesFrame(wx.Frame):
                 session = Session()
                 session.local_port = dialog.port_input.GetValue()
                 session.http_forward = dialog.http_forward_checkbox.GetValue()
-                self.app_service.start_openport_process_from_session(session)
+                p = self.app_service.start_openport_process_from_session(session)
+                #self.os_interaction.print_output_continuously_threaded(p)
             wx.CallAfter(foo)
 
     def rebuild(self):
@@ -318,7 +319,8 @@ class SharesFrame(wx.Frame):
                                                                                  self.config.openport_address)
                 full_command = self.os_interaction.get_full_restart_command(share)
                # self.os_interaction.spawn_daemon(full_command)
-                self.os_interaction.start_process(full_command)
+                p = self.os_interaction.start_process(full_command)
+                #self.os_interaction.print_output_continuously_threaded(p)
                 self.remove_share(share)
             wx.CallAfter(foo)
 
