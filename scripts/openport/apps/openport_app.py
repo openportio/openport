@@ -90,42 +90,40 @@ class OpenportApp(object):
     def add_default_arguments(self, parser, group_required=True):
 
         group = parser.add_mutually_exclusive_group(required=group_required)
-        group.add_argument('--local-port', type=int, help='The port you want to openport.', default=-1)
-        group.add_argument('--register-key', default='', help='Use this to add your link your client to your account.')
-        group.add_argument('port', nargs='?', type=int, help='The port you want to openport.', default=-1)
-        # This is a hack to make the command to start the manager work.
-        group.add_argument('--version', '-V', action='version', help='Print the version number and exit.',
+        group.add_argument('port', nargs='?', type=int, help='The local port you want to openport.', default=-1)
+        group.add_argument('--version', '-V', action='version', help='Print the version and exit.',
                            version=openport_app_version.VERSION)
+        parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
+        group.add_argument('--local-port', type=int, help='The local port you want to openport.', default=-1)
+        group.add_argument('--register-key', default='', metavar='SECRET_KEY', help='Use this to link your client to your account. Find the key at https://openport.io/user/keys')
+        parser.add_argument('--name', default='',
+                            help='The name for this client. (Use in combination with --register-key)')
         group.add_argument('--list', '-l', action='store_true', help="List shares and exit")
-        group.add_argument('--kill', '-k', action='store', type=int, help="Stop a share", default=0)
+        group.add_argument('--kill', '-k', action='store', type=int, help="Stop a share.", metavar='LOCAL_PORT', default=0)
         group.add_argument('--kill-all', '-K', action='store_true', help="Stop all shares")
-        group.add_argument('--restart-shares', action='store_true', help='Restart all active shares.')
+        group.add_argument('--restart-shares', action='store_true', help='Start all shares that were started with -R and are not running.')
         group.add_argument('--create-migrations', action='store_true', help=argparse.SUPPRESS)
-
         parser.add_argument('--listener-port', type=int, default=-1, help=argparse.SUPPRESS)
         parser.add_argument('--database', type=str, default='', help=argparse.SUPPRESS)
-        parser.add_argument('--request-port', type=int, default=-1,
-                            help='Request the server port for the share. Do not forget to pass the token.')
+        parser.add_argument('--request-port', type=int, default=-1, metavar='REMOTE_PORT',
+                            help='Request the server port for the share. Do not forget to pass the token with --request-token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
-        parser.add_argument('--verbose', '-v', action='store_true', help='Be verbose.')
         parser.add_argument('--http-forward', action='store_true',
                             help='Request an http forward, so you can connect to port 80 on the server.')
         parser.add_argument('--server', default=DEFAULT_SERVER, help=argparse.SUPPRESS)
         parser.add_argument('--restart-on-reboot', '-R', action='store_true',
-                            help='Restart this share when the manager app is started.')
+                            help='Restart this share when --restart-shares is called (on boot for example).')
         parser.add_argument('--config-file', action='store', type=str, default='', help=argparse.SUPPRESS)
         parser.add_argument('--forward-tunnel', action='store_true',
-                            help='Forward connections from your local port to the server port.')
+                            help='Forward connections from your local port to the server port. Use this to connect two tunnels.')
         parser.add_argument('--remote-port', type=int, help='The server port you want to forward to'
-                                                            ' (only use in combination with --forward-tunnel).',
+                                                            ' (use in combination with --forward-tunnel).',
                             default=-1)
         parser.add_argument('--ip-link-protection', type=ast.literal_eval,
                             help='Set to True or False to set if you want users to click a secret link before they can '
                                  'access this port. This overwrites the standard setting in your profile for this '
                                  'session.', default=None, choices=[True, False])
 
-        parser.add_argument('--name', default='',
-                            help='The name for this client. (Use in combination with --register-key)')
         parser.add_argument('--daemonize', '-d', action='store_true', help='Start the app in the background.')
 
     def init_app(self, args):
