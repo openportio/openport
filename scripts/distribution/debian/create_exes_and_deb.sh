@@ -1,5 +1,5 @@
 set -ex 
-cd ../../client
+cd ../..
 bash -ex create_exes.sh $1
-cd ../distribution/debian
+cd distribution/debian
 bash -ex createdeb.sh $1

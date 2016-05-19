@@ -3,7 +3,7 @@ Maintainer: Jan De Bleser <info@openport.io>
 Section: misc
 Priority: optional
 Standards-Version: ??
-Build-Depends: 
+Build-Depends: dh-make
 
 Package: openport
 Architecture: any

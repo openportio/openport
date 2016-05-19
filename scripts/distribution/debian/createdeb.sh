@@ -1,7 +1,9 @@
 #!/bin/sh
 set -ex
+export DEBFULLNAME="Jan De Bleser"
+export DEBEMAIL="jan@openport.io"
 
-source ../../client/apps/openport_app_version.py
+source ../../openport/apps/openport_app_version.py
 
 sudo apt-get --yes install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder python-dev python-pip python-virtualenv libsqlite3-dev
 sudo apt-get --yes install python-dev libffi-dev libssl-dev
@@ -21,7 +23,7 @@ function create_deb {
     rm -rf $PACKAGE
     mkdir $PACKAGE
     mkdir -p $PACKAGE/usr/lib/$APPLICATION
-    cp ../../client/dist/$APPLICATION/* $PACKAGE/usr/lib/$APPLICATION -r
+    cp ../../dist/$APPLICATION/* $PACKAGE/usr/lib/$APPLICATION -r
 
     tar -czf $TARBALL $PACKAGE
     # rm -rf $PACKAGE
@@ -45,6 +47,7 @@ function create_deb {
     DEB_BUILD_OPTIONS="noopt nostrip"
     pwd
     dch --create -v $(echo $VERSION)-1 --package $APPLICATION "TODO 12321"
+    #debuild -S # For ppa
     debuild -us -uc
 
     cd $start_dir

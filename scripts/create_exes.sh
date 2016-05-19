@@ -1,5 +1,6 @@
 #!/bin/sh
 rm -rf dist/*
+export LD_LIBRARY_PATH=
 openport/env/bin/pyinstaller --clean openport.spec -y
 
 
