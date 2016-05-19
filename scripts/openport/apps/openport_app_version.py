@@ -1,1 +1,1 @@
-VERSION="1.1.0-mac"
+VERSION="1.1.0"

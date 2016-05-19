@@ -3,6 +3,7 @@
 import sys
 import os
 import requests
+import platform
 from openport.apps.keyhandling import get_or_create_public_key
 from openport.services.logger_service import get_logger
 from openport.common.config import DEFAULT_SERVER
@@ -61,7 +62,8 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
             'automatic_restart': 'on' if automatic_restart else '',
             'local_port': local_port if local_port else '',
             'client_version': client_version,
-            'forward_tunnel': 'on' if forward_tunnel else ''
+            'forward_tunnel': 'on' if forward_tunnel else '',
+            'platform': platform.platform(),
             }
         if ip_link_protection is not None:
             request_data['ip_link_protection'] = 'on' if ip_link_protection else ''
