@@ -248,12 +248,13 @@ class OpenportApp(object):
         self.init_app(self.args)
 
         if self.args.daemonize:
-            args = self.os_interaction.get_python_exec()
-            args.extend(sys.argv)
+            args = self.os_interaction.get_openport_exec()
+            args.extend(sys.argv[1:])
             args = self.os_interaction.unset_variable(args, '--daemonize')
             args = self.os_interaction.unset_variable(args, '-d')
             self.os_interaction.spawn_daemon(args)
             logger.info('App started in background.')
+            logger.debug(args)
             sys.exit(0)
 
         key_registration_service.register_key(self.args, self.args.server)
@@ -350,6 +351,7 @@ class OpenportApp(object):
         self.session = session
 
         self.server.run_threaded()
+        session.active = True
         self.save_share(session)
         self.openport.start_port_forward(session, server=self.args.server)
 

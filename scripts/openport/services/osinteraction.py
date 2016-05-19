@@ -269,6 +269,10 @@ class OsInteraction(object):
             command = []
             path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openportw.exe'))
             if not os.path.exists(path):
+                path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport.exe'))
+            if not os.path.exists(path):
+                path = self.quote_path(os.path.join(os.path.dirname(sys.argv[0]), 'openport'))
+            if not os.path.exists(path):
                 path = self.quote_path('/usr/bin/openport')
             if not os.path.exists(path):
                 path = self.quote_path('/opt/local/bin/openport')

@@ -81,7 +81,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
             return {'error': r.reason}
         return {'error' : 'status code: {} text: {}'.format(r.status_code, r.text)}
     except requests.HTTPError as e:
-        logger.error("An error has occurred while communicating the the openport servers. %s" % e)
+        logger.error("An error has occurred while communicating with the openport servers. %s" % e)
         if r is not None:
             logger.debug('error: got response: %s' % r.text)
             try:
@@ -113,7 +113,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
             except Exception as e:
                 logger.debug(e)
         logger.error("An error has occurred while communicating with the openport servers. %s" % e)
-        logger.exception(e)
+        #logger.exception(e)
         raise e
 
 

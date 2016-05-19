@@ -204,4 +204,5 @@ class OpenportAppTests(unittest.TestCase):
 
         db_handler = dbhandler.DBHandler(self.test_db, init_db=False)
         self.assertEqual(1, len(db_handler.get_shares_to_restart()))
+        self.assertEqual(1, len(db_handler.get_active_shares()))
         self.app.stop()

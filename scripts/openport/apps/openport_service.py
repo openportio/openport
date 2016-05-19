@@ -101,7 +101,7 @@ class Openport(object):
                 logger.error(e)
                 sleep(10)
             except Exception as e:
-                logger.exception(e)
+               # logger.exception(e)
                 logger.error('general exception: {}'.format(e))
                 sleep(10)
             finally:
