@@ -4,7 +4,7 @@ set -ex
 current_dir=$(pwd)
 
 sudo apt-get install -y libgtk2.0-dev
-sudo apt-get install -y libgstreamer-plugins-base0.10-dev 
+sudo apt-get install -y libgstreamer-plugins-base0.10-dev
 sudo apt-get install -y libgl1-mesa-dev
 sudo apt-get install -y libglu1-mesa-dev
 sudo apt-get install -y libopenal-dev
@@ -20,7 +20,12 @@ tar -xf wxPython-src-3.0.2.0.tar.bz2
 
 cd wxPython-src-3.0.2.0/wxPython
 
-export LD_LIBRARY_PATH=/usr/local/lib/python2.7.9/lib/
-sudo /usr/local/lib/python2.7.9/bin/python build-wxpython.py --install --prefix=/usr/local/lib/python2.7.9/
+#export LD_LIBRARY_PATH=/usr/local/lib/python2.7.9/lib/
+#sudo /usr/local/lib/python2.7.9/bin/python build-wxpython.py --install --prefix=/usr/local/lib/python2.7.9/
+#sudo python build-wxpython.py --install
+
+source $current_dir/env/bin/activate
+CFLAGS=-Wno-error=format-security CPPFLAGS=-Wno-error=format-security python setup.py install
+
 
 cd $current_dir
