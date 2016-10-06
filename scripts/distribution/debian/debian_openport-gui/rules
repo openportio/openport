@@ -2,6 +2,12 @@
 
 override_dh_strip:
 	echo "DO NOT STRIP"
+
+override_dh_shlibdeps:
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
+
 %:
 	echo "RUNNING RULESS!!!"
 	dh $@
+
+
