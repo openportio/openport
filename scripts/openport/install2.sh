@@ -24,7 +24,7 @@ export LD_LIBRARY_PATH="$PYTHON_LOCATION/lib/"
 cd $current_dir
 ./install_wx_ubuntu.sh
 
-virtualenv env --python=$PYTHON_LOCATION/bin/python
+virtualenv env --python=$PYTHON_LOCATION/bin/python --no-site-packages
 #virtualenv env
 
 site_packages=$PYTHON_LOCATION/lib/python2.7/site-packages
@@ -36,7 +36,7 @@ ln -s $site_packages/wxversion.py .
 
 cd ../../../..
 
-env/bin/pip install -r requirements.pip -r requirements.gui.txt
+env/bin/pip install -r requirements.txt -r requirements.gui.txt
 
 env/bin/python apps/openport_app.py
 

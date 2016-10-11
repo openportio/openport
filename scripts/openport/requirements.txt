@@ -4,35 +4,37 @@
 # LIB=C:/OPenSSL-win32/lib
 # INCLUDE=C:/OPenSSL-win32/include
 setuptools==19.2
-pycrypto
-cryptography
-ecdsa
 paramiko==1.17  # to avoid "Multibackend cannot be initialized with no backends" error
-#wxPython
-unittest-xml-reporting
-pyopenssl
-ext_http_server
-#pysqlite
-#python-daemon
-argparse
-bottle
-cherrypy
-#pyinstaller
-#git+https://github.com/pyinstaller/pyinstaller.git@develop
 git+https://github.com/gholzmann/pyinstaller/@7be200b5a6f179f6753ca5a51713f19103f23393
-#pyinstaller
-sqlalchemy
-alembic==0.7.6
-psutil
-lockfile
-pyperclip
-#http://sourceforge.net/projects/py2exe/files/latest/download?source=files
-
-# For the error 'no module named wsgiserver2':
 # cd scripts/client/env/lib/python2.7/site-packages/cherrypy/wsgiserver
 # wget https://bitbucket.org/cherrypy/cherrypy/raw/9c2d91cac2e84f166d75f748a836ffe8f244c56c/cherrypy/wsgiserver/wsgiserver2.py
 
+CherryPy==8.1.2
+Mako==1.0.4
+MarkupSafe==0.23
+SQLAlchemy==1.1.1
+alembic==0.7.6
+argparse==1.4.0
+bottle==0.12.10
+cffi==1.8.3
+cryptography==1.5.2
+distribute==0.6.24
+ecdsa==0.13
+enum34==1.1.6
+ext-http-server==0.2
+idna==2.1
+ipaddress==1.0.17
+lockfile==0.12.2
+ndg-httpsclient==0.4.2
+psutil==4.3.1
+pyOpenSSL==16.1.0
+pyasn1==0.1.9
+pycparser==2.14
+pycrypto==2.6.1
+pyperclip==1.5.27
 requests==2.9.1
-ndg-httpsclient
+six==1.10.0
+unittest-xml-reporting==2.1.0
+wsgiref==0.1.2
 
  
