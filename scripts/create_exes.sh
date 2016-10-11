@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 rm -rf dist/*
-export LD_LIBRARY_PATH=
-openport/env/bin/pyinstaller --clean openport.spec -y
-
-
+#export LD_LIBRARY_PATH=
+deactivate || echo ''
+source openport/env/bin/activate
+pyinstaller --clean openport.spec -y
 
 no_gui=0
 for i in "$@" ; do
@@ -15,7 +15,7 @@ done
 
 if [[ $no_gui != 1 ]]
 then
-	openport/env/bin/pyinstaller --clean openport-gui.spec -y
+	pyinstaller --clean openport-gui.spec -y
 fi
 
 #If the exe fails with "cannot import _counter":

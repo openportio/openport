@@ -5,7 +5,7 @@ block_cipher = None
 
 a = Analysis(['openport/apps/openport_app.py'],
              pathex=['.'],
-             hiddenimports=[],
+             hiddenimports=['sqlalchemy.sql.default_comparator'],
              hookspath=None,
              runtime_hooks=None,
              cipher=block_cipher,
