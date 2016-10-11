@@ -1,6 +1,5 @@
 #!/bin/bash
 rm -rf dist/*
-#export LD_LIBRARY_PATH=
 deactivate || echo ''
 source openport/env/bin/activate
 pyinstaller --clean openport.spec -y
