@@ -15,7 +15,7 @@ tar xfz Python-2.7.9.tgz
 cd Python-2.7.9/
 ./configure --prefix $PYTHON_LOCATION --enable-shared --enable-unicode=ucs4
 make
-sudo make install
+sudo make altinstall
 
 echo "export LD_LIBRARY_PATH=$PYTHON_LOCATION/lib/" >> ~/.bashrc
 export LD_LIBRARY_PATH="$PYTHON_LOCATION/lib/"
@@ -24,7 +24,7 @@ export LD_LIBRARY_PATH="$PYTHON_LOCATION/lib/"
 cd $current_dir
 ./install_wx_ubuntu.sh
 
-virtualenv env --python=$PYTHON_LOCATION/bin/python
+virtualenv env --python=$PYTHON_LOCATION/bin/python --no-site-packages
 #virtualenv env
 
 site_packages=$PYTHON_LOCATION/lib/python2.7/site-packages
