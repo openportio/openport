@@ -2,7 +2,7 @@
 
 PROJECTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-sudo apt-get install build-essential #lba
+#sudo apt-get install build-essential #lba
 
 source $PROJECTDIR/env/bin/activate
 
