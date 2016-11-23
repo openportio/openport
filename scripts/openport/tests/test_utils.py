@@ -248,15 +248,15 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', htt
         i += 1
         all_output = osinteraction.get_output(p)
         if all_output[0]:
-            logger.info('%s - stdout -  %s' % (output_prefix, all_output[0]))
+            logger.info('%s - stdout -  <<<<<%s>>>>>' % (output_prefix, all_output[0]))
         if all_output[1]:
-            logger.error('%s - stderr - %s' % (output_prefix, all_output[1]))
+            logger.error('%s - stderr - <<<<<%s>>>>>' % (output_prefix, all_output[1]))
         if not all_output[0]:
             sleep(1)
             continue
 
         if http_forward:
-            m = re.search(r'Now forwarding remote address (?P<host>[a-z\.\-]*) to localhost', all_output[0])
+            m = re.search(r'Now forwarding remote address (?P<host>[a-z0-9\.\-]*) to localhost', all_output[0])
         elif forward_tunnel:
             m = re.search(r'INFO - You are now connected. You can access the remote pc\'s port (?P<remote_port>\d*) '
                           r'on localhost:(?P<local_port>\d*)', all_output[0])
@@ -379,7 +379,7 @@ def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_e
             test.assertEqual(text, response)
 
         cr.close()
-        print 'tcp portforward ok'
+        print('tcp portforward ok')
     except Exception, e:
         logger.error(e)
         logger.exception(e)
