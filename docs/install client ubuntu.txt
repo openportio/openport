@@ -1,16 +1,27 @@
 
 cd ~/Downloads
-wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tgz
-
-tar -xf Python-2.7.9.tgz
-cd Python-2.7.9
-sudo apt-get build-dep python2.7
-./configure --with-threads --enable-shared
+wget https://www.openssl.org/source/openssl-1.0.2h.tar.gz
+tar -xf openssl-1.0.2h.tar.gz
+cd openssl-1.0.2h
+./config -fPIC
 make
 make install
 
-cd ~/swprojects/openport-client/scripts/client
 
+
+wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tgz
+tar -xf Python-2.7.9.tgz
+cd Python-2.7.9
+sudo apt-get build-dep python2.7
+nano Modules/Setup # uncomment the lines with SSL
+
+./configure --with-threads --enable-shared --prefix /usr/local/lib/python2.7.9 --enable-ipv6
+make
+make altinstall
+
+cd ~/swprojects/openport-client/scripts/openport
+
+virtualenv env --python=/usr/local/lib/python2.7.9/bin/python
 
 # WX
 sudo apt-get install python-wxgtk2.8
