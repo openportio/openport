@@ -1,4 +1,11 @@
 #*
 !Dockerfile
 !openport/requirements.txt
+openport/build
+openport/dist
+openport/env
+build
+dist
+deploy
+distribution/mac
 

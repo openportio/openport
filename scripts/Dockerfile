@@ -1,18 +1,17 @@
-FROM armhf/ubuntu:14.04
+FROM ubuntu:16.04
 MAINTAINER JanDeBleser
 
 ENV LANG C.UTF-8
 RUN apt-get update
 RUN /usr/bin/apt-get install -y git libsqlite3-dev libffi-dev libssl-dev make gcc
-RUN apt-get install wget
+RUN apt-get install -y wget bzip2
 RUN apt-get remove python
 RUN apt-get autoremove
 RUN wget https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tgz ;\
-tar xfz Python-2.7.9.tgz ;\
-cd Python-2.7.9/ ;\
-./configure --enable-shared --enable-unicode=ucs4 ;\
-make ;\
-sudo make install
+tar xfz Python-2.7.9.tgz
+RUN cd Python-2.7.9/ ; ./configure --enable-shared --enable-unicode=ucs4
+RUN cd Python-2.7.9/ ; make
+RUN cd Python-2.7.9/ ; make install
 
 
 #cd $current_dir
