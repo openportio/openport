@@ -67,7 +67,7 @@ def create_migrations(db_location):
         autogen._produce_migration_diffs(context, template_args, imports)
         return []
 
-    from services import dbhandler
+    from openport.services import dbhandler
 
     metadata = dbhandler.Base.metadata
 
