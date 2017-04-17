@@ -52,4 +52,5 @@ RUN useradd docker
 RUN mkhomedir_helper docker
 
 WORKDIR /apps/openport/
+RUN apt-get install -y sudo
 CMD sleep infinity
