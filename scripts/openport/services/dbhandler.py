@@ -186,6 +186,7 @@ class DBHandler(object):
 
         session = self._get_session()
         openport_sessions = session.query(OpenportSession).filter_by(active=True)
+        openport_sessions = [s for s in openport_sessions if s.remote_port > 0]
         l = list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
         self.Session.remove()
         return l

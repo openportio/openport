@@ -27,6 +27,7 @@ logger = get_logger(__name__)
 
 TEST_SERVER = 'https://eu.openport.io'
 TEST_SERVER = 'https://openport.io'
+#TEST_SERVER = 'https://test2.openport.io'
 #TEST_SERVER = 'https://us.openport.io'
 #TEST_SERVER = 'https://openport-test-main.debleser.lan'
 
@@ -943,13 +944,13 @@ class AppTests(unittest.TestCase):
         actual_response = c.get('http://localhost:%s' % local_port)
         self.assertEqual(actual_response, response.strip())
         url = 'http://%s:%s' % (remote_host, remote_port) if remote_port != 80 else 'http://%s' % remote_host
-        print 'checking url:', url
+        print('checking url:{}'.format(url))
         try:
             actual_response = c.get(url)
-        except urllib2.URLError, e:
+        except urllib2.URLError as e:
             self.fail('Http forward failed')
         self.assertEqual(actual_response, response.strip())
-        print 'http portforward ok'
+        print('http portforward ok')
         s.server.shutdown()
 
     def kill_manager(self, manager_port):
