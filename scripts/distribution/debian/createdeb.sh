@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 set -ex
 export DEBFULLNAME="Jan De Bleser"
 export DEBEMAIL="jan@openport.io"
-
+cd $(dirname $0)
 source ../../openport/apps/openport_app_version.py
 
 sudo apt-get --yes install build-essential autoconf automake autotools-dev dh-make debhelper devscripts fakeroot xutils lintian pbuilder python-dev python-pip python-virtualenv libsqlite3-dev
