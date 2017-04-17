@@ -256,6 +256,7 @@ class OsInteraction(object):
         s.listen(1)
         port = s.getsockname()[1]
         s.close()
+        self.logger.debug('returning port {}'.format(port))
         return port
 
     def quote_path(self, path):
@@ -358,7 +359,7 @@ class LinuxOsInteraction(OsInteraction):
 
     def __init__(self, use_logger=True):
         super(LinuxOsInteraction, self).__init__(use_logger)
-        home_dir = os.path.expanduser("~{}/".format(os.environ.get("USER")))
+        home_dir = os.path.expanduser("~{}/".format(os.environ.get("USER", 'root')))
         if len(home_dir) < 3:
             home_dir = '/root/'
         self.APP_DATA_PATH = os.path.join(home_dir, '.openport')
