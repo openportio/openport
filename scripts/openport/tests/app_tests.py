@@ -1,3 +1,5 @@
+from openport.tests import test_utils
+
 __author__ = 'Jan'
 import urllib2
 import subprocess
@@ -27,7 +29,8 @@ logger = get_logger(__name__)
 
 TEST_SERVER = 'https://eu.openport.io'
 TEST_SERVER = 'https://openport.io'
-#TEST_SERVER = 'https://test2.openport.io'
+TEST_SERVER = 'https://test2.openport.io'
+#TEST_SERVER = 'http://127.0.0.1:8000'
 #TEST_SERVER = 'https://us.openport.io'
 #TEST_SERVER = 'https://openport-test-main.debleser.lan'
 
@@ -396,10 +399,28 @@ class AppTests(unittest.TestCase):
 
         #        self.assertFalse(openportmanager.manager_is_running(8001))
 
-        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
-
+        return_server = []
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port,
+                               return_server=return_server)
         p.kill()
+        for s in return_server:
+            s.close()
+            print('closed server')
         p.wait()
+
+        c = SimpleTcpClient('localhost', port)
+
+        def server_is_not_active():
+            print('checking server_is_not_active')
+            try:
+                response = c.send('pong').strip()
+            except Exception as e:
+                logger.exception('this is expected')
+                return True
+            print(response)
+            return response != 'pong'
+        wait_for_response(server_is_not_active, timeout=30)
+#        sleep(3)
 
         p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
                               '--server', TEST_SERVER, '--verbose',

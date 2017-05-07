@@ -10,15 +10,17 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 import logging
+from openport.services.crypt_service import get_token
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
-from services import osinteraction
-from services.logger_service import get_logger, set_log_level
+from openport.services import osinteraction
+from openport.services.logger_service import get_logger, set_log_level
 
 
 logger = get_logger(__name__)
+
 
 class SiteInteractionTest(unittest.TestCase):
 
@@ -26,8 +28,8 @@ class SiteInteractionTest(unittest.TestCase):
         print self._testMethodName
         set_log_level(logging.DEBUG)
 
-        self.server = "http://test.openport.be"
-        # self.server = "http://localhost:8000"
+        self.server = "https://test2.openport.io"
+        #self.server = "http://localhost:8000"
         if os.path.exists('/usr/bin/phantomjs'):
             self.browser = webdriver.PhantomJS('/usr/bin/phantomjs')
         else:
@@ -35,6 +37,7 @@ class SiteInteractionTest(unittest.TestCase):
 
         self.browser.set_window_size(1124, 850)
         #self.browser = webdriver.Firefox()
+        #self.browser = webdriver.Chrome('/usr/local/bin/chromedriver')
         self.processes_to_kill = []
         self.os_interaction = osinteraction.getInstance()
 
@@ -44,11 +47,11 @@ class SiteInteractionTest(unittest.TestCase):
 
     def test_site_is_online(self):
         self.browser.get('%s/' % self.server)
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+        self.screenshot()
         self.assertTrue('Openport' in self.browser.title)
 
-    def login_to_site(self):
-        self.browser.get('%s/user/login' % self.server)
+    def login_to_site(self, create_account=True):
+        self.browser.get('{}/?next=/user#/user/login'.format(self.server))
         self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s-1.png' % inspect.stack()[0][3]))
         elem = self.browser.find_element_by_name("username")
         elem.send_keys("jandebleser+test@gmail.com")
@@ -56,11 +59,15 @@ class SiteInteractionTest(unittest.TestCase):
         elem2.send_keys("test")
         elem.send_keys(Keys.RETURN)
         self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s-2.png' % inspect.stack()[0][3]))
+        sleep(1)
+        if create_account and not 'Welcome, Jan' in self.browser.page_source:
+            self.create_account('jandebleser+test@gmail.com', 'test')
+            self.login_to_site(create_account=False)
 
 
     def test_login_to_site(self):
         self.login_to_site()
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+        self.screenshot()
         self.browser.get('%s/user' % self.server)
         self.assertTrue('Welcome, Jan' in self.browser.page_source)
 
@@ -68,7 +75,7 @@ class SiteInteractionTest(unittest.TestCase):
         sleep(5)
         while True:
             self.browser.get('%s/user/keys' % self.server)
-            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+            self.screenshot()
             try:
                 elem = self.browser.find_element_by_css_selector('button[data-title="Edit Key"]')
                 elem.click()
@@ -113,7 +120,7 @@ class SiteInteractionTest(unittest.TestCase):
         sleep(2)
         try:
             self.browser.get('%s/user/keys' % self.server)
-            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+            self.screenshot()
             elems = self.browser.find_elements_by_css_selector('button[data-title="Edit Key"]')
             self.assertEqual(1, len(elems), 'more than 1 key found: %s' % len(elems))
 
@@ -128,7 +135,7 @@ class SiteInteractionTest(unittest.TestCase):
 
     def get_key_binding_token(self):
         self.browser.get('%s/user/keys' % self.server)
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+        self.screenshot()
         try:
             code_elem = self.browser.find_elements_by_xpath("//*[contains(text(), '--register-key')]")[0]
         except IndexError:
@@ -213,7 +220,7 @@ class SiteInteractionTest(unittest.TestCase):
 
     def session_exists_on_site(self, server_port):
         self.browser.get('%s/user/sessions' % self.server)
-        self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+        self.screenshot()
         code_elements = self.browser.find_elements_by_xpath("//*[contains(text(), ':%s')]" % server_port)
         return len(code_elements) == 1
 
@@ -225,11 +232,40 @@ class SiteInteractionTest(unittest.TestCase):
             #elem = self.browser.find_element_by_partial_link_text(":%s" % server_port)
             elem = self.browser.find_element_by_xpath("//td[contains(., ':%s')]/following-sibling::td[1]/button[2]" % server_port)
             elem.click()
-            self.browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % inspect.stack()[0][3]))
+            self.screenshot()
             logger.info('session %s killed using the site' % server_port)
 
         except NoSuchElementException:
             self.fail("session not found")
+
+    def test_create_account(self):
+        self.create_account('jandebleser+{}@gmail.com'.format(get_token()), 'test')
+
+    def create_account(self, email, password):
+        self.browser.get('{}/?next=/user#/user/login'.format(self.server))
+        elem = self.browser.find_elements_by_link_text("New account")[0]
+        elem.click()
+        self.screenshot()
+        self.fill_in('first_name', 'Jan')
+        self.fill_in('last_name', 'Test')
+        self.fill_in('email', email)
+        self.fill_in('password1', password)
+        self.fill_in('password2', password)
+        elem = self.browser.find_element_by_name("password2")
+        elem.send_keys(Keys.RETURN)
+        sleep(1)
+        self.screenshot()
+        self.assertTrue('Welcome, Jan' in self.browser.page_source)
+
+    def fill_in(self, name, value):
+        elem = self.browser.find_element_by_name(name)
+        elem.send_keys(value)
+
+    def screenshot(self, name=None):
+        if name is None:
+            name = inspect.stack()[1][3]
+        self.browser.save_screenshot(
+            os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp', '%s.png' % name))
 
 
 if __name__ == '__main__':

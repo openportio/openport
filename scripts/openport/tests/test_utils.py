@@ -11,6 +11,8 @@ import ssl
 import traceback
 import datetime
 
+import requests
+
 from openport.services.logger_service import get_logger
 from openport.services import osinteraction
 from openport.services import dbhandler
@@ -58,14 +60,15 @@ class SimpleHTTPClient(object):
     def get(self, url, print500=True):
         logger.debug('sending get request ' + url)
         try:
-            req = urllib2.Request(url)
-            return urllib2.urlopen(req, timeout=5).read()
-        except urllib2.HTTPError, e:
+            r = requests.get(url)
+            return r.text
+        except urllib2.HTTPError as e:
             if print500 and e.getcode() == 500:
-                print e.read()
+                print (e.read())
             raise
         except Exception as detail:
-            print "An error has occurred: ", detail
+            logger.exception(detail)
+            print ("An error has occurred: {}".format( detail))
             raise
 
 
@@ -79,9 +82,10 @@ class SimpleTcpServer(object):
         self.s.bind((self.HOST, self.PORT))
         self.s.listen(5)
         self.connections_accepted = 0
+        self.closed = False
 
     def run(self):
-        while 1:
+        while not self.closed:
             print "connections accepted: ", self.connections_accepted
             self.connections_accepted += 1
             conn, self.address = self.s.accept()
@@ -93,11 +97,15 @@ class SimpleTcpServer(object):
             conn.close()
 
     def close(self):
+        self.closed = True
         try:
             self.s.shutdown(socket.SHUT_RDWR)
+        except Exception as e:
+            logger.exception(e)
+        try:
             self.s.close()
-        except:
-            pass
+        except Exception as e:
+            logger.exception(e)
 
     def runThreaded(self):
         import threading
@@ -354,11 +362,12 @@ def click_open_for_ip_link(link):
 servers = {}
 
 
-def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_error=True):
+def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_error=True, return_server=[]):
 
     text = 'ping'
 
     s = servers[local_port] if local_port in servers else SimpleTcpServer(local_port)
+    return_server.append(s)
     servers[local_port] = s
     try:
         s.runThreaded()
@@ -380,7 +389,7 @@ def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_e
 
         cr.close()
         print('tcp portforward ok')
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         logger.exception(e)
         if not fail_on_error:

@@ -1,7 +1,6 @@
--r requirements.pip
+-r requirements.txt
 unittest2
 selenium
 nose
-mock
 docker-py
 mock==2.0.0
