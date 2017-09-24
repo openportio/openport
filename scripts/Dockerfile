@@ -1,5 +1,11 @@
-FROM ubuntu:16.04
+ARG FROMIMAGE=ubuntu:16.04
+
+FROM $FROMIMAGE
+ARG FROMIMAGE
+RUN echo $FROMIMAGE > image_version
+
 MAINTAINER JanDeBleser
+
 
 ENV LANG C.UTF-8
 RUN apt-get update
