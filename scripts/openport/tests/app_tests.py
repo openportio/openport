@@ -1,12 +1,10 @@
-from openport.tests import test_utils
-
-__author__ = 'Jan'
 import urllib2
 import subprocess
 import unittest
 import os
 import signal
 import sys
+import requests
 from time import sleep
 import logging
 import shutil
@@ -45,7 +43,7 @@ else:
 class AppTests(unittest.TestCase):
     def setUp(self):
         logging.getLogger('sqlalchemy').setLevel(logging.WARN)
-        print self._testMethodName
+        print(self._testMethodName)
         set_log_level(logging.DEBUG)
         self.processes_to_kill = []
         self.osinteraction = osinteraction.getInstance()
@@ -100,7 +98,7 @@ class AppTests(unittest.TestCase):
         run_method_with_timeout(p.wait, 3)
         output = self.osinteraction.non_block_read(p)
         for i in output:
-            print i
+            print(i)
         self.assertTrue(output[1] == False or 'Traceback' not in output[1])
         wait_for_response(lambda : get_nr_of_shares_in_db_file(self.db_file) == 1, timeout=10)
         self.assertEqual(1, get_nr_of_shares_in_db_file(self.db_file))
@@ -116,7 +114,7 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p)
         run_method_with_timeout(p.wait, 10)
         output = self.osinteraction.get_all_output(p)
-        print output
+        print(output)
         self.assertTrue('usage: ' in output[1], output[1])
 
     def test_openport_app__live_site(self):
@@ -438,12 +436,12 @@ class AppTests(unittest.TestCase):
 
     def check_application_is_still_alive(self, p):
         if not self.application_is_alive(p):  # process terminated
-            print 'application terminated: ', self.osinteraction.get_output(p)
+            print ('application terminated: ', self.osinteraction.get_output(p))
             self.fail('p_app.poll() should be None but was %s' % p.poll())
 
     def test_exit(self):
         port = self.osinteraction.get_open_port()
-        print 'localport :', port
+        print ('localport :', port)
 
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER, '--database', self.db_file],
@@ -460,7 +458,7 @@ class AppTests(unittest.TestCase):
 
     def test_restart_shares(self):
         port = self.osinteraction.get_open_port()
-        print 'localport :', port
+        print ('localport :', port)
 
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER,
@@ -469,7 +467,7 @@ class AppTests(unittest.TestCase):
         self.processes_to_kill.append(p_app)
 
         remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
-        print lineNumber(), "remote port:", remote_port
+        print (lineNumber(), "remote port:", remote_port)
         sleep(1)
         click_open_for_ip_link(link)
         logger.debug('ping')
@@ -516,11 +514,11 @@ class AppTests(unittest.TestCase):
 
     def test_openport_app__start_twice(self):
         port = self.osinteraction.get_open_port()
-        print 'local port :', port
+        print ('local port :', port)
 
         manager_port = self.osinteraction.get_open_port()
         self.manager_port = manager_port
-        print 'manager_port :', manager_port
+        print ('manager_port :', manager_port)
 
         command = [PYTHON_EXE, 'apps/openport_app.py', str(port), '--database', self.db_file, '--verbose', '--server',
                    TEST_SERVER]
@@ -630,7 +628,7 @@ class AppTests(unittest.TestCase):
     #      s.stop()
 
     def getRemoteAddress(self, output):
-        print 'getRemoteAddress - output:%s' % output
+        print ('getRemoteAddress - output:%s' % output)
         import re
 
         m = re.search(r'Now forwarding remote address ([a-z\\.]*) to localhost', output)
@@ -671,7 +669,7 @@ class AppTests(unittest.TestCase):
 
     def test_openport_app__cannot_reach_manager(self):
         port = self.osinteraction.get_open_port()
-        print 'local port: ', port
+        print ('local port: ', port)
 
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER,
@@ -683,11 +681,11 @@ class AppTests(unittest.TestCase):
         remote_host, remote_port, link = get_remote_host_and_port(p_app, self.osinteraction, output_prefix='app')
         click_open_for_ip_link(link)
         self.check_application_is_still_alive(p_app)
-        print lineNumber(), "remote port:", remote_port
+        print (lineNumber(), "remote port:", remote_port)
 
     def test_kill(self):
         port = self.osinteraction.get_open_port()
-        print 'local port: ', port
+        print ('local port: ', port)
 
         p_app = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
                                   '--verbose', '--server', TEST_SERVER,
@@ -710,7 +708,7 @@ class AppTests(unittest.TestCase):
 
     def test_kill_all(self):
         port = self.osinteraction.get_open_port()
-        print 'local port: ', port
+        print ('local port: ', port)
         self.assertEqual(0, get_nr_of_shares_in_db_file(self.db_file))
 
         p_app1 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port,
@@ -723,7 +721,7 @@ class AppTests(unittest.TestCase):
         self.assertEqual(1, get_nr_of_shares_in_db_file(self.db_file))
 
         port2 = self.osinteraction.get_open_port()
-        print 'local port2: ', port2
+        print ('local port2: ', port2)
         self.assertNotEqual(port, port2)
 
         p_app2 = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '%s' % port2,
@@ -981,11 +979,11 @@ class AppTests(unittest.TestCase):
             req = urllib2.Request(url)
             response = urllib2.urlopen(req, timeout=1).read()
             if response.strip() != 'ok':
-                print lineNumber(), response
+                print (lineNumber(), response)
             else:
-                print 'manager killed'
-        except Exception, detail:
-            print detail
+                print ('manager killed')
+        except Exception as detail:
+            print (detail)
 
     def get_share_count_of_manager(self, manager_port):
         url = 'http://localhost:%s/active_count' % manager_port
@@ -996,7 +994,7 @@ class AppTests(unittest.TestCase):
             return int(response)
 
         except Exception as detail:
-            print 'error contacting the manager: %s %s' % (url, detail)
+            print ('error contacting the manager: %s %s' % (url, detail))
             raise
 
     def test_kill_openport_app(self):
@@ -1010,17 +1008,38 @@ class AppTests(unittest.TestCase):
         sleep(2)
         get_remote_host_and_port(p, self.osinteraction)
 
-        print 'pid: %s' % p.pid
+        print('pid: %s' % p.pid)
         self.osinteraction.kill_pid(p.pid, signal.SIGTERM)
         run_method_with_timeout(p.wait, 10)
 
         output = self.osinteraction.get_output(p)
-        print output[0]
-        print output[1]
+        print(output[0])
+        print(output[1])
         # Sadly, this does not work on windows...
         if not osinteraction.is_windows():
             self.assertTrue('got signal ' in output[0])
 
+        self.assertFalse(self.osinteraction.pid_is_running(p.pid))
+
+    def test_remote_kill_stops_application(self):
+        port = self.osinteraction.get_open_port()
+        p = subprocess.Popen([PYTHON_EXE, 'apps/openport_app.py', '--local-port', '%s' % port,
+                              '--server', TEST_SERVER, '--verbose', '--database', self.db_file],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.check_application_is_still_alive(p)
+
+        session = self.db_handler.get_share_by_local_port(port)
+        data = {'port': session.server_port, 'session_token': session.server_session_token, }
+        print(data)
+        r = requests.post('{}/api/v1/kill-session'.format(TEST_SERVER),
+                          data)
+        logger.debug('#########{}'.format(r.text))
+
+        self.assertEqual(200, r.status_code, r.text)
+        self.osinteraction.print_output_continuously_threaded(p, 'p')
+        run_method_with_timeout(p.wait, 30)
         self.assertFalse(self.osinteraction.pid_is_running(p.pid))
 
     def test_version(self):
@@ -1031,7 +1050,7 @@ class AppTests(unittest.TestCase):
 
         process_output = p.communicate()
         for out in process_output:
-            print 'output: ', out
+            print ('output: ', out)
 
         self.assertFalse(self.application_is_alive(p))
         self.assertEqual(openport_app_version.VERSION, process_output[1].strip())
@@ -1121,7 +1140,7 @@ class AppTests(unittest.TestCase):
 
         run_method_with_timeout(p.wait, 10)
         process_output = print_all_output(p, self.osinteraction, 'list')
-        print process_output[0]
+        print (process_output[0])
         self.assertFalse(process_output[1])
 
     def test_openport_app__no_errors(self):
@@ -1281,7 +1300,7 @@ for i in range(%s):
         p.wait()
         output = p.communicate()
         for i in output:
-            print i
+            print (i)
         self.assertTrue(session.open_port_for_ip_link in output[0])
 
 
