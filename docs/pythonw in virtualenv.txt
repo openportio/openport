@@ -1,6 +1,0 @@
-ln -s /usr/local/bin/pythonw env/bin/pythonw
-
-export PYTHONPATH=$(pwd)/env/lib/python2.7/site-packages
-env/bin/pythonw -c 'import OpenSSL'
-
-See screenshot pythonw settings to run it in pycharm

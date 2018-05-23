@@ -1,2 +1,0 @@
-update-rc.d openport defaults
-openport --restart-shares
