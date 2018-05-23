@@ -1,5 +1,6 @@
 # export CFLAGS=-Qunused-arguments  # If you get clang errors
 
 pillow==3.2
+pyperclip==1.5.27
 
 # install wx (see docs)

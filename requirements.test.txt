@@ -4,3 +4,4 @@ selenium
 nose
 docker-py
 mock==2.0.0
+unittest-xml-reporting==2.1.0

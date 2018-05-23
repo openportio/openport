@@ -3,9 +3,9 @@
 # in bash:
 # LIB=C:/OPenSSL-win32/lib
 # INCLUDE=C:/OPenSSL-win32/include
-setuptools==19.2
+setuptools==39.2.0
 paramiko==1.17  # to avoid "Multibackend cannot be initialized with no backends" error
-git+https://github.com/gholzmann/pyinstaller/@7be200b5a6f179f6753ca5a51713f19103f23393
+
 # cd scripts/client/env/lib/python2.7/site-packages/cherrypy/wsgiserver
 # wget https://bitbucket.org/cherrypy/cherrypy/raw/9c2d91cac2e84f166d75f748a836ffe8f244c56c/cherrypy/wsgiserver/wsgiserver2.py
 
@@ -31,10 +31,8 @@ pyOpenSSL==16.1.0
 pyasn1==0.1.9
 pycparser==2.14
 pycrypto==2.6.1
-pyperclip==1.5.27
 requests==2.9.1
 six==1.10.0
-unittest-xml-reporting==2.1.0
 wsgiref==0.1.2
 
  
