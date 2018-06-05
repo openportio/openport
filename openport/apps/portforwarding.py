@@ -5,7 +5,7 @@ from socket import error as SocketError
 import errno
 from openport.services.logger_service import get_logger
 from openport.services.utils import run_method_with_timeout, TimeoutException
-from keyhandling import get_default_key_locations
+from openport.apps.keyhandling import get_default_key_locations
 
 logger = get_logger(__name__)
 
@@ -118,11 +118,11 @@ class PortForwardingService:
                 start_callback_thread.start()
 
             self.keep_alive()
-        except KeyboardInterrupt, e:
+        except KeyboardInterrupt as e:
             self.stop()
             logger.info('Ctrl-c: Port forwarding stopped.')
 #            sys.exit(0)
-        except EOFError, e:
+        except EOFError as e:
             # Tunnel is stopped.
             self.stop()
             logger.debug(e)
@@ -181,7 +181,7 @@ class PortForwardingService:
         sock = socket.socket()
         try:
             sock.connect((local_server, self.local_port))
-        except Exception, e:
+        except Exception as e:
             logger.error('Forwarding request to %s:%d failed: %r' % (local_server, self.local_port, e))
             return
 

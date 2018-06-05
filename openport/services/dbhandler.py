@@ -139,7 +139,10 @@ class DBHandler(object):
         return self.get_share(openport_session.id)
 
     def pickle_restart_command(self, share):
-        return pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
+        try:
+            return pickle.dumps(share.restart_command).encode('UTF-8', 'ignore')
+        except AttributeError:
+            return pickle.dumps(share.restart_command)
 
     def get_share(self, id):
         logger.debug('get_share')
@@ -241,6 +244,6 @@ class DBHandler(object):
 if __name__ == '__main__':
     db_handler = DBHandler()
     shares = db_handler.get_active_shares()
-    print 'nr of sessions: %s' % len(shares)
+    print('nr of sessions: %s' % len(shares))
 
 

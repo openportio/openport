@@ -866,7 +866,7 @@ class AppTests(unittest.TestCase):
     #         url = 'http://' + remote_host
     #         print 'url=' + url
     #         self.assertEqual('echo', cr.get(url))
-    #     except Exception, e:
+    #     except Exception as e:
     #         tr = traceback.format_exc()
     #         logger.error(e)
     #         logger.error(tr)
@@ -917,7 +917,7 @@ class AppTests(unittest.TestCase):
     #     local_url = 'http://127.0.0.1:%s' % port
     #     try:
     #         self.assertEqual('echo', cr.get(local_url))
-    #     except Exception, e:
+    #     except Exception as e:
     #         logger.exception(e)
     #         self.fail('calling local port failed')
     #
@@ -928,7 +928,7 @@ class AppTests(unittest.TestCase):
     #
     #     try:
     #         self.assertEqual('echo', cr.get(url, print500=False))
-    #     except Exception, e:
+    #     except Exception as e:
     #         logger.exception(e)
     #         self.fail('second port forwarding failed')
     #

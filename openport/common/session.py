@@ -70,13 +70,13 @@ class Session(object):
     def from_dict(self, dict):
         try:
             self.id = int(dict['id'])
-        except ValueError, e:
+        except ValueError as e:
             self.id = ''
         self.server = dict['server']
         self.server_port = dict['server_port']
         try:
             self.pid = int(dict['pid'])
-        except ValueError, e:
+        except ValueError as e:
             self.pid = dict['pid']
         self.active = Session.str_to_bool(dict['active'])
         self.account_id = dict['account_id']

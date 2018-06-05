@@ -1,12 +1,11 @@
 import sys
 import signal
 import os
-from UserDict import UserDict
 import argparse
 import ast
 import threading
 
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..', '..'))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 from openport.services import osinteraction, dbhandler
 from openport.services.logger_service import get_logger, set_log_level
@@ -17,8 +16,8 @@ from openport.services.config_service import ConfigService
 from openport.services.app_service import AppService, USER_CONFIG_FILE
 from openport.apps.openport_service import Openport
 from openport.apps import openport_app_version
-from app_tcp_server import AppTcpServer, send_exit, send_ping, is_running
-from keyhandling import ensure_keys_exist, get_default_key_locations
+from openport.apps.app_tcp_server import AppTcpServer, send_exit, send_ping, is_running
+from openport.apps.keyhandling import ensure_keys_exist, get_default_key_locations
 
 from openport.common.config import DEFAULT_SERVER
 
@@ -32,7 +31,7 @@ class OpenportApp(object):
         self.config.app = self
         self.manager_app_started = False
         self.os_interaction = osinteraction.getInstance()
-        self.args = UserDict()
+        self.args = {}
         self.session = None
         self.openport = Openport()
         self.db_handler = None
@@ -156,7 +155,7 @@ class OpenportApp(object):
 
         logger.debug('listing shares - amount: %s' % len(list(shares)))
         for share in shares:
-            print self.get_share_line(share)
+            print(self.get_share_line(share))
 
     def get_share_line(self, share):
         # "pid: %s - " % share.pid + \
@@ -222,7 +221,7 @@ class OpenportApp(object):
                         logger.debug('started app with pid %s : %s' % (p.pid, share.restart_command))
                         sleep(1)
 
-                except Exception, e:
+                except Exception as e:
                     logger.exception(e)
             else:
                 logger.debug('not starting %s: still running' % share.local_port)
@@ -242,7 +241,7 @@ class OpenportApp(object):
                     self.os_interaction.spawn_daemon(command)
 
     def start(self):
-        # print 'sys.argv: %s' % sys.argv
+        # print('sys.argv: %s' % sys.argv)
         self.init_app(self.args)
 
         if self.args.daemonize:

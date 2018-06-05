@@ -72,9 +72,9 @@ class AppService(object):
                 return True
         except requests.HTTPError:
             raise Exception('Another application is running on port %s' % manager_port)
-        except requests.ConnectionError, detail:
+        except requests.ConnectionError as detail:
             return False
-        except Exception, detail:
+        except Exception as detail:
             raise Exception('Another application is running on port %s' % manager_port)
 
     def check_username_in_config_file(self):

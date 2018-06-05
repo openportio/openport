@@ -7,7 +7,10 @@ import sys
 from threading import Thread
 from time import sleep
 import signal
-import psutil
+try:
+    import psutil
+except ImportError:
+    psutil = False
 from lockfile import NotMyLock, LockTimeout
 from lockfile import LockFile
 
@@ -284,6 +287,8 @@ class OsInteraction(object):
         return command
 
     def pid_is_openport_process(self, pid):
+        if not psutil:
+            return False
         process = filter(lambda p: p.pid == pid, psutil.process_iter())
         for i in process:
             return 'openport' in i.name() or 'python' in i.name()  # Is not 100% but best effort. (for mac)
@@ -359,7 +364,7 @@ class LinuxOsInteraction(OsInteraction):
 
     def __init__(self, use_logger=True):
         super(LinuxOsInteraction, self).__init__(use_logger)
-        home_dir = os.path.expanduser("~{}/".format(os.environ.get("USER", 'root')))
+        home_dir = os.path.expanduser("~/")
         if len(home_dir) < 3:
             home_dir = '/root/'
         self.APP_DATA_PATH = os.path.join(home_dir, '.openport')
@@ -383,7 +388,7 @@ class LinuxOsInteraction(OsInteraction):
 
         try:
             os.kill(pid, 0)
-        except OSError, e:
+        except OSError as e:
             return e.errno != errno.ESRCH
         else:
             return True
@@ -412,7 +417,7 @@ class LinuxOsInteraction(OsInteraction):
             if pid > 0:
                 # parent process, return and keep running
                 return
-        except OSError, e:
+        except OSError as e:
             self.logger.error("fork #1 failed: %d (%s)" % (e.errno, e.strerror))
             sys.exit(1)
 
@@ -424,7 +429,7 @@ class LinuxOsInteraction(OsInteraction):
             if pid > 0:
                 # exit from second parent
                 sys.exit(0)
-        except OSError, e:
+        except OSError as e:
             self.logger.error("fork #2 failed: %d (%s)" % (e.errno, e.strerror) )
             sys.exit(1)
 
@@ -557,7 +562,7 @@ class MacOsInteraction(LinuxOsInteraction):
             if pid > 0:
                 # parent process, return and keep running
                 return pid
-        except OSError, e:
+        except OSError as e:
             self.logger.error("fork #1 failed: %d (%s)" % (e.errno, e.strerror))
             sys.exit(1)
 

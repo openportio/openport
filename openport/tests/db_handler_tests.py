@@ -146,7 +146,7 @@ class DBHandlerTests(unittest.TestCase):
             try:
                 dbh = dbhandler.DBHandler(self.test_db)
                 dbh.init_db(True)
-            except Exception, e:
+            except Exception as e:
                 global errors
                 errors.append(e)
 

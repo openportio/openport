@@ -160,7 +160,7 @@ class GUITcpServer():
             r = requests.post(url, data=data, timeout=1)
             if r.text.strip() != 'ok':
                 logger.error(r.text)
-        except Exception, detail:
+        except Exception as detail:
             self.openport_app_config.app.notify_app_down(share)
             logger.error("An error has occurred while communicating with the app on %s: %s" % (url, detail))
 

@@ -1,6 +1,9 @@
 import os
 import paramiko
-import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import shutil
 from openport.services.logger_service import get_logger
 from openport.services import osinteraction
@@ -20,7 +23,8 @@ def get_default_key_locations():
 def get_or_create_public_key():
     public_key_file, private_key_file = get_default_key_locations()
     ensure_keys_exist(public_key_file, private_key_file)
-    return open(public_key_file, 'r').readline()
+    with open(public_key_file, 'r') as f:
+        return f.readline()
 
 
 def ensure_keys_exist(public_key_file, private_key_file):
@@ -60,7 +64,7 @@ def write_new_key(private_key_filename, public_key_filename):
 def create_new_key_pair(length=1024):
     key = paramiko.RSAKey.generate(length)
 
-    private_key = StringIO.StringIO()
+    private_key = StringIO()
     key.write_private_key(private_key)
     private_key.seek(0)
 

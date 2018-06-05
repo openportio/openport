@@ -30,7 +30,7 @@ def get_current_db_revision(db_location):
     context = get_migration_context(db_location, None)
 
     current_rev = context.get_current_revision()
-    print "current db revision:  %s " % current_rev
+    print("current db revision:  %s " % current_rev)
     return current_rev
 
 

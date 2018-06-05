@@ -1,5 +1,5 @@
 import threading
-from logger_service import get_logger
+from openport.services.logger_service import get_logger
 logger = get_logger(__name__)
 
 class TimeoutException(Exception):

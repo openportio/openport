@@ -91,7 +91,7 @@ class IntegrationTest(unittest.TestCase):
         print 'downloading %s' % url
         try:
             urllib.urlretrieve(url, temp_file)
-        except Exception, e:
+        except Exception as e:
             print e
         print "url %s downloaded to %s" % (url, temp_file)
         self.assertTrue(os.path.exists(temp_file), 'the downloaded file does not exist')
@@ -113,7 +113,7 @@ class IntegrationTest(unittest.TestCase):
 #            try:
 #                self.downloadAndCheckFile(share, file_path)
 #                print "download successful: %s" % file_path
-#            except Exception, e:
+#            except Exception as e:
 #                errors.append(e)
 #
 #        threads = []
@@ -268,9 +268,9 @@ class IntegrationTest(unittest.TestCase):
         try:
             urllib.urlretrieve(share.get_link(), temp_file)
             self.fail('the download should have failed.')
-        except self.failureException, e:
+        except self.failureException as e:
             raise e
-        except Exception, e:
+        except Exception as e:
             print e
 
         click_open_for_ip_link(share.open_port_for_ip_link)

@@ -1,3 +1,4 @@
+import os
 import sys
 import requests
 
@@ -11,7 +12,7 @@ except ImportError:
     try:
         import simplejson as json
     except ImportError:
-        print 'You need python 2.6 or simplejson to run this application.'
+        print('You need python 2.6 or simplejson to run this application.')
         sys.exit(1)
 
 
@@ -29,16 +30,19 @@ def register_key(args, server=DEFAULT_SERVER):
                 'key_binding_token': token,
                 'key_name': args.name
             }
-            r = requests.post(url, data=data)
+            verify = 'local' not in url and '192.168' not in url and not os.environ.get(
+                'NO_SSL_VERIFY')
+
+            r = requests.post(url, data=data, verify=verify)
             dictionary = r.json()
             if 'status' not in dictionary or dictionary['status'] != 'ok':
                 raise Exception('Did not get status ok: %s' % dictionary)
-            print "key successfully registered"
+            print("key successfully registered")
 
-        except Exception, detail:
-            print "An error has occurred while communicating with the openport servers. ", detail
+        except Exception as detail:
+            print("An error has occurred while communicating with the openport servers. {}".format(detail))
             if hasattr(detail, 'read'):
-                print detail.read()
+                print(detail.read())
             raise detail
 
         sys.exit(0)

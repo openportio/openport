@@ -121,7 +121,7 @@ class AppTcpServer():
                         logger.error(response)
                 except requests.ConnectionError:
                     self.openport_app_config.tcp_listeners.remove(port)
-                except Exception, detail:
+                except Exception as detail:
                     logger.error("An error has occurred while informing the manager: %s" % detail)
         t = threading.Thread(target=inform)
         t.setDaemon(True)
@@ -170,7 +170,7 @@ def send_exit(share, force=False):
         r = requests.post(url, data=data, timeout=1)
         if r.text.strip() != 'ok':
             logger.error(response)
-    except Exception, detail:
+    except Exception as detail:
         logger.error("An error has occurred while killing the app: %s" % detail)
 
 
@@ -185,7 +185,7 @@ def send_ping(share, print_error=True):
             logger.error(response)
             return False
         return True
-    except Exception, detail:
+    except Exception as detail:
         log_function = logger.error if print_error else logger.debug
         log_function("An error has occurred while pinging the app: %s" % detail)
         return False
@@ -202,14 +202,14 @@ def is_running(share, print_error=False):
             logger.error(response)
             return False
         return True
-    except Exception, detail:
+    except Exception as detail:
         logger_function = logger.error if print_error else logger.debug
         logger_function("An error has occurred while getting info from the app: %s" % detail)
         return False
 
 
 if __name__ == '__main__':
-    print sys.argv
+    print(sys.argv)
 
     from common.config import OpenportAppConfig
     server = AppTcpServer('127.0.0.1', 6005, OpenportAppConfig(), None)
