@@ -73,7 +73,8 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
  #           ssl._create_default_https_context = ssl._create_unverified_context
         logger.debug('sending request %s %s' % (url, request_data))
 #
-        r = requests.post(url, data=request_data, verify=('local' not in url and '192.168' not in url))
+        verify = 'local' not in url and '192.168' not in url and not os.environ.get('NO_SSL_VERIFY')
+        r = requests.post(url, data=request_data, verify=verify)
         if r.status_code == 200:
         #logger.debug(r.text)
             return r.json()
