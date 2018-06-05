@@ -21,7 +21,7 @@ class ConfigService(object):
         manager_port = osinteraction.getInstance().get_open_port()
        # manager_port = 22
         self.config.manager_port = manager_port
-        config.set('manager', 'port', manager_port)
+        config.set('manager', 'port', str(manager_port))
         self.config.manager_port_from_config_file = True
         return manager_port
 
