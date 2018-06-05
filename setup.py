@@ -1,3 +1,5 @@
+import os
+
 from setuptools import setup, find_packages
 
 install_reqs = [
@@ -19,6 +21,16 @@ install_reqs = [
     'six==1.10.0',
 ]
 
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
+
+package_data = package_files('openport/alembic')
+
+
 setup(name='openport',
       version='1.0',
       description='Official Openport Client',
@@ -26,5 +38,6 @@ setup(name='openport',
       author_email='jan@openport.io',
       install_requires=install_reqs,
       url='https://openport.io',
-      packages=['openport'],
+      packages=find_packages(),
+      package_data={'': package_data},
       )
