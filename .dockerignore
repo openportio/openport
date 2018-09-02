@@ -1,0 +1,8 @@
+env
+env3
+go
+scripts
+*/**.pyc
+.idea
+.git
+

@@ -24,6 +24,7 @@ for handler in sqlalchemy_logger.handlers:
 
 Base = declarative_base()
 
+
 class OpenportSession(Base):
     __tablename__ = 'sessions'
 

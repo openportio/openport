@@ -121,9 +121,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
 def request_open_port(local_port, restart_session_token='', request_server_port=-1, error_callback=None,
                       http_forward=False, stop_callback=None, server=DEFAULT_SERVER, automatic_restart=False,
                       public_key=None, forward_tunnel=False, ip_link_protection=None, client_version=VERSION):
-
-    if public_key is None:
-        public_key = get_or_create_public_key()
+    assert public_key is not None
 
     logger.debug("requesting port forward - remote port: %s, restart session token: %s" % (request_server_port, restart_session_token))
     url = '%s/api/v1/request-port' % server

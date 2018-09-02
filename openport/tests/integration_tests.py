@@ -1,3 +1,4 @@
+from __future__ import print_function
 import filecmp
 from time import sleep
 import unittest
@@ -8,23 +9,22 @@ import subprocess
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from apps.keyhandling import get_or_create_public_key, create_new_key_pair
-from apps.openport_api import PortForwardResponse, request_port
-from services.logger_service import set_log_level, get_logger
-from services.crypt_service import get_token
-from services import osinteraction
-from apps.openport_api import request_open_port
+from openport.apps.keyhandling import get_or_create_public_key, create_new_key_pair
+from openport.apps.openport_api import PortForwardResponse, request_port
+from openport.services.logger_service import set_log_level, get_logger
+from openport.services.crypt_service import get_token
+from openport.services import osinteraction
+from openport.apps.openport_api import request_open_port
 import logging
-import urllib2
 
 import xmlrunner
 
-from common.share import Share
-from common.session import Session
+from openport.common.share import Share
+from openport.common.session import Session
 
-from test_utils import SimpleHTTPClient, TestHTTPServer, click_open_for_ip_link, check_tcp_port_forward
-from test_utils import start_openportit_session, start_openport_session, wait_for_response
-from services.utils import run_method_with_timeout
+from .test_utils import SimpleHTTPClient, TestHTTPServer, click_open_for_ip_link, check_tcp_port_forward
+from .test_utils import start_openportit_session, start_openport_session, wait_for_response
+from openport.services.utils import run_method_with_timeout
 
 TOKEN = 'tokentest'
 
@@ -34,10 +34,10 @@ logger = get_logger(__name__)
 class IntegrationTest(unittest.TestCase):
 
     def setUp(self):
-        print self._testMethodName
+        print(self._testMethodName)
         set_log_level(logging.DEBUG)
         #self.test_server = 'http://test.openport.be'
-        self.test_server = 'https://openport.io'
+        self.test_server = 'https://test2.openport.io'
         self.osinteraction = osinteraction.getInstance()
 
     def tearDown(self):
@@ -53,7 +53,7 @@ class IntegrationTest(unittest.TestCase):
         temp_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
                                  os.path.basename(share.filePath) + get_token(3))
 
-        print 'temp file: ' + temp_file
+        print('temp file: ' + temp_file)
         self.downloadAndCheckFile(share, temp_file)
 
     def test_start_session(self):
@@ -67,7 +67,7 @@ class IntegrationTest(unittest.TestCase):
             out_app = start_openport_session(self, out_session)
             remote_host, remote_port, link = out_session.server, out_session.server_port, out_session.open_port_for_ip_link
             click_open_for_ip_link(link)
-            print remote_port
+            print(remote_port)
             sleep(10)
             #sleep(1000)
             check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
@@ -82,18 +82,18 @@ class IntegrationTest(unittest.TestCase):
         return share
 
     def downloadAndCheckFile(self, share, temp_file):
-        print "removing file %s" % temp_file
+        print("removing file %s" % temp_file)
         if os.path.exists(temp_file):
             os.remove(temp_file)
         self.assertFalse(os.path.exists(temp_file))
-        print "file %s removed" % temp_file
+        print("file %s removed" % temp_file)
         url = share.get_link()
-        print 'downloading %s' % url
+        print('downloading %s' % url)
         try:
             urllib.urlretrieve(url, temp_file)
         except Exception as e:
-            print e
-        print "url %s downloaded to %s" % (url, temp_file)
+            print(e)
+        print("url %s downloaded to %s" % (url, temp_file))
         self.assertTrue(os.path.exists(temp_file), 'the downloaded file does not exist')
         self.assertTrue(filecmp.cmp(share.filePath, temp_file), 'the file compare did not succeed')
         os.remove(temp_file)
@@ -236,7 +236,7 @@ class IntegrationTest(unittest.TestCase):
             out_app = start_openport_session(self, out_session)
             remote_host, remote_port, link = out_session.server, out_session.server_port, out_session.open_port_for_ip_link
             click_open_for_ip_link(link)
-            print remote_port
+            print(remote_port)
             sleep(10)
             #sleep(1000)
             check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
@@ -271,19 +271,19 @@ class IntegrationTest(unittest.TestCase):
         except self.failureException as e:
             raise e
         except Exception as e:
-            print e
+            print(e)
 
         click_open_for_ip_link(share.open_port_for_ip_link)
 
         sleep(5)
-        print 'temp file: ' + temp_file
+        print ('temp file: ' + temp_file)
         self.downloadAndCheckFile(share, temp_file)
 
     def exceptionTest(self):
         try:
             raise ValueError
         except (ValueError, TypeError):
-            print "huray!"
+            print ("huray!")
 
     def test_http_forward(self):
 
@@ -308,7 +308,7 @@ class IntegrationTest(unittest.TestCase):
 #        remote_port = session.server_port
 #        self.assertEqual(80, remote_port)
         remote_host = session.http_forward_address
-        print 'remote host:' + remote_host
+        print ('remote host:' + remote_host)
         self.assertTrue('.u.' in remote_host, 'expect .u. in remote_host: %s' % remote_host)
 
         c = SimpleHTTPClient()
@@ -330,7 +330,7 @@ class IntegrationTest(unittest.TestCase):
         self.app = start_openport_session(self, session)
 
         remote_host = session.http_forward_address
-        print 'remote host:' + remote_host
+        print ('remote host:' + remote_host)
         self.assertTrue('.u.' in remote_host, 'expect .u. in remote_host: %s' % remote_host)
 
         c = SimpleHTTPClient()
@@ -372,7 +372,7 @@ class IntegrationTest(unittest.TestCase):
         click_open_for_ip_link(session.open_port_for_ip_link)
 
         link = session.get_link()
-        print 'link: %s' % link
+        print ('link: %s' % link)
         self.assertTrue(session.server_port > 1000)
 
         c = SimpleHTTPClient()
@@ -381,11 +381,11 @@ class IntegrationTest(unittest.TestCase):
         i = -1
         try:
             for i in range(20):
-                print "connection %s" % i
+                print ("connection %s" % i)
                 actual_response = c.get('http://%s' % link)
                 self.assertEqual(actual_response, expected_response.strip())
         except (urllib2.HTTPError, urllib2.URLError) as e:
-            print e
+            print (e)
         self.assertTrue(5 < i < 20, 'i should be around 10 but was %s' % i)
 
         # check download on different port is still ok
@@ -399,7 +399,7 @@ class IntegrationTest(unittest.TestCase):
 
         openport2 = start_openport_session(self, session2)
         sleep(3)
-        print 'http://%s' % session2.get_link()
+        print ('http://%s' % session2.get_link())
 
         click_open_for_ip_link(session2.open_port_for_ip_link)
         actual_response = c.get('http://%s' % session2.get_link())
@@ -427,7 +427,7 @@ class IntegrationTest(unittest.TestCase):
         click_open_for_ip_link(session.open_port_for_ip_link)
 
         link = session.http_forward_address
-        print 'link: %s' % link
+        print ('link: %s' % link)
 
         c = SimpleHTTPClient()
         actual_response = c.get('http://localhost:%s' % port)
@@ -435,7 +435,7 @@ class IntegrationTest(unittest.TestCase):
         i = -1
         try:
             for i in range(20):
-                print "connection %s" % i
+                print ("connection %s" % i)
                 actual_response = c.get('http://%s' % link)
                 self.assertEqual(actual_response, response.strip())
         except (urllib2.HTTPError, urllib2.URLError) as e:
@@ -510,14 +510,14 @@ class IntegrationTest(unittest.TestCase):
         request_open_port(port, server=self.test_server)
         command = ['/usr/bin/ssh', 'open@%s' % self.test_server.split('//')[1], '-R',
                    '%s:localhost:%s' % (port2, port2), 'wrong_session_token']
-        print command
+        print (command)
         p = subprocess.Popen(command,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              shell=False)
         failed = wait_for_response(lambda: p.poll() is not None, timeout=10, throw=False)
         sleep(3)
         output = self.osinteraction.non_block_read(p)
-        print output
+        print (output)
         self.assertTrue('remote port forwarding failed for listen port' in output[1])
         self.assertFalse(failed)
 
@@ -527,13 +527,13 @@ class IntegrationTest(unittest.TestCase):
         response = request_open_port(port, server=self.test_server)
         command = ['/usr/bin/ssh', 'open@%s' % self.test_server.split('//')[1], '-R',
                    '%s:localhost:%s' % (response.remote_port, port), response.session_token]
-        print command
+        print (command)
         p = subprocess.Popen(command,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              shell=False)
         run_method_with_timeout(lambda: wait_for_response(lambda: p.poll() is not None, timeout=10, throw=False), 10, raise_exception=False)
         if p.returncode:
-            print p.communicate()
+            print (p.communicate())
         self.assertEqual(p.returncode, None)
 
     def test_rogue_ssh_session__correct__old_version(self):
@@ -542,14 +542,31 @@ class IntegrationTest(unittest.TestCase):
         response = request_open_port(port, server=self.test_server, client_version='0.9.3')
         command = ['/usr/bin/ssh', 'open@%s' % self.test_server.split('//')[1], '-R',
                    '%s:localhost:%s' % (response.remote_port, port)]  # No response.session_token!
-        print command
+        print (command)
         p = subprocess.Popen(command,
                              bufsize=2048, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              shell=False)
         run_method_with_timeout(lambda: wait_for_response(lambda: p.poll() is not None, timeout=10, throw=False), 10, raise_exception=False)
         if p.returncode is not None:
-            print p.communicate()
+            print (p.communicate())
         self.assertEqual(p.returncode, None)
+
+
+    def test_request_restart_while_still_running(self):
+        port_out = self.osinteraction.get_open_port()
+        session = Session()
+        session.local_port = port_out
+        session.server_session_token = None
+
+        openport = start_openport_session(self, session)
+        print('session started')
+        sleep(30)
+        openport.start_port_forward(session)
+
+
+
+
+
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ from time import sleep
 import errno
 
 from openport.apps import openport_api
+from openport.apps.keyhandling import get_default_key_locations
 from openport.common.config import DEFAULT_SERVER
 from openport.apps.portforwarding import PortForwardingService, TunnelError
 from openport.services.logger_service import get_logger
@@ -33,11 +34,11 @@ class Openport(object):
         self.restart_on_failure = True
         self.automatic_restart = False
         self.session = session
-        if session.public_key_file:
-            with open(session.public_key_file, 'r') as f:
-                public_key = f.readline().strip()
-        else:
-            public_key = None
+        if not session.public_key_file:
+            session.public_key_file, session.private_key_file = get_default_key_locations()
+
+        with open(session.public_key_file, 'r') as f:
+            public_key = f.readline().strip()
 
         # This is the main loop. Exit this and the program ends.
         while self.restart_on_failure and not self.stopped:
