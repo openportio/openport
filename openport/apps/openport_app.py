@@ -107,6 +107,7 @@ class OpenportApp(object):
         parser.add_argument('--request-port', type=int, default=-1, metavar='REMOTE_PORT',
                             help='Request the server port for the share. Do not forget to pass the token with --request-token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
+        parser.add_argument('--keep-alive', type=int, default=10, help='The interval in between keep-alive messages in seconds.')
         parser.add_argument('--http-forward', action='store_true',
                             help='Request an http forward, so you can connect to port 80 on the server.')
         parser.add_argument('--server', default=DEFAULT_SERVER, help=argparse.SUPPRESS)
@@ -295,6 +296,7 @@ class OpenportApp(object):
         session.server_session_token = self.args.request_token
         session.forward_tunnel = self.args.forward_tunnel
         session.active = False  # Will be set active in start_callback.
+        session.keep_alive_interval_seconds = self.args.keep_alive
 
         if session.forward_tunnel:
             session.server_port = self.args.remote_port

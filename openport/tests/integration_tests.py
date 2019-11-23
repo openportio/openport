@@ -551,7 +551,6 @@ class IntegrationTest(unittest.TestCase):
             print (p.communicate())
         self.assertEqual(p.returncode, None)
 
-
     def test_request_restart_while_still_running(self):
         port_out = self.osinteraction.get_open_port()
         session = Session()
@@ -560,8 +559,13 @@ class IntegrationTest(unittest.TestCase):
 
         openport = start_openport_session(self, session)
         print('session started')
-        sleep(30)
-        openport.start_port_forward(session)
+        sleep(3)
+
+        session2 = Session()
+        session2.local_port = port_out
+        session2.server_session_token = session.server_session_token
+
+        openport2 = start_openport_session(self, session)
 
 
 

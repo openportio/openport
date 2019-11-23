@@ -37,7 +37,7 @@ class PortForwardingService:
                  start_callback=None,
                  forward_tunnel=False,
                  session_token=None,
-                 keep_alive_interval=10
+                 keep_alive_interval_seconds=10
                  ):
         self.local_port = local_port
         self.remote_port = remote_port
@@ -59,7 +59,7 @@ class PortForwardingService:
         self.start_callback = start_callback
         self.forward_tunnel = forward_tunnel
         self.session_token = session_token
-        self.keep_alive_interval = keep_alive_interval
+        self.keep_alive_interval_seconds = keep_alive_interval_seconds
 
         self.portForwardingRequestException = None
         self.stopped = False
@@ -132,7 +132,7 @@ class PortForwardingService:
 
     def keep_alive(self):
         while not self.stopped:
-            time.sleep(self.keep_alive_interval)
+            time.sleep(self.keep_alive_interval_seconds)
             if self.stopped:
                 return
             if self.portForwardingRequestException is not None:
@@ -155,7 +155,7 @@ class PortForwardingService:
     def _forward_local_port(self):
         try:
             transport = self.client.get_transport()
-            transport.set_keepalive(30)
+            transport.set_keepalive(self.keep_alive_interval_seconds)
             logger.debug('requesting forward from remote port %s' % (self.remote_port,))
             transport.request_port_forward('', self.remote_port)
             while True:
@@ -173,7 +173,7 @@ class PortForwardingService:
 
     def _port_forward_handler(self, chan):
         """
-        A handler to handle the incomming traffic.
+        A handler to handle the incoming traffic.
         This will connect the channel to the localhost at the given port.
         """
         local_server = 'localhost'

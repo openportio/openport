@@ -128,7 +128,7 @@ class SimpleTcpClient(object):
 
         except socket.timeout as e:
             sys.stderr.write("[timeout] %s\n" % e)
-        except socket.error, msg:
+        except socket.error as msg:
             sys.stderr.write("[ERROR] %s\n" % msg)
             if hasattr(msg, 'len') and len(msg) > 0:
                 sys.stderr.write("[ERROR] %s\n" % msg[1])
@@ -375,7 +375,7 @@ def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_e
     servers[local_port] = s
     try:
         s.runThreaded()
-
+        # Connect to local service directly
         cl = SimpleTcpClient('127.0.0.1', local_port)
         response = cl.send(text).strip()
         if not fail_on_error and text != response:
@@ -384,6 +384,7 @@ def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_e
             test.assertEqual(text, response)
         cl.close()
 
+        # Connect to remote service
         cr = SimpleTcpClient(remote_host, remote_port)
         response = cr.send(text).strip()
         if not fail_on_error and text != response:

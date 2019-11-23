@@ -4,16 +4,16 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from common.share import Share
+from openport.common.session import Session
 
 
 class SessionTests(unittest.TestCase):
 
     def setUp(self):
-        print self._testMethodName
+        print(self._testMethodName)
 
     def test_as_dict(self):
-        share = Share()
+        share = Session()
         share.account_id = 6
         share.key_id = 14
         share.local_port = 2022
@@ -28,8 +28,9 @@ class SessionTests(unittest.TestCase):
         share.http_forward = True
         share.http_forward_address = 'http://jan.u.openport.io'
         share.open_port_for_ip_link = 'http//openport.io/l/1234/zerazer'
+        share.keep_alive_interval_seconds = 123
 
-        share2 = Share().from_dict(share.as_dict())
+        share2 = Session().from_dict(share.as_dict())
 
         self.assertEquals(share.id, share2.id)
         self.assertEquals(share.server, share2.server)
@@ -44,3 +45,4 @@ class SessionTests(unittest.TestCase):
         self.assertEquals(share.http_forward, share2.http_forward)
         self.assertEquals(share.http_forward_address, share2.http_forward_address)
         self.assertEquals(share.open_port_for_ip_link, share2.open_port_for_ip_link)
+        self.assertEquals(share.keep_alive_interval_seconds, share2.keep_alive_interval_seconds)

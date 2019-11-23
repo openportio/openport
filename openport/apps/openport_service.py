@@ -87,6 +87,7 @@ class Openport(object):
                     start_callback=self.session_start,
                     forward_tunnel=session.forward_tunnel,
                     session_token=session.server_session_token,
+                    keep_alive_interval_seconds=session.keep_alive_interval_seconds,
                 )
                 self.port_forwarding_service.start()  # hangs
             except openport_api.FatalSessionError as e:
