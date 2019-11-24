@@ -16,7 +16,7 @@ install_reqs = [
     'psutil==4.3.1',
     'pyOpenSSL==18.0.0',
     'pycrypto==2.6.1',
-    'requests==2.9.1',
+    'requests==2.20.0',
     'six==1.10.0',
 ]
 
