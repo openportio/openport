@@ -11,7 +11,6 @@ from wx._core import EVT_PAINT
 from wx._gdi import PaintDC
 
 
-sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '..', '..'))
 from openport.common.share import Share
 from openport.services import osinteraction
 from openport.services.logger_service import get_logger
@@ -92,7 +91,7 @@ class SharesFrame(wx.Frame):
             self.server.register_with_app(share)
 
     def showFrame(self, event):
-        print "show frame"
+        print("show frame")
         self.Show(True)
         self.Raise()
         self.Iconize(False)

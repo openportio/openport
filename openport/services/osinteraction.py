@@ -95,7 +95,7 @@ class OsInteraction(object):
         return command
 
     def start_process(self, args, cwd=None):
-        if isinstance(args, basestring):
+        if isinstance(args, str):
             args = args.split()
         if self.logger:
             self.logger.debug('Running command: %s' % args)
@@ -209,7 +209,7 @@ class OsInteraction(object):
             def enqueue_output(out, queue):
                 if out:
                     for line in iter(out.readline, b''):
-                        queue.put(line)
+                        queue.put(line.decode('utf-8'))
 #                out.close()
 
             q_stdout = Queue()
@@ -374,8 +374,8 @@ class LinuxOsInteraction(OsInteraction):
 
     def nonBlockRead(self, output):
         fd = output.fileno()
-        fl = fcntl.fcntl(fd, fcntl.F_GETFL)
-        fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
+      #  fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+       # fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
         try:
             return output.read()
         except:

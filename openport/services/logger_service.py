@@ -35,7 +35,7 @@ def get_logger(name):
 def set_log_level(new_log_level):
     global log_level
     log_level = new_log_level
-    for name, logger in loggers.iteritems():
+    for name, logger in loggers.items():
         for handler in logger.handlers:
             if type(handler) is logging.StreamHandler:
                 handler.setLevel(log_level)

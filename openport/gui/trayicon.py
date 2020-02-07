@@ -49,8 +49,8 @@ class OpenPortItTaskBarIcon(wx.TaskBarIcon):
         self.Bind(wx.EVT_MENU, callBackFunction, id=newItem)
 
     def ShowMenu(self, event):
-        print 'event %s' % event
-        print "ShowMenu"
+        print('event %s' % event)
+        print("ShowMenu")
         self.PopupMenu(self.menu)
 
 def main(argv=None):

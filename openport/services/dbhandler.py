@@ -178,9 +178,10 @@ class DBHandler(object):
         share.open_port_for_ip_link = openport_session.open_port_for_ip_link
         share.restart_command = openport_session.restart_command
         try:
-            share.restart_command = pickle.loads(share.restart_command.encode('ascii', 'ignore'))
-            pass
+            b = share.restart_command if type(share.restart_command) == bytes else share.restart_command.encode('utf-8')
+            share.restart_command = pickle.loads(b)
         except Exception as e:
+            raise(e)
             pass
 
         return share
@@ -189,7 +190,7 @@ class DBHandler(object):
         logger.debug('get_active_shares')
 
         session = self._get_session()
-        openport_sessions = session.query(OpenportSession).filter_by(active=True)
+        openport_sessions = list(session.query(OpenportSession).filter_by(active=True))
         openport_sessions = [s for s in openport_sessions if s.remote_port > 0]
         l = list(self.convert_session_from_db(openport_session) for openport_session in openport_sessions)
         self.Session.remove()

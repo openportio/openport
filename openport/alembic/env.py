@@ -17,7 +17,6 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from services import dbhandler
 
 config.set_main_option('sqlalchemy.url', 'sqlite:///%s' % dbhandler.getInstance(init_db=False).db_location)

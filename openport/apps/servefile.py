@@ -1,8 +1,7 @@
-from BaseHTTPServer import HTTPServer
-from StringIO import StringIO
+from http.server import HTTPServer, BaseHTTPRequestHandler
 import cgi
-from urlparse import urlparse, parse_qs
-import SocketServer
+from urllib.parse import urlparse, parse_qs
+from socketserver import ThreadingMixIn, TCPServer, BaseServer
 import os
 import posixpath
 import socket
@@ -10,15 +9,15 @@ import urllib
 from OpenSSL import SSL
 from openport.services.logger_service import get_logger
 from openport.services import osinteraction
-from ext_http_server import RangeHandler
-
+from io import StringIO
 
 _file_serve_path = None
 _token = None
 logger = get_logger(__name__)
 os_interaction = osinteraction.getInstance()
 
-class FileServeHandler(RangeHandler):
+
+class FileServeHandler(BaseHTTPRequestHandler):
     def setup(self):
         self.connection = self.request
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
@@ -29,53 +28,56 @@ class FileServeHandler(RangeHandler):
         return self.send_file(_file_serve_path)
 
     def send_file(self, path):
-		f = None
-		logger.debug( 'path = %s' % path )
-		ctype = self.guess_type(path)
-		try:
-			# Always read in binary mode. Opening files in text mode may cause
-			# newline translations, making the actual size of the content
-			# transmitted *less* than the content-length!
-			f = open(path, 'rb')
-		except IOError:
-			self.send_error(404, "File not found")
-			return None
-		self.send_response(200)
-		self.send_header("Content-type", ctype)
-		fs = os.fstat(f.fileno())
-		self.send_header("Content-Length", str(fs[6]))
-		self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
-		self.send_header("Content-Disposition", "attachment; filename=%s" % os.path.basename(path))
-		self.end_headers()
-		return f
+        f = None
+        logger.debug('path = %s' % path)
+        ctype = self.guess_type(path)
+        try:
+            # Always read in binary mode. Opening files in text mode may cause
+            # newline translations, making the actual size of the content
+            # transmitted *less* than the content-length!
+            f = open(path, 'rb')
+        except IOError:
+            self.send_error(404, "File not found")
+            return None
+        self.send_response(200)
+        self.send_header("Content-type", ctype)
+        fs = os.fstat(f.fileno())
+        self.send_header("Content-Length", str(fs[6]))
+        self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+        self.send_header("Content-Disposition", "attachment; filename=%s" % os.path.basename(path))
+        self.end_headers()
+        return f
 
     def check_token(self):
         dict = parse_qs(urlparse(self.path).query)
-        #print dict, self.path
+        # print dict, self.path
         if not 't' in dict or len(dict['t']) < 1 or dict['t'][0].strip('/') != _token:
             self.send_error(401, "invalid token")
             return False
         return True
 
-class ThreadingHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTPServer):
+
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
-class SecureHTTPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer, HTTPServer):
+
+class SecureHTTPServer(ThreadingMixIn, HTTPServer):
     def __init__(self, server_address, HandlerClass):
-        SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
+        BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
-        #danger of decryption because every user has the same private key... Make sure to use diffie hellman for key exchange.
+        # danger of decryption because every user has the same private key... Make sure to use diffie hellman for key exchange.
         ctx.set_options(SSL.OP_SINGLE_DH_USE)
-        #server.pem's location (containing the server private key and
-        #the server certificate).
+        # server.pem's location (containing the server private key and
+        # the server certificate).
         fpem = osinteraction.get_resource_path('server.pem')
         logger.debug('certificate file: %s' % fpem)
-        ctx.use_privatekey_file (fpem)
+        ctx.use_privatekey_file(fpem)
         ctx.use_certificate_file(fpem)
         self.socket = SSL.Connection(ctx, socket.socket(self.address_family,
-            self.socket_type))
+                                                        self.socket_type))
         self.server_bind()
         self.server_activate()
+
 
 class DirServeHandler(FileServeHandler):
     def send_head(self):
@@ -131,7 +133,7 @@ class DirServeHandler(FileServeHandler):
                 displayname = name + "@"
                 # Note: a link to a directory displays with @ and links with /
             f.write('<li><a href="%s?t=%s">%s</a>\n'
-            % (urllib.quote(linkname), _token, cgi.escape(displayname)))
+                    % (urllib.quote(linkname), _token, cgi.escape(displayname)))
         f.write("</ul>\n<hr>\n</body>\n</html>\n")
         length = f.tell()
         f.seek(0)
@@ -141,7 +143,6 @@ class DirServeHandler(FileServeHandler):
         self.end_headers()
         return f
 
-
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.
 
@@ -150,8 +151,8 @@ class DirServeHandler(FileServeHandler):
         probably be diagnosed.)
         """
         # abandon query parameters
-        path = path.split('?',1)[0]
-        path = path.split('#',1)[0]
+        path = path.split('?', 1)[0]
+        path = path.split('#', 1)[0]
         path = posixpath.normpath(urllib.unquote(path))
         words = path.split('/')
         words = filter(None, words)
@@ -172,12 +173,13 @@ def serve_file_on_port(path, port, token):
     global _token
     _token = token
 
- #   ServerClass = SecureHTTPServer
+    #   ServerClass = SecureHTTPServer
     ServerClass = ThreadingHTTPServer
     httpd = ServerClass(('', port), HandlerClass)
 
-    logger.info( "serving at port %s" % port )
+    logger.info("serving at port %s" % port)
     httpd.serve_forever()
+
 
 if __name__ == '__main__':
     path = os.path.dirname(os.path.abspath(__file__))

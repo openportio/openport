@@ -7,7 +7,6 @@ import win32evtlogutil
 import servicemanager
 import winerror
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from services.osinteraction import getInstance
 

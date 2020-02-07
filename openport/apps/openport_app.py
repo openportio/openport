@@ -5,7 +5,6 @@ import argparse
 import ast
 import threading
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 from openport.services import osinteraction, dbhandler
 from openport.services.logger_service import get_logger, set_log_level

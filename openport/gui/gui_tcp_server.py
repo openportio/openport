@@ -191,7 +191,7 @@ class GUITcpServer():
 
 
 if __name__ == '__main__':
-    print sys.argv
+    print(sys.argv)
 
     server = GUITcpServer('127.0.0.1', 6049, OpenportAppConfig())
     server.start_server()
