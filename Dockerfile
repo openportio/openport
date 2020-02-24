@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.6
 WORKDIR /apps/openport
 COPY setup.py /apps/openport/setup.py
 RUN pip install -e .

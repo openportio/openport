@@ -1,7 +1,7 @@
 import os
 import requests
 
-from openport.common.session import Session
+from openport.common.session import Session, DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS
 from openport.services.logger_service import get_logger
 from openport.services import osinteraction
 from openport.common.config import DEFAULT_SERVER
@@ -45,6 +45,8 @@ class AppService(object):
         if session.forward_tunnel:
             command = self.os_interaction.set_variable(command, '--forward-tunnel')
             command = self.os_interaction.set_variable(command, '--remote-port', str(session.server_port))
+        if session.keep_alive_interval_seconds != DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS:
+            command = self.os_interaction.set_variable(command, '--keep-alive', str(session.keep_alive_interval_seconds))
 
         command = self.set_manager_port(command)
 

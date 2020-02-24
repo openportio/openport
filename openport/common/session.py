@@ -1,5 +1,7 @@
 import pickle
 
+DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS = 10
+
 
 class Session(object):
     def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=False, account_id=-1,

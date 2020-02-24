@@ -9,7 +9,7 @@ import threading
 from openport.services import osinteraction, dbhandler
 from openport.services.logger_service import get_logger, set_log_level
 from openport.common.config import OpenportAppConfig
-from openport.common.session import Session
+from openport.common.session import Session, DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS
 from openport.services import key_registration_service
 from openport.services.config_service import ConfigService
 from openport.services.app_service import AppService, USER_CONFIG_FILE
@@ -106,7 +106,8 @@ class OpenportApp(object):
         parser.add_argument('--request-port', type=int, default=-1, metavar='REMOTE_PORT',
                             help='Request the server port for the share. Do not forget to pass the token with --request-token.')
         parser.add_argument('--request-token', default='', help='The token needed to restart the share.')
-        parser.add_argument('--keep-alive', type=int, default=10, help='The interval in between keep-alive messages in seconds.')
+        parser.add_argument('--keep-alive', type=int, default=DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS,
+                            help='The interval in between keep-alive messages in seconds.')
         parser.add_argument('--http-forward', action='store_true',
                             help='Request an http forward, so you can connect to port 80 on the server.')
         parser.add_argument('--server', default=DEFAULT_SERVER, help=argparse.SUPPRESS)

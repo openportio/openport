@@ -10,13 +10,12 @@ install_reqs = [
     'argparse==1.4.0',
     'bottle==0.12.10',
     'cryptography==2.8',
-    'enum34==1.1.6',
     'ipaddress==1.0.17',
     'lockfile==0.12.2',
     'psutil==4.3.1',
     'pyOpenSSL==18.0.0',
     'pycrypto==2.6.1',
-    'requests==2.9.1',
+    'requests==2.23.0',
     'six==1.10.0',
 ]
 
