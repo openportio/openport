@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.6.10-stretch
 WORKDIR /apps/openport
 COPY setup.py /apps/openport/setup.py
 COPY requirements.txt /apps/openport/
