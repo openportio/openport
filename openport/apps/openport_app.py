@@ -125,6 +125,7 @@ class OpenportApp(object):
                                  'session.', default=None, choices=[True, False])
 
         parser.add_argument('--daemonize', '-d', action='store_true', help='Start the app in the background.')
+        parser.add_argument('--proxy', type=str, help='Socks5 proxy to use. Format: socks5h://user:pass@host:port')
 
     def init_app(self, args):
         if args.verbose:
@@ -297,6 +298,7 @@ class OpenportApp(object):
         session.forward_tunnel = self.args.forward_tunnel
         session.active = False  # Will be set active in start_callback.
         session.keep_alive_interval_seconds = self.args.keep_alive
+        session.proxy = self.args.proxy
 
         if session.forward_tunnel:
             session.server_port = self.args.remote_port

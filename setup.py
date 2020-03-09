@@ -15,8 +15,10 @@ install_reqs = [
     'psutil==4.3.1',
     'pyOpenSSL==18.0.0',
     'pycrypto==2.6.1',
-    'requests==2.23.0',
+    'requests[socks]==2.23.0',
     'six==1.10.0',
+    'pysocks==1.7.1',
+    'setuptools==45.2.0',
 ]
 
 

@@ -211,7 +211,18 @@ class AppTests(unittest.TestCase):
         self.assertTrue(share.active)
         self.assertEqual(['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
                           TEST_SERVER, '--keep-alive', '5'], share.restart_command)
-        p.kill()
+
+    def test_save_share__restart_on_reboot__proxy(self):
+        port = self.osinteraction.get_open_port()
+        p = subprocess.Popen([PYTHON_EXE, OPENPORT_APP_FILE, '--local-port', '%s' % port,
+                              '--server', TEST_SERVER, '--verbose', '--database', self.db_file, '--restart-on-reboot',
+                              '--proxy', 'socks5://jan:db@1.2.3.4:5555'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        share = self.db_handler.get_share_by_local_port(port, filter_active=False)
+        self.assertEqual(['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
+                          TEST_SERVER, '--proxy', 'socks5://jan:db@1.2.3.4:5555'],
+                         share.restart_command)
 
     def test_save_share__restart_on_reboot__simple(self):
         port = self.osinteraction.get_open_port()

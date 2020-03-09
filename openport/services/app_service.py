@@ -47,7 +47,8 @@ class AppService(object):
             command = self.os_interaction.set_variable(command, '--remote-port', str(session.server_port))
         if session.keep_alive_interval_seconds != DEFAULT_KEEP_ALIVE_INTERVAL_SECONDS:
             command = self.os_interaction.set_variable(command, '--keep-alive', str(session.keep_alive_interval_seconds))
-
+        if session.proxy:
+            command = self.os_interaction.set_variable(command, '--proxy', session.proxy)
         command = self.set_manager_port(command)
 
         return command

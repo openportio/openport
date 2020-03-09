@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  openport:
+    image: jandebleser/openport
+    networks:
+      - no-internet
+    volumes:
+      - ..:/apps/openport
+    command: python openport/apps/openport_app.py 22 --proxy=socks5h://USER:PASSWORD@proxy:1080
+    environment:
+      - PYTHONPATH=.
+    depends_on:
+      - proxy
+
+  proxy:
+    image: serjs/go-socks5-proxy
+    environment:
+      - PROXY_USER=USER
+      - PROXY_PASSWORD=PASSWORD
+    networks:
+      - no-internet
+      - internet
+
+networks:
+  no-internet:
+    driver: bridge
+    internal: true
+  internet:
+    driver: bridge

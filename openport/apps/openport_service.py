@@ -6,6 +6,7 @@ from openport.apps import openport_api
 from openport.apps.keyhandling import get_default_key_locations
 from openport.common.config import DEFAULT_SERVER
 from openport.apps.portforwarding import PortForwardingService, TunnelError
+from openport.common.session import Session
 from openport.services.logger_service import get_logger
 
 
@@ -29,7 +30,7 @@ class Openport(object):
         self.last_response = None
         self.stopped = False
 
-    def start_port_forward(self, session, server=DEFAULT_SERVER):
+    def start_port_forward(self, session: Session, server=DEFAULT_SERVER):
 
         self.restart_on_failure = True
         self.automatic_restart = False
@@ -55,6 +56,7 @@ class Openport(object):
                     public_key=public_key,
                     forward_tunnel=session.forward_tunnel,
                     ip_link_protection=session.ip_link_protection,
+                    proxies=session.get_proxy_dict(),
                 )
                 self.last_response = response
 
@@ -88,6 +90,7 @@ class Openport(object):
                     forward_tunnel=session.forward_tunnel,
                     session_token=session.server_session_token,
                     keep_alive_interval_seconds=session.keep_alive_interval_seconds,
+                    proxy=session.proxy,
                 )
                 self.port_forwarding_service.start()  # hangs
             except openport_api.FatalSessionError as e:

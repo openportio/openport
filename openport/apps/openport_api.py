@@ -4,17 +4,17 @@ import sys
 import os
 import requests
 import platform
-from openport.apps.keyhandling import get_or_create_public_key
 from openport.services.logger_service import get_logger
 from openport.common.config import DEFAULT_SERVER
 from openport.apps.openport_app_version import VERSION
 from openport.services import osinteraction
 
-
 logger = get_logger('openport_api')
+
 
 class SessionError(Exception):
     pass
+
 
 class FatalSessionError(Exception):
     pass
@@ -45,7 +45,8 @@ class PortForwardResponse():
 def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEFAULT_SERVER,
                  restart_session_token='',
                  request_server_port=-1, http_forward=False, automatic_restart=False,
-                 forward_tunnel=False, ip_link_protection=None, client_version=VERSION):
+                 forward_tunnel=False, ip_link_protection=None, client_version=VERSION,
+                 proxies={}):
     """
     Requests a port on the server using the openPort protocol
     return a tuple with ( server_ip, server_port, message )
@@ -64,23 +65,20 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
             'client_version': client_version,
             'forward_tunnel': 'on' if forward_tunnel else '',
             'platform': platform.platform(),
-            }
+        }
         if ip_link_protection is not None:
             request_data['ip_link_protection'] = 'on' if ip_link_protection else ''
 
- #       if sys.version_info >= (2, 7, 9):
- #           import ssl
- #           ssl._create_default_https_context = ssl._create_unverified_context
         logger.debug('sending request %s %s' % (url, request_data))
-#
+
         verify = 'local' not in url and '192.168' not in url and not os.environ.get('NO_SSL_VERIFY')
-        r = requests.post(url, data=request_data, verify=verify)
+        r = requests.post(url, data=request_data, verify=verify, proxies=proxies)
         if r.status_code == 200:
-        #logger.debug(r.text)
+            # logger.debug(r.text)
             return r.json()
         if r.status_code == 500:
             return {'error': r.reason}
-        return {'error' : 'status code: {} text: {}'.format(r.status_code, r.text)}
+        return {'error': 'status code: {} text: {}'.format(r.status_code, r.text)}
     except requests.HTTPError as e:
         logger.error("An error has occurred while communicating with the openport servers. %s" % e)
         if r is not None:
@@ -90,8 +88,8 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
                 with open(error_page_file_path, 'w') as f:
                     f.write(r.text)
                     logger.debug('error is available here: %s' % error_page_file_path)
-            except Exception as e:
-                logger.debug(e)
+            except Exception as e2:
+                logger.debug(e2)
 
         if e.response:
             logger.debug('error: got response: %s' % e.response.text)
@@ -114,16 +112,18 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
             except Exception as e:
                 logger.debug(e)
         logger.error("An error has occurred while communicating with the openport servers. %s" % e)
-        #logger.exception(e)
+        # logger.exception(e)
         raise e
 
 
 def request_open_port(local_port, restart_session_token='', request_server_port=-1, error_callback=None,
                       http_forward=False, stop_callback=None, server=DEFAULT_SERVER, automatic_restart=False,
-                      public_key=None, forward_tunnel=False, ip_link_protection=None, client_version=VERSION):
+                      public_key=None, forward_tunnel=False, ip_link_protection=None, client_version=VERSION,
+                      proxies={}):
     assert public_key is not None
 
-    logger.debug("requesting port forward - remote port: %s, restart session token: %s" % (request_server_port, restart_session_token))
+    logger.debug("requesting port forward - remote port: %s, restart session token: %s" % (
+    request_server_port, restart_session_token))
     url = '%s/api/v1/request-port' % server
     dict = request_port(local_port=local_port, public_key=public_key, url=url,
                         restart_session_token=restart_session_token,
@@ -132,6 +132,7 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
                         forward_tunnel=forward_tunnel,
                         ip_link_protection=ip_link_protection,
                         client_version=client_version,
+                        proxies=proxies,
                         )
 
     if 'error' in dict:
@@ -156,7 +157,3 @@ def request_open_port(local_port, restart_session_token='', request_server_port=
         logger.error('Did not get requested server port (%s), but got %s' % (request_server_port, response.remote_port))
 
     return response
-
-
-
-

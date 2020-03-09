@@ -7,7 +7,7 @@ class Session(object):
     def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=False, account_id=-1,
                  key_id=-1, local_port=-1, server_session_token='', restart_command='', http_forward=False,
                  http_forward_address='', open_port_for_ip_link='', app_management_port=-1,
-                 forward_tunnel=False, ip_link_protection=None, keep_alive_interval_seconds=10):
+                 forward_tunnel=False, ip_link_protection=None, keep_alive_interval_seconds=10, proxy=''):
         # todo: why is this ever a dict?
         if type(_id) == dict:
             self.id = -1
@@ -29,6 +29,7 @@ class Session(object):
         self.forward_tunnel = forward_tunnel
         self.ip_link_protection = ip_link_protection
         self.keep_alive_interval_seconds = keep_alive_interval_seconds
+        self.proxy = proxy
 
         self.public_key_file = None
         self.private_key_file = None
@@ -63,6 +64,7 @@ class Session(object):
             'forward_tunnel': self.forward_tunnel,
             'ip_link_protection': self.ip_link_protection,
             'keep_alive_interval_seconds': self.keep_alive_interval_seconds,
+            'proxy': self.proxy,
         }
 
     @staticmethod
@@ -95,7 +97,19 @@ class Session(object):
         self.forward_tunnel = dict.get('forward_tunnel', False)
         self.ip_link_protection = dict.get('ip_link_protection', None)
         self.keep_alive_interval_seconds = dict.get('keep_alive_interval_seconds', None)
+        self.proxy = dict.get('proxy', '')
         return self
+
+    def get_proxy_dict(self):
+        if self.proxy:
+            return {
+                'http': self.proxy,
+                'https': self.proxy,
+            }
+        else:
+            return {}
+
+
 
     def notify_success(self):
         for observer in self.success_observers:

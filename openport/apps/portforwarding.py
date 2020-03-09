@@ -1,13 +1,18 @@
-import threading
+import errno
+from urllib.parse import urlparse
+
 import paramiko
+import socks
+import threading
 import time
 from socket import error as SocketError
-import errno
+
+from openport.apps.keyhandling import get_default_key_locations
 from openport.services.logger_service import get_logger
 from openport.services.utils import run_method_with_timeout, TimeoutException
-from openport.apps.keyhandling import get_default_key_locations
 
 logger = get_logger(__name__)
+
 
 class TunnelError(Exception):
     pass
@@ -15,6 +20,7 @@ class TunnelError(Exception):
 
 class IgnoreUnknownHostKeyPolicy(paramiko.MissingHostKeyPolicy):
     """A Paramiko policy that ignores UnknownHostKeyError for missing keys."""
+
     def missing_host_key(self, client, hostname, key):
         pass
 
@@ -37,7 +43,8 @@ class PortForwardingService:
                  start_callback=None,
                  forward_tunnel=False,
                  session_token=None,
-                 keep_alive_interval_seconds=10
+                 keep_alive_interval_seconds=10,
+                 proxy=None,
                  ):
         self.local_port = local_port
         self.remote_port = remote_port
@@ -63,6 +70,18 @@ class PortForwardingService:
 
         self.portForwardingRequestException = None
         self.stopped = False
+        self.proxy = proxy
+        self.sock = None
+        if self.proxy:
+            parsed = urlparse(self.proxy)
+            self.sock = socks.socksocket()
+            self.sock.set_proxy(
+                proxy_type=socks.SOCKS5,
+                addr=parsed.hostname,
+                port=parsed.port,
+                username=parsed.username,
+                password=parsed.password,
+            )
 
     def stop(self):
         self.stopped = True
@@ -76,15 +95,34 @@ class PortForwardingService:
         pk = paramiko.RSAKey(filename=self.private_key_file)
 
         try:
-            self.client.connect(self.server, self.server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
+            if self.sock:
+                self.sock.connect((self.server, self.server_ssh_port))
+            self.client.connect(
+                self.server,
+                self.server_ssh_port,
+                username=self.ssh_user,
+                pkey=pk,
+                look_for_keys=False,
+                sock=self.sock,
+            )
             self.stopped = False
         except Exception as e:
             logger.error('*** Failed to connect to %s:%d: %r' % (self.server, self.server_ssh_port, e))
             if self.fallback_server_ssh_port is not None:
                 try:
-                    logger.debug('Connecting to fallback ssh host %s:%d ...' % (self.fallback_ssh_server, self.fallback_server_ssh_port))
+                    logger.debug('Connecting to fallback ssh host %s:%d ...' % (
+                        self.fallback_ssh_server, self.fallback_server_ssh_port))
+                    if self.sock:
+                        self.sock.connect((self.server, self.server_ssh_port))
+
                     self.client.connect(
-                        self.fallback_ssh_server, self.fallback_server_ssh_port, username=self.ssh_user, pkey=pk, look_for_keys=False)
+                        self.fallback_ssh_server,
+                        self.fallback_server_ssh_port,
+                        username=self.ssh_user,
+                        pkey=pk,
+                        look_for_keys=False,
+                        sock=self.sock,
+                    )
                     self.stopped = False
                 except Exception as e:
                     logger.error('*** Failed to fallback connect to %s:%d: %r' % (self.fallback_ssh_server,
@@ -98,7 +136,8 @@ class PortForwardingService:
                 return
 
         try:
-            stdin, stdout, stderr = run_method_with_timeout(lambda: self.client.exec_command(self.session_token), timeout_s=10)
+            stdin, stdout, stderr = run_method_with_timeout(lambda: self.client.exec_command(self.session_token),
+                                                            timeout_s=10)
         except (TimeoutException, paramiko.SSHException):
             raise TunnelError('Connection to the server seems to be lost.')
 
@@ -121,7 +160,7 @@ class PortForwardingService:
         except KeyboardInterrupt as e:
             self.stop()
             logger.info('Ctrl-c: Port forwarding stopped.')
-#            sys.exit(0)
+        #            sys.exit(0)
         except EOFError as e:
             # Tunnel is stopped.
             self.stop()
@@ -143,7 +182,8 @@ class PortForwardingService:
             logger.debug('sending keep_alive')
 
             try:
-                stdin, stdout, stderr = run_method_with_timeout(lambda: self.client.exec_command(self.session_token), timeout_s=10)
+                stdin, stdout, stderr = run_method_with_timeout(lambda: self.client.exec_command(self.session_token),
+                                                                timeout_s=10)
             except (TimeoutException, paramiko.SSHException):
                 raise TunnelError('Connection to the server seems to be lost.')
 
@@ -177,16 +217,17 @@ class PortForwardingService:
         This will connect the channel to the localhost at the given port.
         """
         local_server = 'localhost'
-        logger.debug('Opening socket %s:%s'% (local_server, self.local_port))
+        logger.debug('Opening socket %s:%s' % (local_server, self.local_port))
         sock = socket.socket()
         try:
             sock.connect((local_server, self.local_port))
         except Exception as e:
             logger.error('Forwarding request to %s:%d failed: %r' % (local_server, self.local_port, e))
+            sock.close()
             return
 
         logger.debug('Connected!  Tunnel open %r -> %r -> %r' % (chan.origin_addr,
-                                                            chan.getpeername(), (local_server, self.local_port)))
+                                                                 chan.getpeername(), (local_server, self.local_port)))
 
         try:
             while True:
@@ -206,15 +247,15 @@ class PortForwardingService:
                 logger.debug('Got a connection reset by peer.')
             else:
                 raise
-
-        chan.close()
-        sock.close()
-        logger.debug('Tunnel closed from %r' % (chan.origin_addr,))
-
+        finally:
+            chan.close()
+            sock.close()
+            logger.debug('Tunnel closed from %r' % (chan.origin_addr,))
 
 
 import socket
 import select
+
 try:
     import SocketServer
 except ImportError:
@@ -228,30 +269,31 @@ DEFAULT_PORT = 4000
 g_verbose = True
 
 
-class ForwardServer (SocketServer.ThreadingTCPServer):
+class ForwardServer(SocketServer.ThreadingTCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
 
-class Handler (SocketServer.BaseRequestHandler):
+class Handler(SocketServer.BaseRequestHandler):
 
     def handle(self):
         try:
             chan = self.ssh_transport.open_channel('direct-tcpip',
                                                    (self.chain_host, self.chain_port),
-                                                    self.request.getpeername())
+                                                   self.request.getpeername())
         except Exception as e:
             logger.debug('Incoming request to %s:%d failed: %s' % (self.chain_host,
-                                                              self.chain_port,
-                                                              repr(e)))
+                                                                   self.chain_port,
+                                                                   repr(e)))
             chan = None
         if chan is None:
             logger.error('Incoming request to %s:%d was rejected by the SSH server.' %
-                    (self.chain_host, self.chain_port))
+                         (self.chain_host, self.chain_port))
             return
 
         logger.debug('Connected!  Tunnel open %r -> %r -> %r' % (self.request.getpeername(),
-                                                            chan.getpeername(), (self.chain_host, self.chain_port)))
+                                                                 chan.getpeername(),
+                                                                 (self.chain_host, self.chain_port)))
         while True:
             r, w, x = select.select([self.request, chan], [], [])
             if self.request in r:
@@ -276,8 +318,9 @@ def create_forward_tunnel(local_port, remote_host, remote_port, transport):
     # this is a little convoluted, but lets me configure things for the Handler
     # object.  (SocketServer doesn't give Handlers any way to access the outer
     # server normally.)
-    class SubHander (Handler):
+    class SubHandler(Handler):
         chain_host = remote_host
         chain_port = remote_port
         ssh_transport = transport
-    ForwardServer(('', local_port), SubHander).serve_forever()
+
+    ForwardServer(('', local_port), SubHandler).serve_forever()
