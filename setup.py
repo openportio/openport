@@ -13,7 +13,7 @@ install_reqs = [
     'enum34==1.1.6',
     'ipaddress==1.0.17',
     'lockfile==0.12.2',
-    'psutil==4.3.1',
+    'psutil==5.6.6',
     'pyOpenSSL==18.0.0',
     'pycrypto==2.6.1',
     'requests==2.9.1',
