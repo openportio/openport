@@ -325,6 +325,7 @@ class OpenportApp(object):
             else:
                 logger.debug('No db share session could be found.')
             session.http_forward = self.args.http_forward
+            session.ip_link_protection = self.args.ip_link_protection
 
         if self.args.restart_on_reboot:
             session.restart_command = self.app_service.get_restart_command(session,
@@ -333,8 +334,6 @@ class OpenportApp(object):
                                                                            server=self.args.server,
                                                                            )
             self.app_service.check_username_in_config_file()
-
-        session.ip_link_protection = self.args.ip_link_protection
 
         session.stop_observers.append(self.stop_callback)
         session.start_observers.append(self.save_share)
