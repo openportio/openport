@@ -177,12 +177,14 @@ class DBHandler(object):
         share.app_management_port = openport_session.app_management_port
         share.open_port_for_ip_link = openport_session.open_port_for_ip_link
         share.restart_command = openport_session.restart_command
+        b = share.restart_command if type(share.restart_command) == bytes else share.restart_command.encode('utf-8')
         try:
-            b = share.restart_command if type(share.restart_command) == bytes else share.restart_command.encode('utf-8')
             share.restart_command = pickle.loads(b)
         except Exception as e:
-            raise(e)
-            pass
+            try:
+                share.restart_command = b.split()
+            except:
+                raise e
 
         return share
 

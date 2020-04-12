@@ -230,11 +230,10 @@ def run_command_with_timeout_return_process(args, timeout_s):
     return c.run(timeout_s)
 
 
-def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', http_forward=False, forward_tunnel=False):
-    i = 0
+def get_remote_host_and_port(p, osinteraction, timeout=10, output_prefix='', http_forward=False, forward_tunnel=False):
+    start = datetime.datetime.now()
     all_output = ['', '']
-    while i < timeout:
-        i += 1
+    while start + datetime.timedelta(seconds=timeout) > datetime.datetime.now():
         output = osinteraction.get_output(p)
         for j in range(2):
             if output[j]:
@@ -244,23 +243,22 @@ def get_remote_host_and_port(p, osinteraction, timeout=30, output_prefix='', htt
         if output[1]:
             logger.error('%s - stderr - <<<<<%s>>>>>' % (output_prefix, output[1]))
         if not output[0]:
-            sleep(1)
+            sleep(0.1)
             continue
 
         if http_forward:
             m = re.search(r'Now forwarding remote address (?P<host>[a-z0-9\.\-]*) to localhost', output[0])
         elif forward_tunnel:
-            m = re.search(r'INFO - You are now connected. You can access the remote pc\'s port (?P<remote_port>\d*) '
+            m = re.search(r'You are now connected. You can access the remote pc\'s port (?P<remote_port>\d*) '
                           r'on localhost:(?P<local_port>\d*)', output[0])
         else:
             m = re.search(r'Now forwarding remote port (?P<host>[^:]*):(?P<remote_port>\d*) to localhost', output[0])
         if m is None:
             if p.poll() is not None:
                 raise Exception('Application is stopped')
-            sleep(1)
+            sleep(0.1)
             continue
         else:
-            sleep(3)
             if http_forward:
                 host = m.group('host')
                 port = 80
@@ -364,6 +362,8 @@ def check_tcp_port_forward(test, remote_host, local_port, remote_port, fail_on_e
         else:
             test.assertEqual(text, response)
         cl.close()
+
+        sleep(3)
 
         # Connect to remote service
         cr = SimpleTcpClient(remote_host, remote_port)
