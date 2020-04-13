@@ -43,6 +43,8 @@ OPENPORT_APP_FILE = Path(__file__).parents[1] / 'openport' / 'apps' / 'openport_
 class AppTests(unittest.TestCase):
     openport_exe = [PYTHON_EXE, OPENPORT_APP_FILE]
     restart_shares = '--restart-shares'
+    kill = '--kill'
+    kill_all = '--kill-all'
 
     def setUp(self):
         logging.getLogger('sqlalchemy').setLevel(logging.WARN)
@@ -63,7 +65,6 @@ class AppTests(unittest.TestCase):
         os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
         self.db_handler = dbhandler.DBHandler(self.db_file)
 
-
     def tearDown(self):
         logger.debug('teardown!')
         if self.manager_port > 0:
@@ -73,12 +74,6 @@ class AppTests(unittest.TestCase):
             send_exit(session)
         kill_all_processes(self.processes_to_kill)
         logger.debug('end of teardown!')
-
-    def kill_openport_process(self, port):
-        return subprocess.Popen(self.openport_exe + [
-            '--kill', str(port),
-            '--database', self.db_file, '--verbose'],
-                                stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
     def test_openport_app(self):
         port = self.osinteraction.get_open_port()
@@ -91,7 +86,7 @@ class AppTests(unittest.TestCase):
         self.check_application_is_still_alive(p)
         click_open_for_ip_link(link)
 
-#        self.assertEqual(1, get_nr_of_shares_in_db_file(self.db_file))
+        #        self.assertEqual(1, get_nr_of_shares_in_db_file(self.db_file))
 
         #        self.assertFalse(openportmanager.manager_is_running(8001))
 
@@ -775,7 +770,10 @@ class AppTests(unittest.TestCase):
         self.osinteraction.print_output_continuously_threaded(p_app, 'p_app')
         self.processes_to_kill.append(p_app)
 
-        p_kill = self.kill_openport_process(port)
+        p_kill = subprocess.Popen(self.openport_exe + [
+            self.kill, str(port),
+            '--database', self.db_file, '--verbose'],
+                                stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_kill)
         self.osinteraction.print_output_continuously_threaded(p_kill, 'p_kill')
         run_method_with_timeout(p_kill.wait, 10)
@@ -811,8 +809,8 @@ class AppTests(unittest.TestCase):
             logger.debug(share.local_port)
 
         self.assertEqual(2, get_nr_of_shares_in_db_file(self.db_file))
-        p_kill = subprocess.Popen(self.openport_exe + ['--kill-all',
-                                                       '--database', self.db_file, '--restart-on-reboot'],
+        p_kill = subprocess.Popen(self.openport_exe + [self.kill_all,
+                                                       '--database', self.db_file],
                                   stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.osinteraction.print_output_continuously_threaded(p_kill, 'p_kill')
         sleep(1)
