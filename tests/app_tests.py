@@ -200,9 +200,8 @@ class AppTests(unittest.TestCase):
 
     def test_save_share__restart_on_reboot(self):
         port = self.osinteraction.get_open_port()
-        p = subprocess.Popen(self.openport_exe + ['--local-port', '%s' % port,
-                                                  '--server', TEST_SERVER, '--verbose', '--database', self.db_file,
-                                                  '--restart-on-reboot',
+        p = subprocess.Popen(self.openport_exe + [str(port), '--restart-on-reboot', '--database', self.db_file,
+                                                  '--verbose', '--server', TEST_SERVER,
                                                   '--ip-link-protection', 'False', '--keep-alive', '5'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
@@ -211,36 +210,46 @@ class AppTests(unittest.TestCase):
         share = self.db_handler.get_share_by_local_port(port, filter_active=False)
 
         self.assertTrue(share.active)
-        self.assertEqual(['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
-                          TEST_SERVER, '--ip-link-protection', 'False', '--keep-alive', '5'], share.restart_command)
+        self.assertEqual(
+            [x.encode('utf-8') for x in
+             ['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
+              TEST_SERVER, '--ip-link-protection', 'False', '--keep-alive', '5']],
+            share.restart_command)
 
     def test_save_share__restart_on_reboot__proxy(self):
         port = self.osinteraction.get_open_port()
-        p = subprocess.Popen(self.openport_exe + ['--local-port', '%s' % port,
-                                                  '--server', TEST_SERVER, '--verbose', '--database', self.db_file,
-                                                  '--restart-on-reboot',
+        p = subprocess.Popen(self.openport_exe + ['%s' % port, '--restart-on-reboot', '--database', self.db_file,
+                                                  '--verbose', '--server', TEST_SERVER,
                                                   '--proxy', 'socks5://jan:db@1.2.3.4:5555'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
-        sleep(1)
+        sleep(2)
 
+        output = self.osinteraction.non_block_read(p)
+        for i in output:
+            print(i)
         share = self.db_handler.get_share_by_local_port(port, filter_active=False)
-        self.assertEqual(['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
-                          TEST_SERVER, '--proxy', 'socks5://jan:db@1.2.3.4:5555'],
-                         share.restart_command)
+        self.assertEqual(
+            [x.encode('utf-8') for x in
+             ['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
+              TEST_SERVER, '--proxy', 'socks5://jan:db@1.2.3.4:5555']],
+            share.restart_command)
 
     def test_save_share__restart_on_reboot__simple(self):
         port = self.osinteraction.get_open_port()
-        p = subprocess.Popen(self.openport_exe + [str(port),
-                                                  '--server', TEST_SERVER, '--database', self.db_file,
-                                                  '--restart-on-reboot'],
+        p = subprocess.Popen(self.openport_exe + [str(port), '--restart-on-reboot',
+                                                  '--database', self.db_file,
+                                                  '--server', TEST_SERVER,
+                                                  ],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
         share = self.db_handler.get_share_by_local_port(port, filter_active=False)
         self.assertTrue(share.active)
-        self.assertEqual(['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--server',
-                          TEST_SERVER], share.restart_command)
+        self.assertEqual(
+            [x.encode('utf-8') for x in
+             ['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--server',
+              TEST_SERVER]], share.restart_command)
         p.kill()
 
     def test_openport_app__forward_tunnel(self):
@@ -773,7 +782,7 @@ class AppTests(unittest.TestCase):
         p_kill = subprocess.Popen(self.openport_exe + [
             self.kill, str(port),
             '--database', self.db_file, '--verbose'],
-                                stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_kill)
         self.osinteraction.print_output_continuously_threaded(p_kill, 'p_kill')
         run_method_with_timeout(p_kill.wait, 10)
@@ -988,14 +997,11 @@ class AppTests(unittest.TestCase):
         self.check_application_is_still_alive(p)
         click_open_for_ip_link(link)
 
-        db_handler = dbhandler.DBHandler(old_db_tmp)
+        db_handler = dbhandler.DBHandler(old_db_tmp, init_db=False)
         session_from_db = db_handler.get_share_by_local_port(port)
         self.assertNotEqual(session_from_db, None)
 
         check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
-
-    def test_alembic__0_9_1__restart_shares(self):
-        pass
 
     def test_alembic__create_migrations(self):
         return

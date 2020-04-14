@@ -14,7 +14,9 @@ class GoAppTests(AppTests):
 
     @classmethod
     def setUpClass(cls):
-        print(subprocess.getoutput("/Users/jan/swprojects/openport-go-client/build.sh"))
+        exit_code, output = subprocess.getstatusoutput("/Users/jan/swprojects/openport-go-client/build.sh")
+        print(output)
+        assert exit_code == 0, exit_code
 
 
 if __name__ == '__main__':
