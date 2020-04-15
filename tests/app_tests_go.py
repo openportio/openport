@@ -11,6 +11,9 @@ class GoAppTests(AppTests):
     restart_shares = 'restart-shares'
     kill = 'kill'
     kill_all = 'kill-all'
+    version = 'version'
+    app_version = '2.0.0'
+    forward = 'forward'
 
     @classmethod
     def setUpClass(cls):

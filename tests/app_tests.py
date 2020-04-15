@@ -45,6 +45,9 @@ class AppTests(unittest.TestCase):
     restart_shares = '--restart-shares'
     kill = '--kill'
     kill_all = '--kill-all'
+    version = '--version'
+    app_version = openport_app_version.VERSION
+    forward = '--forward-tunnel'
 
     def setUp(self):
         logging.getLogger('sqlalchemy').setLevel(logging.WARN)
@@ -182,7 +185,7 @@ class AppTests(unittest.TestCase):
         share = self.db_handler.get_share_by_local_port(port, filter_active=False)
 
         self.assertEqual(1, share.id)
-        self.assertEqual(remote_host, share.server)
+        self.assertEqual(TEST_SERVER, share.server)
         self.assertEqual(remote_port, share.server_port)
         self.assertEqual(p.pid, share.pid)
         self.assertTrue(share.active)
@@ -266,9 +269,9 @@ class AppTests(unittest.TestCase):
 
         port_in = self.osinteraction.get_open_port()
         logger.info('port_in: %s' % port_in)
-        p_in = subprocess.Popen(self.openport_exe + ['--local-port', '%s' % port_in,
+        p_in = subprocess.Popen(self.openport_exe + [self.forward, '--local-port', '%s' % port_in,
                                                      '--server', TEST_SERVER, '--database', self.db_file,
-                                                     '--forward-tunnel', '--verbose',
+                                                     '--verbose',
                                                      '--remote-port', str(remote_port)],
                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_in)
@@ -288,8 +291,8 @@ class AppTests(unittest.TestCase):
         remote_host, remote_port, link = get_remote_host_and_port(p_out, self.osinteraction)
         self.osinteraction.print_output_continuously_threaded(p_out, 'p_out')
 
-        p_in = subprocess.Popen(self.openport_exe + [
-            '--server', TEST_SERVER, '--database', self.db_file, '--forward-tunnel', '--verbose',
+        p_in = subprocess.Popen(self.openport_exe + [self.forward,
+            '--server', TEST_SERVER, '--database', self.db_file, '--verbose',
             '--remote-port', str(remote_port)],
                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_in)
@@ -313,8 +316,8 @@ class AppTests(unittest.TestCase):
         click_open_for_ip_link(link)
         self.osinteraction.print_output_continuously_threaded(p_reverse_tunnel, 'p_reverse_tunnel')
 
-        p_forward_tunnel = subprocess.Popen(self.openport_exe + [
-            '--server', TEST_SERVER, '--database', self.db_file, '--forward-tunnel',
+        p_forward_tunnel = subprocess.Popen(self.openport_exe + [self.forward,
+            '--server', TEST_SERVER, '--database', self.db_file,
             '--verbose',
             '--remote-port', str(remote_port), '--restart-on-reboot'],
                                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -919,7 +922,7 @@ class AppTests(unittest.TestCase):
         self.assertFalse(self.osinteraction.pid_is_running(p.pid))
 
     def test_version(self):
-        p = subprocess.Popen(self.openport_exe + ['--version'],
+        p = subprocess.Popen(self.openport_exe + [self.version],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p)
         run_method_with_timeout(p.wait, 10)
@@ -929,7 +932,7 @@ class AppTests(unittest.TestCase):
             print('output: ', out)
 
         self.assertFalse(self.application_is_alive(p))
-        self.assertEqual(openport_app_version.VERSION, process_output[0].decode('utf-8').strip())
+        self.assertEqual(self.app_version, process_output[0].decode('utf-8').strip())
 
     def test_run_run_command_with_timeout(self):
         self.assertEqual((False, False),
@@ -1089,8 +1092,8 @@ for i in range(%s):
 
         if 1 == 1:
             if 1 == 1:
-                p_in = subprocess.Popen(self.openport_exe + [
-                    '--server', TEST_SERVER, '--database', self.db_file, '--forward-tunnel',
+                p_in = subprocess.Popen(self.openport_exe + [self.forward,
+                    '--server', TEST_SERVER, '--database', self.db_file,
                     '--verbose',
                     '--remote-port', str(remote_port), '--restart-on-reboot'],
                                         stderr=subprocess.PIPE, stdout=subprocess.PIPE)
