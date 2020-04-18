@@ -14,6 +14,7 @@ class GoAppTests(AppTests):
     version = 'version'
     app_version = '2.0.0'
     forward = 'forward'
+    list = 'list'
 
     @classmethod
     def setUpClass(cls):

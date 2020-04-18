@@ -48,6 +48,7 @@ class AppTests(unittest.TestCase):
     version = '--version'
     app_version = openport_app_version.VERSION
     forward = '--forward-tunnel'
+    list = '--list'
 
     def setUp(self):
         logging.getLogger('sqlalchemy').setLevel(logging.WARN)
@@ -155,7 +156,8 @@ class AppTests(unittest.TestCase):
         run_method_with_timeout(p.wait, 10)
         output = self.osinteraction.get_all_output(p)
         print(output)
-        self.assertTrue('usage: ' in output[1], output[1])
+        all_output = ''.join([str(x) for x in output])
+        self.assertTrue('usage: ' in all_output.lower(), all_output)
 
     def test_openport_app__live_site(self):
         port = self.osinteraction.get_open_port()
@@ -304,9 +306,9 @@ class AppTests(unittest.TestCase):
         self.assertEqual(2, get_nr_of_shares_in_db_file(self.db_file))
 
     def test_openport_app__forward_tunnel__restart_on_reboot(self):
-        port_out = self.osinteraction.get_open_port()
+        serving_port = self.osinteraction.get_open_port()
         p_reverse_tunnel = subprocess.Popen(
-            self.openport_exe + ['--local-port', '%s' % port_out,  # --verbose,
+            self.openport_exe + ['--local-port', '%s' % serving_port,  # --verbose,
                                  '--server', TEST_SERVER, '--database', self.db_file],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         logger.debug('p_reverse_tunnel.pid: %s' % p_reverse_tunnel.pid)
@@ -327,18 +329,18 @@ class AppTests(unittest.TestCase):
         self.check_application_is_still_alive(p_forward_tunnel)
         self.check_application_is_still_alive(p_reverse_tunnel)
         # self.osinteraction.print_output_continuously_threaded(p_forward_tunnel, 'p_forward_tunnel')
-        host, port_in, link = get_remote_host_and_port(p_forward_tunnel, self.osinteraction, forward_tunnel=True)
+        host, forwarding_port, link = get_remote_host_and_port(p_forward_tunnel, self.osinteraction, forward_tunnel=True)
         sleep(2)
-        in_session = self.db_handler.get_share_by_local_port(port_in, filter_active=False)
+        in_session = self.db_handler.get_share_by_local_port(forwarding_port, filter_active=False)
         in_app_management_port = in_session.app_management_port
-        check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
+        check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=serving_port, remote_port=forwarding_port)
         self.assertEqual(2, get_nr_of_shares_in_db_file(self.db_file))
         #
         p_forward_tunnel.terminate()
         logger.debug('p_forward_tunnel wait')
-        run_method_with_timeout(p_forward_tunnel.wait, 10)
-        self.assertFalse(check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out,
-                                                remote_port=port_in, fail_on_error=False))
+        run_method_with_timeout(p_forward_tunnel.wait, 4)
+        self.assertFalse(check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=serving_port,
+                                                remote_port=forwarding_port, fail_on_error=False))
 
         self.assertEqual(1, len(self.db_handler.get_shares_to_restart()))
 
@@ -350,21 +352,28 @@ class AppTests(unittest.TestCase):
 
         logger.debug('p_restart.pid: %s' % p_restart.pid)
         logger.debug('p_restart.wait')
-        run_method_with_timeout(p_restart.wait, 10)
+        run_method_with_timeout(p_restart.wait, 2)
         # p_restart.wait()
         logger.debug('p_restart.wait done')
 
         self.check_application_is_still_alive(p_reverse_tunnel)
         logger.debug('alive!')
-        check_tcp_port_forward(self, remote_host=remote_host, local_port=port_out, remote_port=remote_port)
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=serving_port, remote_port=remote_port)
 
         def foo():
-            in_session2 = self.db_handler.get_share_by_local_port(port_in, filter_active=False)
+            in_session2 = self.db_handler.get_share_by_local_port(forwarding_port, filter_active=False)
+            if in_session2 is None:
+                print('forwarding session not found')
+                return False
+
+            print('forwarding session found')
             in_app_management_port2 = in_session2.app_management_port
             # wait for the session to be renewed
             if in_app_management_port == in_app_management_port2:
+                print('still same session')
                 return False
             if not in_session2.active:
+                print('session not active')
                 return False
 
             return run_method_with_timeout(is_running, args=[in_session2], timeout_s=5)
@@ -374,7 +383,7 @@ class AppTests(unittest.TestCase):
         # sleep(20)
         logger.debug('wait_for_response done')
 
-        check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=port_out, remote_port=port_in)
+        check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=serving_port, remote_port=forwarding_port)
 
     def test_openport_app__do_not_restart(self):
 
@@ -407,10 +416,7 @@ class AppTests(unittest.TestCase):
                                                            ],
                                       stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_manager2)
-        i = 0
-        while i < 10 and self.application_is_alive(p_manager2):
-            sleep(1)
-            i += 1
+        run_method_with_timeout(self.application_is_alive, args=[p_manager2], timeout_s=10, raise_exception=False)
         print_all_output(p_manager2, self.osinteraction, 'p_manager2')
         self.assertFalse(self.application_is_alive(p_manager2))
         try:
@@ -896,7 +902,7 @@ class AppTests(unittest.TestCase):
         print(output[1])
         # Sadly, this does not work on windows...
         if not osinteraction.is_windows():
-            self.assertTrue('got signal ' in output[0])
+            self.assertTrue('got signal ' in str(output[0]).lower())
 
         self.assertFalse(self.osinteraction.pid_is_running(p.pid))
 
@@ -1176,7 +1182,7 @@ for i in range(%s):
 
         session = self.db_handler.get_share_by_local_port(port)
 
-        p = subprocess.Popen(self.openport_exe + ['--list', '--database', self.db_file],
+        p = subprocess.Popen(self.openport_exe + [self.list, '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         p.wait()
         output = p.communicate()
