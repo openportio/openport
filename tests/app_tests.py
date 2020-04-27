@@ -294,8 +294,8 @@ class AppTests(unittest.TestCase):
         self.osinteraction.print_output_continuously_threaded(p_out, 'p_out')
 
         p_in = subprocess.Popen(self.openport_exe + [self.forward,
-            '--server', TEST_SERVER, '--database', self.db_file, '--verbose',
-            '--remote-port', str(remote_port)],
+                                                     '--server', TEST_SERVER, '--database', self.db_file, '--verbose',
+                                                     '--remote-port', str(remote_port)],
                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.processes_to_kill.append(p_in)
         self.check_application_is_still_alive(p_in)
@@ -319,9 +319,10 @@ class AppTests(unittest.TestCase):
         self.osinteraction.print_output_continuously_threaded(p_reverse_tunnel, 'p_reverse_tunnel')
 
         p_forward_tunnel = subprocess.Popen(self.openport_exe + [self.forward,
-            '--server', TEST_SERVER, '--database', self.db_file,
-            '--verbose',
-            '--remote-port', str(remote_port), '--restart-on-reboot'],
+                                                                 '--server', TEST_SERVER, '--database', self.db_file,
+                                                                 '--verbose',
+                                                                 '--remote-port', str(remote_port),
+                                                                 '--restart-on-reboot'],
                                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         logger.debug('p_forward_tunnel.pid: %s' % p_forward_tunnel.pid)
 
@@ -329,7 +330,8 @@ class AppTests(unittest.TestCase):
         self.check_application_is_still_alive(p_forward_tunnel)
         self.check_application_is_still_alive(p_reverse_tunnel)
         # self.osinteraction.print_output_continuously_threaded(p_forward_tunnel, 'p_forward_tunnel')
-        host, forwarding_port, link = get_remote_host_and_port(p_forward_tunnel, self.osinteraction, forward_tunnel=True)
+        host, forwarding_port, link = get_remote_host_and_port(p_forward_tunnel, self.osinteraction,
+                                                               forward_tunnel=True)
         sleep(2)
         in_session = self.db_handler.get_share_by_local_port(forwarding_port, filter_active=False)
         in_app_management_port = in_session.app_management_port
@@ -992,10 +994,9 @@ class AppTests(unittest.TestCase):
         click_open_for_ip_link(link)
         check_tcp_port_forward(self, remote_host, port, remote_port)
 
-    def test_alembic__0_9_1__new_share(self):
-        old_db = os.path.join(os.path.dirname(__file__), 'testfiles/openport-0.9.1.db')
-        old_db_tmp = os.path.join(os.path.dirname(__file__), 'testfiles/tmp/openport-0.9.1.db')
-
+    def check_migration(self, old_db_file, local_port, old_token, old_remote_port):
+        old_db = Path(__file__).parent / 'testfiles' / old_db_file
+        old_db_tmp = Path(__file__).parent / 'testfiles' / 'tmp' / old_db_file
         shutil.copy(old_db, old_db_tmp)
 
         port = self.osinteraction.get_open_port()
@@ -1005,16 +1006,22 @@ class AppTests(unittest.TestCase):
 
         try:
             server = f"http://localhost:{port}"
-            p = subprocess.Popen(self.openport_exe + ['--local-port', '22',
+            p = subprocess.Popen(self.openport_exe + ['--local-port', str(local_port),
                                                       '--server', server, '--verbose', '--database', old_db_tmp],
                                  stderr=subprocess.PIPE, stdout=subprocess.PIPE)
             self.processes_to_kill.append(p)
             wait_for_response(lambda: len(http_server.requests) > 0, timeout=2)
             request = http_server.requests[0]
-            self.assertEqual([b"gOFZM7vDDcxsqB1P"], request[b'restart_session_token'])
-            self.assertEqual([b"38261"], request[b'request_port'])
+            self.assertEqual([old_token], request[b'restart_session_token'])
+            self.assertEqual([old_remote_port], request[b'request_port'])
         finally:
             http_server.stop()
+
+    def test_alembic__0_9_1__new_share(self):
+        self.check_migration('openport-0.9.1.db', 22, b"gOFZM7vDDcxsqB1P", b"38261")
+
+    def test_db_migrate_from_1_3_0(self):
+        self.check_migration('openport-1.3.0.db', 44,  b"Me8eHwaze3F6SMS9", b"26541")
 
     @skip
     def test_alembic__create_migrations(self):
@@ -1103,9 +1110,9 @@ for i in range(%s):
         if 1 == 1:
             if 1 == 1:
                 p_in = subprocess.Popen(self.openport_exe + [self.forward,
-                    '--server', TEST_SERVER, '--database', self.db_file,
-                    '--verbose',
-                    '--remote-port', str(remote_port), '--restart-on-reboot'],
+                                                             '--server', TEST_SERVER, '--database', self.db_file,
+                                                             '--verbose',
+                                                             '--remote-port', str(remote_port), '--restart-on-reboot'],
                                         stderr=subprocess.PIPE, stdout=subprocess.PIPE)
                 host, port_in, link = get_remote_host_and_port(p_in, self.osinteraction, forward_tunnel=True)
 
