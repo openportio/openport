@@ -841,21 +841,23 @@ class AppTests(unittest.TestCase):
     def check_http_port_forward(self, remote_host, local_port, remote_port=80):
         s = TestHTTPServer(local_port)
         response = 'echo'
-        s.reply(response)
-        s.runThreaded()
+        s.set_response(response)
+        s.run_threaded()
 
-        c = SimpleHTTPClient()
-        actual_response = c.get('http://localhost:%s' % local_port)
-        self.assertEqual(actual_response, response.strip())
-        url = 'http://%s:%s' % (remote_host, remote_port) if remote_port != 80 else 'http://%s' % remote_host
-        print('checking url:{}'.format(url))
         try:
-            actual_response = c.get(url)
-        except urllib2.URLError as e:
-            self.fail('Http forward failed')
-        self.assertEqual(actual_response, response.strip())
-        print('http portforward ok')
-        s.server.shutdown()
+            c = SimpleHTTPClient()
+            actual_response = c.get('http://localhost:%s' % local_port)
+            self.assertEqual(actual_response, response.strip())
+            url = 'http://%s:%s' % (remote_host, remote_port) if remote_port != 80 else 'http://%s' % remote_host
+            print('checking url:{}'.format(url))
+            try:
+                actual_response = c.get(url)
+            except urllib2.URLError as e:
+                self.fail('Http forward failed')
+            self.assertEqual(actual_response, response.strip())
+            print('http portforward ok')
+        finally:
+            s.stop()
 
     def kill_manager(self, manager_port):
         url = 'http://localhost:%s/exit' % manager_port
@@ -998,22 +1000,24 @@ class AppTests(unittest.TestCase):
 
         port = self.osinteraction.get_open_port()
 
-        p = subprocess.Popen(self.openport_exe + ['--local-port', '%s' % port,
-                                                  '--server', TEST_SERVER, '--verbose', '--database', old_db_tmp],
-                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.processes_to_kill.append(p)
-        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
-        self.check_application_is_still_alive(p)
-        click_open_for_ip_link(link)
+        http_server = TestHTTPServer(port)
+        http_server.run_threaded()
 
-        db_handler = dbhandler.DBHandler(old_db_tmp, init_db=False)
-        session_from_db = db_handler.get_share_by_local_port(port)
-        self.assertNotEqual(session_from_db, None)
+        try:
+            server = f"http://localhost:{port}"
+            p = subprocess.Popen(self.openport_exe + ['--local-port', '22',
+                                                      '--server', server, '--verbose', '--database', old_db_tmp],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            self.processes_to_kill.append(p)
+            wait_for_response(lambda: len(http_server.requests) > 0, timeout=2)
+            request = http_server.requests[0]
+            self.assertEqual([b"gOFZM7vDDcxsqB1P"], request[b'restart_session_token'])
+            self.assertEqual([b"38261"], request[b'request_port'])
+        finally:
+            http_server.stop()
 
-        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
-
+    @skip
     def test_alembic__create_migrations(self):
-        return
         old_db = os.path.join(os.path.dirname(__file__), 'testfiles/openport-0.9.1.db')
         old_db_tmp = os.path.join(os.path.dirname(__file__), 'testfiles/tmp/openport-0.9.1.db')
 

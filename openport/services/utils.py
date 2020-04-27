@@ -2,8 +2,10 @@ import threading
 from openport.services.logger_service import get_logger
 logger = get_logger(__name__)
 
+
 class TimeoutException(Exception):
     pass
+
 
 def run_method_with_timeout(function, timeout_s, args=[], kwargs={}, raise_exception=True):
     return_value = [None]

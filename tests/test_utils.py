@@ -1,25 +1,24 @@
+import inspect
+import json
+import re
+import subprocess
+import sys
+from http.server import HTTPServer, SimpleHTTPRequestHandler, BaseHTTPRequestHandler
 from urllib.error import HTTPError
+from urllib.parse import parse_qs
 from urllib.request import Request, urlopen
 
-import socket
-import sys
-import re
-from time import sleep
-import inspect
-import subprocess
-import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import datetime
-
 import requests
+import socket
+import threading
+from time import sleep
 
-from openport.apps.openportit import OpenportItApp
 from openport.apps.openport_service import Openport
-
-from openport.services.logger_service import get_logger
-from openport.services import osinteraction
+from openport.apps.openportit import OpenportItApp
 from openport.services import dbhandler
-
+from openport.services import osinteraction
+from openport.services.logger_service import get_logger
 from openport.services.utils import run_method_with_timeout, TimeoutException
 
 logger = get_logger(__name__)
@@ -28,33 +27,55 @@ logger = get_logger(__name__)
 class TestHTTPServer(object):
     def __init__(self, port):
         self.server = HTTPServer(('', port), TestHTTPRequestHandler)
+        self.requests = []
+        self.server.requests = self.requests
+        self.server.response = ""
 
-    def reply(self, response):
-        self.server.response_string = response  # what a hack
+    def set_response(self, response):
+        self.server.response = response  # what a hack
 
-    def runThreaded(self):
+    def run_threaded(self):
         import threading
-        thr = threading.Thread(target=self.server.serve_forever, args=())
-        thr.setDaemon(True)
+        thr = threading.Thread(target=self.server.serve_forever, daemon=True)
         thr.start()
 
     def stop(self):
+        self.server.shutdown()
         self.server.server_close()
 
 
 class TestHTTPRequestHandler(BaseHTTPRequestHandler):
 
-    def __init__(self, request, client_address, httpServer):
-        self._response_string = httpServer.response_string
-        BaseHTTPRequestHandler.__init__(self, request, client_address, httpServer)
+    def __init__(self, request, client_address, http_server):
+        self._response = http_server.response
+        self.requests = http_server.requests
+        super().__init__(request, client_address, http_server)
+
+    def _set_headers(self,  response_length, content_type="text/html"):
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(response_length))
+        self.end_headers()
 
     def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.send_header("Content-Length", str(len(self._response_string)))
-        self.end_headers()
-        self.wfile.write(self._response_string.encode('utf-8'))
-        self.wfile.close()
+        response = self._response.encode('utf-8')
+        print(f"got request: {self.raw_requestline}, will reply : {response}")
+        self._set_headers(len(response))
+        self.wfile.write(response)
+
+    def do_POST(self):
+        print(self.raw_requestline)
+        response = json.dumps(self._response).encode('utf-8')
+        self._set_headers(len(response), "application/json")
+        data = self.rfile.read(int(self.headers['Content-Length']))
+        print(f"request body: {data}")
+        try:
+            data = parse_qs(data)
+        except:
+            data = json.loads(data)
+        print(f"request body: {data}")
+        self.requests.append(data)
+        self.wfile.write(response)
 
 
 class SimpleHTTPClient(object):
@@ -172,8 +193,8 @@ if __name__ == '__main__':
 
     port = osinteraction.getInstance().get_open_port()
     s = TestHTTPServer(port)
-    s.reply('hooray')
-    s.runThreaded()
+    s.set_response('hooray')
+    s.run_threaded()
     sleep(1)
 
     c = SimpleHTTPClient()

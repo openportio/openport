@@ -351,8 +351,8 @@ class IntegrationTest(unittest.TestCase):
 
     def start_http_server(self, port, response):
         s = TestHTTPServer(port)
-        s.reply(response)
-        s.runThreaded()
+        s.set_response(response)
+        s.run_threaded()
         return s
 
     def test_brute_force_blocked(self):
