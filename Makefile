@@ -12,3 +12,9 @@ build-docker:
 
 run-proxy-test:
 	docker-compose -f ./docker-compose/proxy-test.yaml run openport
+
+run-proxy-test-go:
+	docker-compose -f ./docker-compose/proxy-test.yaml run openport-go
+
+run-proxy-test-go-no-password:
+	docker-compose -f ./docker-compose/proxy-test-no-password.yaml run openport-go
