@@ -14,10 +14,10 @@ services:
       - proxy
 
   openport-go:
-    image: openport-client-go
+    image: openport-go-amd64
     networks:
       - no-internet
-    command: ./openport 22 --proxy=socks5://USER:PASSWORD@proxy:1080 --verbose
+    command: ./openport-amd64 22 --proxy=socks5://USER:PASSWORD@proxy:1080 --verbose
     depends_on:
       - proxy
 

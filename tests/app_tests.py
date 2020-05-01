@@ -644,6 +644,38 @@ class AppTests(unittest.TestCase):
         self.assertEqual(remote_host1, remote_host3)
         self.assertEqual(remote_port1, remote_port3)
 
+    def test_openport_app__start_trice(self):
+        port = self.osinteraction.get_open_port()
+        print('local port :', port)
+        command = self.openport_exe + [str(port), '--database', self.db_file, '--verbose', '--server',
+                                       TEST_SERVER]
+        p_app1 = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+
+        self.processes_to_kill.append(p_app1)
+        remote_host1, remote_port1, link1 = get_remote_host_and_port(p_app1, self.osinteraction, output_prefix='app')
+
+        p_app2 = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app2)
+
+        def foo(p_app):
+            command_output = print_all_output(p_app, self.osinteraction, 'p_app2')
+            if command_output[0]:
+                return 'Port forward already running for port %s' % port in command_output[0], command_output[0]
+            else:
+                return False
+
+        wait_for_response(foo, args=[p_app2])
+        run_method_with_timeout(p_app2.wait, 5)
+        self.assertFalse(self.application_is_alive(p_app2))
+
+        print('######app3')
+        p_app3 = subprocess.Popen(command, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_app3)
+        wait_for_response(foo, args=[p_app3])
+        run_method_with_timeout(p_app3.wait, 5)
+        self.assertFalse(self.application_is_alive(p_app3))
+
+
     def write_to_conf_file(self, section, option, value):
         import ConfigParser
 

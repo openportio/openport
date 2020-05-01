@@ -8,7 +8,7 @@ from tests.app_tests import AppTests
 
 class GoAppTests(AppTests):
     openport_exe = ['/Users/jan/swprojects/openport-go-client/openport']
-    restart_shares = 'restart-shares'
+    restart_shares = 'restart-sessions'
     kill = 'kill'
     kill_all = 'kill-all'
     version = 'version'
