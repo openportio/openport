@@ -141,7 +141,7 @@ class SimpleTcpClient(object):
     def __init__(self, host, port):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(5)
+            self.sock.settimeout(2)
         except socket.error as msg:
             sys.stderr.write("[ERROR] %s\n" % msg[1])
         #            sys.exit(1)

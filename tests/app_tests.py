@@ -315,30 +315,31 @@ class AppTests(unittest.TestCase):
 
         self.processes_to_kill.append(p_reverse_tunnel)
         remote_host, remote_port, link = get_remote_host_and_port(p_reverse_tunnel, self.osinteraction)
-        click_open_for_ip_link(link)
+        # click_open_for_ip_link(link)
         self.osinteraction.print_output_continuously_threaded(p_reverse_tunnel, 'p_reverse_tunnel')
 
-        p_forward_tunnel = subprocess.Popen(self.openport_exe + [self.forward,
-                                                                 '--server', TEST_SERVER, '--database', self.db_file,
-                                                                 '--verbose',
-                                                                 '--remote-port', str(remote_port),
-                                                                 '--restart-on-reboot'],
-                                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        forward_port = self.osinteraction.get_open_port()
+        p_forward_tunnel = self.start_openport_process([self.forward,
+             '--server', TEST_SERVER, '--database', self.db_file,
+             '--local-port', str(forward_port),
+             '--verbose',
+             '--remote-port', str(remote_port),
+             '--restart-on-reboot'])
         logger.debug('p_forward_tunnel.pid: %s' % p_forward_tunnel.pid)
 
-        self.processes_to_kill.append(p_forward_tunnel)
         self.check_application_is_still_alive(p_forward_tunnel)
         self.check_application_is_still_alive(p_reverse_tunnel)
         # self.osinteraction.print_output_continuously_threaded(p_forward_tunnel, 'p_forward_tunnel')
         host, forwarding_port, link = get_remote_host_and_port(p_forward_tunnel, self.osinteraction,
                                                                forward_tunnel=True)
+        self.assertEqual(forward_port, forwarding_port)
         sleep(2)
-        in_session = self.db_handler.get_share_by_local_port(forwarding_port, filter_active=False)
-        in_app_management_port = in_session.app_management_port
+        forward_session = self.db_handler.get_share_by_local_port(forwarding_port, filter_active=False)
+        forward_app_management_port = forward_session.app_management_port
         check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=serving_port, remote_port=forwarding_port)
         self.assertEqual(2, get_nr_of_shares_in_db_file(self.db_file))
         #
-        p_forward_tunnel.terminate()
+        p_forward_tunnel.terminate()  # on shutdown, ubuntu sends a sigterm
         logger.debug('p_forward_tunnel wait')
         run_method_with_timeout(p_forward_tunnel.wait, 4)
         self.assertFalse(check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=serving_port,
@@ -360,7 +361,7 @@ class AppTests(unittest.TestCase):
 
         self.check_application_is_still_alive(p_reverse_tunnel)
         logger.debug('alive!')
-        check_tcp_port_forward(self, remote_host=remote_host, local_port=serving_port, remote_port=remote_port)
+       # check_tcp_port_forward(self, remote_host=remote_host, local_port=serving_port, remote_port=remote_port)
 
         def foo():
             in_session2 = self.db_handler.get_share_by_local_port(forwarding_port, filter_active=False)
@@ -371,7 +372,7 @@ class AppTests(unittest.TestCase):
             print('forwarding session found')
             in_app_management_port2 = in_session2.app_management_port
             # wait for the session to be renewed
-            if in_app_management_port == in_app_management_port2:
+            if forward_app_management_port == in_app_management_port2:
                 print('still same session')
                 return False
             if not in_session2.active:
@@ -382,10 +383,17 @@ class AppTests(unittest.TestCase):
 
         wait_for_response(foo, timeout=10)
         logger.debug('sleeping now')
-        # sleep(20)
         logger.debug('wait_for_response done')
-
         check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=serving_port, remote_port=forwarding_port)
+
+    def start_openport_process(self, args):
+        print(f'Running {" ".join(self.openport_exe + args)}')
+        p_forward_tunnel = subprocess.Popen(
+            self.openport_exe + args,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p_forward_tunnel)
+        return p_forward_tunnel
 
     def test_openport_app__do_not_restart(self):
 
@@ -587,7 +595,7 @@ class AppTests(unittest.TestCase):
 
         # self.assertFalse(self.application_is_alive(p_manager2))
 
-        sleep(5)
+        sleep(1)
         # todo: replace by /register
 
         share = self.db_handler.get_share_by_local_port(port)
@@ -599,7 +607,7 @@ class AppTests(unittest.TestCase):
 
         share = self.db_handler.get_share_by_local_port(port)
         send_exit(share, force=True)
-        sleep(5)
+        sleep(1)
 
         self.assertFalse(check_tcp_port_forward(self, remote_host, port, remote_port, fail_on_error=False))
 
@@ -674,7 +682,6 @@ class AppTests(unittest.TestCase):
         wait_for_response(foo, args=[p_app3])
         run_method_with_timeout(p_app3.wait, 5)
         self.assertFalse(self.application_is_alive(p_app3))
-
 
     def write_to_conf_file(self, section, option, value):
         import ConfigParser
@@ -930,7 +937,7 @@ class AppTests(unittest.TestCase):
         get_remote_host_and_port(p, self.osinteraction)
 
         print('pid: %s' % p.pid)
-        self.osinteraction.kill_pid(p.pid, signal.SIGTERM)
+        self.osinteraction.kill_pid(p.pid, signal.SIGINT)
         run_method_with_timeout(p.wait, 10)
 
         output = self.osinteraction.get_output(p)
@@ -1053,7 +1060,7 @@ class AppTests(unittest.TestCase):
         self.check_migration('openport-0.9.1.db', 22, b"gOFZM7vDDcxsqB1P", b"38261")
 
     def test_db_migrate_from_1_3_0(self):
-        self.check_migration('openport-1.3.0.db', 44,  b"Me8eHwaze3F6SMS9", b"26541")
+        self.check_migration('openport-1.3.0.db', 44, b"Me8eHwaze3F6SMS9", b"26541")
 
     @skip
     def test_alembic__create_migrations(self):
