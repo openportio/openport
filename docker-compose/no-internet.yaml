@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  openport-go:
+    image: openport-go-amd64
+    networks:
+      - no-internet
+    command: ./openport-amd64 22 --verbose
+
+networks:
+  no-internet:
+    driver: bridge
+    internal: true
+  internet:
+    driver: bridge
