@@ -16,7 +16,7 @@ from openport.apps.app_tcp_server import send_exit, is_running
 from openport.services import osinteraction, dbhandler
 from openport.services.logger_service import get_logger, set_log_level
 from openport.services.utils import run_method_with_timeout
-from tests.test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer
+from tests.test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer, get_ip
 from tests.test_utils import get_nr_of_shares_in_db_file
 from tests.test_utils import print_all_output, click_open_for_ip_link, check_tcp_port_forward
 from tests.test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
@@ -145,10 +145,8 @@ class AppTests(unittest.TestCase):
         self.assertEqual(1, get_nr_of_shares_in_db_file(self.db_file))
         share = self.db_handler.get_share_by_local_port(port, filter_active=False)
         click_open_for_ip_link(share.open_port_for_ip_link)
-
-        #        self.assertFalse(openportmanager.manager_is_running(8001))
-
-        check_tcp_port_forward(self, remote_host=share.server, local_port=port, remote_port=share.server_port)
+        check_tcp_port_forward(self, remote_host=share.server.split('://')[-1], local_port=port,
+                               remote_port=share.server_port)
 
     def test_openport_app__no_arguments(self):
         p = subprocess.Popen(self.openport_exe, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -320,11 +318,11 @@ class AppTests(unittest.TestCase):
 
         forward_port = self.osinteraction.get_open_port()
         p_forward_tunnel = self.start_openport_process([self.forward,
-             '--server', TEST_SERVER, '--database', self.db_file,
-             '--local-port', str(forward_port),
-             '--verbose',
-             '--remote-port', str(remote_port),
-             '--restart-on-reboot'])
+                                                        '--server', TEST_SERVER, '--database', self.db_file,
+                                                        '--local-port', str(forward_port),
+                                                        '--verbose',
+                                                        '--remote-port', str(remote_port),
+                                                        '--restart-on-reboot'])
         logger.debug('p_forward_tunnel.pid: %s' % p_forward_tunnel.pid)
 
         self.check_application_is_still_alive(p_forward_tunnel)
@@ -361,7 +359,8 @@ class AppTests(unittest.TestCase):
 
         self.check_application_is_still_alive(p_reverse_tunnel)
         logger.debug('alive!')
-       # check_tcp_port_forward(self, remote_host=remote_host, local_port=serving_port, remote_port=remote_port)
+
+        # check_tcp_port_forward(self, remote_host=remote_host, local_port=serving_port, remote_port=remote_port)
 
         def foo():
             in_session2 = self.db_handler.get_share_by_local_port(forwarding_port, filter_active=False)
@@ -1239,6 +1238,46 @@ for i in range(%s):
         for i in output:
             print(i)
         self.assertTrue(session.open_port_for_ip_link in output[0].decode('utf-8'))
+
+    def test_auto_restart_on_disconnect(self):
+        port = self.osinteraction.get_open_port()
+        proxy, proxy_client = self.get_proxy()
+
+        p = subprocess.Popen(self.openport_exe + [str(port), '--restart-on-reboot', '--database', self.db_file,
+                                                  '--verbose', '--server', TEST_SERVER,
+                                                  '--ip-link-protection', 'False', '--keep-alive', '1',
+                                                  '--proxy', f'socks5://{proxy}'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.osinteraction.print_output_continuously_threaded(p)
+
+        self.check_application_is_still_alive(p)
+        self.assertIsNone(link)
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
+        proxy_client.disable()
+        self.assertFalse(check_tcp_port_forward(self,
+                                                remote_host=remote_host,
+                                                local_port=port,
+                                                remote_port=remote_port,
+                                                fail_on_error=False))
+
+        sleep(5)
+        proxy_client.enable()
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.assertIsNone(link)
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
+
+    def get_proxy(self):
+        import toxiproxy
+        # make sure you've run
+        # docker-compose -f docker-compose/toxiproxy.yaml up
+        server = toxiproxy.Toxiproxy()
+        server.destroy_all()
+        ip = get_ip()
+        return "127.0.0.1:22220", server.create(
+            name="socks_proxy", upstream=f"{ip}:1080", enabled=True, listen="0.0.0.0:22220"
+        )
 
 
 if __name__ == '__main__':

@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  toxiproxy:
+    image: shopify/toxiproxy:2.1.4
+    ports:
+      - 8474:8474
+      - 22220:22220
+
+  proxy-no-pass:
+    image: serjs/go-socks5-proxy
+    ports:
+      - 1080:1080

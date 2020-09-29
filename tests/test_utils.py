@@ -51,7 +51,7 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
         self.requests = http_server.requests
         super().__init__(request, client_address, http_server)
 
-    def _set_headers(self,  response_length, content_type="text/html"):
+    def _set_headers(self, response_length, content_type="text/html"):
         self.send_response(200)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(response_length))
@@ -525,6 +525,15 @@ def set_default_args(app, db_location=None):
     app.args.ip_link_protection = None
     app.args.create_migrations = False
     app.args.daemonize = False
+
+
+def get_ip():
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    result = s.getsockname()[0]
+    s.close()
+    return result
 
 
 def get_nr_of_shares_in_db_file(db_file):
