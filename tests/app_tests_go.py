@@ -15,13 +15,13 @@ class GoAppTests(AppTests):
     kill = 'kill'
     kill_all = 'kill-all'
     version = 'version'
-    app_version = '2.0.1'
+    app_version = '2.0.2'
     forward = 'forward'
     list = 'list'
 
     @classmethod
     def setUpClass(cls):
-        exit_code, output = subprocess.getstatusoutput(str(openport_go_dir / "build.sh"))
+        exit_code, output = subprocess.getstatusoutput(str(openport_go_dir / "compile.sh"))
         print(output)
         assert exit_code == 0, exit_code
 
