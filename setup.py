@@ -38,4 +38,5 @@ setup(name='openport',
       url='https://openport.io',
       packages=find_packages(),
       package_data={'': package_data},
+      scripts=['bin/openport'],
       )
