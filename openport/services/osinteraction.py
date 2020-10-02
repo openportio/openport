@@ -7,8 +7,14 @@ import sys
 from threading import Thread
 from time import sleep
 import signal
+import sysconfig
 try:
-    import psutil
+    if sysconfig.get_config_var('ANDROID_API_LEVEL') != [None]:
+        sys.stderr = open(os.devnull,'w')
+        import psutil
+        sys.stderr = sys.__stderr__
+    else:
+        import psutil
 except ImportError:
     psutil = False
 from lockfile import NotMyLock, LockTimeout

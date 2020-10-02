@@ -43,9 +43,8 @@ def update_if_needed(db_location):
 
     context = get_migration_context(db_location, script_directory, {'fn': upgrade})
 
-    from alembic.op import _install_proxy
     op = Operations(context)
-    _install_proxy(op)
+    op._install_proxy()
 
     with context.begin_transaction():
         context.run_migrations()
