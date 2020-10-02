@@ -14,9 +14,12 @@ logger = get_logger('server')
 
 class CherryPyServer(ServerAdapter):
     def run(self, handler):
-        from cherrypy import wsgiserver
+        try:
+            from cheroot.wsgi import Server as CherryPyWSGIServer
+        except ImportError:
+            from cherrypy.wsgiserver import CherryPyWSGIServer
 
-        self.server = wsgiserver.CherryPyWSGIServer((self.host, self.port), handler)
+        self.server = CherryPyWSGIServer((self.host, self.port), handler)
         try:
             self.server.start()
         finally:

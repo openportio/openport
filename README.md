@@ -12,4 +12,4 @@ Installation
 ----
 
     sudo apt-get install build-essential libssl-dev libffi-dev python-dev
-    pip install git+https://github.com/openportio/openport
+    pip install git+https://github.com/deshdeepak1/openport

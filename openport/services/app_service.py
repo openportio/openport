@@ -1,6 +1,6 @@
 import os
 import requests
-
+import sysconfig
 from openport.common.session import Session
 from openport.services.logger_service import get_logger
 from openport.services import osinteraction
@@ -9,7 +9,9 @@ from openport.common.config import DEFAULT_SERVER
 logger = get_logger(__name__)
 
 USER_CONFIG_FILE = '/etc/openport/users.conf'
-
+if sysconfig.get_config_var('ANDROID_API_LEVEL') != [None]:
+    prefix=sysconfig.get_config_var('prefix')
+    USER_CONFIG_FILE = prefix+'/etc/openport/users.conf'
 
 class AppService(object):
     def __init__(self, openport_app_config):
