@@ -10,7 +10,7 @@ from openport.common.session import Session
 from openport.services.logger_service import get_logger
 
 
-logger = get_logger('openport')
+logger = get_logger('openport_service')
 
 SERVER_SSH_PORT = 22
 FALLBACK_SERVER_SSH_PORT = 443
@@ -107,7 +107,7 @@ class Openport(object):
                 sleep(10)
             except Exception as e:
                # logger.exception(e)
-                logger.error('general exception: {}'.format(e))
+                logger.exception('general exception: {}'.format(e))
                 sleep(10)
             finally:
                 self.automatic_restart = True

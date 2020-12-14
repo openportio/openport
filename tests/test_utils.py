@@ -51,7 +51,7 @@ class TestHTTPRequestHandler(BaseHTTPRequestHandler):
         self.requests = http_server.requests
         super().__init__(request, client_address, http_server)
 
-    def _set_headers(self, response_length, content_type="text/html"):
+    def _set_headers(self, response_length, content_type="application/json"):
         self.send_response(200)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(response_length))

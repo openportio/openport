@@ -46,7 +46,7 @@ def request_port(public_key, local_port=None, url='%s/api/v1/request-port' % DEF
                  restart_session_token='',
                  request_server_port=-1, http_forward=False, automatic_restart=False,
                  forward_tunnel=False, ip_link_protection=None, client_version=VERSION,
-                 proxies={}):
+                 proxies={}) -> dict:
     """
     Requests a port on the server using the openPort protocol
     return a tuple with ( server_ip, server_port, message )

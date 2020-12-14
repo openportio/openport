@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import shutil
@@ -28,6 +29,7 @@ logger = get_logger(__name__)
 TEST_SERVER = 'https://test2.openport.io'
 # TEST_SERVER = 'http://127.0.0.1:8000'
 # TEST_SERVER = 'https://us.openport.io'
+# TEST_SERVER = 'http://192.168.64.2.xip.io'
 
 
 if not osinteraction.is_windows():
@@ -1278,6 +1280,52 @@ for i in range(%s):
         return "127.0.0.1:22220", server.create(
             name="socks_proxy", upstream=f"{ip}:1080", enabled=True, listen="0.0.0.0:22220"
         )
+
+    def test_killed_session_not_restarting(self):
+        port = self.osinteraction.get_open_port()
+        http_server = TestHTTPServer(port)
+        http_server.set_response(
+            {
+                'session_token': "abc",
+                'server_ip': "localhost",
+                'server_port': 266,  # nobody is listening
+                'fallback_ssh_server_ip': "localhost",
+                'fallback_ssh_server_port': 226,  # nobody is listening
+                'message': "You will not be able to connect, which is expected",
+                'account_id': 1,
+                'key_id': 1,
+                'session_end_time': None,
+                'session_max_bytes': 100,
+                'session_id': 1,
+                'http_forward_address': "",
+                'open_port_for_ip_link': "",
+            }
+        )
+        http_server.run_threaded()
+
+        local_port = self.osinteraction.get_open_port()
+
+        try:
+            server = f"http://localhost:{port}"
+            logger.info(f"local server: {server}")
+            p = subprocess.Popen(self.openport_exe + ['--local-port', str(local_port),
+                                                      '--server', server, '--verbose', '--database', self.db_file],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            self.osinteraction.print_output_continuously_threaded(p)
+
+            self.processes_to_kill.append(p)
+            wait_for_response(lambda: len(http_server.requests) > 0, timeout=10)
+
+            http_server.set_response(
+                {
+                    'error': "Session killed",
+                    'fatal_error': True,
+                }
+            )
+
+            wait_for_response(lambda : p.returncode is not None, timeout=20)
+        finally:
+            http_server.stop()
 
 
 if __name__ == '__main__':
