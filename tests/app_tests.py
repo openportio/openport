@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest import skip
 
 import requests
+import xmlrunner as xmlrunner
 from threading import Thread
 from time import sleep
 
@@ -1057,11 +1058,54 @@ class AppTests(unittest.TestCase):
         finally:
             http_server.stop()
 
+    def check_migration__restart_sessions(self, old_db_file, local_port, old_token, old_remote_port):
+        old_db = Path(__file__).parent / 'testfiles' / old_db_file
+        old_db_tmp = Path(__file__).parent / 'testfiles' / 'tmp' / old_db_file
+        shutil.copy(old_db, old_db_tmp)
+
+        port = self.osinteraction.get_open_port()
+
+        http_server = TestHTTPServer(port)
+        http_server.run_threaded()
+
+        try:
+            server = f"http://localhost:{port}"
+            p = subprocess.Popen(self.openport_exe + [self.restart_shares,
+                                                      '--server', server, '--verbose', '--database', old_db_tmp],
+                                 stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            self.processes_to_kill.append(p)
+            self.osinteraction.print_output_continuously_threaded(p, 'restart_sessions')
+
+            wait_for_response(lambda: len(http_server.requests) > 0, timeout=2)
+            request = http_server.requests[0]
+            self.assertEqual([old_token], request[b'restart_session_token'])
+            self.assertEqual([old_remote_port], request[b'request_port'])
+        finally:
+            http_server.stop()
+
     def test_alembic__0_9_1__new_share(self):
         self.check_migration('openport-0.9.1.db', 22, b"gOFZM7vDDcxsqB1P", b"38261")
+        self.check_migration__restart_sessions('openport-0.9.1.db', 22, b"gOFZM7vDDcxsqB1P", b"38261")
 
     def test_db_migrate_from_1_3_0(self):
         self.check_migration('openport-1.3.0.db', 44, b"Me8eHwaze3F6SMS9", b"26541")
+        self.check_migration__restart_sessions('openport-1.3.0.db', 44, b"Me8eHwaze3F6SMS9", b"26541")
+
+    def test_db_migrate_from_1_3_0__2(self):
+        self.check_migration('openport-1.3.0__2.db', 15070, b"DRADXUnvHW9m6FuS", b"40842")
+        self.check_migration__restart_sessions('openport-1.3.0_2.db', 15070, b"DRADXUnvHW9m6FuS", b"40842")
+
+    def test_restart_version_0_9_1(self):
+        cmd = "22 --restart-on-reboot --request-port 38261 --request-token gOFZM7vDDcxsqB1P --start-manager False " \
+              "--manager-port 57738 --server http://localhost:63771 " \
+              f"--database {self.db_file}"
+        p = subprocess.Popen(
+            self.openport_exe + cmd.split(),
+            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.osinteraction.print_output_continuously_threaded(p, 'restart_sessions')
+        self.processes_to_kill.append(p)
+        sleep(1)
+        self.assertTrue(self.application_is_alive(p))
 
     @skip
     def test_alembic__create_migrations(self):

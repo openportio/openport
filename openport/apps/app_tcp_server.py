@@ -199,6 +199,7 @@ def is_running(share, print_error=False):
     try:
         r = requests.get(url, timeout=1)
         if r.text.splitlines()[0].strip() != 'openport':
+            print(response)
             logger.error(response)
             return False
         return True
