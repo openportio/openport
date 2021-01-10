@@ -18,7 +18,8 @@ from openport.apps.app_tcp_server import send_exit, is_running
 from openport.services import osinteraction, dbhandler
 from openport.services.logger_service import get_logger, set_log_level
 from openport.services.utils import run_method_with_timeout
-from tests.test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer, get_ip
+from tests.test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer, get_ip, \
+    TEST_FILES_PATH
 from tests.test_utils import get_nr_of_shares_in_db_file
 from tests.test_utils import print_all_output, click_open_for_ip_link, check_tcp_port_forward
 from tests.test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
@@ -61,8 +62,7 @@ class AppTests(unittest.TestCase):
         self.osinteraction = osinteraction.getInstance()
         self.manager_port = -1
         #        self.assertFalse(openportmanager.manager_is_running(8001))
-        self.db_file = os.path.join(os.path.dirname(__file__), 'testfiles', 'tmp',
-                                    'tmp_openport_%s.db' % self._testMethodName)
+        self.db_file = TEST_FILES_PATH / 'tmp' / f'tmp_openport_{self._testMethodName}.db'
         if os.path.exists(self.db_file):
             try:
                 os.remove(self.db_file)
@@ -206,7 +206,7 @@ class AppTests(unittest.TestCase):
 
     def test_save_share__restart_on_reboot(self):
         port = self.osinteraction.get_open_port()
-        p = subprocess.Popen(self.openport_exe + [str(port), '--restart-on-reboot', '--database', self.db_file,
+        p = subprocess.Popen(self.openport_exe + [str(port), '--restart-on-reboot', '--database', str(self.db_file),
                                                   '--verbose', '--server', TEST_SERVER,
                                                   '--ip-link-protection', 'False', '--keep-alive', '5'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -218,13 +218,13 @@ class AppTests(unittest.TestCase):
         self.assertTrue(share.active)
         self.assertEqual(
             [x.encode('utf-8') for x in
-             ['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
+             ['%s' % port, '--restart-on-reboot', '--database', str(self.db_file), '--verbose', '--server',
               TEST_SERVER, '--ip-link-protection', 'False', '--keep-alive', '5']],
             share.restart_command)
 
     def test_save_share__restart_on_reboot__proxy(self):
         port = self.osinteraction.get_open_port()
-        p = subprocess.Popen(self.openport_exe + ['%s' % port, '--restart-on-reboot', '--database', self.db_file,
+        p = subprocess.Popen(self.openport_exe + ['%s' % port, '--restart-on-reboot', '--database', str(self.db_file),
                                                   '--verbose', '--server', TEST_SERVER,
                                                   '--proxy', 'socks5://jan:db@1.2.3.4:5555'],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -237,7 +237,7 @@ class AppTests(unittest.TestCase):
         share = self.db_handler.get_share_by_local_port(port, filter_active=False)
         self.assertEqual(
             [x.encode('utf-8') for x in
-             ['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--verbose', '--server',
+             ['%s' % port, '--restart-on-reboot', '--database', str(self.db_file), '--verbose', '--server',
               TEST_SERVER, '--proxy', 'socks5://jan:db@1.2.3.4:5555']],
             share.restart_command)
 
@@ -253,7 +253,7 @@ class AppTests(unittest.TestCase):
         share = self.db_handler.get_share_by_local_port(port, filter_active=False)
         self.assertTrue(share.active)
         self.assertEqual(
-            [x.encode('utf-8') for x in
+            [str(x).encode('utf-8') for x in
              ['%s' % port, '--restart-on-reboot', '--database', self.db_file, '--server',
               TEST_SERVER]], share.restart_command)
         p.kill()
@@ -310,7 +310,7 @@ class AppTests(unittest.TestCase):
         serving_port = self.osinteraction.get_open_port()
         p_reverse_tunnel = subprocess.Popen(
             self.openport_exe + ['--local-port', '%s' % serving_port,  # --verbose,
-                                 '--server', TEST_SERVER, '--database', self.db_file],
+                                 '--server', TEST_SERVER, '--database', str(self.db_file)],
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         logger.debug('p_reverse_tunnel.pid: %s' % p_reverse_tunnel.pid)
 
@@ -321,7 +321,7 @@ class AppTests(unittest.TestCase):
 
         forward_port = self.osinteraction.get_open_port()
         p_forward_tunnel = self.start_openport_process([self.forward,
-                                                        '--server', TEST_SERVER, '--database', self.db_file,
+                                                        '--server', TEST_SERVER, '--database', str(self.db_file),
                                                         '--local-port', str(forward_port),
                                                         '--verbose',
                                                         '--remote-port', str(remote_port),
@@ -1036,8 +1036,8 @@ class AppTests(unittest.TestCase):
         check_tcp_port_forward(self, remote_host, port, remote_port)
 
     def check_migration(self, old_db_file, local_port, old_token, old_remote_port):
-        old_db = Path(__file__).parent / 'testfiles' / old_db_file
-        old_db_tmp = Path(__file__).parent / 'testfiles' / 'tmp' / old_db_file
+        old_db = TEST_FILES_PATH / old_db_file
+        old_db_tmp = TEST_FILES_PATH / 'tmp' / old_db_file
         shutil.copy(old_db, old_db_tmp)
 
         port = self.osinteraction.get_open_port()
@@ -1059,8 +1059,8 @@ class AppTests(unittest.TestCase):
             http_server.stop()
 
     def check_migration__restart_sessions(self, old_db_file, local_port, old_token, old_remote_port):
-        old_db = Path(__file__).parent / 'testfiles' / old_db_file
-        old_db_tmp = Path(__file__).parent / 'testfiles' / 'tmp' / old_db_file
+        old_db = TEST_FILES_PATH / old_db_file
+        old_db_tmp = TEST_FILES_PATH / 'tmp' / old_db_file
         shutil.copy(old_db, old_db_tmp)
 
         port = self.osinteraction.get_open_port()
@@ -1089,28 +1089,41 @@ class AppTests(unittest.TestCase):
 
     def test_db_migrate_from_1_3_0(self):
         self.check_migration('openport-1.3.0.db', 44, b"Me8eHwaze3F6SMS9", b"26541")
-        self.check_migration__restart_sessions('openport-1.3.0.db', 44, b"Me8eHwaze3F6SMS9", b"26541")
+        with self.assertRaises(TimeoutError):
+            self.check_migration__restart_sessions('openport-1.3.0.db', 44, b"Me8eHwaze3F6SMS9", b"26541")
+            subprocess.Popen(self.openport_exe + self.kill_all, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
     def test_db_migrate_from_1_3_0__2(self):
-        self.check_migration('openport-1.3.0__2.db', 15070, b"DRADXUnvHW9m6FuS", b"40842")
-        self.check_migration__restart_sessions('openport-1.3.0_2.db', 15070, b"DRADXUnvHW9m6FuS", b"40842")
+        self.check_migration('openport-1.3.0_2.db', 54613, b"DRADXUnvHW9m6FuS", b"15070")
+        with self.assertRaises(TimeoutError):
+            self.check_migration__restart_sessions('openport-1.3.0_2.db', 54613, b"DRADXUnvHW9m6FuS", b"15070")
+            self.kill_all_in_db(TEST_FILES_PATH / 'tmp' / 'openport-1.3.0_2.db')
 
-    def test_restart_version_0_9_1(self):
+    def test_db_migrate_from_1_3_0__3(self):
+        self.check_migration('openport-1.3.0_3.db', 44, b"FYfS3a05OnkXWNj4", b"42006")
+        self.check_migration__restart_sessions('openport-1.3.0_3.db', 44, b"FYfS3a05OnkXWNj4", b"42006")
+        self.kill_all_in_db(TEST_FILES_PATH / 'tmp' / 'openport-1.3.0_3.db')
+
+    def kill_all_in_db(self, db_file: Path):
+        subprocess.Popen(self.openport_exe + f"{self.kill_all} --database {db_file}".split(), stderr=subprocess.PIPE,
+                         stdout=subprocess.PIPE)
+
+    def test_restart_command_from_version_0_9_1(self):
         cmd = "22 --restart-on-reboot --request-port 38261 --request-token gOFZM7vDDcxsqB1P --start-manager False " \
               "--manager-port 57738 --server http://localhost:63771 " \
               f"--database {self.db_file}"
         p = subprocess.Popen(
             self.openport_exe + cmd.split(),
             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.osinteraction.print_output_continuously_threaded(p, 'restart_sessions')
+        self.osinteraction.print_output_continuously_threaded(p)
         self.processes_to_kill.append(p)
         sleep(1)
         self.assertTrue(self.application_is_alive(p))
 
     @skip
     def test_alembic__create_migrations(self):
-        old_db = os.path.join(os.path.dirname(__file__), 'testfiles/openport-0.9.1.db')
-        old_db_tmp = os.path.join(os.path.dirname(__file__), 'testfiles/tmp/openport-0.9.1.db')
+        old_db = TEST_FILES_PATH/'openport-0.9.1.db'
+        old_db_tmp = TEST_FILES_PATH / 'tmp/openport-0.9.1.db'
 
         shutil.copy(old_db, old_db_tmp)
 
@@ -1289,7 +1302,7 @@ for i in range(%s):
         port = self.osinteraction.get_open_port()
         proxy, proxy_client = self.get_proxy()
 
-        p = subprocess.Popen(self.openport_exe + [str(port), '--restart-on-reboot', '--database', self.db_file,
+        p = subprocess.Popen(self.openport_exe + [str(port), '--restart-on-reboot', '--database', str(self.db_file),
                                                   '--verbose', '--server', TEST_SERVER,
                                                   '--ip-link-protection', 'False', '--keep-alive', '1',
                                                   '--proxy', f'socks5://{proxy}'],
@@ -1367,7 +1380,7 @@ for i in range(%s):
                 }
             )
 
-            wait_for_response(lambda : p.returncode is not None, timeout=20)
+            wait_for_response(lambda: p.returncode is not None, timeout=20)
         finally:
             http_server.stop()
 

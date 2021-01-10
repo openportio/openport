@@ -156,7 +156,7 @@ class OsInteraction(object):
                 return initial
             else:
                 newline = '' if initial.endswith(os.linesep) else os.linesep
-                return initial + newline + extra
+                return f"{initial}{newline}{extra}"
 
         all_output = [False, False]
         while True:
@@ -209,7 +209,10 @@ class OsInteraction(object):
             def enqueue_output(out, queue):
                 if out:
                     for line in iter(out.readline, b''):
-                        queue.put(line.decode('utf-8'))
+                        try:
+                            queue.put(line.decode('utf-8'))
+                        except Exception as e:
+                            self.logger.exception(e)
 #                out.close()
 
             q_stdout = Queue()

@@ -4,6 +4,7 @@ import re
 import subprocess
 import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler, BaseHTTPRequestHandler
+from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import parse_qs
 from urllib.request import Request, urlopen
@@ -22,6 +23,8 @@ from openport.services.logger_service import get_logger
 from openport.services.utils import run_method_with_timeout, TimeoutException
 
 logger = get_logger(__name__)
+
+TEST_FILES_PATH = Path(__file__).parent / "testfiles"
 
 
 class TestHTTPServer(object):
@@ -312,7 +315,7 @@ def wait_for_response(function, args=[], kwargs={}, timeout=30, throw=True, max_
         logger.debug('no response, try again')
         sleep(1)
     if throw:
-        raise Exception('function did not response in time')
+        raise TimeoutError('function did not response in time')
     return False
 
 
