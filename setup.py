@@ -19,6 +19,7 @@ install_reqs = [
     'six==1.10.0',
     'pysocks==1.7.1',
     'setuptools==45.2.0',
+    'supervisor==4.1.0',
 ]
 
 
@@ -31,7 +32,6 @@ def package_files(directory):
 
 
 package_data = package_files('openport/alembic')
-
 
 setup(name='openport',
       version='1.0',
