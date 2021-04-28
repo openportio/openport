@@ -82,7 +82,7 @@ class AppTests(unittest.TestCase):
         kill_all_processes(self.processes_to_kill)
         logger.debug('end of teardown!')
 
-    def test_openport_app(self):
+    def test_aaa_openport_app(self):
         port = self.osinteraction.get_open_port()
 
         p = subprocess.Popen(self.openport_exe + ['--local-port', str(port),
@@ -895,8 +895,19 @@ class AppTests(unittest.TestCase):
             print('checking url:{}'.format(url))
             try:
                 actual_response = c.get(url)
-            except urllib2.URLError as e:
+            except Exception as e:
+                logger.exception(e)
                 self.fail('Http forward failed')
+            self.assertEqual(actual_response, response.strip())
+            print('http portforward ok')
+
+            url = 'https://%s' % remote_host
+            print('checking url:{}'.format(url))
+            try:
+                actual_response = c.get(url)
+            except Exception as e:
+                logger.exception(e)
+                self.fail('Https forward failed')
             self.assertEqual(actual_response, response.strip())
             print('http portforward ok')
         finally:
