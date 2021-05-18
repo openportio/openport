@@ -545,3 +545,22 @@ def get_nr_of_shares_in_db_file(db_file):
         return len(db_handler.get_active_shares())
     except:
         return 0
+
+
+def get_toxi_mysql():
+    import toxiproxy
+    # make sure you've run
+    # docker-compose -f docker-compose/toxiproxy.yaml up
+    server = toxiproxy.Toxiproxy()
+    server.destroy_all()
+    return "127.0.0.1:33306", server.create(
+        name="mysql_proxy", upstream=f"mysql:3306", enabled=True, listen="0.0.0.0:33306"
+    )
+
+
+if __name__ == "__main__":
+    address, client = get_toxi_mysql()
+    # client.add_toxic(type='latency', attributes=dict(latency=5000, jitter=0))
+    toxics = client.toxics()
+    print(toxics)
+

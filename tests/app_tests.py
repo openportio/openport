@@ -7,6 +7,7 @@ import subprocess
 import unittest
 from pathlib import Path
 from unittest import skip
+from urllib.error import URLError
 
 import requests
 import xmlrunner as xmlrunner
@@ -1444,6 +1445,7 @@ for i in range(%s):
             wait_for_response(lambda: len(http_server.requests) > 3, timeout=60)
         finally:
             http_server.stop()
+
 
 
 if __name__ == '__main__':
