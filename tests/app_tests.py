@@ -469,6 +469,34 @@ class AppTests(unittest.TestCase):
 
         check_tcp_port_forward(self, new_remote_host, port, new_remote_port)
 
+    def test_openport_app_get_same_port__after_sigint(self):
+        port = self.osinteraction.get_open_port()
+        p = subprocess.Popen(self.openport_exe + ['%s' % port,
+                                                  '--server', TEST_SERVER, '--verbose', '--database', self.db_file],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.check_application_is_still_alive(p)
+        click_open_for_ip_link(link)
+        check_tcp_port_forward(self, remote_host, port, remote_port)
+
+        p.send_signal(signal.SIGINT)
+        run_method_with_timeout(p.wait, 10)
+
+        p = subprocess.Popen(self.openport_exe + ['%s' % port,
+                                                  '--server', TEST_SERVER, '--verbose', '--database', self.db_file],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+
+        new_remote_host, new_remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.check_application_is_still_alive(p)
+
+        self.assertEqual(remote_port, new_remote_port)
+        click_open_for_ip_link(link)
+
+        check_tcp_port_forward(self, new_remote_host, port, new_remote_port)
+
     def test_openport_app__http_forward(self):
         port = self.osinteraction.get_open_port()
 

@@ -15,7 +15,7 @@ class GoAppTests(AppTests):
     kill = 'kill'
     kill_all = 'kill-all'
     version = 'version'
-    app_version = '2.0.2'
+    app_version = '2.0.3'
     forward = 'forward'
     list = 'list'
 
