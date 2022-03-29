@@ -3,7 +3,7 @@ import os
 from setuptools import setup, find_packages
 
 install_reqs = [
-    'paramiko==2.4.2',
+    'paramiko==2.10.1',
     'CherryPy==8.1.2',
     'SQLAlchemy==1.1.1',
     'alembic==0.7.6',
