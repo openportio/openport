@@ -12,6 +12,7 @@ install_reqs = [
     'cryptography==2.8',
     'ipaddress==1.0.17',
     'lockfile==0.12.2',
+    'prettytable==3.3.0',
     'psutil==4.3.1',
     'pyOpenSSL==18.0.0',
     'pycrypto==2.6.1',

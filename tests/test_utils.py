@@ -21,6 +21,7 @@ from openport.services import dbhandler
 from openport.services import osinteraction
 from openport.services.logger_service import get_logger
 from openport.services.utils import run_method_with_timeout, TimeoutException
+from prettytable import PrettyTable
 
 logger = get_logger(__name__)
 
@@ -547,6 +548,40 @@ def get_nr_of_shares_in_db_file(db_file):
         return 0
 
 
+def print_shares_in_db(db_file):
+    db_handler = dbhandler.DBHandler(db_file, init_db=False)
+    t = PrettyTable([
+        "server",
+        # "ssh_server",
+                     "remote_port",
+                     "session_token",
+                     "local_port",
+                     # "forward_tunnel",
+                     "pid",
+                     "active",
+                     "http_forward",
+                     "http_forward_address",
+                     "open_port_for_ip_link",
+                     "restart_command"])
+
+    for s in db_handler.get_active_shares():
+        t.add_row([
+            s.server,
+            # s.ssh_server,
+                   s.server_port,
+                   s.server_session_token,
+                   s.local_port,
+                   # s.forward_tunnel,
+                   s.pid,
+                   s.active,
+                   s.http_forward,
+                   s.http_forward_address,
+                   s.open_port_for_ip_link,
+                   "", # s.restart_command,
+                   ])
+    print(t)
+
+
 def get_toxi_mysql():
     import toxiproxy
     # make sure you've run
@@ -563,4 +598,3 @@ if __name__ == "__main__":
     # client.add_toxic(type='latency', attributes=dict(latency=5000, jitter=0))
     toxics = client.toxics()
     print(toxics)
-

@@ -1,3 +1,5 @@
+from typing import List
+
 import sys
 import os
 import pickle
@@ -30,6 +32,7 @@ class OpenportSession(Base):
 
     id = Column(Integer, primary_key=True)
     server = Column(String(50))
+    # ssh_server = Column(String(50))
     remote_port = Column(Integer)
     session_token = Column(String(50))
     local_port = Column(Integer)
@@ -44,6 +47,7 @@ class OpenportSession(Base):
 
     app_management_port = Column(Integer)
     open_port_for_ip_link = Column(String(150))
+    # forward_tunnel = Column(Boolean)
 
     def __repr__(self):
        return "<Session(local_port='%s', remote_port='%s', session_token='%s')>" % (
@@ -156,7 +160,7 @@ class DBHandler(object):
         self.Session.remove()
         return share
 
-    def convert_session_from_db(self, openport_session):
+    def convert_session_from_db(self, openport_session: OpenportSession) -> Session:
         if openport_session is None:
             return None
 
@@ -177,6 +181,8 @@ class DBHandler(object):
         share.app_management_port = openport_session.app_management_port
         share.open_port_for_ip_link = openport_session.open_port_for_ip_link
         share.restart_command = openport_session.restart_command
+        # share.forward_tunnel = openport_session.forward_tunnel
+        # share.ssh_server = openport_session.ssh_server
         b = share.restart_command if type(share.restart_command) == bytes else share.restart_command.encode('utf-8')
         try:
             share.restart_command = pickle.loads(b)
@@ -188,7 +194,7 @@ class DBHandler(object):
 
         return share
 
-    def get_active_shares(self):
+    def get_active_shares(self) -> List[OpenportSession]:
         logger.debug('get_active_shares')
 
         session = self._get_session()

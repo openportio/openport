@@ -10,12 +10,13 @@ openport_go_dir = Path(__file__).parents[2] / 'openport-go-client'
 
 
 class GoAppTests(AppTests):
-    openport_exe = [str(openport_go_dir / 'openport')]
+    openport_exe = [str(openport_go_dir / 'src' / 'openport')]
+    # openport_exe = [str(openport_go_dir / 'openport')]
     restart_shares = 'restart-sessions'
     kill = 'kill'
     kill_all = 'kill-all'
     version = 'version'
-    app_version = '2.0.3'
+    app_version = '2.1.0'
     forward = 'forward'
     list = 'list'
 
@@ -28,4 +29,3 @@ class GoAppTests(AppTests):
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
-

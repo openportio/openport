@@ -7,7 +7,8 @@ class Session(object):
     def __init__(self, _id=-1, server_ip='', server_port=-1, pid=-1, active=False, account_id=-1,
                  key_id=-1, local_port=-1, server_session_token='', restart_command='', http_forward=False,
                  http_forward_address='', open_port_for_ip_link='', app_management_port=-1,
-                 forward_tunnel=False, ip_link_protection=None, keep_alive_interval_seconds=10, proxy=''):
+                 forward_tunnel=False, ip_link_protection=None, keep_alive_interval_seconds=10, proxy='',
+                 ssh_server=''):
         # todo: why is this ever a dict?
         if type(_id) == dict:
             self.id = -1
@@ -30,6 +31,7 @@ class Session(object):
         self.ip_link_protection = ip_link_protection
         self.keep_alive_interval_seconds = keep_alive_interval_seconds
         self.proxy = proxy
+        self.ssh_server = ssh_server
 
         self.public_key_file = None
         self.private_key_file = None

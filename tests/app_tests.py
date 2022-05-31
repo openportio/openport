@@ -20,7 +20,7 @@ from openport.services import osinteraction, dbhandler
 from openport.services.logger_service import get_logger, set_log_level
 from openport.services.utils import run_method_with_timeout
 from tests.test_utils import SimpleTcpServer, SimpleTcpClient, lineNumber, SimpleHTTPClient, TestHTTPServer, get_ip, \
-    TEST_FILES_PATH
+    TEST_FILES_PATH, print_shares_in_db
 from tests.test_utils import get_nr_of_shares_in_db_file
 from tests.test_utils import print_all_output, click_open_for_ip_link, check_tcp_port_forward
 from tests.test_utils import run_command_with_timeout, get_remote_host_and_port, kill_all_processes, wait_for_response
@@ -29,6 +29,9 @@ logger = get_logger(__name__)
 
 # TEST_SERVER = 'https://eu.openport.io'
 # TEST_SERVER = 'https://openport.io'
+# TEST_SERVER = 'https://test2.openport.io'
+# TEST_SERVER = 'https://test2.openport.xyz'
+# TEST_SERVER = 'https://test.openport.xyz'
 TEST_SERVER = 'https://test2.openport.io'
 # TEST_SERVER = 'http://127.0.0.1:8000'
 # TEST_SERVER = 'https://us.openport.io'
@@ -339,6 +342,7 @@ class AppTests(unittest.TestCase):
         forward_session = self.db_handler.get_share_by_local_port(forwarding_port, filter_active=False)
         forward_app_management_port = forward_session.app_management_port
         check_tcp_port_forward(self, remote_host='127.0.0.1', local_port=serving_port, remote_port=forwarding_port)
+        print_shares_in_db(self.db_file)
         self.assertEqual(2, get_nr_of_shares_in_db_file(self.db_file))
         #
         p_forward_tunnel.terminate()  # on shutdown, ubuntu sends a sigterm
@@ -1332,7 +1336,7 @@ for i in range(%s):
 
         p = subprocess.Popen(self.openport_exe + [self.list, '--database', self.db_file],
                              stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        p.wait()
+        p.wait(10)
         output = p.communicate()
         for i in output:
             print(i)
@@ -1363,9 +1367,37 @@ for i in range(%s):
 
         sleep(5)
         proxy_client.enable()
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction, timeout=30)
+        self.assertIsNone(link)
+        sleep(5)
+        check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
+
+    def test_exits_on_disconnect_if_connection_timeout_set(self):
+        port = self.osinteraction.get_open_port()
+        proxy, proxy_client = self.get_proxy()
+
+        p = subprocess.Popen(self.openport_exe + [str(port), '--restart-on-reboot', '--database', str(self.db_file),
+                                                  '--verbose', '--server', TEST_SERVER,
+                                                  '--ip-link-protection', 'False', '--keep-alive', '1',
+                                                  '--proxy', f'socks5://{proxy}',
+                                                  '--exit-on-failure-timeout', '5'],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
         remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.osinteraction.print_output_continuously_threaded(p)
+
+        self.check_application_is_still_alive(p)
         self.assertIsNone(link)
         check_tcp_port_forward(self, remote_host=remote_host, local_port=port, remote_port=remote_port)
+        proxy_client.disable()
+        self.assertFalse(check_tcp_port_forward(self,
+                                                remote_host=remote_host,
+                                                local_port=port,
+                                                remote_port=remote_port,
+                                                fail_on_error=False))
+
+        sleep(5)
+        self.assertEqual(4, p.returncode, "Expected process to have killed itself.")
 
     def get_proxy(self):
         import toxiproxy
