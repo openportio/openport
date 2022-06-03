@@ -8,7 +8,7 @@ install_reqs = [
     'SQLAlchemy==1.1.1',
     'alembic==0.7.6',
     'argparse==1.4.0',
-    'bottle==0.12.10',
+    'bottle==0.12.20',
     'cryptography==2.3',
     'enum34==1.1.6',
     'ipaddress==1.0.17',
