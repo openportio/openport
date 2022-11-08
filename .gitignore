@@ -42,3 +42,4 @@ scripts/distribution/redhat/SOURCES/*
 scripts/distribution/redhat/SRPMS/*
 scripts/distribution/redhat/BUILDROOT/*
 openport/tests/testfiles/tmp/*
+/tests/testfiles/tmp/

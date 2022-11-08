@@ -474,6 +474,42 @@ class AppTests(unittest.TestCase):
 
         check_tcp_port_forward(self, new_remote_host, port, new_remote_port)
 
+    def test_openport_app_get_same_port__old_db_format(self):
+        port = self.osinteraction.get_open_port()
+
+        db_file_name = "openport-2.1.0-old-format.db"
+        old_db = TEST_FILES_PATH / db_file_name
+        old_db_tmp = TEST_FILES_PATH / 'tmp' / db_file_name
+        shutil.copy(old_db, old_db_tmp)
+        self.db_handler = dbhandler.DBHandler(old_db_tmp)
+
+        p = subprocess.Popen(self.openport_exe + ['%s' % port,
+                                                  '--server', TEST_SERVER, '--verbose', '--database', old_db_tmp],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+
+        remote_host, remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.check_application_is_still_alive(p)
+        click_open_for_ip_link(link)
+        check_tcp_port_forward(self, remote_host, port, remote_port)
+
+        share = self.db_handler.get_share_by_local_port(port)
+        send_exit(share)
+        run_method_with_timeout(p.wait, 10)
+
+        p = subprocess.Popen(self.openport_exe + ['%s' % port,
+                                                  '--server', TEST_SERVER, '--verbose', '--database', old_db_tmp],
+                             stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        self.processes_to_kill.append(p)
+
+        new_remote_host, new_remote_port, link = get_remote_host_and_port(p, self.osinteraction)
+        self.check_application_is_still_alive(p)
+
+        self.assertEqual(remote_port, new_remote_port)
+        click_open_for_ip_link(link)
+
+        check_tcp_port_forward(self, new_remote_host, port, new_remote_port)
+
     def test_openport_app_get_same_port__after_sigint(self):
         port = self.osinteraction.get_open_port()
         p = subprocess.Popen(self.openport_exe + ['%s' % port,
@@ -1083,6 +1119,7 @@ class AppTests(unittest.TestCase):
         old_db = TEST_FILES_PATH / old_db_file
         old_db_tmp = TEST_FILES_PATH / 'tmp' / old_db_file
         shutil.copy(old_db, old_db_tmp)
+        self.db_handler = dbhandler.DBHandler(old_db_tmp)
 
         port = self.osinteraction.get_open_port()
 
